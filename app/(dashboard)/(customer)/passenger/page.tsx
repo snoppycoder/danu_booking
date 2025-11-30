@@ -13,7 +13,6 @@ export default function DanuBooking() {
   const [departDate, setDepartDate] = useState<string>(today);
   const [returnDate, setReturnDate] = useState(today);
   const { user } = useAuth();
-  console.log("user", user);
 
   const trips = [
     {
