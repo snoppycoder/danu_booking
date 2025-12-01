@@ -101,6 +101,19 @@ export const authAPI = {
     const response = await api.get(`/user/me`);
     return response.data;
   },
+  forgotPassword: async (identifier: string) => {
+    let response = null;
+    if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/.test(identifier)) {
+      response = await api.post("/auth/forgot-password", {
+        email: identifier,
+      });
+    } else {
+      response = await api.post("/auth/forgot-password", {
+        phone: identifier,
+      });
+    }
+    return response.data;
+  },
 };
 
 export default api;

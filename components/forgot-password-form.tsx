@@ -6,6 +6,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Mail, Phone, ArrowRight } from "lucide-react";
+import Link from "next/link";
 
 interface ForgotPasswordFormProps {
   onSubmit: (contact: string) => void;
@@ -128,9 +129,12 @@ export default function ForgotPasswordForm({
       <div className="text-center">
         <p className="text-muted-foreground text-sm">
           Remember your password?{" "}
-          <a href="#" className="text-primary hover:underline font-semibold">
+          <Link
+            href="/login"
+            className="text-primary hover:underline font-semibold"
+          >
             Sign In
-          </a>
+          </Link>
         </p>
       </div>
     </div>
