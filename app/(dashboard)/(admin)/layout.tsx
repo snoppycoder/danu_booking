@@ -5,6 +5,8 @@ import "@/app/globals.css";
 import Navbar from "@/components/navbar";
 import { AuthProtector } from "@/lib/authProtector";
 import { AuthProvider } from "@/lib/authContext";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import Sidebar from "@/components/sidebar";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -41,17 +43,14 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <Navbar
-          initalPath={[
-            { href: "/passenger", label: "Home" },
-            { href: "/passenger/bookings", label: "Bookings" },
-            { href: "/about-us", label: "About Us" },
-            { href: "/contact", label: "Contact" },
-          ]}
-        />
         <AuthProvider requiredRole={"superadmin"}>
           <AuthProtector>
-            <main>{children}</main>
+            <div className="min-h-screen w-full flex flex-col md:flex-row">
+              <aside className="w-full md:w-64 md:min-h-screen border-r border-gray-300">
+                <Sidebar />
+              </aside>
+              <main className="flex-1">{children}</main>
+            </div>
           </AuthProtector>
         </AuthProvider>
       </body>

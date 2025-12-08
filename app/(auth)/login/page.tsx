@@ -35,12 +35,15 @@ export default function LoginPage() {
         "superadmin"
       );
       if (response) {
-        console.log(response.access_token);
         await setAuthCookies(response);
         const decoded = await decodeJWT(response.access_token);
-        console.log("deconded", decoded);
         toast.success("You have successfully Logged In");
-        route.replace("/passenger");
+        console.log(decoded);
+        if (decoded.roles.includes("passenger")) {
+          route.replace("/passenger");
+        } else {
+          route.replace("/superadmin");
+        }
       }
     } catch (error) {
       if (axios.isAxiosError(error)) {

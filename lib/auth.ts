@@ -26,6 +26,7 @@ export const setAuthCookies = async (response: {
     sameSite: "lax",
     maxAge: access_token_expiry,
   });
+  
   if (response.refresh_token)
     cookie.set({
       name: "refresh_token",

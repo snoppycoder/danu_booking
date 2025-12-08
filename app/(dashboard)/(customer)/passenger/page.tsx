@@ -9,6 +9,7 @@ import { handleSearch } from "@/lib/handleSearch";
 import { useAuth } from "@/lib/authContext";
 export default function DanuBooking() {
   const [fromLocation, setFromLocation] = useState("");
+  const [toLocation, setToLocation] = useState("");
   const today = new Date().toISOString().split("T")[0];
   const [departDate, setDepartDate] = useState<string>(today);
   const [returnDate, setReturnDate] = useState(today);
@@ -85,6 +86,21 @@ export default function DanuBooking() {
                   placeholder="Departure City"
                   value={fromLocation}
                   onChange={(e) => setFromLocation(e.target.value)}
+                  className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+                />
+              </div>
+            </div>
+            <div className="flex-1 min-w-0">
+              <label className="block text-sm text-gray-600 mb-2 text-left">
+                To
+              </label>
+              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
+                <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                <input
+                  type="text"
+                  placeholder="Destination City"
+                  value={toLocation}
+                  onChange={(e) => setToLocation(e.target.value)}
                   className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
                 />
               </div>

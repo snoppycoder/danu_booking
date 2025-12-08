@@ -43,11 +43,12 @@ const data: {
 
 export default function Driver() {
   function handleDownload(event: React.MouseEvent<HTMLTableCellElement>) {
+    event.preventDefault();
     throw new Error("Function not implemented.");
   }
 
   return (
-    <div className="w-full min-h-screen ">
+    <div className="p-4 w-full min-h-screen ">
       <h1 className="text-2xl font-semibold mb-4">Driver Dashboard</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="hover:shadow-lg transition-shadow duration-300 rounded-lg p-4 text-center">
@@ -88,57 +89,57 @@ export default function Driver() {
       </div>
       <div className="p-2 mt-5 bg-white rounded-lg w-full">
         {" "}
-        <Table className=" w-full border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-          <TableHeader className="bg-gray-50">
-            <TableRow>
-              <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                Passenger Name
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                Contact
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                Pickup Location
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                Drop Location
-              </TableHead>
-              <TableHead className="px-6 py-3 text-left text-sm font-semibold text-gray-700">
-                Download CSV
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {data.map((passenger, index) => (
-              <TableRow
-                key={index}
-                className={`transition-colors duration-200 ${
-                  index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                } hover:bg-gray-100`}
-              >
-                <TableCell className="px-6 py-3 text-sm text-gray-800">
-                  {passenger.name}
-                </TableCell>
-                <TableCell className="px-6 py-3 text-sm text-gray-800">
-                  {passenger.contact}
-                </TableCell>
-                <TableCell className="px-6 py-3 text-sm text-gray-800">
-                  {passenger.pickup}
-                </TableCell>
-                <TableCell className="px-6 py-3 text-sm text-gray-800">
-                  {passenger.drop}
-                </TableCell>
-                <TableCell
-                  className="flex justify-center px-6 py-3 text-sm text-gray-800"
-                  onClick={handleDownload}
-                >
-                  <Download className="w-5 h-5 cursor-pointer hover:text-gray-600" />
-                </TableCell>
+        <div className="rounded-xl border bg-white shadow-sm overflow-hidden mt-6">
+          <Table>
+            <TableHeader>
+              <TableRow className="bg-gray-100/80">
+                <TableHead className="px-6 py-4 text-gray-700 font-semibold">
+                  Passenger Name
+                </TableHead>
+                <TableHead className="px-6 py-4 text-gray-700 font-semibold">
+                  Contact
+                </TableHead>
+                <TableHead className="px-6 py-4 text-gray-700 font-semibold">
+                  Pickup Location
+                </TableHead>
+                <TableHead className="px-6 py-4 text-gray-700 font-semibold">
+                  Drop Location
+                </TableHead>
+                <TableHead className="px-6 py-4 text-gray-700 font-semibold text-center">
+                  Download CSV
+                </TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+            </TableHeader>
+
+            <TableBody>
+              {data.map((passenger, index) => (
+                <TableRow
+                  key={index}
+                  className="hover:bg-gray-50 transition-all border-b"
+                >
+                  <TableCell className="px-6 py-4 font-medium text-gray-900">
+                    {passenger.name}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 text-gray-700">
+                    {passenger.contact}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 text-gray-700">
+                    {passenger.pickup}
+                  </TableCell>
+                  <TableCell className="px-6 py-4 text-gray-700">
+                    {passenger.drop}
+                  </TableCell>
+                  <TableCell
+                    className="px-6 py-4 flex justify-center"
+                    onClick={handleDownload}
+                  >
+                    <Download className="w-5 h-5 cursor-pointer text-gray-500 hover:text-black transition" />
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
       </div>
     </div>
   );

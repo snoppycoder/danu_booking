@@ -5,6 +5,7 @@ import "@/app/globals.css";
 import Navbar from "@/components/navbar";
 import { AuthProtector } from "@/lib/authProtector";
 import { AuthProvider } from "@/lib/authContext";
+import Sidebar from "@/components/sidebar";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -49,7 +50,7 @@ export default function DashboardLayout({
             { href: "/contact", label: "Contact" },
           ]}
         />
-        <AuthProvider requiredRole={"role"}>
+        <AuthProvider requiredRole={"superadmin"}>
           <AuthProtector>
             <main>{children}</main>
           </AuthProtector>

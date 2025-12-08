@@ -20,13 +20,15 @@ interface AuthContextType {
   setUser: (user: User) => void;
 }
 
-
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-export const AuthProvider = (
- 
-  { children,requiredRole }: { children: ReactNode,   requiredRole:string}
-) => {
+export const AuthProvider = ({
+  children,
+  requiredRole,
+}: {
+  children: ReactNode;
+  requiredRole: string;
+}) => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
   useEffect(() => {
@@ -37,9 +39,9 @@ export const AuthProvider = (
         try {
           //   const payload = JSON.parse(atob(token.split(".")[1])); // decode JWT payload
           setUser(usr);
-          if (usr.role !== requiredRole) {
-            router.replace("/unauthorized");
-          }
+          // if (usr.role !== requiredRole) {
+          //   router.replace("/unauthorized");
+          // }
         } catch (err) {
           console.error("Invalid token");
           setUser(null);
