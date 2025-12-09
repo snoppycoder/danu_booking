@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { Lock } from "lucide-react";
+import { useAuth } from "@/lib/authContext";
+import { useState } from "react";
 
 export default function UnauthorizedPage() {
   return (
@@ -23,7 +25,7 @@ export default function UnauthorizedPage() {
 
         <div className="flex flex-col gap-3">
           <Link
-            href="/"
+            href="/passenger"
             className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity"
           >
             Back to Home

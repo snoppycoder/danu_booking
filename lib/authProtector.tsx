@@ -15,10 +15,9 @@ export const AuthProtector = ({ children }: AuthProtectorProps) => {
 
   useEffect(() => {
     const fetchAccessToken = async () => {
-      const token_ = (await getRefreshToken()) || "";
-      console.log("token here", token_);
+      const refresh_token = (await getRefreshToken()) || "";
 
-      if (!token_) {
+      if (!refresh_token) {
         router.replace("/login");
       } else {
         setLoading(false);
@@ -27,7 +26,12 @@ export const AuthProtector = ({ children }: AuthProtectorProps) => {
     fetchAccessToken();
   }, [router]);
 
-  if (loading) return <p>Loading...</p>;
+  if (loading)
+    return (
+      <div className="w-full min-h-screen flex justify-center items-center">
+        Loading...
+      </div>
+    );
 
   return <>{children}</>;
 };

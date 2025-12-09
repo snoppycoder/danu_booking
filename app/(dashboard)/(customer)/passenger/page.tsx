@@ -121,12 +121,12 @@ export default function DanuBooking() {
               </div>
             </div>
 
-            <div className="flex-1 min-w-0">
+            {/* <div className="flex-1 min-w-0">
               <label className="block text-sm text-gray-600 mb-2 text-left">
-                Return (Optional)
+                Return date (Optional)
               </label>
               <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                {/* <Calendar className="w-5 h-5 text-teal-600 flex-shrink-0" /> */}
+                
                 <input
                   type="date"
                   value={returnDate}
@@ -134,7 +134,7 @@ export default function DanuBooking() {
                   className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
                 />
               </div>
-            </div>
+            </div> */}
 
             <Button
               onClick={handleSearch}

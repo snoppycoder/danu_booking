@@ -4,11 +4,15 @@ import { useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
+import { User } from "@/lib/model";
+import { useAuth } from "@/lib/authContext";
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
 }
 export default function Navbar(Props: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const { user } = useAuth();
+  console.log(user, "user");
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -55,9 +59,14 @@ export default function Navbar(Props: NavbarProps) {
               >
                 Contact
               </Link> */}
-              <Button className="bg-primary cursor-pointer hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors">
-                <Link href={"/login"}> Log In </Link>
-              </Button>
+
+              {!user ? (
+                <Button className="bg-primary cursor-pointer hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors">
+                  <Link href={"/login"}> Log In </Link>
+                </Button>
+              ) : (
+                <></>
+              )}
             </div>
           </div>
 

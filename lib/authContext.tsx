@@ -8,12 +8,7 @@ import {
 } from "react";
 import { decodeJWT, getAccessToken } from "./auth";
 import { useRouter } from "next/navigation";
-
-interface User {
-  sub: string;
-  roles: string[];
-  portal: string;
-}
+import { User } from "./model";
 
 interface AuthContextType {
   user: User | null;
@@ -24,10 +19,10 @@ const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider = ({
   children,
-  requiredRole,
+  blackListRoles,
 }: {
   children: ReactNode;
-  requiredRole: string;
+  blackListRoles: string[];
 }) => {
   const [user, setUser] = useState<User | null>(null);
   const router = useRouter();
@@ -38,10 +33,10 @@ export const AuthProvider = ({
       if (token) {
         try {
           //   const payload = JSON.parse(atob(token.split(".")[1])); // decode JWT payload
-          setUser(usr);
-          // if (usr.role !== requiredRole) {
-          //   router.replace("/unauthorized");
-          // }
+
+          if (blackListRoles.includes(usr.roles[0])) {
+            router.replace("/unauthorized");
+          }
         } catch (err) {
           console.error("Invalid token");
           setUser(null);

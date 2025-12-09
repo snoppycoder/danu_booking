@@ -39,7 +39,9 @@ export default function LoginPage() {
         const decoded = await decodeJWT(response.access_token);
         toast.success("You have successfully Logged In");
         console.log(decoded);
+
         if (decoded.roles.includes("passenger")) {
+          console.log(decoded.roles);
           route.replace("/passenger");
         } else {
           route.replace("/superadmin");

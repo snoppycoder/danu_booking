@@ -15,3 +15,8 @@ export interface Operator {
   updated_at: string;
   // type: string;
 }
+export interface User {
+  sub: string;
+  roles: string[];
+  portal: string;
+}

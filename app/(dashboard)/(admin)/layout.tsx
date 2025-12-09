@@ -43,7 +43,7 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <AuthProvider requiredRole={"superadmin"}>
+        <AuthProvider blackListRoles={["passenger", "agent", "operator"]}>
           <AuthProtector>
             <div className="min-h-screen w-full flex flex-col md:flex-row">
               <aside className="w-full md:w-64 md:min-h-screen border-r border-gray-300">
