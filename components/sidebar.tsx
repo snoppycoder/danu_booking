@@ -32,7 +32,14 @@ export default function Sidebar() {
     { icon: Briefcase, label: "Ticket Booking", href: "/ticket-booking" },
     { icon: Users, label: "Agent", href: "/agent" },
     { icon: Settings, label: "Account", href: "/account" },
-    { icon: Users, label: "Passenger", href: "/passenger" },
+    {
+      icon: Users,
+      label: "Users",
+      subItems: [
+        { label: "User List", href: "/superadmin/user" },
+        { label: "Manage User", href: "/superadmin/user/manage" },
+      ],
+    },
     {
       icon: Briefcase,
       label: "Operator",

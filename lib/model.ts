@@ -5,6 +5,13 @@ export interface AddOperatorForm {
   contact_email: string;
   extra_metadata: Record<string, string>;
 }
+export interface AddUserForm {
+  first_name: string;
+  last_name: string;
+  phone: string;
+  password: string;
+  email: string;
+}
 export interface Operator {
   id: string;
   name: string;
@@ -19,4 +26,13 @@ export interface User {
   sub: string;
   roles: string[];
   portal: string;
+  first_name: string;
+  last_name: string;
+  id: string;
+  phone?: string;
+  phone_verified: boolean;
+  email: string;
+  email_verified: boolean;
+  is_disabled: boolean;
+  is_active: boolean;
 }

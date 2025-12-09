@@ -1,7 +1,7 @@
 // "use server";
 
 import { getAccessToken, getRefreshToken, setAuthCookies } from "@/lib/auth";
-import { AddOperatorForm } from "@/lib/model";
+import { AddOperatorForm, AddUserForm } from "@/lib/model";
 import axios from "axios";
 
 const api = axios.create({
@@ -126,6 +126,10 @@ export const authAPI = {
   },
 };
 export const superAdminApi = {
+  /**
+   *
+   * This are the operator operation below
+   */
   addOperator: async (body: AddOperatorForm) => {
     const response = await api.post("/admin/operators", body);
     return response.data;
@@ -140,6 +144,17 @@ export const superAdminApi = {
   },
   deleteOperator: async (id: string) => {
     const response = await api.delete(`/admin/operators/${id}`);
+    return response.data;
+  },
+  /**
+   * This is the user operation below
+   */
+  getUsers: async () => {
+    const response = await api.get(`/admin/users`);
+    return response.data;
+  },
+  addUser: async (body: AddUserForm) => {
+    const response = await api.post(`/admin/user`, body);
     return response.data;
   },
 };
