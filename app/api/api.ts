@@ -154,7 +154,7 @@ export const superAdminApi = {
     return response.data;
   },
   addUser: async (body: AddUserForm) => {
-    const response = await api.post(`/admin/user`, body);
+    const response = await api.post(`/admin/users`, body);
     return response.data;
   },
 };
