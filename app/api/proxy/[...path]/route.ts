@@ -17,7 +17,6 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> }
 ) {
-  console.log(TARGET_URL, "target url");
   const { path } = await context.params;
   return handleRequest(request, path, "POST");
 }
@@ -139,10 +138,16 @@ async function handleRequest(
 
     let decoded: string;
 
-    if (encoding === "zstd") {
-      decoded = Buffer.from(decompress(new Uint8Array(raw))).toString();
-    } else {
-      decoded = Buffer.from(raw).toString();
+    try {
+      if (encoding === "zstd") {
+        console.log("Attempting ZSTD decompression...");
+        decoded = Buffer.from(decompress(new Uint8Array(raw))).toString("utf8");
+      } else {
+        decoded = Buffer.from(raw).toString("utf8");
+      }
+    } catch (err) {
+      console.warn("ZSTD decompression failed, falling back to raw body:", err);
+      decoded = Buffer.from(raw).toString("utf8");
     }
 
     responseHeaders.set("Content-Type", "application/json");

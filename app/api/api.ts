@@ -11,7 +11,6 @@ const api = axios.create({
     "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
     "Content-Type": "application/json",
     Accept: "application/json",
-    Authorization: "Bearer ",
   },
 
   responseType: "json",
@@ -39,7 +38,10 @@ api.interceptors.response.use(
 
 api.interceptors.request.use(
   async (config) => {
-    config.headers.Authorization = `Bearer ${await getAccessToken()}`;
+    const token = await getAccessToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     console.log("[API Request]", config.method?.toUpperCase(), config.url);
 
     return config;
