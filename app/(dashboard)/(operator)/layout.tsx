@@ -39,7 +39,7 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <Navbar initalPath={[]} />
+        {/* <Navbar initalPath={[]} /> */}
         <main>{children}</main>
       </body>
     </html>
