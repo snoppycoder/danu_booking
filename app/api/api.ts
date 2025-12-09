@@ -21,10 +21,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    if (
-      (error.response.status === 403 || error.response.status === 401) &&
-      !originalRequest._retry
-    ) {
+    if (error.response.status === 401 && !originalRequest._retry) {
       originalRequest._retry = true;
       const refreshToken = await getRefreshToken();
       console.log("Token expired! " + refreshToken);
@@ -155,6 +152,22 @@ export const superAdminApi = {
   },
   addUser: async (body: AddUserForm) => {
     const response = await api.post(`/admin/users`, body);
+    return response.data;
+  },
+  assignRole: async (id: string, role_identifier: string) => {
+    const response = await api.post(`/admin/users/${role_identifier}/users`, {
+      users: [id],
+    });
+    return response.data;
+  },
+  disableUser: async (id: string, reason: string) => {
+    const response = await api.post(`/admin/users/${id}/disable`, {
+      disabled_reason: reason,
+    });
+    return response.data;
+  },
+  enableUser: async (id: string) => {
+    const response = await api.post(`/admin/users/${id}/enable`);
     return response.data;
   },
 };

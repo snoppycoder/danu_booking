@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Eye, Trash2, Copy, Plus } from "lucide-react";
+import { Eye, Trash2, Copy, Plus, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -25,17 +25,27 @@ import { toast } from "sonner";
 
 import { User } from "@/lib/model";
 import { AddUserModal } from "./AddUserModal";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { Dialog } from "@radix-ui/react-dialog";
+import DisableReasonModal from "./DisableReasonModal";
 
 export default function UserList() {
   const [displayCount, setDisplayCount] = useState("10");
   const [searchTerm, setSearchTerm] = useState("");
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [detailToggle, setDetailToggle] = useState(false);
   const [data, setData] = useState<User[]>([]);
+  const [disableOpen, setDisableOpen] = useState(false);
   const [detail, setDetail] = useState<User>();
   const fetchUsers = async () => {
     const res = await superAdminApi.getUsers();
-    console.log(res.items);
+
     setData(res.items);
   };
 
@@ -46,7 +56,8 @@ export default function UserList() {
   const filteredUser = data.filter(
     (emp) =>
       emp.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.last_name.toLowerCase().includes(searchTerm.toLowerCase())
+      emp.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp.email.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
   async function handleViewDetail(id: string) {
@@ -56,12 +67,15 @@ export default function UserList() {
       setDetailToggle(true);
     }
   }
+  async function handleAssignRole(role_identifier: string, id: string) {
+    const response = await superAdminApi.assignRole(id, role_identifier);
+    console.log(response);
+  }
 
-  async function handleDelete(id: string) {
-    const response = await superAdminApi.deleteOperator(id);
+  async function handleEnable(id: string) {
+    const response = await superAdminApi.enableUser(id);
     if (response) {
-      toast.success("Operator deleted");
-      fetchUsers();
+      toast.success("User successfully enabled ");
     }
   }
 
@@ -128,7 +142,7 @@ export default function UserList() {
           {/* Search */}
           <div className="max-w-xs w-full">
             <Input
-              placeholder="Search operators..."
+              placeholder="Search User..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -165,20 +179,52 @@ export default function UserList() {
                       <div className="flex gap-2 justify-center">
                         <Button
                           variant="outline"
-                          size="icon"
-                          className="bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={() => handleViewDetail(u.id)}
+                          size="sm"
+                          className="text-black p-2"
+                          onClick={() => handleAssignRole("super_admin", u.id)}
                         >
-                          <Eye className="w-4 h-4" />
+                          Assign Role
                         </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="bg-destructive/20 text-destructive hover:bg-destructive/30"
-                          onClick={() => handleDelete(u.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => console.log("View")}
+                            >
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => console.log("Delete")}
+                            >
+                              Update
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleEnable(u.id)}
+                            >
+                              Enable
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectedUserId(u.id); // track which user to disable
+                                setDisableOpen(true); // open the modal
+                              }}
+                            >
+                              Disable
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                        {selectedUserId && (
+                          <DisableReasonModal
+                            id={selectedUserId}
+                            open={disableOpen}
+                            setOpen={setDisableOpen}
+                          />
+                        )}
                       </div>
                     </TableCell>
                   </TableRow>
