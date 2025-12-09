@@ -33,10 +33,11 @@ export const AuthProvider = ({
       if (token) {
         try {
           //   const payload = JSON.parse(atob(token.split(".")[1])); // decode JWT payload
-
           if (blackListRoles.includes(usr.roles[0])) {
             router.replace("/unauthorized");
+            return;
           }
+          setUser(usr);
         } catch (err) {
           console.error("Invalid token");
           setUser(null);
