@@ -19,13 +19,16 @@ import { AddOperatorForm } from "@/lib/model";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast, Toaster } from "sonner";
+interface AddOperatorModalProps {
+  onSuccess?: () => void; // callback when a new operator is added
+}
 
-export function AddOperatorModal() {
+export function AddOperatorModal({ onSuccess }: AddOperatorModalProps) {
   const [open, setOpen] = useState(false);
   const [slug, setSlug] = useState("");
   const [form, setForm] = useState<AddOperatorForm>({
     name: "",
-    slug: slug,
+    slug: "",
     contact_phone: "",
     contact_email: "",
     extra_metadata: {
@@ -37,11 +40,17 @@ export function AddOperatorModal() {
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> {
     e.preventDefault();
+
     if (!form.contact_email || !form.contact_phone || !form.name) {
       toast.warning("Please insert all the fields");
       return;
     }
+    form.slug = form?.name.replace(" ", "-").toLowerCase();
     const response = await superAdminApi.addOperator(form);
+    if (response) {
+      onSuccess?.();
+    }
+    setOpen(false);
 
     console.log(response);
   }

@@ -59,20 +59,28 @@ async function handleRequest(
 
     // Prepare headers - preserve important headers
     const headers = new Headers();
-    request.headers.forEach((value, key) => {
-      // Skip problematic headers but keep important ones
-      if (
-        !["host", "connection", "content-length", "origin", "referer"].includes(
-          key.toLowerCase()
-        )
-      ) {
-        headers.set(key, value);
-      }
-    });
+    headers.set("Content-Type", "application/json");
+    headers.set("Accept", "application/json");
+
+    const auth = request.headers.get("Authorization");
+    if (auth) headers.set("Authorization", auth);
+
+    const apiKey = request.headers.get("X-API-Key");
+    if (apiKey) headers.set("X-API-Key", apiKey);
+    // request.headers.forEach((value, key) => {
+    //   // Skip problematic headers but keep important ones
+    //   if (
+    //     !["host", "connection", "content-length", "origin", "referer"].includes(
+    //       key.toLowerCase()
+    //     )
+    //   ) {
+    //     headers.set(key, value);
+    //   }
+    // });
 
     // Get request body for POST/PUT requests
     let body: string | undefined;
-    if (["POST", "PUT"].includes(method)) {
+    if (["POST", "PUT", "PATCH"].includes(method)) {
       body = await request.text();
       console.log("Proxy forwarding body:", body);
     }
@@ -85,7 +93,7 @@ async function handleRequest(
       method,
       headers,
       body,
-      credentials: "include",
+      // credentials: "include",
     });
 
     // Create response with proper headers
@@ -140,14 +148,17 @@ async function handleRequest(
 
     try {
       if (encoding === "zstd") {
-        console.log("Attempting ZSTD decompression...");
-        decoded = Buffer.from(decompress(new Uint8Array(raw))).toString("utf8");
+        console.log("ZSTD");
+        decoded = Buffer.from(decompress(new Uint8Array(raw))).toString();
       } else {
-        decoded = Buffer.from(raw).toString("utf8");
+        console.log("OTHERS");
+        console.log("POST Headers:", Object.fromEntries(headers.entries()));
+        console.log("POST Body:", body);
+
+        decoded = Buffer.from(raw).toString();
       }
     } catch (err) {
-      console.warn("ZSTD decompression failed, falling back to raw body:", err);
-      decoded = Buffer.from(raw).toString("utf8");
+      decoded = Buffer.from(raw).toString();
     }
 
     responseHeaders.set("Content-Type", "application/json");

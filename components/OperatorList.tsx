@@ -104,7 +104,7 @@ export default function OperatorList() {
     <div className="relative space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Operator List</h1>
-        <AddOperatorModal />
+        <AddOperatorModal onSuccess={fetchOperators} />
       </div>
 
       <Dialog open={detailToggle} onOpenChange={setDetailToggle}>
