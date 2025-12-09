@@ -1,7 +1,9 @@
+export const runtime = "nodejs";
+
 import { NextRequest, NextResponse } from "next/server";
 import { decompress } from "fzstd";
 
-const TARGET_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const TARGET_URL = process.env.API_BASE_URL;
 
 export async function GET(
   request: NextRequest,
@@ -15,6 +17,7 @@ export async function POST(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> }
 ) {
+  console.log(TARGET_URL, "target url");
   const { path } = await context.params;
   return handleRequest(request, path, "POST");
 }

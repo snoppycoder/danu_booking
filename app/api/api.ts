@@ -8,7 +8,7 @@ const api = axios.create({
   baseURL: "/api/proxy",
 
   headers: {
-    "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
+    "X-API-KEY": process.env.API_KEY,
     "Content-Type": "application/json",
     Accept: "application/json",
     Authorization: "Bearer ",
