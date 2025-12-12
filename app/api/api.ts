@@ -1,6 +1,11 @@
 // "use server";
 
-import { getAccessToken, getRefreshToken, setAuthCookies } from "@/lib/auth";
+import {
+  getAccessToken,
+  getRefreshToken,
+  setAccessToken,
+  setAuthCookies,
+} from "@/lib/auth";
 import { AddOperatorForm, AddUserForm } from "@/lib/model";
 import axios from "axios";
 
@@ -11,6 +16,7 @@ const api = axios.create({
     "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
     "Content-Type": "application/json",
     Accept: "application/json",
+    "x-csrf-token": "hUDnfKGgyUBjxuq2KLroxT4J-Ian9UFR12YwGwhnWDA",
   },
 
   responseType: "json",
@@ -21,16 +27,31 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
+    // descern between every 401 errors
+
     if (error.response.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
+      if (error.response.data.detail == "Invalid credentials ") return;
+
       const refreshToken = await getRefreshToken();
-      console.log("Token expired! " + refreshToken);
+
+      originalRequest._retry = true;
+      console.log("Token expired! " + error);
       const { data } = await api.post("/auth/refresh", {
         refresh_token: refreshToken,
       });
-      setAuthCookies(data.access_token);
+
+      console.log(data, "from /auth/refresh");
+
+      originalRequest.headers = {
+        ...originalRequest.headers,
+        Authorization: `Bearer ${data.access_token}`,
+      };
+      // setAuthCookies(data);
+      await setAccessToken(data.access_token, data.access_expiry);
+
       // Cookies.set("access_token", data.access_token);
-      originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+      // originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
+
       return api(originalRequest);
     }
     return Promise.reject(error);
@@ -40,6 +61,7 @@ api.interceptors.response.use(
 api.interceptors.request.use(
   async (config) => {
     const token = await getAccessToken();
+
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -76,9 +98,9 @@ api.interceptors.response.use(
 
     if (isAuthError && isBrowser && isSafeToRedirect) {
       console.warn("[API] Unauthorized - redirecting to login");
-      window.location.href = `/login?callbackUrl=${encodeURIComponent(
-        pathname
-      )}`;
+      // window.location.href = `/login?callbackUrl=${encodeURIComponent(
+      //   pathname
+      // )}`;
     }
 
     return Promise.reject(error);
@@ -89,15 +111,16 @@ export const authAPI = {
   login: async (
     identifier: string,
     password: string,
-    remember: boolean,
-    portal: string
+    remember: boolean
+    // portal: string
   ) => {
     const response = await api.post("/auth/login", {
       identifier,
       password,
       remember,
-      portal,
+      // portal,
     });
+    console.log(response);
     return response.data;
   },
   logout: async (session_id: string) => {
@@ -154,6 +177,13 @@ export const superAdminApi = {
     const response = await api.post(`/admin/users`, body);
     return response.data;
   },
+  assignOperatorToUser: async (operatorId: string, userId: string) => {
+    const response = await api.post(
+      `/admin/operators/${operatorId}/users/${userId}`
+    );
+    return response.data;
+  },
+
   assignRole: async (id: string, role_identifier: string) => {
     const response = await api.post(`/admin/users/${role_identifier}/users`, {
       users: [id],

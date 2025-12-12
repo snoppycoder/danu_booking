@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Eye, Trash2, Copy, Plus } from "lucide-react";
+import {
+  Eye,
+  Trash2,
+  Copy,
+  Plus,
+  RefreshCcw,
+  RefreshCw,
+  MoreHorizontal,
+  CircleQuestionMark,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -19,6 +28,12 @@ import {
   TableHeader,
   TableRow,
 } from "./ui/table";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
 import { AddOperatorModal } from "./AddOperatorModal";
 import { superAdminApi } from "@/app/api/api";
 import { toast } from "sonner";
@@ -28,30 +43,29 @@ import { Card, CardContent } from "./ui/card";
 import {
   Dialog,
   DialogContent,
+  DialogFooter,
   DialogDescription,
   DialogHeader,
   DialogOverlay,
   DialogTitle,
 } from "./ui/dialog";
 import InfoRow from "./InfoRow";
+import { useOperator, useUsers } from "./Query";
 
 export default function OperatorList() {
   const [displayCount, setDisplayCount] = useState("10");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [open, setOpen] = useState(false);
+  // const [userId, setUserId] = useState("");
+  const [operatorId, setOperatorId] = useState("");
   const [detailToggle, setDetailToggle] = useState(false);
-  const [data, setData] = useState<Operator[]>([]);
   const [detail, setDetail] = useState<Operator>();
-  const fetchOperators = async () => {
-    const res = await superAdminApi.getOperator();
-    setData(res.items);
-  };
+  const [spinning, setSpinning] = useState<boolean>(false);
+  const { data, isLoading, refetch } = useOperator();
+  const { data: users, ...rest } = useUsers();
 
-  useEffect(() => {
-    fetchOperators();
-  }, []);
-
-  const filteredOperators = data.filter(
+  const filteredOperators = data?.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase())
@@ -67,9 +81,10 @@ export default function OperatorList() {
 
   async function handleDelete(id: string) {
     const response = await superAdminApi.deleteOperator(id);
+
     if (response) {
+      await refetch();
       toast.success("Operator deleted");
-      fetchOperators();
     }
   }
   function dateformatter(date: Date) {
@@ -83,14 +98,14 @@ export default function OperatorList() {
   }
 
   async function handleCopy() {
-    if (!filteredOperators.length) {
+    if (!filteredOperators?.length) {
       toast.warning("Nothing to copy");
       return;
     }
     const jsonData = {
       metadata: {
         exported_at: new Date().toISOString(),
-        total_operators: filteredOperators.length,
+        total_operators: filteredOperators?.length,
         source: "Operator Management System",
       },
       operators: filteredOperators,
@@ -99,13 +114,66 @@ export default function OperatorList() {
     await navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
     toast.success(`Copied ${filteredOperators.length} operators`);
   }
+  if (isLoading) {
+    return (
+      <div className="h-full w-full flex justify-center items-center">
+        Loading...
+      </div>
+    );
+  }
+  async function handleAssignOperatorToUser(userId: string) {
+    const res = await superAdminApi.assignOperatorToUser(operatorId, userId);
+    console.log(res);
+  }
+
+  async function handleRefetch(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> {
+    event.preventDefault();
+    setSpinning(true);
+    await refetch();
+    setSpinning(false);
+  }
 
   return (
     <div className="relative space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">Operator List</h1>
-        <AddOperatorModal onSuccess={fetchOperators} />
+      <div className="flex flex-col md:flex-row md:items-center justify-between">
+        <h1 className="text-3xl font-bold text-center md:text-left text-foreground mb-5 md:md-auto ">
+          Operator List
+        </h1>
+        <AddOperatorModal onSuccess={refetch} />
       </div>
+      <Dialog open={open} onOpenChange={setOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>User List</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-2 mt-4">
+            {users?.map((users) => (
+              <div
+                key={users.id}
+                className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
+              >
+                <div>
+                  <p className="font-medium">
+                    {(users.first_name ?? "") + " " + (users.last_name ?? "")}
+                  </p>
+                </div>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => {
+                    handleAssignOperatorToUser(users.id);
+                  }}
+                >
+                  Select
+                </Button>
+              </div>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={detailToggle} onOpenChange={setDetailToggle}>
         <DialogOverlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
@@ -186,6 +254,14 @@ export default function OperatorList() {
             <Button variant="outline">CSV</Button>
             <Button variant="outline">PDF</Button>
             <Button variant="outline">Print</Button>
+
+            <Button
+              className="ml-3.5 "
+              variant="outline"
+              onClick={handleRefetch}
+            >
+              <RefreshCw className={spinning ? "animate-spin" : ""} />
+            </Button>
           </div>
 
           {/* Search */}
@@ -199,7 +275,7 @@ export default function OperatorList() {
         </div>
 
         {/* Table */}
-        {data.length === 0 ? (
+        {data?.length === 0 ? (
           <p className="text-muted-foreground text-center py-10">
             No operators registered.
           </p>
@@ -216,7 +292,7 @@ export default function OperatorList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredOperators.map((op, i) => (
+                {filteredOperators?.map((op, i) => (
                   <TableRow key={op.id} className="hover:bg-muted/30">
                     <TableCell>{i + 1}</TableCell>
                     <TableCell>{op.name}</TableCell>
@@ -224,22 +300,46 @@ export default function OperatorList() {
                     <TableCell>{op.contact_phone}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex gap-2 justify-center">
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="bg-primary text-primary-foreground hover:bg-primary/90"
-                          onClick={() => handleViewDetail(op.id)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="bg-destructive/20 text-destructive hover:bg-destructive/30"
-                          onClick={() => handleDelete(op.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="relative inline-block group">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-black p-2 flex items-center gap-1"
+                            onClick={() => {
+                              setOperatorId(op.id);
+                              setOpen(true);
+                            }}
+                          >
+                            Assign
+                            <CircleQuestionMark className="text-blue-600 cursor-pointer" />
+                          </Button>
+
+                          <pre className="z-90 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 rounded bg-gray-700 px-3 py-1 max-w-xs text-white text-xs text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words pointer-events-none shadow-lg">
+                            This will enable you to assign {`\n`} a user to this
+                            operator
+                          </pre>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" className="h-8 w-8 p-0">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={() => handleViewDetail(op.id)}
+                            >
+                              View
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => handleDelete(op.id)}
+                            >
+                              Delete
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </div>
                     </TableCell>
                   </TableRow>
@@ -250,11 +350,11 @@ export default function OperatorList() {
         )}
 
         {/* Pagination */}
-        {data.length > 0 && (
+        {(data?.length ?? 0) > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing 1 to {filteredOperators.length} of{" "}
-              {filteredOperators.length} entries
+              Showing 1 to {filteredOperators?.length} of{" "}
+              {filteredOperators?.length} entries
             </p>
 
             <div className="flex gap-2">

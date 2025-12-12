@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Eye, Trash2, Copy, Plus, MoreHorizontal } from "lucide-react";
+import {
+  Eye,
+  Trash2,
+  Copy,
+  Plus,
+  MoreHorizontal,
+  RefreshCw,
+  CircleQuestionMark,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -31,8 +39,17 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-import { Dialog } from "@radix-ui/react-dialog";
+
 import DisableReasonModal from "./DisableReasonModal";
+import { useQueryClient } from "@tanstack/react-query";
+import { useOperator, useUsers } from "./Query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
 
 export default function UserList() {
   const [displayCount, setDisplayCount] = useState("10");
@@ -40,20 +57,16 @@ export default function UserList() {
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [detailToggle, setDetailToggle] = useState(false);
-  const [data, setData] = useState<User[]>([]);
+  const [spinning, setSpinning] = useState(false);
+  const [_operator, setOperatorId] = useState("");
+  // const [data, setData] = useState<User[]>([]);
   const [disableOpen, setDisableOpen] = useState(false);
   const [detail, setDetail] = useState<User>();
-  const fetchUsers = async () => {
-    const res = await superAdminApi.getUsers();
+  const [open, setOpen] = useState<boolean>();
+  const { data, isLoading, refetch } = useUsers();
+  const { data: operator, isLoading: loading } = useOperator();
 
-    setData(res.items);
-  };
-
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  const filteredUser = data.filter(
+  const filteredUser = data?.filter(
     (emp) =>
       emp.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -67,6 +80,7 @@ export default function UserList() {
       setDetailToggle(true);
     }
   }
+
   async function handleAssignRole(role_identifier: string, id: string) {
     const response = await superAdminApi.assignRole(id, role_identifier);
     console.log(response);
@@ -80,7 +94,7 @@ export default function UserList() {
   }
 
   async function handleCopy() {
-    if (!filteredUser.length) {
+    if (!filteredUser?.length) {
       toast.warning("Nothing to copy");
       return;
     }
@@ -94,14 +108,32 @@ export default function UserList() {
     };
 
     await navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
-    toast.success(`Copied ${filteredUser.length} operators`);
+    toast.success(`Copied ${filteredUser.length} users`);
+  }
+  if (isLoading) {
+    return (
+      <div className="absolute inset-0 flex justify-center items-center">
+        Loading...
+      </div>
+    );
+  }
+
+  async function handleRefetch(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+  ): Promise<void> {
+    event.preventDefault();
+    setSpinning(true);
+    await refetch();
+    setSpinning(false);
   }
 
   return (
     <div className="relative space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-foreground">User List</h1>
-        <AddUserModal onSuccess={fetchUsers} />
+      <div className="flex flex-col md:flex-row md:items-center justify-between">
+        <h1 className="text-3xl font-bold text-center ml-2.5 md:text-left text-foreground mb-5 md:md-auto ">
+          User List
+        </h1>
+        <AddUserModal onSuccess={refetch} />
       </div>
 
       {/* Controls Section */}
@@ -137,6 +169,13 @@ export default function UserList() {
             <Button variant="outline">CSV</Button>
             <Button variant="outline">PDF</Button>
             <Button variant="outline">Print</Button>
+            <Button
+              className="ml-3.5 "
+              variant="outline"
+              onClick={handleRefetch}
+            >
+              <RefreshCw className={spinning ? "animate-spin" : ""} />
+            </Button>
           </div>
 
           {/* Search */}
@@ -150,7 +189,7 @@ export default function UserList() {
         </div>
 
         {/* Table */}
-        {data.length === 0 ? (
+        {data?.length === 0 ? (
           <p className="text-muted-foreground text-center py-10">
             No User registered.
           </p> // though this is impossible
@@ -167,7 +206,7 @@ export default function UserList() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredUser.map((u, i) => (
+                {filteredUser?.map((u, i) => (
                   <TableRow key={i} className="hover:bg-muted/30">
                     <TableCell>{i + 1}</TableCell>
                     <TableCell>
@@ -177,14 +216,23 @@ export default function UserList() {
                     <TableCell>{u.phone ?? "N/A"}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex gap-2 justify-center">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          className="text-black p-2"
-                          onClick={() => handleAssignRole("super_admin", u.id)}
-                        >
-                          Assign Role
-                        </Button>
+                        <div className="relative inline-block group">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-black p-2 flex items-center gap-1"
+                            onClick={() => setOpen(true)}
+                          >
+                            Assign Role
+                            {/* <CircleQuestionMark className="text-blue-600 cursor-pointer" /> */}
+                          </Button>
+
+                          {/* <pre className="z-90 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 rounded bg-gray-700 px-3 py-1 max-w-xs text-white text-xs text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words pointer-events-none shadow-lg">
+                            This will enable you to assign {`\n`} a user to a
+                            operator
+                          </pre> */}
+                        </div>
+
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -207,6 +255,13 @@ export default function UserList() {
                               onClick={() => handleEnable(u.id)}
                             >
                               Enable
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleAssignRole("super_admin", u.id)
+                              }
+                            >
+                              Assign Role
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => {
@@ -235,10 +290,10 @@ export default function UserList() {
         )}
 
         {/* Pagination */}
-        {data.length > 0 && (
+        {(data?.length ?? 0) > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing 1 to {filteredUser.length} of {filteredUser.length}{" "}
+              Showing 1 to {filteredUser?.length} of {filteredUser?.length}{" "}
               entries
             </p>
 

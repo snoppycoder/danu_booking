@@ -1,5 +1,6 @@
 "use client";
 
+import { authAPI } from "@/app/api/api";
 import ForgotPasswordForm from "@/components/forgot-password-form";
 import OTPVerification from "@/components/otp-verification";
 import { useState } from "react";
@@ -8,8 +9,10 @@ export default function Page() {
   const [step, setStep] = useState<"email" | "otp">("email");
   const [contact, setContact] = useState("");
 
-  const handleEmailSubmit = (email: string) => {
-    setContact(email);
+  const handleEmailSubmit = async (identifer: string) => {
+    const res = await authAPI.forgotPassword(identifer);
+    console.log(res);
+    setContact(identifer);
     setStep("otp");
   };
 

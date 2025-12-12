@@ -1,7 +1,7 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-import { decompress } from "fzstd";
+// import { decompress } from "fzstd";
 
 const TARGET_URL = process.env.API_BASE_URL;
 
@@ -66,6 +66,8 @@ async function handleRequest(
     if (auth) headers.set("Authorization", auth);
 
     const apiKey = request.headers.get("X-API-Key");
+    const csrf_token = request.headers.get("x-csrf-token");
+    if (csrf_token) headers.set("x-csrf-token", csrf_token);
     if (apiKey) headers.set("X-API-Key", apiKey);
     // request.headers.forEach((value, key) => {
     //   // Skip problematic headers but keep important ones
@@ -93,7 +95,6 @@ async function handleRequest(
       method,
       headers,
       body,
-      // credentials: "include",
     });
 
     // Create response with proper headers
@@ -112,10 +113,7 @@ async function handleRequest(
       }
     });
     const setCookies =
-      // Modern API (Next.js 14+)
-      response.headers.getSetCookie?.() ||
-      // Fallback for older environments
-      response.headers.get("set-cookie");
+      response.headers.getSetCookie?.() || response.headers.get("set-cookie");
 
     if (setCookies) {
       if (Array.isArray(setCookies)) {
@@ -142,24 +140,10 @@ async function handleRequest(
     responseHeaders.set("Access-Control-Allow-Credentials", "true");
 
     const raw = await response.arrayBuffer();
-    const encoding = response.headers.get("content-encoding")?.toLowerCase();
 
     let decoded: string;
 
-    try {
-      if (encoding === "zstd") {
-        console.log("ZSTD");
-        decoded = Buffer.from(decompress(new Uint8Array(raw))).toString();
-      } else {
-        console.log("OTHERS");
-        console.log("POST Headers:", Object.fromEntries(headers.entries()));
-        console.log("POST Body:", body);
-
-        decoded = Buffer.from(raw).toString();
-      }
-    } catch (err) {
-      decoded = Buffer.from(raw).toString();
-    }
+    decoded = Buffer.from(raw).toString();
 
     responseHeaders.set("Content-Type", "application/json");
 

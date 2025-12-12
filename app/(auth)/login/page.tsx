@@ -31,8 +31,8 @@ export default function LoginPage() {
       const response = await authAPI.login(
         phone.trim().toLowerCase(),
         password,
-        checked,
-        "superadmin"
+        checked
+        // "superadmin"
       );
       if (response) {
         await setAuthCookies(response);
@@ -48,8 +48,13 @@ export default function LoginPage() {
         }
       }
     } catch (error) {
+      console.log(error);
       if (axios.isAxiosError(error)) {
-        toast.warning(error.response?.data.detail);
+        if (error.response?.data.detail) {
+          toast.error(error.response?.data.detail);
+        } else {
+          toast.warning(error.response?.data.error);
+        }
       }
     }
   };

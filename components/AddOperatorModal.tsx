@@ -2,6 +2,7 @@
 
 import { superAdminApi } from "@/app/api/api";
 import { Button } from "@/components/ui/button";
+import axios from "axios";
 import {
   Dialog,
   DialogClose,
@@ -45,14 +46,30 @@ export function AddOperatorModal({ onSuccess }: AddOperatorModalProps) {
       toast.warning("Please insert all the fields");
       return;
     }
-    form.slug = form?.name.replace(" ", "-").toLowerCase();
-    const response = await superAdminApi.addOperator(form);
-    if (response) {
-      onSuccess?.();
-    }
-    setOpen(false);
+    form.slug = form.name.replace(/\s+/g, "-").toLowerCase();
 
-    console.log(response);
+    try {
+      const response = await superAdminApi.addOperator(form);
+
+      if (response) {
+        onSuccess?.();
+        setOpen(false);
+        return;
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.status == 500) {
+          toast.warning("This operator was added before");
+        }
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+        console.log(error);
+      } else {
+        toast.error("Error trying to processs your request!");
+
+        console.log(error);
+      }
+    }
   }
 
   return (
@@ -100,7 +117,7 @@ export function AddOperatorModal({ onSuccess }: AddOperatorModalProps) {
                       ...prev,
                       name: e?.target.value,
                     }));
-                    setSlug(e.target.value.replace(" ", "-").toLowerCase());
+                    setSlug(e.target.value.replace("", "-").toLowerCase());
                   }}
                 />
               </div>
@@ -142,7 +159,7 @@ export function AddOperatorModal({ onSuccess }: AddOperatorModalProps) {
                 <Input
                   required
                   readOnly
-                  value={form?.name.replace(" ", "-").toLowerCase()}
+                  value={form?.name.replace(/\s+/g, "-").toLowerCase()}
                   id="slug"
                   name="slug"
                 />
