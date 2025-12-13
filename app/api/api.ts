@@ -1,8 +1,11 @@
 // "use server";
 
 import {
+  deleteAllCookies,
   getAccessToken,
+  getCSRFToken,
   getRefreshToken,
+  getSessionId,
   setAccessToken,
   setAuthCookies,
 } from "@/lib/auth";
@@ -16,44 +19,63 @@ const api = axios.create({
     "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
     "Content-Type": "application/json",
     Accept: "application/json",
-    "x-csrf-token": "hUDnfKGgyUBjxuq2KLroxT4J-Ian9UFR12YwGwhnWDA",
   },
 
   responseType: "json",
   decompress: true,
   withCredentials: true,
 });
+const refreshApi = axios.create({
+  baseURL: "/api/proxy",
+  withCredentials: true,
+  headers: {
+    "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+}); // THIS IS TO AVOID INFINITE REFRESH LOOP
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    // descern between every 401 errors
 
-    if (error.response.status === 401 && !originalRequest._retry) {
-      if (error.response.data.detail == "Invalid credentials ") return;
+    if (
+      error.response?.status === 401 &&
+      !originalRequest._retry &&
+      !originalRequest.url?.includes("/auth/refresh") &&
+      error.response?.data?.detail !== "Invalid credentials "
+    ) {
+      originalRequest._retry = true;
 
       const refreshToken = await getRefreshToken();
+      console.log(refreshToken, "token refreshed");
 
-      originalRequest._retry = true;
-      console.log("Token expired! " + error);
-      const { data } = await api.post("/auth/refresh", {
-        refresh_token: refreshToken,
-      });
+      if (!refreshToken) {
+        return Promise.reject(error);
+      }
 
-      console.log(data, "from /auth/refresh");
+      try {
+        const { data } = await refreshApi.post("/auth/refresh", {
+          refresh_token: refreshToken,
+        });
+        originalRequest.headers = {
+          ...originalRequest.headers,
+          Authorization: `Bearer ${data.access_token}`,
+        };
+        console.log(data, "entered");
 
-      originalRequest.headers = {
-        ...originalRequest.headers,
-        Authorization: `Bearer ${data.access_token}`,
-      };
-      // setAuthCookies(data);
-      await setAccessToken(data.access_token, data.access_expiry);
+        await setAccessToken(data.access_token, data.access_expiry);
 
-      // Cookies.set("access_token", data.access_token);
-      // originalRequest.headers.Authorization = `Bearer ${data.access_token}`;
-
-      return api(originalRequest);
+        return api(originalRequest); // retry original request
+      } catch (refreshError) {
+        window.location.href = "/login";
+        console.log(refreshError, "here is the error");
+        return Promise.reject(refreshError);
+      }
+    } else {
+      window.location.href = "/login";
     }
+
     return Promise.reject(error);
   }
 );
@@ -61,9 +83,15 @@ api.interceptors.response.use(
 api.interceptors.request.use(
   async (config) => {
     const token = await getAccessToken();
+    const csrf_token = await getCSRFToken();
+    console.log(csrf_token, "csrf token here");
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
+    }
+    if (csrf_token) {
+      console.log(csrf_token, "csrf token");
+      config.headers["x-csrf-token"] = csrf_token;
     }
     console.log("[API Request]", config.method?.toUpperCase(), config.url);
 
@@ -71,38 +99,6 @@ api.interceptors.request.use(
   },
   (error) => {
     console.error("[API Request Error]", error);
-    return Promise.reject(error);
-  }
-);
-
-api.interceptors.response.use(
-  (response) => {
-    console.log("[API Response]", response.status, response.config.url);
-    return response;
-  },
-  (error) => {
-    const isAuthError = error.response?.status === 401;
-    const isBrowser = typeof window !== "undefined";
-    const pathname = isBrowser ? window.location.pathname : "";
-
-    const isSafeToRedirect =
-      pathname !== "/login" &&
-      !pathname.startsWith("/.well-known") &&
-      !pathname.match(/\.(js|json|css|map|ico|png|jpg|jpeg)$/);
-
-    console.error("[API Error]", {
-      status: error.response?.status,
-      url: error.config?.url,
-      data: error.response?.data,
-    });
-
-    if (isAuthError && isBrowser && isSafeToRedirect) {
-      console.warn("[API] Unauthorized - redirecting to login");
-      // window.location.href = `/login?callbackUrl=${encodeURIComponent(
-      //   pathname
-      // )}`;
-    }
-
     return Promise.reject(error);
   }
 );
@@ -123,9 +119,22 @@ export const authAPI = {
     console.log(response);
     return response.data;
   },
-  logout: async (session_id: string) => {
-    const response = await api.post("/auth/logout", { session_id });
-    return response.data;
+  logout: async () => {
+    try {
+      const session_id = await getSessionId();
+      const refresh_token = await getRefreshToken();
+
+      const response = await api.post("/user/me/sessions/logout", {
+        refresh_token,
+        session_id,
+      });
+      await deleteAllCookies();
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    } finally {
+      window.location.href = "/login";
+    }
   },
   whoAmI: async () => {
     const response = await api.get(`/user/me`);
@@ -142,6 +151,20 @@ export const authAPI = {
         phone: identifier,
       });
     }
+    return response.data;
+  },
+};
+export const sessionMgmt = {
+  getAllSession: async () => {
+    const response = await api.get(`/user/me/sessions`);
+    return response.data;
+  },
+  revokeAllSession: async () => {
+    const response = await api.post(`/user/me/sessions/revoke-all`);
+    return response.data;
+  },
+  revokeOtherSession: async () => {
+    const response = await api.post("/user/me/sessions/revoke-others");
     return response.data;
   },
 };
@@ -170,8 +193,12 @@ export const superAdminApi = {
    * This is the user operation below
    */
   getUsers: async () => {
-    const response = await api.get(`/admin/users`);
-    return response.data;
+    try {
+      const response = await api.get(`/admin/users`);
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from getUsers func");
+    }
   },
   addUser: async (body: AddUserForm) => {
     const response = await api.post(`/admin/users`, body);
@@ -179,6 +206,12 @@ export const superAdminApi = {
   },
   assignOperatorToUser: async (operatorId: string, userId: string) => {
     const response = await api.post(
+      `/admin/operators/${operatorId}/users/${userId}`
+    );
+    return response.data;
+  },
+  unassignOperatorToUser: async (operatorId: string, userId: string) => {
+    const response = await api.delete(
       `/admin/operators/${operatorId}/users/${userId}`
     );
     return response.data;

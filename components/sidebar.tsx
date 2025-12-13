@@ -1,12 +1,8 @@
 "use client";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+
 import {
-  ChartColumnDecreasing,
-  DollarSign,
-  LayoutDashboard,
-  Receipt,
   Settings,
-  TrendingUp,
-  UsersRound,
   Menu,
   X,
   AlertCircle,
@@ -21,10 +17,22 @@ import {
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/lib/authContext";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+import { authAPI } from "@/app/api/api";
+
+import AvatarHero from "./HeroAvatar";
 
 export default function Sidebar() {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
+  const { user } = useAuth();
+  // console.log(user, "user");
 
   const menuItems = [
     { icon: Zap, label: "Dashboard", href: "/superadmin" },
@@ -76,6 +84,7 @@ export default function Sidebar() {
         ) : (
           <Menu onClick={() => setIsOpen(true)} className="cursor-pointer" />
         )}
+        <AvatarHero />
       </div>
 
       {/* Overlay */}

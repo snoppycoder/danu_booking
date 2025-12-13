@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
-import { superAdminApi } from "@/app/api/api";
-import { Operator, User } from "@/lib/model";
+import { sessionMgmt, superAdminApi } from "@/app/api/api";
+import { Operator, Session, User } from "@/lib/model";
 
 export const useUsers = () => {
   return useQuery({
@@ -18,6 +18,17 @@ export const useOperator = () => {
     queryFn: async () => {
       const res = await superAdminApi.getOperator();
       return res.items as Operator[];
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
+export const useSession = () => {
+  return useQuery({
+    queryKey: ["session"],
+    queryFn: async () => {
+      const res = await sessionMgmt.getAllSession();
+      console.log(res, "active");
+      return res as Session[];
     },
     staleTime: 1000 * 60 * 5,
   });

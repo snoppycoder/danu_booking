@@ -37,14 +37,13 @@ export default function LoginPage() {
       if (response) {
         await setAuthCookies(response);
         const decoded = await decodeJWT(response.access_token);
-        toast.success("You have successfully Logged In");
-        console.log(decoded);
+        // toast.success("You have successfully Logged In");
+        // console.log(decoded);
 
         if (decoded.roles.includes("passenger")) {
-          console.log(decoded.roles);
-          route.replace("/passenger");
+          window.location.replace("/passenger");
         } else {
-          route.replace("/superadmin");
+          window.location.replace("/superadmin");
         }
       }
     } catch (error) {

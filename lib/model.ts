@@ -5,6 +5,17 @@ export interface AddOperatorForm {
   contact_email: string;
   extra_metadata: Record<string, string>;
 }
+export interface Session {
+  id: string;
+  created_at?: string;
+  user_agent: string;
+  deviceType: "desktop" | "mobile" | "tablet";
+  location: string;
+  ip_address: string;
+  last_seen_at: string;
+  isCurrent: boolean;
+}
+
 export interface AddUserForm {
   first_name: string;
   last_name: string;

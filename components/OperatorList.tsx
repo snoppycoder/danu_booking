@@ -334,6 +334,12 @@ export default function OperatorList() {
                               View
                             </DropdownMenuItem>
                             <DropdownMenuItem
+                              onClick={() => console.log(op.id)}
+                            >
+                              Unassign
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
                               onClick={() => handleDelete(op.id)}
                             >
                               Delete
