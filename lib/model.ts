@@ -113,6 +113,18 @@ export interface Route {
   created_at: string;
   updated_at: string;
 }
+export interface TripData {
+  id: string;
+  operator: Operator;
+  bus: Bus;
+  driver: Driver;
+  route_from: string;
+  route_to: string;
+  departure_at: string;
+  price: number;
+  created_at: string;
+  updated_at: string;
+}
 export interface PopularRoute {
   route_from: string;
   route_to: string;
@@ -135,6 +147,10 @@ export interface Trip {
   updated_at: string;
 }
 export type Item = Trip | Route;
+
+export interface ItemTrip extends Item {
+  trip_id: string;
+}
 
 export interface SearchRouteResponse {
   route_from: string;

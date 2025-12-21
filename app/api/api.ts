@@ -379,7 +379,25 @@ export const passengerApi = {
     const response = await api.get("/passenger/routes/popular");
     return response.data.routes;
   },
+  getTripDetails: async (tripId: string) => {
+    const response = await api.get(`/passenger/trips/${tripId}`);
+    return response.data;
+  },
 };
+export const operatorApi = {
+  createBus: async (
+    body: {
+      plate_number: string;
+      capacity: number;
+      side_number?: string;
+    },
+    operator_id: string
+  ) => {
+    const response = await api.post(`/operator/${operator_id}/buses`, { body });
+    return response.data;
+  },
+};
+
 export const profileApi = {
   deleteAccount: async (password: string, anonymize = false) => {
     const response = await api.delete("/user/me", {

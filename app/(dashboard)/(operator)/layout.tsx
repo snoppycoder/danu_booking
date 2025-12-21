@@ -1,3 +1,4 @@
+"use client";
 import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
@@ -5,33 +6,7 @@ import "@/app/globals.css";
 import Navbar from "@/components/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/OperatorSidebar";
-
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
-
-export const metadata: Metadata = {
-  title: "Danu Booking - Book Your Bus Tickets Online",
-  description:
-    "Book your bus tickets online with Danu Booking. Easy, fast, and reliable bus reservations for your journey.",
-
-  icons: {
-    icon: [
-      {
-        url: "/icon-light-32x32.png",
-        media: "(prefers-color-scheme: light)",
-      },
-      {
-        url: "/icon-dark-32x32.png",
-        media: "(prefers-color-scheme: dark)",
-      },
-      {
-        url: "/icon.svg",
-        type: "image/svg+xml",
-      },
-    ],
-    apple: "/apple-icon.png",
-  },
-};
+import { AuthProvider } from "@/lib/authContext";
 
 export default function DashboardLayout({
   children,
@@ -41,13 +16,14 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        {/* <Navbar initalPath={[]} /> */}
-        <SidebarProvider>
-          <div className="flex min-h-screen w-full">
-            <AppSidebar />
-            <main className="flex-1">{children}</main>
-          </div>
-        </SidebarProvider>
+        <AuthProvider blackListRoles={["agent", "passenger"]}>
+          <SidebarProvider>
+            <div className="flex min-h-screen w-full">
+              <AppSidebar />
+              <main className="flex-1">{children}</main>
+            </div>
+          </SidebarProvider>
+        </AuthProvider>
       </body>
     </html>
   );

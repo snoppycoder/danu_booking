@@ -72,67 +72,30 @@ import {
   Calendar,
   Users,
 } from "lucide-react";
+import { operatorApi } from "@/app/api/api";
+import { useAuth } from "@/lib/authContext";
 
 type BusStatus = "Active" | "Maintenance" | "Deactivated";
 
 interface FleetBus {
   id: string;
-  licensePlate: string;
-  model: string;
+  plate_number: string;
+  side_no: string;
   status: BusStatus;
   capacity: number;
-  facilities: string[];
+
   seats: { row: number; col: number; available: boolean }[];
 }
 
 const initialBuses: FleetBus[] = [
   {
     id: "1",
-    licensePlate: "MH-12-AB-1234",
-    model: "Volvo 9400",
+    plate_number: "MH-12-AB-1234",
+    side_no: "S-001",
     status: "Active",
     capacity: 45,
-    facilities: ["AC", "WiFi", "USB Charging"],
+    // facilities: ["AC", "WiFi", "USB Charging"],
     seats: Array.from({ length: 45 }, (_, i) => ({
-      row: Math.floor(i / 4) + 1,
-      col: (i % 4) + 1,
-      available: true,
-    })),
-  },
-  {
-    id: "2",
-    licensePlate: "MH-12-CD-5678",
-    model: "Mercedes-Benz Travego",
-    status: "Active",
-    capacity: 50,
-    facilities: ["AC", "WiFi", "Entertainment"],
-    seats: Array.from({ length: 50 }, (_, i) => ({
-      row: Math.floor(i / 4) + 1,
-      col: (i % 4) + 1,
-      available: true,
-    })),
-  },
-  {
-    id: "3",
-    licensePlate: "MH-12-EF-9012",
-    model: "Scania Touring",
-    status: "Maintenance",
-    capacity: 48,
-    facilities: ["AC", "Reclining Seats"],
-    seats: Array.from({ length: 48 }, (_, i) => ({
-      row: Math.floor(i / 4) + 1,
-      col: (i % 4) + 1,
-      available: true,
-    })),
-  },
-  {
-    id: "4",
-    licensePlate: "MH-12-GH-3456",
-    model: "MAN Lion's Coach",
-    status: "Active",
-    capacity: 52,
-    facilities: ["AC", "WiFi", "USB Charging", "Entertainment"],
-    seats: Array.from({ length: 52 }, (_, i) => ({
       row: Math.floor(i / 4) + 1,
       col: (i % 4) + 1,
       available: true,
@@ -158,19 +121,18 @@ export default function OperatorPage() {
   const [addBusStep, setAddBusStep] = useState(1);
   const [isAssignTripOpen, setIsAssignTripOpen] = useState(false);
   const [busToAssign, setBusToAssign] = useState<string | null>(null);
+  const { user } = useAuth();
 
   // New bus form state
   const [newBus, setNewBus] = useState({
-    licensePlate: "",
-    model: "",
+    plate_number: "",
+    side_no: "",
     capacity: 45,
-    facilities: [] as string[],
+    // facilities: [] as string[],
   });
 
-  const filteredBuses = buses.filter(
-    (bus) =>
-      bus.licensePlate.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      bus.model.toLowerCase().includes(searchQuery.toLowerCase())
+  const filteredBuses = buses.filter((bus) =>
+    bus.plate_number.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const handleViewDetails = (bus: FleetBus) => {
@@ -194,7 +156,7 @@ export default function OperatorPage() {
     }
   };
 
-  const handleAddBus = () => {
+  const handleAddBus = async () => {
     const bus: FleetBus = {
       id: String(buses.length + 1),
       ...newBus,
@@ -208,7 +170,9 @@ export default function OperatorPage() {
     setBuses((prev) => [...prev, bus]);
     setIsAddBusOpen(false);
     setAddBusStep(1);
-    setNewBus({ licensePlate: "", model: "", capacity: 45, facilities: [] });
+
+    operatorApi.createBus(newBus, user?.id || "");
+    setNewBus({ plate_number: "", capacity: 45, side_no: "" });
   };
 
   const handleUpdateBus = (updatedBus: FleetBus) => {
@@ -241,15 +205,7 @@ export default function OperatorPage() {
       <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
         <div className="flex h-16 items-center gap-4 px-6">
           <SidebarTrigger />
-          <div className="flex flex-1 items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">
-                Fleet Management
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Manage your bus fleet operations
-              </p>
-            </div>
+          <div className="flex flex-1 flex-row-reverse">
             <Button onClick={() => setIsAddBusOpen(true)} className="gap-2">
               <Plus className="size-4" />
               Add New Bus
@@ -332,7 +288,7 @@ export default function OperatorPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>License Plate</TableHead>
-                  <TableHead>Model</TableHead>
+                  {/* <TableHead>Model</TableHead> */}
                   <TableHead>Status</TableHead>
                   <TableHead>Capacity</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
@@ -346,9 +302,9 @@ export default function OperatorPage() {
                     onClick={() => handleViewDetails(bus)}
                   >
                     <TableCell className="font-mono font-medium">
-                      {bus.licensePlate}
+                      {bus.plate_number}
                     </TableCell>
-                    <TableCell>{bus.model}</TableCell>
+                    {/* <TableCell>{bus.model}</TableCell> */}
                     <TableCell>
                       <Badge
                         variant="outline"
@@ -439,7 +395,6 @@ export default function OperatorPage() {
         </Card>
       </div>
 
-      {/* Bus Details Sheet */}
       <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
         <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
           {selectedBus && (
@@ -461,29 +416,17 @@ export default function OperatorPage() {
                       <Label htmlFor="license">License Plate</Label>
                       <Input
                         id="license"
-                        value={selectedBus.licensePlate}
+                        value={selectedBus.plate_number}
                         onChange={(e) =>
                           handleUpdateBus({
                             ...selectedBus,
-                            licensePlate: e.target.value,
+                            plate_number: e.target.value,
                           })
                         }
                         className="font-mono"
                       />
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="model">Model</Label>
-                      <Input
-                        id="model"
-                        value={selectedBus.model}
-                        onChange={(e) =>
-                          handleUpdateBus({
-                            ...selectedBus,
-                            model: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="status">Status</Label>
                       <Select
@@ -520,7 +463,7 @@ export default function OperatorPage() {
                         }
                       />
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label>Facilities</Label>
                       <div className="flex flex-wrap gap-2">
                         {selectedBus.facilities.map((facility, idx) => (
@@ -529,7 +472,7 @@ export default function OperatorPage() {
                           </Badge>
                         ))}
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </TabsContent>
                 <TabsContent value="seats" className="space-y-4">
@@ -576,9 +519,8 @@ export default function OperatorPage() {
         </SheetContent>
       </Sheet>
 
-      {/* Add Bus Dialog */}
       <Dialog open={isAddBusOpen} onOpenChange={setIsAddBusOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[500px] max-h-[92vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New Bus</DialogTitle>
             <DialogDescription>
@@ -589,31 +531,33 @@ export default function OperatorPage() {
             </DialogDescription>
           </DialogHeader>
           {addBusStep === 1 ? (
-            <div className="space-y-4 py-4">
+            <div className="flex-1 space-y-4 py-4 overflow-y-auto">
               <div className="space-y-2">
                 <Label htmlFor="new-license">License Plate</Label>
                 <Input
                   id="new-license"
                   placeholder="MH-12-XX-0000"
-                  value={newBus.licensePlate}
+                  value={newBus.plate_number}
                   onChange={(e) =>
-                    setNewBus({ ...newBus, licensePlate: e.target.value })
+                    setNewBus({ ...newBus, plate_number: e.target.value })
                   }
                   className="font-mono"
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="new-model">Model</Label>
+                <Label htmlFor="side-number">Side Number</Label>
                 <Input
-                  id="new-model"
-                  placeholder="e.g., Volvo 9400"
-                  value={newBus.model}
+                  id="side-number"
+                  placeholder="MH-12-XX-0000"
+                  value={newBus.side_no}
                   onChange={(e) =>
-                    setNewBus({ ...newBus, model: e.target.value })
+                    setNewBus({ ...newBus, side_no: e.target.value })
                   }
+                  className="font-mono"
                 />
               </div>
-              <div className="space-y-2">
+
+              {/* <div className="space-y-2">
                 <Label htmlFor="new-facilities">
                   Facilities (comma-separated)
                 </Label>
@@ -629,10 +573,10 @@ export default function OperatorPage() {
                     })
                   }
                 />
-              </div>
+              </div> */}
             </div>
           ) : (
-            <div className="space-y-4 py-4">
+            <div className="space-y-4 py-4 overflow-auto">
               <div className="space-y-2">
                 <Label htmlFor="new-capacity">Seating Capacity</Label>
                 <Input
@@ -692,7 +636,7 @@ export default function OperatorPage() {
             {addBusStep === 1 ? (
               <Button
                 onClick={() => setAddBusStep(2)}
-                disabled={!newBus.licensePlate || !newBus.model}
+                disabled={!newBus.plate_number}
               >
                 Next
               </Button>

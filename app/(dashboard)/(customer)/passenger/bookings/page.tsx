@@ -1,10 +1,10 @@
 "use client";
 
-import { MapPin, Calendar, Download } from "lucide-react";
+import { MapPin, Calendar, Download, MoreVertical } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Table,
   TableBody,
@@ -15,8 +15,21 @@ import {
 } from "@/components/ui/table";
 import { formatTime, handleSearch } from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
-import { Item, PopularRoute, SearchRouteResponse } from "@/lib/model";
+import {
+  Item,
+  PopularRoute,
+  SearchRouteResponse,
+  Trip,
+  TripData,
+} from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { TripDetailsModal } from "@/components/TripDetailModal";
 
 export default function BookingPage() {
   const searchParams = useSearchParams();
@@ -30,6 +43,28 @@ export default function BookingPage() {
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
   const [data, setData] = useState<Item[]>([]);
+
+  const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+
+  function isTrip(item: Item): item is Trip {
+    return "trip_id" in item;
+  }
+
+  const handleViewDetails = async (trip: Trip) => {
+    const response = await passengerApi.getTripDetails(trip.trip_id);
+
+    setSelectedTrip(response);
+    setIsModalOpen(true);
+  };
+
+  useEffect(() => {
+    handleSearch(form).then((res) => {
+      const data_ = res?.items || [];
+      setData(data_);
+      console.log(data_, "items from useEffect");
+    }); // for it fetch the data on load
+  }, []);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>
@@ -206,45 +241,123 @@ export default function BookingPage() {
           </CardContent>
         </Card>
       </div>
-      <div className="p-4">
-        {data.length === 0 ? (
-          <p className="text-center text-gray-500">No trips found</p>
-        ) : (
-          <Table className="mt-4 w-full border border-gray-200 rounded-lg shadow-sm overflow-hidden">
-            <TableHeader className="bg-gray-50">
-              <TableRow>
-                <TableHead>Bus Name</TableHead>
-                <TableHead>Departure</TableHead>
-                <TableHead>Duration</TableHead>
-                <TableHead>Arrival</TableHead>
-                <TableHead className="text-center">Fare</TableHead>
-                <TableHead className="text-center">Seat Available</TableHead>
-                <TableHead>Action</TableHead>
-              </TableRow>
-            </TableHeader>
+      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 p-8">
+        <div className="mx-auto max-w-7xl">
+          <div className="mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">
+              Available Trips
+            </h1>
+            <p className="mt-2 text-gray-600">
+              Select your preferred bus for your journey
+            </p>
+          </div>
 
-            <TableBody>
-              {data.map((route, index) => (
-                <TableRow key={index}>
-                  <TableCell>{route.operator.operator_name}</TableCell>
-                  <TableCell>{form.route_from}</TableCell>
-                  <TableCell>{form.route_to}</TableCell>
-                  <TableCell>{formatTime(route.departure_at)}</TableCell>
-                  <TableCell className="text-center">
-                    {route.price} Birr
-                  </TableCell>
-                  <TableCell className="text-center">0</TableCell>
-                  <TableCell>
-                    <Button className="bg-teal-600 hover:bg-teal-700 text-white">
-                      Book Now
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        )}
+          {data.length === 0 ? (
+            <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+              <p className="text-gray-500">No trips found</p>
+            </div>
+          ) : (
+            <div className="overflow-hidden rounded-xl bg-white shadow-lg">
+              <Table>
+                <TableHeader className="">
+                  <TableRow className="border border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50 hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50">
+                    <TableHead className="font-semibold text-gray-900">
+                      Bus Name
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-900">
+                      Departure
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-900">
+                      Arrival
+                    </TableHead>
+                    <TableHead className="font-semibold text-gray-900">
+                      Duration
+                    </TableHead>
+                    <TableHead className="text-right font-semibold text-gray-900">
+                      Fare
+                    </TableHead>
+                    <TableHead className="text-center font-semibold text-gray-900">
+                      Seats
+                    </TableHead>
+                    <TableHead className="text-center font-semibold text-gray-900">
+                      Action
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {data.map((route, index) => (
+                    <TableRow
+                      key={index}
+                      className="border-b  border-gray-100 transition-colors hover:bg-teal-50/50"
+                    >
+                      <TableCell className="py-4 font-medium text-gray-900">
+                        {route.operator.operator_name}
+                      </TableCell>
+                      <TableCell className="py-4 text-gray-700">
+                        {form.route_from}
+                      </TableCell>
+                      <TableCell className="py-4 text-gray-700">
+                        {form.route_to}
+                      </TableCell>
+                      <TableCell className="py-4 text-gray-700">
+                        {formatTime(route.departure_at)}
+                      </TableCell>
+                      <TableCell className="py-4 text-right font-semibold text-teal-600">
+                        {route.price} Birr
+                      </TableCell>
+                      <TableCell className="py-4 text-center">
+                        <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
+                          12 Available
+                        </span>
+                      </TableCell>
+                      <TableCell className="py-4 ">
+                        <div className="flex justify-center">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-8 w-8 p-0 hover:bg-teal-100"
+                              >
+                                <MoreVertical className="h-6 w-6 text-gray-600" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem className="cursor-pointer">
+                                Book Now
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                className="cursor-pointer "
+                                onClick={() => {
+                                  if (isTrip(route)) {
+                                    handleViewDetails(route);
+                                  }
+                                }}
+                              >
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="cursor-pointer">
+                                Check Seats
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
       </div>
+      <TripDetailsModal
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        tripData={selectedTrip}
+      />
     </div>
   );
 }
