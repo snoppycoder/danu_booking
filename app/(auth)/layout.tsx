@@ -2,6 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 
 import "@/app/globals.css";
+import { AuthProvider } from "@/lib/authContext";
 
 export const metadata: Metadata = {
   title: "Danu Booking - Book Your Bus Tickets Online",
@@ -35,7 +36,9 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <main>{children}</main>
+        <AuthProvider blackListRoles={[]}>
+          <main>{children}</main>
+        </AuthProvider>
       </body>
     </html>
   );

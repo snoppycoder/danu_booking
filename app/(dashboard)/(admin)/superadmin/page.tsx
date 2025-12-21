@@ -1,5 +1,5 @@
 import Charts from "@/components/charts";
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/SuperAdminSideBar";
 
 import StatCards from "@/components/stat-card";
 

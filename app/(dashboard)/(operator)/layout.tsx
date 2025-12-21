@@ -3,6 +3,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "@/app/globals.css";
 import Navbar from "@/components/navbar";
+import { SidebarProvider } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/OperatorSidebar";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -40,7 +42,12 @@ export default function DashboardLayout({
     <html lang="en">
       <body className={`font-sans antialiased`}>
         {/* <Navbar initalPath={[]} /> */}
-        <main>{children}</main>
+        <SidebarProvider>
+          <div className="flex min-h-screen w-full">
+            <AppSidebar />
+            <main className="flex-1">{children}</main>
+          </div>
+        </SidebarProvider>
       </body>
     </html>
   );

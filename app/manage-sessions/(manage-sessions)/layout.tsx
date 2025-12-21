@@ -6,7 +6,7 @@ import "@/app/globals.css";
 import Navbar from "@/components/navbar";
 import { AuthProtector } from "@/lib/authProtector";
 import { AuthProvider, useAuth } from "@/lib/authContext";
-import Sidebar from "@/components/sidebar";
+import Sidebar from "@/components/SuperAdminSideBar";
 import QueryProvider from "@/components/QueryProvide";
 
 export default function DashboardLayout({

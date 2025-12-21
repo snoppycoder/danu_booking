@@ -23,6 +23,17 @@ export interface AddUserForm {
   password: string;
   email: string;
 }
+export interface Agent {
+  id?: string;
+  name: string;
+  contact_email: string;
+  contact_phone: string;
+  slug: string;
+  created_at?: string;
+  updated_at?: string;
+  // type: string;
+}
+
 export interface Operator {
   id: string;
   name: string;
@@ -32,6 +43,24 @@ export interface Operator {
   created_at: string;
   updated_at: string;
   // type: string;
+}
+export interface LoginResponse {
+  access_token: string;
+  refresh_token: string;
+  refresh_expires_at: string;
+  session_id: string;
+  access_expires_at: string;
+  csrf_token: string;
+  user_info: User;
+}
+interface Address {
+  country: string;
+  region: string;
+  city: string;
+  sub_city: string;
+  woreda: string;
+  kebele: string;
+  house_number: string;
 }
 export interface User {
   sub: string;
@@ -46,4 +75,85 @@ export interface User {
   email_verified: boolean;
   is_disabled: boolean;
   is_active: boolean;
+  display_name: string;
+  dob: string;
+  gender: string;
+  avatar_file_id: string;
+  bio: string;
+  address: Address;
+}
+export interface Bus {
+  id: string;
+  operator_id: string;
+  plate_no: string;
+  side_no: string;
+  capacity: number;
+  created_at: string;
+  updated_at: string;
+}
+export interface Driver {
+  id: string;
+  operator_id: string;
+  first_name: string;
+  last_name: string;
+  license_no: string;
+  created_at: string;
+  updated_at: string;
+}
+export interface Route {
+  route_id: string;
+  operator: {
+    operator_id: string;
+    operator_name: string;
+  };
+  bus: Bus;
+  driver: Driver;
+  departure_at: string;
+  price: 0;
+  created_at: string;
+  updated_at: string;
+}
+export interface Trip {
+  trip_id: string;
+  operator: {
+    operator_id: string;
+    operator_name: string;
+  };
+  departure_at: string;
+  price: number;
+  created_at: string;
+  updated_at: string;
+}
+export type Item = Trip | Route;
+
+export interface SearchRouteResponse {
+  route_from: string;
+  route_to: string;
+  // items: Item[
+  //   {
+  //     route_id: string;
+  //     operator: Operator;
+  //     bus: Bus;
+  //     driver: Driver;
+  //     departure_at: string;
+  //     price: 0;
+  //     created_at: string;
+  //     updated_at: string;
+  //   },
+  //   {
+  //     trip_id: string;
+  //     operator: {
+  //       operator_id: string;
+  //       operator_name: string;
+  //     };
+  //     departure_at: string;
+  //     price: number;
+  //     created_at: string;
+  //     updated_at: string;
+  //   }
+  // ];
+  total: number;
+  page: number;
+  items: Item[];
+  per_page: number;
 }

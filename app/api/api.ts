@@ -9,8 +9,18 @@ import {
   setAccessToken,
   setAuthCookies,
 } from "@/lib/auth";
-import { AddOperatorForm, AddUserForm } from "@/lib/model";
-import axios from "axios";
+import {
+  AddOperatorForm,
+  AddUserForm,
+  Agent,
+  LoginResponse,
+} from "@/lib/model";
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  isAxiosError,
+} from "axios";
 
 const api = axios.create({
   baseURL: "/api/proxy",
@@ -34,46 +44,126 @@ const refreshApi = axios.create({
     Accept: "application/json",
   },
 }); // THIS IS TO AVOID INFINITE REFRESH LOOP
+
+// api.interceptors.response.use(
+//   (response) => response,
+//   async (error) => {
+//     const originalRequest = error.config;
+
+//     if (
+//       error.response?.status === 401 &&
+//       !originalRequest._retry &&
+//       !originalRequest.url?.includes("/auth/refresh") &&
+//       error.response?.data?.detail !== "Invalid credentials "
+//     ) {
+//       originalRequest._retry = true;
+//       console.log("401 INTERCEPTOR");
+
+//       const refreshToken = await getRefreshToken();
+
+//       if (!refreshToken) {
+//         return Promise.reject(error);
+//       }
+
+//       try {
+//         const { data } = await refreshApi.post("/auth/refresh", {
+//           refresh_token: refreshToken,
+//         });
+//         originalRequest.headers = {
+//           ...originalRequest.headers,
+//           Authorization: `Bearer ${data.access_token}`,
+//         };
+
+//         await setAccessToken(data.access_token, data.access_expiry);
+
+//         return api(originalRequest); // retry original request
+//       } catch (refreshError) {
+//         if (AxiosError.isError(refreshError)){
+//           refreshError.da
+//         }
+//         // window.location.href = "/login";
+//         console.log(refreshError, "here is the error");
+//         return Promise.reject(refreshError);
+//       }
+//     }
+
+//     return Promise.reject(error);
+//   }
+// );
+
+// 409 interceptor
 api.interceptors.response.use(
   (response) => response,
-  async (error) => {
+  (error) => {
     const originalRequest = error.config;
 
-    if (
-      error.response?.status === 401 &&
-      !originalRequest._retry &&
-      !originalRequest.url?.includes("/auth/refresh") &&
-      error.response?.data?.detail !== "Invalid credentials "
-    ) {
-      originalRequest._retry = true;
+    if (error.response) {
+      const status = error.response.status;
+      const data = error.response.data;
+      const code = data.code;
 
-      const refreshToken = await getRefreshToken();
-      console.log(refreshToken, "token refreshed");
+      if (status === 401) {
+        switch (code) {
+          case "CSRF_MISSING":
+          case "CSRF_INVALID":
+            // Retry once if not already retried
+            if (!originalRequest._retry) {
+              originalRequest._retry = true;
+              return api(originalRequest);
+            }
+            // If retry fails, force re-login
+            console.error(`${code}: Forcing re-login`);
+            window.location.href = "/login";
+            break;
 
-      if (!refreshToken) {
-        return Promise.reject(error);
-      }
+          case "CSRF_EXPIRED":
+            console.error("CSRF Token expired");
+            window.location.href = "/login";
+            break;
 
-      try {
-        const { data } = await refreshApi.post("/auth/refresh", {
-          refresh_token: refreshToken,
-        });
-        originalRequest.headers = {
-          ...originalRequest.headers,
-          Authorization: `Bearer ${data.access_token}`,
-        };
-        console.log(data, "entered");
+          case "REFRESH_REUSED":
+            console.error("Refresh token reuse detected — security warning");
+            // Optionally show an alert to the user
+            alert(
+              "Security alert: Your session was used from another location. Please log in again."
+            );
+            window.location.href = "/login";
+            break;
 
-        await setAccessToken(data.access_token, data.access_expiry);
+          case "REFRESH_EXPIRED":
+            console.error("Refresh token expired");
+            window.location.href = "/login";
+            break;
 
-        return api(originalRequest); // retry original request
-      } catch (refreshError) {
-        window.location.href = "/login";
-        console.log(refreshError, "here is the error");
-        return Promise.reject(refreshError);
+          case "REFRESH_INVALID":
+            console.error("Refresh token invalid");
+            window.location.href = "/login";
+            break;
+
+          case "SESSION_INVALID":
+            console.error("Session invalid — clearing UI state");
+            // Clear session from UI/local storage
+            localStorage.removeItem("session");
+            sessionStorage.clear();
+            window.location.href = "/login";
+            break;
+
+          case "USER_NOT_FOUND":
+            console.error("User not found — clearing auth state");
+            localStorage.clear();
+            sessionStorage.clear();
+            window.location.href = "/login";
+            break;
+
+          default:
+            console.error("Unhandled 401 error:", data);
+            throw Error();
+        }
+      } else {
+        console.error(`HTTP ${status} error:`, data);
       }
     } else {
-      window.location.href = "/login";
+      console.error("Network or unknown error:", error.message);
     }
 
     return Promise.reject(error);
@@ -110,14 +200,17 @@ export const authAPI = {
     remember: boolean
     // portal: string
   ) => {
-    const response = await api.post("/auth/login", {
-      identifier,
-      password,
-      remember,
-      // portal,
-    });
-    console.log(response);
-    return response.data;
+    try {
+      const response = await api.post("/auth/login", {
+        identifier,
+        password,
+        remember,
+        // portal,
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+    }
   },
   logout: async () => {
     try {
@@ -208,6 +301,7 @@ export const superAdminApi = {
     const response = await api.post(
       `/admin/operators/${operatorId}/users/${userId}`
     );
+    // console.log(response);
     return response.data;
   },
   unassignOperatorToUser: async (operatorId: string, userId: string) => {
@@ -231,6 +325,55 @@ export const superAdminApi = {
   },
   enableUser: async (id: string) => {
     const response = await api.post(`/admin/users/${id}/enable`);
+    return response.data;
+  },
+  /**
+   * This is the Agent operation below
+   */
+  getAgents: async () => {
+    const response = await api.get("/admin/agents");
+
+    return response.data;
+  },
+  addAgent: async (body: Agent) => {
+    const response = await api.post("/admin/agents", body);
+    return response.data;
+  },
+  deleteAgent: async (id: string) => {
+    const response = await api.delete(`/admin/agents/${id}`);
+    console.log(response.data);
+    return response.data;
+  },
+};
+export const passengerApi = {
+  searchRoute: async (body: {
+    route_from: string;
+    route_to: string;
+    departure_date: string;
+  }) => {
+    const response = await api.get("/passenger/search", {
+      params: {
+        route_from: body.route_from,
+        route_to: body.route_to,
+        departure_date: body.departure_date,
+      },
+    });
+    console.log(response.data);
+    return response.data;
+  },
+};
+export const profileApi = {
+  deleteAccount: async (password: string, anonymize = false) => {
+    const response = await api.delete("/user/me", {
+      data: { password, anonymize },
+    });
+    return response.data;
+  },
+  changePassword: async (old_password: string, new_password: string) => {
+    const response = await api.put("/user/me/change-password", {
+      old_password,
+      new_password,
+    });
     return response.data;
   },
 };

@@ -29,6 +29,7 @@ import { Session } from "@/lib/model";
 import { useSession } from "@/components/Query";
 import { sessionMgmt } from "@/app/api/api";
 import { useRouter } from "next/navigation";
+import { formatTime } from "@/lib/common_functions";
 
 export default function SessionManager() {
   const { data = [], isLoading, refetch } = useSession();
@@ -81,13 +82,6 @@ export default function SessionManager() {
       </div>
     );
   }
-  const formatTime = (date: string) => {
-    return new Date(date).toLocaleDateString("en-US", {
-      month: "short", // Jan, Feb, Mar...
-      day: "2-digit", // 01, 02, ...
-      year: "numeric",
-    });
-  };
 
   return (
     <div className="relative inset-0 w-full mx-auto p-2 md:p-12">

@@ -32,13 +32,12 @@ export default function Sidebar() {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
-  // console.log(user, "user");
 
   const menuItems = [
     { icon: Zap, label: "Dashboard", href: "/superadmin" },
     { icon: BarChart3, label: "Driver Dashboard", href: "/superadmin/driver" },
     { icon: Briefcase, label: "Ticket Booking", href: "/ticket-booking" },
-    { icon: Users, label: "Agent", href: "/agent" },
+    { icon: Users, label: "Agent", href: "/superadmin/agent" },
     { icon: Settings, label: "Account", href: "/account" },
     {
       icon: Users,
@@ -104,7 +103,7 @@ export default function Sidebar() {
       >
         <div className="flex flex-1 flex-col gap-y-3 p-2 ">
           <div className="w-full flex gap-x-2.5 my-4 md:mb-5">
-            <span className="font-bold text-xl">Danu Booking</span>
+            <span className="font-bold text-2xl">Danu Booking</span>
           </div>
 
           {menuItems.map((link) => {
@@ -124,7 +123,7 @@ export default function Sidebar() {
                       ${
                         isActive
                           ? "bg-primary text-white"
-                          : " hover:bg-primary/90"
+                          : " hover:bg-primary/90 hover:text-white"
                       }`}
                   >
                     <link.icon size={20} />
@@ -142,8 +141,10 @@ export default function Sidebar() {
                         <Link
                           key={sub.label}
                           href={sub.href}
-                          className={`px-3 py-2 rounded-xl text-gray-500 hover:bg-primary/30 hover:text-white ${
-                            pathname === sub.href ? "bg-primary text-white" : ""
+                          className={`px-3 py-2 rounded-xl text-gray-500  ${
+                            pathname === sub.href
+                              ? "bg-primary text-white"
+                              : "text-gray-500 hover:bg-gray-100"
                           }`}
                         >
                           {sub.label}

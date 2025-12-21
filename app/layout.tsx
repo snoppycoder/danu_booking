@@ -1,14 +1,10 @@
 import type React from "react";
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
 
 import "@/app/globals.css";
 
-const _geist = Geist({ subsets: ["latin"] });
-const _geistMono = Geist_Mono({ subsets: ["latin"] });
-
 export const metadata: Metadata = {
-  title: "Danu Booking - Book Your Bus Tickets Online",
+  title: "Danu Booking - Intercity Bus Ticket Management System",
   description:
     "Book your bus tickets online with Danu Booking. Easy, fast, and reliable bus reservations for your journey.",
 
@@ -38,10 +34,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>
-        {children}
-        {/* <Analytics /> */}
-      </body>
+      <body className={`font-sans antialiased`}>{children}</body>
     </html>
   );
 }

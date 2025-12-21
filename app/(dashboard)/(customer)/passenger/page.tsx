@@ -5,15 +5,23 @@ import { MapPin, Calendar, ArrowRight, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Toaster, toast } from "sonner";
-import { handleSearch } from "@/lib/handleSearch";
+
 import { useAuth } from "@/lib/authContext";
+import { SearchRouteResponse } from "@/lib/model";
+import { passengerApi } from "@/app/api/api";
+import { handleSearch } from "@/lib/common_functions";
+import { useRouter } from "next/navigation";
 export default function DanuBooking() {
-  const [fromLocation, setFromLocation] = useState("");
-  const [toLocation, setToLocation] = useState("");
+  const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
-  const [departDate, setDepartDate] = useState<string>(today);
+  // const [departDate, setDepartDate] = useState<string>(today);
   const [returnDate, setReturnDate] = useState(today);
   const { user } = useAuth();
+  const [form, setForm] = useState({
+    route_from: "",
+    route_to: "",
+    departure_date: "",
+  });
 
   const trips = [
     {
@@ -56,6 +64,19 @@ export default function DanuBooking() {
     },
   ];
 
+  async function handleSubmit(
+    event: React.FormEvent<HTMLFormElement>
+  ): Promise<void> {
+    event.preventDefault();
+    if (!form.departure_date || !form.route_from || !form.route_to) {
+      toast.error("Please enter all necessary inputs");
+      return;
+    }
+    router.push(
+      `/passenger/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`
+    );
+  }
+
   return (
     <div className="w-full">
       <Toaster richColors position="top-right"></Toaster>
@@ -74,54 +95,61 @@ export default function DanuBooking() {
           </button> */}
 
           {/* Search Form */}
-          <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
-            <div className="flex-1 min-w-0">
-              <label className="block text-sm text-gray-600 mb-2 text-left">
-                From
-              </label>
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Departure City"
-                  value={fromLocation}
-                  onChange={(e) => setFromLocation(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
-                />
+          <form onSubmit={handleSubmit}>
+            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex-1 min-w-0">
+                <label className="block text-sm text-gray-600 mb-2 text-left">
+                  From
+                </label>
+                <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
+                  <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Departure City"
+                    value={form.route_from}
+                    onChange={(e) =>
+                      setForm({ ...form, route_from: e.target.value })
+                    }
+                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+                  />
+                </div>
               </div>
-            </div>
-            <div className="flex-1 min-w-0">
-              <label className="block text-sm text-gray-600 mb-2 text-left">
-                To
-              </label>
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0" />
-                <input
-                  type="text"
-                  placeholder="Destination City"
-                  value={toLocation}
-                  onChange={(e) => setToLocation(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
-                />
+              <div className="flex-1 min-w-0">
+                <label className="block text-sm text-gray-600 mb-2 text-left">
+                  To
+                </label>
+                <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
+                  <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0" />
+                  <input
+                    type="text"
+                    placeholder="Destination City"
+                    value={form.route_to}
+                    onChange={(e) =>
+                      setForm({ ...form, route_to: e.target.value })
+                    }
+                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+                  />
+                </div>
               </div>
-            </div>
 
-            <div className="flex-1 min-w-0">
-              <label className="block text-sm text-gray-600 mb-2 text-left">
-                Depart
-              </label>
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                {/* <Calendar className="w-5 h-5 text-teal-600 flex-shrink-0" /> */}
-                <input
-                  type="date"
-                  value={departDate}
-                  onChange={(e) => setDepartDate(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
-                />
+              <div className="flex-1 min-w-0">
+                <label className="block text-sm text-gray-600 mb-2 text-left">
+                  Depart
+                </label>
+                <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
+                  {/* <Calendar className="w-5 h-5 text-teal-600 flex-shrink-0" /> */}
+                  <input
+                    type="date"
+                    value={form.departure_date}
+                    onChange={(e) =>
+                      setForm({ ...form, departure_date: e.target.value })
+                    }
+                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+                  />
+                </div>
               </div>
-            </div>
 
-            {/* <div className="flex-1 min-w-0">
+              {/* <div className="flex-1 min-w-0">
               <label className="block text-sm text-gray-600 mb-2 text-left">
                 Return date (Optional)
               </label>
@@ -136,13 +164,11 @@ export default function DanuBooking() {
               </div>
             </div> */}
 
-            <Button
-              onClick={handleSearch}
-              className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors whitespace-nowrap"
-            >
-              Find Tickets
-            </Button>
-          </div>
+              <Button className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors whitespace-nowrap">
+                Find Tickets
+              </Button>
+            </div>
+          </form>
         </div>
       </section>
 

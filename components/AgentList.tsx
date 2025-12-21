@@ -50,10 +50,11 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import InfoRow from "./InfoRow";
-import { useOperator, useUsers } from "./Query";
+import { useAgent, useOperator, useUsers } from "./Query";
 import axios from "axios";
+import { AddAgentModal } from "./AddAgentModal";
 
-export default function OperatorList() {
+export default function AgentList() {
   const [displayCount, setDisplayCount] = useState("10");
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
@@ -63,8 +64,7 @@ export default function OperatorList() {
   const [detailToggle, setDetailToggle] = useState(false);
   const [detail, setDetail] = useState<Operator>();
   const [spinning, setSpinning] = useState<boolean>(false);
-  const { data, isLoading, refetch } = useOperator();
-  const { data: users, ...rest } = useUsers();
+  const { data, isLoading, refetch } = useAgent();
 
   const filteredOperators = data?.filter(
     (emp) =>
@@ -81,11 +81,22 @@ export default function OperatorList() {
   }
 
   async function handleDelete(id: string) {
-    const response = await superAdminApi.deleteOperator(id);
+    try {
+      const response = await superAdminApi.deleteAgent(id);
 
-    if (response) {
-      await refetch();
-      toast.success("Operator deleted");
+      if (response) {
+        await refetch();
+        toast.success("Agent deleted");
+      }
+    } catch (error) {
+      if (axios.isAxiosError(error)) {
+        if (error.status == 404) {
+          toast.warning(
+            error.response?.data.detail || "The agent doesn't exist "
+          );
+          return;
+        }
+      }
     }
   }
   function dateformatter(date: Date) {
@@ -107,13 +118,13 @@ export default function OperatorList() {
       metadata: {
         exported_at: new Date().toISOString(),
         total_operators: filteredOperators?.length,
-        source: "Operator Management System",
+        source: "Agent Management System",
       },
       operators: filteredOperators,
     };
 
     await navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
-    toast.success(`Copied ${filteredOperators.length} operators`);
+    toast.success(`Copied ${filteredOperators.length} agents`);
   }
   if (isLoading) {
     return (
@@ -150,14 +161,14 @@ export default function OperatorList() {
     <div className="relative space-y-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between">
         <h1 className="text-3xl font-bold text-center md:text-left text-foreground mb-5 md:md-auto ">
-          Operator List
+          Agent List
         </h1>
-        <AddOperatorModal onSuccess={refetch} />
+        <AddAgentModal onSuccess={refetch} />
       </div>
-      <Dialog open={open} onOpenChange={setOpen}>
+      {/* <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>User List</DialogTitle>
+            <DialogTitle>Agent List</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-2 mt-4">
@@ -184,7 +195,7 @@ export default function OperatorList() {
             ))}
           </div>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
 
       <Dialog open={detailToggle} onOpenChange={setDetailToggle}>
         <DialogOverlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
@@ -278,7 +289,7 @@ export default function OperatorList() {
           {/* Search */}
           <div className="max-w-xs w-full">
             <Input
-              placeholder="Search operators..."
+              placeholder="Search agents..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
             />
@@ -288,7 +299,7 @@ export default function OperatorList() {
         {/* Table */}
         {data?.length === 0 ? (
           <p className="text-muted-foreground text-center py-10">
-            No operators registered.
+            No Agent registered.
           </p>
         ) : (
           <div className="overflow-x-auto border border-border rounded-lg">
@@ -311,26 +322,6 @@ export default function OperatorList() {
                     <TableCell>{op.contact_phone}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex gap-2 justify-center">
-                        <div className="relative inline-block group">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-black p-2 flex items-center gap-1"
-                            onClick={() => {
-                              setOperatorId(op.id);
-                              setOpen(true);
-                            }}
-                          >
-                            Assign
-                            <CircleQuestionMark className="text-blue-600 cursor-pointer" />
-                          </Button>
-
-                          <pre className="z-90 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 rounded bg-gray-700 px-3 py-1 max-w-xs text-white text-xs text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words pointer-events-none shadow-lg">
-                            This will enable you to assign {`\n`} a user to this
-                            operator
-                          </pre>
-                        </div>
-
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -339,22 +330,23 @@ export default function OperatorList() {
                           </DropdownMenuTrigger>
 
                           <DropdownMenuContent align="end">
-                            <DropdownMenuItem
+                            {/* <DropdownMenuItem
                               onClick={() => handleViewDetail(op.id)}
                             >
                               View
-                            </DropdownMenuItem>
+                            </DropdownMenuItem> */}
                             <DropdownMenuItem
-                              onClick={() => console.log(op.id)}
-                            >
-                              Unassign
-                            </DropdownMenuItem>
-
-                            <DropdownMenuItem
-                              onClick={() => handleDelete(op.id)}
+                              onClick={() => handleDelete(op.id!)}
+                              className="text-red-400"
                             >
                               Delete
                             </DropdownMenuItem>
+
+                            {/* <DropdownMenuItem
+                              onClick={() => handleDelete(op.id)}
+                            >
+                              Delete
+                            </DropdownMenuItem> */}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

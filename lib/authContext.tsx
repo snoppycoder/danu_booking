@@ -8,11 +8,18 @@ import {
 } from "react";
 import { decodeJWT, getAccessToken } from "./auth";
 import { useRouter } from "next/navigation";
-import { User } from "./model";
+import { LoginResponse, User } from "./model";
+import { authAPI } from "@/app/api/api";
+import { usePathname } from "next/navigation";
 
 interface AuthContextType {
   user: User | null;
-  setUser: (user: User) => void;
+  setUser: React.Dispatch<React.SetStateAction<User | null>>;
+  login: (
+    identifier: string,
+    password: string,
+    remember: boolean
+  ) => Promise<LoginResponse>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -24,31 +31,39 @@ export const AuthProvider = ({
   children: ReactNode;
   blackListRoles: string[];
 }) => {
+  const path = usePathname();
   const [user, setUser] = useState<User | null>(null);
-  const router = useRouter();
+
   useEffect(() => {
-    const fetch = async () => {
-      const token = (await getAccessToken()) || "";
-      const usr = await decodeJWT(token);
-      if (token) {
-        try {
-          //   const payload = JSON.parse(atob(token.split(".")[1])); // decode JWT payload
-          if (blackListRoles.includes(usr.roles[0])) {
-            router.replace("/unauthorized");
-            return;
-          }
-          setUser(usr);
-        } catch (err) {
-          console.error("Invalid token");
-          setUser(null);
-        }
-      }
-    };
-    fetch();
+    if (!(path == "/login")) {
+      const fetchCurrUser = async () => {
+        const response = (await authAPI.whoAmI()) as User;
+        setUser(response);
+      };
+      fetchCurrUser();
+    }
   }, []);
 
+  const login = async (
+    identifier: string,
+    password: string,
+    remember: boolean
+  ) => {
+    try {
+      const response = await authAPI.login(identifier, password, remember);
+
+      setUser(response.user_info);
+
+      return response;
+    } catch (error) {
+      setUser(null);
+      console.log(error);
+      throw error;
+    }
+  };
+
   return (
-    <AuthContext.Provider value={{ user, setUser }}>
+    <AuthContext.Provider value={{ user, setUser, login }}>
       {children}
     </AuthContext.Provider>
   );
