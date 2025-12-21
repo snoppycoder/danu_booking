@@ -148,10 +148,6 @@ export interface Trip {
 }
 export type Item = Trip | Route;
 
-export interface ItemTrip extends Item {
-  trip_id: string;
-}
-
 export interface SearchRouteResponse {
   route_from: string;
   route_to: string;
