@@ -361,6 +361,24 @@ export const passengerApi = {
     console.log(response.data);
     return response.data;
   },
+  autoComplete: async (
+    query: string,
+    type: "origin" | "destination" | "all" = "all"
+  ) => {
+    if (query.length < 2) return [];
+    const response = await api.get("/passenger/routes/autocomplete", {
+      params: {
+        q: query,
+        type: type,
+        limit: 5,
+      },
+    });
+    return response.data.routes;
+  },
+  getPopularRoutes: async () => {
+    const response = await api.get("/passenger/routes/popular");
+    return response.data.routes;
+  },
 };
 export const profileApi = {
   deleteAccount: async (password: string, anonymize = false) => {

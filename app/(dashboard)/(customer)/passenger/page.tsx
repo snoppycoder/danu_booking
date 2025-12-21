@@ -1,69 +1,65 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapPin, Calendar, ArrowRight, Star } from "lucide-react";
+import { MapPin, Calendar, ArrowRight, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Toaster, toast } from "sonner";
 
 import { useAuth } from "@/lib/authContext";
-import { SearchRouteResponse } from "@/lib/model";
-import { passengerApi } from "@/app/api/api";
+import {
+  PopularRoute,
+  PopularRoutesResponse,
+  SearchRouteResponse,
+} from "@/lib/model";
+import api, { passengerApi } from "@/app/api/api";
 import { handleSearch } from "@/lib/common_functions";
 import { useRouter } from "next/navigation";
+import { Card } from "@/components/ui/card";
 export default function DanuBooking() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
-  // const [departDate, setDepartDate] = useState<string>(today);
-  const [returnDate, setReturnDate] = useState(today);
-  const { user } = useAuth();
+
+  const [suggestionsFrom, setSuggestionsFrom] = useState([]);
+  const [suggestionsTo, setSuggestionsTo] = useState([]);
+  const [showDropdownFrom, setShowDropdownFrom] = useState(false);
+  const [showDropdownTo, setShowDropdownTo] = useState(false);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [popularRoutes, setPopularRoutes] = useState<PopularRoute[]>();
+
   const [form, setForm] = useState({
     route_from: "",
     route_to: "",
-    departure_date: "",
+    departure_date: today,
   });
+  useEffect(() => {
+    // Fetch popular routes from your backend
+    const fetchPopularRoutes = async () => {
+      try {
+        const response = await passengerApi.getPopularRoutes();
 
-  const trips = [
-    {
-      route: "COX'S BAZAR – RANGPUR",
-      price: "BDT 700",
-      color: "bg-gradient-to-br from-teal-600 to-teal-700",
-    },
-    {
-      route: "DHAKA – RANGPUR",
-      price: "BDT 800",
-      color: "bg-gradient-to-br from-teal-500 to-teal-600",
-    },
-    {
-      route: "RANGPUR – COMILLA",
-      price: "BDT 1200",
-      color: "bg-gradient-to-br from-teal-600 to-teal-700",
-    },
-    {
-      route: "COMILLA – RANGPUR",
-      price: "BDT 1300",
-      color: "bg-gradient-to-br from-teal-500 to-teal-600",
-    },
-  ];
+        setPopularRoutes(response.slice(0, 6)); // Show top 6 routes
+      } catch (error) {
+        console.error(error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const testimonials = [
-    {
-      name: "Sarah Ahmed",
-      role: "Frequent Traveler",
-      text: "Best bus booking experience ever. The app is so easy to use!",
-    },
-    {
-      name: "Mohammad Khan",
-      role: "Business Commuter",
-      text: "Reliable, comfortable, and great customer service. Highly recommended!",
-    },
-    {
-      name: "Fatima Hassan",
-      role: "Student",
-      text: "Affordable prices and comfortable seats. Will definitely book again!",
-    },
-  ];
+    fetchPopularRoutes();
+  }, []);
 
+
+  const handleRouteSelect = (route: PopularRoute) => {
+    if (!route) return;
+    setForm({
+      ...form,
+      route_from: route.route_from,
+      route_to: route.route_to,
+    });
+    // Scroll to booking form
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
   async function handleSubmit(
     event: React.FormEvent<HTMLFormElement>
   ): Promise<void> {
@@ -75,6 +71,43 @@ export default function DanuBooking() {
     router.push(
       `/passenger/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`
     );
+  }
+  const handleSelectFromCity = (city: string) => {
+    setForm({ ...form, route_from: city });
+    setShowDropdownFrom(false);
+    setSuggestionsFrom([]);
+  };
+  const handleSelectToCity = (city: string) => {
+    setForm({ ...form, route_to: city });
+    setShowDropdownTo(false);
+    setSuggestionsTo([]);
+  };
+
+  function handleAutoCompleteFrom(value: string) {
+    try {
+      setTimeout(async () => {
+        const response = await passengerApi.autoComplete(value, "origin");
+
+        setSuggestionsFrom(response);
+        setShowDropdownFrom(true);
+        console.log(response);
+      }, 300);
+    } catch (error) {
+      console.error("Auto complete error:", error);
+    }
+  }
+  function handleAutoCompleteTo(value: string) {
+    try {
+      setTimeout(async () => {
+        const response = await passengerApi.autoComplete(value, "destination");
+
+        setSuggestionsTo(response);
+        setShowDropdownTo(true);
+        console.log(response);
+      }, 200);
+    } catch (error) {
+      console.error("Auto complete error:", error);
+    }
   }
 
   return (
@@ -90,90 +123,171 @@ export default function DanuBooking() {
             Choose Your Destinations And Dates To Reserve A Ticket
           </p>
 
-          {/* <s-aj className="bg-coral-500 hover:bg-coral-600 text-white font-semibold px-8 py-3 rounded transition-colors mb-12">
-            Book Now!
-          </button> */}
-
-          {/* Search Form */}
           <form onSubmit={handleSubmit}>
-            <div className="bg-white rounded-lg shadow-xl p-4 sm:p-6 max-w-4xl mx-auto flex flex-col sm:flex-row items-center gap-4">
-              <div className="flex-1 min-w-0">
-                <label className="block text-sm text-gray-600 mb-2 text-left">
-                  From
-                </label>
-                <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                  <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Departure City"
-                    value={form.route_from}
-                    onChange={(e) =>
-                      setForm({ ...form, route_from: e.target.value })
-                    }
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
-                  />
-                </div>
-              </div>
-              <div className="flex-1 min-w-0">
-                <label className="block text-sm text-gray-600 mb-2 text-left">
-                  To
-                </label>
-                <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                  <MapPin className="w-4 h-4 text-teal-600 flex-shrink-0" />
-                  <input
-                    type="text"
-                    placeholder="Destination City"
-                    value={form.route_to}
-                    onChange={(e) =>
-                      setForm({ ...form, route_to: e.target.value })
-                    }
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
-                  />
-                </div>
-              </div>
+            <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    From
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
 
-              <div className="flex-1 min-w-0">
-                <label className="block text-sm text-gray-600 mb-2 text-left">
-                  Depart
-                </label>
-                <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                  {/* <Calendar className="w-5 h-5 text-teal-600 flex-shrink-0" /> */}
+                    <input
+                      type="text"
+                      placeholder="Departure City"
+                      value={form.route_from}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        setForm({ ...form, route_from: value });
+                        handleAutoCompleteFrom(value);
+                      }}
+                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                    />
+
+                    {showDropdownFrom && suggestionsFrom.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                        {suggestionsFrom.map((city, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSelectFromCity(city)}
+                            className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                          >
+                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm font-medium">{city}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    To
+                  </label>
+                  <div className="relative">
+                    <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
+                    <input
+                      type="text"
+                      placeholder="Departure City"
+                      value={form.route_to}
+                      onChange={(e) => {
+                        handleAutoCompleteTo(e.target.value);
+                        setForm({ ...form, route_to: e.target.value });
+                      }}
+                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                    />
+                    {showDropdownTo && suggestionsTo.length > 0 && (
+                      <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
+                        {suggestionsTo.map((city, idx) => (
+                          <button
+                            key={idx}
+                            type="button"
+                            onClick={() => handleSelectToCity(city)}
+                            className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                          >
+                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <span className="text-sm font-medium">{city}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                    Depart
+                  </label>
                   <input
                     type="date"
                     value={form.departure_date}
                     onChange={(e) =>
                       setForm({ ...form, departure_date: e.target.value })
                     }
-                    className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
+                    className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
                   />
                 </div>
-              </div>
 
-              {/* <div className="flex-1 min-w-0">
-              <label className="block text-sm text-gray-600 mb-2 text-left">
-                Return date (Optional)
-              </label>
-              <div className="flex items-center gap-2 bg-gray-50 px-3 py-2 rounded">
-                
-                <input
-                  type="date"
-                  value={returnDate}
-                  onChange={(e) => setReturnDate(e.target.value)}
-                  className="flex-1 bg-transparent outline-none text-gray-700 text-sm"
-                />
+                <div className="flex items-end">
+                  <Button className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
+                    Find Tickets
+                  </Button>
+                </div>
               </div>
-            </div> */}
-
-              <Button className="bg-teal-600 hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors whitespace-nowrap">
-                Find Tickets
-              </Button>
-            </div>
+            </Card>
           </form>
+        </div>
+      </section>
+      <section className="py-16 px-4 bg-background">
+        <div className="container mx-auto max-w-6xl">
+          <div className="flex items-center justify-center gap-3 mb-10">
+            <TrendingUp className="w-8 h-8 text-[#00a896]" />
+            <h3 className="text-3xl font-bold text-foreground">
+              Popular Routes
+            </h3>
+          </div>
+
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <Card key={i} className="p-6 animate-pulse">
+                  <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
+                  <div className="h-3 bg-muted rounded w-1/2"></div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {popularRoutes?.map((route, index) => (
+                <Card
+                  key={index}
+                  className="p-6 hover:shadow-lg transition-all duration-300 cursor-pointer border-2 hover:border-[#00a896] group"
+                  onClick={() => handleRouteSelect(route)}
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        <MapPin className="w-4 h-4 text-[#00a896]" />
+                        <span className="font-semibold text-lg text-foreground">
+                          {route.route_from}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2 ml-6">
+                        <span className="text-muted-foreground">→</span>
+                        <span className="font-semibold text-lg text-foreground">
+                          {route.route_to}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between pt-4 border-t border-border">
+                    <span className="text-sm text-muted-foreground">
+                      {route.trip_count.toLocaleString()} trips
+                    </span>
+                    <span className="text-sm font-medium text-[#00a896] opacity-0 group-hover:opacity-100 transition-opacity">
+                      Select →
+                    </span>
+                  </div>
+                </Card>
+              ))}
+            </div>
+          )}
+
+          {!loading && popularRoutes?.length === 0 && (
+            <div className="text-center py-12">
+              <p className="text-muted-foreground text-lg">
+                No popular routes available at the moment.
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
       {/* Enjoy Trips Section */}
-      <section className="py-16 px-4 sm:py-24">
+      {/* <section className="py-16 px-4 sm:py-24">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
@@ -212,10 +326,10 @@ export default function DanuBooking() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* Customer Feedback Section */}
-      <section className="py-16 px-4 sm:py-24 bg-gray-50">
+      {/* <section className="py-16 px-4 sm:py-24 bg-gray-50">
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-12">
             <h2 className="text-3xl sm:text-4xl font-bold text-gray-900 mb-3">
@@ -253,7 +367,7 @@ export default function DanuBooking() {
             ))}
           </div>
         </div>
-      </section>
+      </section> */}
 
       {/* CTA Section */}
       <section className="py-16 px-4 sm:py-20 bg-gradient-to-r from-teal-600 to-teal-700 text-white">

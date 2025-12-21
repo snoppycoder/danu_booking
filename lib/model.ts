@@ -113,6 +113,16 @@ export interface Route {
   created_at: string;
   updated_at: string;
 }
+export interface PopularRoute {
+  route_from: string;
+  route_to: string;
+  trip_count: number;
+}
+
+export interface PopularRoutesResponse {
+  routes: PopularRoute[];
+  total: number;
+}
 export interface Trip {
   trip_id: string;
   operator: {
