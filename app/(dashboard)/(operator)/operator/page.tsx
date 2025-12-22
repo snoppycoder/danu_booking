@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -71,9 +71,11 @@ import {
   MapPin,
   Calendar,
   Users,
+  RefreshCcw,
 } from "lucide-react";
 import { operatorApi } from "@/app/api/api";
 import { useAuth } from "@/lib/authContext";
+import { useOperatorBuses } from "@/components/Query";
 
 type BusStatus = "Active" | "Maintenance" | "Deactivated";
 
@@ -122,8 +124,16 @@ export default function OperatorPage() {
   const [isAssignTripOpen, setIsAssignTripOpen] = useState(false);
   const [busToAssign, setBusToAssign] = useState<string | null>(null);
   const { user } = useAuth();
+  const {
+    data: operatorBuses,
+    isLoading,
+    isError,
+  } = useOperatorBuses(user?.id!);
 
-  // New bus form state
+  // useEffect(() => {
+  //   setBuses(operatorBuses || []);
+  // }, []);
+
   const [newBus, setNewBus] = useState({
     plate_number: "",
     side_no: "",
@@ -148,9 +158,10 @@ export default function OperatorPage() {
     );
   };
 
-  const handleDeleteBus = () => {
+  const handleDeleteBus = async () => {
     if (busToDelete) {
       setBuses((prev) => prev.filter((bus) => bus.id !== busToDelete));
+      await operatorApi.deleteBus(user?.id || "", busToDelete);
       setBusToDelete(null);
       setIsDeleteDialogOpen(false);
     }
@@ -272,6 +283,7 @@ export default function OperatorPage() {
                   View and manage all buses in your fleet
                 </CardDescription>
               </div>
+
               <div className="relative w-64">
                 <Search className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
                 <Input
@@ -288,13 +300,22 @@ export default function OperatorPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>License Plate</TableHead>
-                  {/* <TableHead>Model</TableHead> */}
+
                   <TableHead>Status</TableHead>
                   <TableHead>Capacity</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
+                {filteredBuses.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <div className="text-center mt-2.5 font-semibold">
+                        No buses found!
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
                 {filteredBuses.map((bus) => (
                   <TableRow
                     key={bus.id}
@@ -325,8 +346,6 @@ export default function OperatorPage() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
@@ -347,7 +366,7 @@ export default function OperatorPage() {
                             Assign Trip
                           </DropdownMenuItem>
                           <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                          {/* <DropdownMenuLabel>Change Status</DropdownMenuLabel> */}
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
@@ -363,6 +382,14 @@ export default function OperatorPage() {
                             }}
                           >
                             Set Maintenance
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(bus.id, "Deactivated");
+                            }}
+                          >
+                            Add Seatmap
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => {
@@ -396,7 +423,7 @@ export default function OperatorPage() {
       </div>
 
       <Sheet open={isDetailsOpen} onOpenChange={setIsDetailsOpen}>
-        <SheetContent className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetContent className="w-full p-6 sm:max-w-2xl overflow-y-auto">
           {selectedBus && (
             <>
               <SheetHeader>

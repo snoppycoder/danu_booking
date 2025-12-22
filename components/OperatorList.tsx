@@ -130,7 +130,7 @@ export default function OperatorList() {
     } catch (error) {
       console.log(error);
       if (axios.isAxiosError(error)) {
-        toast.error(error.response?.data.detail);
+        toast.error(error.response?.data.error);
       } else if (error instanceof Error) {
         toast.error(error.message);
       }

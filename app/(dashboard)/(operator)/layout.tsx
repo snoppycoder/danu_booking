@@ -7,6 +7,7 @@ import Navbar from "@/components/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/OperatorSidebar";
 import { AuthProvider } from "@/lib/authContext";
+import QueryProvider from "@/components/QueryProvide";
 
 export default function DashboardLayout({
   children,
@@ -17,12 +18,14 @@ export default function DashboardLayout({
     <html lang="en">
       <body className={`font-sans antialiased`}>
         <AuthProvider blackListRoles={["agent", "passenger"]}>
-          <SidebarProvider>
-            <div className="flex min-h-screen w-full">
-              <AppSidebar />
-              <main className="flex-1">{children}</main>
-            </div>
-          </SidebarProvider>
+          <QueryProvider>
+            <SidebarProvider>
+              <div className="flex min-h-screen w-full">
+                <AppSidebar />
+                <main className="flex-1">{children}</main>
+              </div>
+            </SidebarProvider>
+          </QueryProvider>
         </AuthProvider>
       </body>
     </html>

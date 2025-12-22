@@ -216,22 +216,10 @@ export default function UserList() {
                     <TableCell>{u.phone ?? "N/A"}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex gap-2 justify-center">
-                        <div className="relative inline-block group">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="text-black p-2 flex items-center gap-1"
-                            onClick={() => setOpen(true)}
-                          >
-                            Assign Role
-                            {/* <CircleQuestionMark className="text-blue-600 cursor-pointer" /> */}
-                          </Button>
-
-                          {/* <pre className="z-90 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 rounded bg-gray-700 px-3 py-1 max-w-xs text-white text-xs text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words pointer-events-none shadow-lg">
+                        {/* <pre className="z-90 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 rounded bg-gray-700 px-3 py-1 max-w-xs text-white text-xs text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words pointer-events-none shadow-lg">
                             This will enable you to assign {`\n`} a user to a
                             operator
                           </pre> */}
-                        </div>
 
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

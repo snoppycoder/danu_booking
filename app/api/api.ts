@@ -344,6 +344,27 @@ export const superAdminApi = {
     console.log(response.data);
     return response.data;
   },
+  updateAgent: async (id: string, body: Agent) => {
+    const response = await api.put(`/admin/agents/${id}`, body);
+    return response.data;
+  },
+  assignUserToAgent: async (agentId: string, userId: string) => {
+    const response = await api.post(`/admin/agents/${agentId}/users/${userId}`);
+    return response.data;
+  },
+  unassignUserToAgent: async (agentId: string, userId: string) => {
+    const response = await api.delete(
+      `/admin/agents/${agentId}/users/${userId}`
+    );
+    return response.data;
+  },
+  /**
+   * This operations is for agent users
+   */
+  getAllAgentUsers: async (agentId: string) => {
+    const response = await api.get(`/admin/agents/${agentId}/users`);
+    return response.data;
+  },
 };
 export const passengerApi = {
   searchRoute: async (body: {
@@ -384,6 +405,7 @@ export const passengerApi = {
     return response.data;
   },
 };
+export const agentApi = {};
 export const operatorApi = {
   createBus: async (
     body: {
@@ -394,6 +416,22 @@ export const operatorApi = {
     operator_id: string
   ) => {
     const response = await api.post(`/operator/${operator_id}/buses`, { body });
+    return response.data;
+  },
+  getAllBuses: async (operator_id: string) => {
+    const response = await api.get(`/operator/${operator_id}/buses`);
+    return response.data;
+  },
+  deleteBus: async (operator_id: string, bus_id: string) => {
+    const response = await api.delete(
+      `/operator/${operator_id}/buses/${bus_id}`
+    );
+    return response.data;
+  },
+  getAllTrips: async (operator_id: string, limit: number) => {
+    const response = await api.get(`/operator/${operator_id}/trips`, {
+      params: { limit },
+    });
     return response.data;
   },
 };
