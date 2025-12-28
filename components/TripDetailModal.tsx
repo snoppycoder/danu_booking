@@ -33,6 +33,7 @@ export function TripDetailsModal({
   if (!tripData) return null;
 
   const formatDate = (dateString: string) => {
+    console.log(dateString, "dateString");
     return new Date(dateString).toLocaleString("en-US", {
       dateStyle: "medium",
       timeStyle: "short",
@@ -126,12 +127,12 @@ export function TripDetailsModal({
               Bus Information
             </h3>
             <div className="space-y-2 rounded-lg border border-gray-200 p-4">
-              <div className="flex justify-between">
+              {/* <div className="flex justify-between">
                 <span className="text-gray-600">Plate Number</span>
                 <Badge variant="secondary" className="font-mono">
                   {tripData.bus.plate_no}
                 </Badge>
-              </div>
+              </div> */}
               <div className="flex justify-between">
                 <span className="text-gray-600">Side Number</span>
                 <span className="font-medium text-gray-900">
@@ -150,7 +151,7 @@ export function TripDetailsModal({
           <Separator />
 
           {/* Driver Information */}
-          <div>
+          {/* <div>
             <h3 className="mb-3 flex items-center gap-2 text-lg font-semibold text-gray-900">
               <User className="h-5 w-5 text-teal-600" />
               Driver Information
@@ -171,15 +172,15 @@ export function TripDetailsModal({
             </div>
           </div>
 
-          <Separator />
+          <Separator /> */}
 
           {/* Additional Information */}
-          <div className="rounded-lg bg-gray-50 p-4">
+          {/* <div className="rounded-lg bg-gray-50 p-4">
             <div className="flex items-center gap-2 text-sm text-gray-600">
               <Calendar className="h-4 w-4" />
               <span>Trip created: {formatDate(tripData.created_at)}</span>
             </div>
-          </div>
+          </div> */}
         </div>
       </DialogContent>
     </Dialog>

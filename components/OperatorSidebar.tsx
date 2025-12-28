@@ -23,8 +23,8 @@ const menuItems = [
     icon: Home,
   },
   {
-    title: "Fleet Management",
-    url: "/fleet",
+    title: "Trip Management",
+    url: "/operator/trips",
     icon: Bus,
   },
   {

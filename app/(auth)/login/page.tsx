@@ -18,7 +18,7 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [checked, setChecked] = useState(false);
-  const route = useRouter();
+
   const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -37,30 +37,9 @@ export default function LoginPage() {
         // "superadmin"
       );
       console.log(response);
-
-      if (response) {
-        await setAuthCookies(response);
-        const decoded = await decodeJWT(response.access_token);
-        // toast.success("You have successfully Logged In");
-        // console.log(decoded);
-
-        if (decoded.roles.includes("passenger")) {
-          route.replace("/passenger");
-          // window.location.replace("/passenger");
-        } else {
-          route.replace("/superadmin");
-          // window.location.replace("/superadmin");
-        }
-      }
     } catch (error) {
       console.log(error);
-      if (axios.isAxiosError(error)) {
-        if (error.response?.data.detail) {
-          toast.error(error.response?.data.detail);
-        } else {
-          toast.warning(error.response?.data.error);
-        }
-      }
+      toast.error("Invalid credentials. Please try again.");
     }
   };
 

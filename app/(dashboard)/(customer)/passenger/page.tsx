@@ -49,7 +49,6 @@ export default function DanuBooking() {
     fetchPopularRoutes();
   }, []);
 
-
   const handleRouteSelect = (route: PopularRoute) => {
     if (!route) return;
     setForm({

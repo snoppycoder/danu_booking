@@ -22,6 +22,29 @@ export const useOperator = () => {
     staleTime: 1000 * 60 * 5,
   });
 };
+export const useTrips = (operator_id: string) => {
+  return useQuery({
+    queryKey: ["trips", operator_id],
+    queryFn: async () => {
+      const res = await operatorApi.getAllTrips(operator_id, 10);
+      return res.items;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id,
+  });
+};
+
+export const useDrivers = (operator_id: string) => {
+  return useQuery({
+    queryKey: ["drivers", operator_id],
+    queryFn: async () => {
+      const res = await operatorApi.getAllDrivers(operator_id);
+      return res.items;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id,
+  });
+};
 export const useOperatorBuses = (operator_id: string) => {
   return useQuery({
     queryKey: ["buses", operator_id],

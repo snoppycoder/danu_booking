@@ -42,7 +42,7 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <AuthProvider blackListRoles={["passenger", "agent", "operator"]}>
+        <AuthProvider blackListRoles={["passenger", "agent", "operator-admin"]}>
           <QueryProvider>
             <div className="min-h-screen w-full flex flex-col md:flex-row">
               <aside className="w-full md:w-64 md:min-h-screen border-r border-gray-300">

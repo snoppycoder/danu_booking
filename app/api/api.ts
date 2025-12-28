@@ -14,6 +14,7 @@ import {
   AddUserForm,
   Agent,
   LoginResponse,
+  Passenger,
 } from "@/lib/model";
 import axios, {
   AxiosError,
@@ -157,7 +158,7 @@ api.interceptors.response.use(
 
           default:
             console.error("Unhandled 401 error:", data);
-            throw Error();
+            throw Error("Invalid credentials");
         }
       } else {
         console.error(`HTTP ${status} error:`, data);
@@ -217,16 +218,15 @@ export const authAPI = {
       const session_id = await getSessionId();
       const refresh_token = await getRefreshToken();
 
-      const response = await api.post("/user/me/sessions/logout", {
+      await api.post("/user/me/sessions/logout", {
         refresh_token,
         session_id,
       });
       await deleteAllCookies();
-      return response.data;
-    } catch (error) {
-      console.log(error);
-    } finally {
       window.location.href = "/login";
+    } catch (error) {
+      window.location.href = "/login";
+      console.log(error);
     }
   },
   whoAmI: async () => {
@@ -308,6 +308,10 @@ export const superAdminApi = {
     const response = await api.delete(
       `/admin/operators/${operatorId}/users/${userId}`
     );
+    return response.data;
+  },
+  getAllOperatorUsers: async (operatorId: string) => {
+    const response = await api.get(`/admin/operators/${operatorId}/users`);
     return response.data;
   },
 
@@ -401,7 +405,27 @@ export const passengerApi = {
     return response.data.routes;
   },
   getTripDetails: async (tripId: string) => {
-    const response = await api.get(`/passenger/trips/${tripId}`);
+    const response = await api.get(`/passenger/${tripId}`);
+    return response.data;
+  },
+  holdSeat: async (
+    tripId: string,
+    body: {
+      seat_codes: string[];
+      passenger_details: Passenger[];
+    }
+  ) => {
+    const uuid = crypto.randomUUID();
+    console.log(body, "body here");
+    const response = await api.post(`/passenger/${tripId}/holds`, {
+      ...body,
+      passenger_details: body.passenger_details.map((passenger) => ({
+        ...passenger,
+        name: passenger.phone.trim(),
+      })),
+      client_ref: uuid,
+    });
+
     return response.data;
   },
 };
@@ -409,9 +433,9 @@ export const agentApi = {};
 export const operatorApi = {
   createBus: async (
     body: {
-      plate_number: string;
+      plate_no: string;
       capacity: number;
-      side_number?: string;
+      side_no: string;
     },
     operator_id: string
   ) => {
@@ -432,6 +456,15 @@ export const operatorApi = {
     const response = await api.get(`/operator/${operator_id}/trips`, {
       params: { limit },
     });
+    return response.data;
+  },
+  getAllDrivers: async (operator_id: string) => {
+    const response = await api.get(`/operator/${operator_id}/drivers`);
+    return response.data;
+  },
+  getAllSeatTemplates: async (operator_id: string) => {
+    console.log(operator_id, "operator id here");
+    const response = await api.get(`/operator/${operator_id}/seat-templates`);
     return response.data;
   },
 };

@@ -9,6 +9,7 @@ export interface Session {
   id: string;
   created_at?: string;
   user_agent: string;
+  organization_id?: string;
   deviceType: "desktop" | "mobile" | "tablet";
   location: string;
   ip_address: string;
@@ -109,7 +110,7 @@ export interface Route {
   bus: Bus;
   driver: Driver;
   departure_at: string;
-  price: 0;
+  price: number;
   created_at: string;
   updated_at: string;
 }
@@ -135,6 +136,12 @@ export interface PopularRoutesResponse {
   routes: PopularRoute[];
   total: number;
 }
+export type Passenger = {
+  name: string;
+  email: string;
+  phone: string;
+  id_number: string;
+};
 export interface Trip {
   trip_id: string;
   operator: {

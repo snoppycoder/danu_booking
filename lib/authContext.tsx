@@ -6,7 +6,7 @@ import {
   ReactNode,
   useEffect,
 } from "react";
-import { decodeJWT, getAccessToken } from "./auth";
+import { decodeJWT, getAccessToken, setAuthCookies } from "./auth";
 import { useRouter } from "next/navigation";
 import { LoginResponse, User } from "./model";
 import { authAPI } from "@/app/api/api";
@@ -38,6 +38,15 @@ export const AuthProvider = ({
     if (!(path == "/login")) {
       const fetchCurrUser = async () => {
         const response = (await authAPI.whoAmI()) as User;
+        const hasBlacklistedRole = response.roles.some((role) =>
+          blackListRoles.includes(role)
+        );
+
+        if (hasBlacklistedRole) {
+          setUser(null);
+          window.location.replace("/unauthorized"); // or /login
+          return;
+        }
         setUser(response);
       };
       fetchCurrUser();
@@ -53,10 +62,35 @@ export const AuthProvider = ({
       const response = await authAPI.login(identifier, password, remember);
 
       setUser(response.user_info);
+      console.log(response);
+
+      if (response) {
+        await setAuthCookies(response);
+        const decoded = await decodeJWT(response.access_token);
+        // toast.success("You have successfully Logged In");
+        // console.log(decoded);
+
+        if (decoded.roles.includes("passenger")) {
+          // route.replace("/passenger");
+          window.location.replace("/passenger");
+        } else if (decoded.roles.includes("super_admin")) {
+          // route.replace("/superadmin");
+          window.location.replace("/superadmin");
+        } else if (decoded.roles.includes("agent_admin")) {
+          // route.replace("/agent");
+          window.location.replace("/agent");
+        } else if (decoded.roles.includes("operator_admin")) {
+          // route.replace("/operator");
+          window.location.replace("/operator");
+        } else {
+          console.log("No role matched");
+        }
+      }
 
       return response;
     } catch (error) {
       setUser(null);
+
       console.log(error);
       throw error;
     }

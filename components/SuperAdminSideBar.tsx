@@ -53,7 +53,7 @@ export default function Sidebar() {
 
       subItems: [
         { label: "Operator List", href: "/superadmin/operator" },
-        { label: "Manage Operators", href: "/superadmin/operator/manage" },
+        { label: "Operator Users", href: "/superadmin/operator/manage" },
       ],
     },
     { icon: BarChart3, label: "Report", href: "/report" },

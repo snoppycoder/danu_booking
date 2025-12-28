@@ -1,6 +1,12 @@
 "use client";
 
-import { MapPin, Calendar, Download, MoreVertical } from "lucide-react";
+import {
+  MapPin,
+  Calendar,
+  Download,
+  MoreVertical,
+  MoreHorizontal,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
@@ -30,6 +36,8 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TripDetailsModal } from "@/components/TripDetailModal";
+import SeatBookingDialog from "@/components/SeatBookingDialog";
+import { set } from "zod";
 
 export default function BookingPage() {
   const searchParams = useSearchParams();
@@ -43,17 +51,19 @@ export default function BookingPage() {
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
   const [data, setData] = useState<Item[]>([]);
-
+  const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [tripId, setTripId] = useState<string>("");
 
   function isTrip(item: Item): item is Trip {
     return "trip_id" in item;
   }
+  console.log(selectedTrip, "selected trip");
 
   const handleViewDetails = async (trip: Trip) => {
     const response = await passengerApi.getTripDetails(trip.trip_id);
-
+    console.log(response, "trip details");
     setSelectedTrip(response);
     setIsModalOpen(true);
   };
@@ -70,6 +80,7 @@ export default function BookingPage() {
     e: React.FormEvent<HTMLFormElement>
   ): Promise<void> {
     e.preventDefault();
+
     const res = (await handleSearch(form)) ?? {
       departure_date: form.departure_date,
       route_from: form.route_from,
@@ -98,7 +109,7 @@ export default function BookingPage() {
         setSuggestionsFrom(response);
         setShowDropdownFrom(true);
         console.log(response);
-      }, 300);
+      }, 100);
     } catch (error) {
       console.error("Auto complete error:", error);
     }
@@ -111,10 +122,17 @@ export default function BookingPage() {
         setSuggestionsTo(response);
         setShowDropdownTo(true);
         console.log(response);
-      }, 200);
+      }, 100);
     } catch (error) {
       console.error("Auto complete error:", error);
     }
+  }
+
+  function handleBookNow(trip: Item): void {
+    if (isTrip(trip)) {
+      setTripId(trip.trip_id);
+    }
+    setUseInfoToggle(true);
   }
 
   return (
@@ -289,7 +307,7 @@ export default function BookingPage() {
                   {data.map((route, index) => (
                     <TableRow
                       key={index}
-                      className="border-b  border-gray-100 transition-colors hover:bg-teal-50/50"
+                      className="border-b p border-gray-100 transition-colors hover:bg-teal-50/50"
                     >
                       <TableCell className="py-4 font-medium text-gray-900">
                         {route.operator.operator_name}
@@ -313,36 +331,43 @@ export default function BookingPage() {
                       </TableCell>
                       <TableCell className="py-4 ">
                         <div className="flex justify-center">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                className="h-8 w-8 p-0 hover:bg-teal-100"
-                              >
-                                <MoreVertical className="h-6 w-6 text-gray-600" />
-                                <span className="sr-only">Open menu</span>
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem className="cursor-pointer">
-                                Book Now
-                              </DropdownMenuItem>
-                              <DropdownMenuItem
-                                className="cursor-pointer "
-                                onClick={() => {
-                                  if (isTrip(route)) {
-                                    handleViewDetails(route);
-                                  }
-                                }}
-                              >
-                                View Details
-                              </DropdownMenuItem>
-                              <DropdownMenuItem className="cursor-pointer">
-                                Check Seats
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <Button
+                            size="sm"
+                            variant="default"
+                            className="mr-1.5"
+                            onClick={() => handleBookNow(route)}
+                          >
+                            Book Now
+                          </Button>
+                          <div className="ml-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 w-8 p-0 hover:bg-teal-100"
+                                >
+                                  <MoreHorizontal className="h-6 w-6 text-gray-600" />
+                                  <span className="sr-only">Open menu</span>
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end" className="w-48">
+                                <DropdownMenuItem
+                                  className="cursor-pointer "
+                                  onClick={() => {
+                                    if (isTrip(route)) {
+                                      handleViewDetails(route);
+                                    }
+                                  }}
+                                >
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer">
+                                  Check Seats
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
                         </div>
                       </TableCell>
                     </TableRow>
@@ -357,6 +382,11 @@ export default function BookingPage() {
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
         tripData={selectedTrip}
+      />
+      <SeatBookingDialog
+        toggle={useInfoToggle}
+        setToggle={setUseInfoToggle}
+        tripId={tripId || ""}
       />
     </div>
   );

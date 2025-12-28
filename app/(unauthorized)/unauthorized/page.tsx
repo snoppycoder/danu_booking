@@ -3,9 +3,20 @@
 import Link from "next/link";
 import { Lock } from "lucide-react";
 import { useAuth } from "@/lib/authContext";
-import { useState } from "react";
+import { use, useState } from "react";
 
 export default function UnauthorizedPage() {
+  const { user } = useAuth();
+  const [redirect, setRedirect] = useState("");
+  if (user && user.roles.length > 0) {
+    if (user.roles.includes("passenger")) {
+      if (redirect !== "/passenger") setRedirect("/passenger");
+    } else if (user.roles.includes("agent")) {
+      if (redirect !== "/agent") setRedirect("/agent");
+    } else if (user.roles.includes("operator-admin")) {
+      if (redirect !== "/operator") setRedirect("/operator");
+    }
+  }
   return (
     <main className="min-h-screen bg-gradient-to-br from-background to-background flex items-center justify-center p-4">
       <div className="w-full max-w-md text-center">
@@ -25,7 +36,7 @@ export default function UnauthorizedPage() {
 
         <div className="flex flex-col gap-3">
           <Link
-            href="/passenger"
+            href={redirect || "/"}
             className="w-full bg-primary text-primary-foreground py-2.5 px-4 rounded-lg font-medium hover:opacity-90 transition-opacity"
           >
             Back to Home
