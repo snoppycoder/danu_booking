@@ -95,18 +95,28 @@ export default function SeatBookingDialog({
       });
       if (response) setToggle(false);
       console.log(response, "booking");
-      toast.success("Seats successfully booked!");
+      toast.success("Seats successfully booked!", { duration: 1000 });
+      setPassengers(
+        Array.from({ length: Number(seatCount) }, () => ({
+          name: "",
+          email: "",
+          phone: "",
+          id_number: "",
+        }))
+      );
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.data.detail) {
-          toast.error(error.response?.data.detail?.[0].msg);
+          toast.error(error.response?.data.detail?.[0].msg, { duration: 1000 });
         } else {
-          toast.error(error.response?.data.error, { duration: 2000 });
+          toast.error(error.response?.data.error, { duration: 1000 });
         }
       } else if (error instanceof Error) {
-        toast.error(error.message);
+        toast.error(error.message, { duration: 1000 });
       } else {
-        toast.error("Error trying to process your request. Please try again.");
+        toast.error("Error trying to process your request. Please try again.", {
+          duration: 1000,
+        });
       }
     }
   };

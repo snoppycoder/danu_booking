@@ -91,7 +91,7 @@ export interface SeatExtraMetadata {
 export interface Seat {
   id: string;
   seat_code: string;
-  status: "available" | "unavailable";
+  status: "available" | "booked";
   row: number;
   col: number;
   extra_metadata: SeatExtraMetadata;

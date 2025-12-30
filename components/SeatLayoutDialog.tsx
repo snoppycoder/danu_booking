@@ -69,7 +69,7 @@ export default function SeatLayoutDialog({
   }, [bus]);
 
   const toggleSeat = (seat: Seat) => {
-    if (seat.status === "unavailable") return;
+    if (seat.status === "booked") return;
 
     setSelectedSeats((prev) => {
       // If this passenger already has this seat, unselect it
@@ -85,16 +85,16 @@ export default function SeatLayoutDialog({
   };
 
   const handleConfirm = () => {
-    if (!selectedSeats[idx]) return; // Check if seat is selected using passenger index
+    // Check if seat is selected using passenger index
 
     setSeats((prev) =>
       prev?.map((s) =>
-        s.seat_code === selectedSeats[idx] ? { ...s, status: "unavailable" } : s
+        s.seat_code === selectedSeats[idx] ? { ...s, status: "booked" } : s
       )
     );
     onSelect(selectedSeats[idx]);
     setToggle(false);
-    console.log("Selected seat:", selectedSeats);
+
     setSelectedSeats({}); // reset selection after confirm
   };
   if (!bus) {
@@ -124,12 +124,11 @@ export default function SeatLayoutDialog({
 
                 <button
                   onClick={() => toggleSeat(seat)}
-                  disabled={seat.status == "unavailable"}
+                  disabled={seat.status == "booked"}
                   className={clsx(
                     "w-12 h-12 rounded-lg border text-sm font-semibold",
                     "transition-colors",
-                    seat.status == "unavailable" &&
-                      "bg-gray-300 cursor-not-allowed",
+                    seat.status == "booked" && "bg-gray-300 cursor-not-allowed",
                     // Now correctly checks if this seat is selected for THIS passenger
                     selectedSeats[idx] === seat.seat_code &&
                       "bg-teal-600 text-white",
