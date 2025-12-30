@@ -59,7 +59,6 @@ export default function BookingPage() {
   function isTrip(item: Item): item is Trip {
     return "trip_id" in item;
   }
-  console.log(selectedTrip, "selected trip");
 
   const handleViewDetails = async (trip: Trip) => {
     const response = await passengerApi.getTripDetails(trip.trip_id);
@@ -72,7 +71,6 @@ export default function BookingPage() {
     handleSearch(form).then((res) => {
       const data_ = res?.items || [];
       setData(data_);
-      console.log(data_, "items from useEffect");
     }); // for it fetch the data on load
   }, []);
 
@@ -128,8 +126,10 @@ export default function BookingPage() {
     }
   }
 
-  function handleBookNow(trip: Item): void {
+  async function handleBookNow(trip: Item): Promise<void> {
     if (isTrip(trip)) {
+      const response = await passengerApi.getTripDetails(trip.trip_id);
+      console.log(trip);
       setTripId(trip.trip_id);
     }
     setUseInfoToggle(true);
@@ -386,7 +386,7 @@ export default function BookingPage() {
       <SeatBookingDialog
         toggle={useInfoToggle}
         setToggle={setUseInfoToggle}
-        tripId={tripId || ""}
+        tripId={tripId}
       />
     </div>
   );

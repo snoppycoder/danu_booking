@@ -64,8 +64,11 @@ export default function AgentList() {
   const [detailToggle, setDetailToggle] = useState(false);
   const [detail, setDetail] = useState<Operator>();
   const [spinning, setSpinning] = useState<boolean>(false);
-  const { data, isLoading, refetch } = useAgent();
-  const { data: users } = useUsers();
+  const { data, isLoading, refetch } = useAgent(
+    currentPage,
+    Number(displayCount)
+  );
+  const { data: users } = useUsers(10, 10); // make default all
 
   const filteredAgents = data?.filter(
     (emp) =>
@@ -387,13 +390,22 @@ export default function AgentList() {
             </p>
 
             <div className="flex gap-2">
-              <Button variant="outline" disabled={currentPage === 1}>
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
                 Previous
               </Button>
               <Button className="bg-primary text-primary-foreground">
                 {currentPage}
               </Button>
-              <Button variant="outline">Next</Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </Button>
             </div>
           </div>
         )}

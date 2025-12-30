@@ -50,6 +50,7 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { exportToCSV } from "@/lib/common_functions";
 
 export default function UserList() {
   const [displayCount, setDisplayCount] = useState("10");
@@ -62,9 +63,11 @@ export default function UserList() {
   // const [data, setData] = useState<User[]>([]);
   const [disableOpen, setDisableOpen] = useState(false);
   const [detail, setDetail] = useState<User>();
-  const [open, setOpen] = useState<boolean>();
-  const { data, isLoading, refetch } = useUsers();
-  const { data: operator, isLoading: loading } = useOperator();
+
+  const { data, isLoading, refetch } = useUsers(
+    currentPage,
+    Number(displayCount)
+  );
 
   const filteredUser = data?.filter(
     (emp) =>
@@ -166,7 +169,28 @@ export default function UserList() {
               <Copy className="w-4 h-4" /> Copy
             </Button>
 
-            <Button variant="outline">CSV</Button>
+            <Button
+              variant="outline"
+              disabled={!data}
+              onClick={() =>
+                exportToCSV(
+                  data!.map((u) => ({
+                    "First name": u.first_name,
+                    "Last name": u.last_name,
+                    email: u.email,
+                    "email verified": u.email_verified ? "Yes" : "No",
+                    // address: `${u.address.country ?? "Ethiopia"}, ${
+                    //   u.address.city
+                    // }`,
+                    // kebele: u.address.kebele,
+                    "Date of birth": u.dob,
+                  })),
+                  ` users_${new Date()}.csv`
+                )
+              }
+            >
+              CSV
+            </Button>
             <Button variant="outline">PDF</Button>
             <Button variant="outline">Print</Button>
             <Button
@@ -286,13 +310,26 @@ export default function UserList() {
             </p>
 
             <div className="flex gap-2">
-              <Button variant="outline" disabled={currentPage === 1}>
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => {
+                  setCurrentPage((p) => p - 1);
+                }}
+              >
                 Previous
               </Button>
               <Button className="bg-primary text-primary-foreground">
                 {currentPage}
               </Button>
-              <Button variant="outline">Next</Button>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  setCurrentPage((p) => p + 1);
+                }}
+              >
+                Next
+              </Button>
             </div>
           </div>
         )}

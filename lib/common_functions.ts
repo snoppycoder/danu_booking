@@ -28,3 +28,32 @@ export async function handleSearch(form: {
   const res = (await passengerApi.searchRoute(form)) as SearchRouteResponse;
   return res;
 }
+export type CSVRow = Record<string, string | number | boolean | null>;
+
+export const exportToCSV = <T extends CSVRow>(data: T[], filename: string) => {
+  if (!data.length) return;
+
+  const headers = Object.keys(data[0]) as (keyof T)[];
+
+  const csvRows = [
+    headers.join(","),
+
+    ...data.map((row) =>
+      headers
+        .map((key) => `"${String(row[key] ?? "").replace(/"/g, '""')}"`)
+        .join(",")
+    ),
+  ];
+
+  const csvContent = csvRows.join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = filename;
+  link.click();
+
+  URL.revokeObjectURL(url);
+};

@@ -76,11 +76,13 @@ import {
 import { operatorApi } from "@/app/api/api";
 import { useAuth } from "@/lib/authContext";
 import { useOperatorBuses } from "@/components/Query";
-import { Bus } from "@/lib/model";
+import { Bus, SeatTemplate } from "@/lib/model";
 import { pl } from "zod/v4/locales";
 import { set } from "zod";
+import SeatTemplateDialog from "@/components/SeatTemplateModal";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
-type BusStatus = "Active" | "Maintenance" | "Deactivated";
+type BusStatus = "active" | "inactive";
 
 // interface FleetBus {
 //   id: string;
@@ -114,6 +116,14 @@ const scheduleOptions = [
   { id: "3", route: "Mumbai - Goa", time: "10:00 AM" },
   { id: "4", route: "Pune - Bangalore", time: "07:00 PM" },
 ];
+interface createBusRequest extends Bus {
+  plate_no: string;
+  side_no: string;
+  capacity: number;
+  seat_template_id: string;
+  bus_status: "active" | "inactive";
+  // facilities: [] as string[],
+}
 
 export default function OperatorPage() {
   const [buses, setBuses] = useState<Bus[]>([]);
@@ -127,35 +137,53 @@ export default function OperatorPage() {
   const [isAssignTripOpen, setIsAssignTripOpen] = useState(false);
   const [busToAssign, setBusToAssign] = useState<string | null>(null);
   const { user } = useAuth();
-  const [seatTemplates, setSeatTemplates] = useState();
+  const [seatTemplates, setSeatTemplates] = useState<SeatTemplate[]>();
   const {
     data: operatorBuses,
     isLoading,
     isError,
-  } = useOperatorBuses(user?.id!);
+  } = useOperatorBuses(user?.organization_id!);
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null
+  );
 
   useEffect(() => {
-    setBuses(operatorBuses || []);
-    operatorApi.getAllSeatTemplates(user?.id!).then((data) => {
-      setSeatTemplates(data);
-    });
-    console.log("seat templates", seatTemplates);
-  }, []);
+    if (!operatorBuses || !user?.organization_id) return;
+
+    setBuses(operatorBuses);
+
+    operatorApi
+      .getAllSeatTemplates(user.organization_id)
+      .then(setSeatTemplates)
+      .catch(console.error);
+  }, [operatorBuses, user?.organization_id]);
 
   const [newBus, setNewBus] = useState({
     plate_no: "",
     side_no: "",
-    capacity: 45,
+    capacity: 0,
+    seat_template_id: "",
+    bus_status: "active",
+
     // facilities: [] as string[],
   });
 
-  const filteredBuses = buses.filter((bus) =>
-    bus.plate_no.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredBuses =
+    buses?.filter(
+      (bus: Bus) =>
+        bus.plate_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        bus.side_no.toLowerCase().includes(searchQuery.toLowerCase())
+    ) ?? [];
 
   const handleViewDetails = (bus: Bus) => {
     setSelectedBus(bus);
     setIsDetailsOpen(true);
+  };
+  const [selectedTemplate, setSelectedTemplate] = useState<SeatTemplate>();
+
+  const handleTemplateSelect = (template: SeatTemplate) => {
+    console.log("Selected template:", template);
+    setSelectedTemplate(template);
   };
 
   const handleStatusChange = (busId: string, newStatus: BusStatus) => {
@@ -169,28 +197,50 @@ export default function OperatorPage() {
   const handleDeleteBus = async () => {
     if (busToDelete) {
       setBuses((prev) => prev.filter((bus) => bus.id !== busToDelete));
-      await operatorApi.deleteBus(user?.id || "", busToDelete);
+      await operatorApi.deleteBus(user?.organization_id || "", busToDelete);
       setBusToDelete(null);
       setIsDeleteDialogOpen(false);
     }
   };
 
   const handleAddBus = async () => {
-    const bus: Bus = {
-      id: String(buses.length + 1),
+    const bus: createBusRequest = {
       ...newBus,
-      // status: "Active",
-      capacity: newBus.capacity,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-      operator_id: user?.id!,
+
+      bus_status: "active",
+      seat_template_id: selectedTemplateId ?? "",
+      created_at: new Date().toString(),
+      operator_id: user?.organization_id ?? "",
+      updated_at: new Date().toString(),
+      id: Date.now().toString(),
+      seat_template: selectedTemplate!,
     };
+    console.log(bus, "here ");
     setBuses((prev) => [...prev, bus]);
+    if (selectedTemplateId)
+      setNewBus((prev) => ({
+        ...prev,
+        seat_template_id: selectedTemplateId,
+      }));
+    console.log(newBus, "new bus");
     setIsAddBusOpen(false);
     setAddBusStep(1);
-
-    operatorApi.createBus(newBus, user?.id || "");
-    setNewBus({ plate_no: "", capacity: 45, side_no: "" });
+    const dataT = {
+      plate_no: bus.plate_no,
+      side_no: bus.side_no,
+      capacity: bus.capacity,
+      seat_template_id: bus.seat_template_id,
+      bus_status: bus.bus_status,
+    };
+    console.log(dataT, "data T");
+    operatorApi.createBus(dataT, user?.organization_id || "");
+    setNewBus({
+      plate_no: "",
+      capacity: 0,
+      side_no: "",
+      seat_template_id: "",
+      bus_status: "active",
+    });
   };
 
   const handleUpdateBus = (updatedBus: Bus) => {
@@ -200,21 +250,20 @@ export default function OperatorPage() {
     setSelectedBus(updatedBus);
   };
 
-  // const getStatusColor = (status: BusStatus) => {
-  //   switch (status) {
-  //     case "Active":
-  //       return "bg-primary/20 text-primary border-primary/30";
-  //     case "Maintenance":
-  //       return "bg-chart-3/20 text-chart-3 border-chart-3/30";
-  //     case "Deactivated":
-  //       return "bg-muted text-muted-foreground border-border";
-  //   }
-  // };
+  const getStatusColor = (status: BusStatus) => {
+    switch (status) {
+      case "active":
+        return "bg-primary/20 text-primary border-primary/30";
 
-  // const activeCount = buses.filter((b) => b.status === "Active").length;
-  // const maintenanceCount = buses.filter(
-  //   (b) => b.status === "Maintenance"
-  // ).length;
+      case "inactive":
+        return "bg-muted text-muted-foreground border-border";
+    }
+  };
+
+  const activeCount = buses.filter((b) => b.bus_status === "active").length;
+  const maintenanceCount = buses.filter(
+    (b) => b.bus_status === "inactive"
+  ).length;
   const totalCapacity = buses.reduce((sum, b) => sum + b.capacity, 0);
 
   return (
@@ -235,7 +284,7 @@ export default function OperatorPage() {
       {/* Main Content */}
       <div className="flex-1 space-y-6 p-6">
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Total Buses</CardTitle>
@@ -247,24 +296,24 @@ export default function OperatorPage() {
             </CardContent>
           </Card>
           <Card>
-            {/* <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">Active</CardTitle>
               <div className="size-2 rounded-full bg-primary" />
-            </CardHeader> */}
-            {/* <CardContent>
+            </CardHeader>
+            <CardContent>
               <div className="text-2xl font-bold">{activeCount}</div>
               <p className="text-xs text-muted-foreground">On road</p>
-            </CardContent> */}
+            </CardContent>
           </Card>
           <Card>
-            {/* <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">Maintenance</CardTitle>
-              <div className="size-2 rounded-full bg-chart-3" />
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Inactive</CardTitle>
+              <div className="size-2 rounded-full bg-red-600" />
             </CardHeader>
             <CardContent>
               <div className="text-2xl font-bold">{maintenanceCount}</div>
               <p className="text-xs text-muted-foreground">Under service</p>
-            </CardContent> */}
+            </CardContent>
           </Card>
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -280,7 +329,6 @@ export default function OperatorPage() {
           </Card>
         </div>
 
-        {/* Fleet Table */}
         <Card>
           <CardHeader>
             <div className="flex items-center justify-between">
@@ -307,23 +355,30 @@ export default function OperatorPage() {
               <TableHeader>
                 <TableRow>
                   <TableHead>License Plate</TableHead>
+                  <TableHead>Side Number</TableHead>
+                  <TableHead>Status</TableHead>
 
-                  {/* <TableHead>Status</TableHead> */}
                   <TableHead>Capacity</TableHead>
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredBuses.length === 0 && (
+                {isLoading && (
                   <TableRow>
-                    <TableCell colSpan={4}>
-                      <div className="text-center mt-2.5 font-semibold">
-                        No buses found!
-                      </div>
+                    <TableCell colSpan={5} className="text-center py-6">
+                      Loading buses...
                     </TableCell>
                   </TableRow>
                 )}
-                {filteredBuses.map((bus) => (
+
+                {/* {!isLoading && filteredBuses.length === 0 && (
+                <TableRow>
+                  <TableCell colSpan={5} className="text-center py-6 font-semibold">
+                    No buses found!
+                  </TableCell>
+                </TableRow>
+              )} */}
+                {filteredBuses?.map((bus: Bus) => (
                   <TableRow
                     key={bus.id}
                     className="cursor-pointer hover:bg-muted/50"
@@ -332,15 +387,18 @@ export default function OperatorPage() {
                     <TableCell className="font-mono font-medium">
                       {bus.plate_no}
                     </TableCell>
+                    <TableCell className="font-mono font-medium">
+                      {bus.side_no}
+                    </TableCell>
                     {/* <TableCell>{bus.model}</TableCell> */}
-                    {/* <TableCell>
+                    <TableCell>
                       <Badge
                         variant="outline"
-                        className={getStatusColor(bus.status)}
+                        className={getStatusColor(bus.bus_status as BusStatus)}
                       >
-                        {bus.status}
+                        {bus.bus_status}
                       </Badge>
-                    </TableCell> */}
+                    </TableCell>
                     <TableCell>{bus.capacity} seats</TableCell>
                     <TableCell className="text-right">
                       <DropdownMenu>
@@ -377,7 +435,7 @@ export default function OperatorPage() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusChange(bus.id, "Active");
+                              handleStatusChange(bus.id, "active");
                             }}
                           >
                             Set Active
@@ -385,27 +443,19 @@ export default function OperatorPage() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusChange(bus.id, "Maintenance");
+                              handleStatusChange(bus.id, "inactive");
                             }}
                           >
-                            Set Maintenance
+                            Set Inactive
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusChange(bus.id, "Deactivated");
                             }}
                           >
                             Add Seatmap
                           </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(bus.id, "Deactivated");
-                            }}
-                          >
-                            Deactivate
-                          </DropdownMenuItem>
+
                           <DropdownMenuSeparator />
                           <DropdownMenuItem
                             className="text-destructive"
@@ -522,7 +572,8 @@ export default function OperatorPage() {
                         variant="outline"
                         className="bg-primary/10 text-primary"
                       >
-                        {Math.ceil(selectedBus.capacity / 4)} rows × 4 columns
+                        {`${Math.ceil(selectedBus.capacity / 4)}  `} rows × 4
+                        columns
                       </Badge>
                     </div>
                     <div className="rounded-lg border border-border bg-muted/30 p-6">
@@ -590,6 +641,19 @@ export default function OperatorPage() {
                   className="font-mono"
                 />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="new-license">Capacity</Label>
+                <Input
+                  id="capacity"
+                  type="number"
+                  // placeholder="MH-12-XX-0000"
+                  value={newBus.capacity}
+                  onChange={(e) =>
+                    setNewBus({ ...newBus, capacity: Number(e.target.value) })
+                  }
+                  className="font-mono"
+                />
+              </div>
 
               {/* <div className="space-y-2">
                 <Label htmlFor="new-facilities">
@@ -612,59 +676,74 @@ export default function OperatorPage() {
           ) : (
             <div className="space-y-4 py-4 overflow-auto">
               {seatTemplates ? (
-                <>There is</>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="new-capacity">Seating Capacity</Label>
-                  <Input
-                    id="new-capacity"
-                    type="number"
-                    min="20"
-                    max="60"
-                    value={newBus.capacity}
-                    onChange={(e) =>
-                      setNewBus({
-                        ...newBus,
-                        capacity: Number.parseInt(e.target.value),
-                      })
-                    }
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Layout will be generated as {Math.ceil(newBus.capacity / 4)}{" "}
-                    rows × 4 columns
-                  </p>
-                </div>
-              )}
-              <div className="rounded-lg border border-border bg-muted/30 p-4">
-                <div className="mb-3 flex items-center justify-center">
-                  <div className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium">
-                    Driver
-                  </div>
-                </div>
-                <div
-                  className="grid gap-2"
-                  style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+                <RadioGroup
+                  value={selectedTemplateId || undefined}
+                  onValueChange={(value) => setSelectedTemplateId(value)}
+                  className="flex flex-col space-y-2 mt-4"
                 >
-                  {Array.from(
-                    { length: Math.min(newBus.capacity, 16) },
-                    (_, i) => (
-                      <div
-                        key={i}
-                        className="flex aspect-square items-center justify-center rounded-md border border-border bg-card text-xs font-medium"
-                      >
-                        {i + 1}
-                      </div>
-                    )
+                  {seatTemplates.map((template) => (
+                    <div
+                      key={template.id}
+                      className="flex items-center space-x-2"
+                    >
+                      <RadioGroupItem value={template.id} id={template.id} />
+                      <Label htmlFor={template.id}>{template.name}</Label>
+                    </div>
+                  ))}
+                </RadioGroup>
+              ) : (
+                <div className="rounded-lg border border-border bg-muted/30 p-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="new-capacity">Seating Capacity</Label>
+                    <Input
+                      id="new-capacity"
+                      type="number"
+                      min="20"
+                      max="60"
+                      value={newBus.capacity}
+                      onChange={(e) =>
+                        setNewBus({
+                          ...newBus,
+                          capacity: Number.parseInt(e.target.value),
+                        })
+                      }
+                    />
+                    <p className="text-xs text-muted-foreground">
+                      Layout will be generated as{" "}
+                      {Math.ceil(newBus.capacity / 4)} rows × 4 columns
+                    </p>
+                  </div>
+                  <div className="mb-3 flex items-center justify-center">
+                    <div className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium">
+                      Driver
+                    </div>
+                  </div>
+                  <div
+                    className="grid gap-2"
+                    style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+                  >
+                    {Array.from(
+                      { length: Math.min(newBus.capacity, 16) },
+                      (_, i) => (
+                        <div
+                          key={i}
+                          className="flex aspect-square items-center justify-center rounded-md border border-border bg-card text-xs font-medium"
+                        >
+                          {i + 1}
+                        </div>
+                      )
+                    )}
+                  </div>
+                  {newBus.capacity > 16 && (
+                    <p className="mt-2 text-center text-xs text-muted-foreground">
+                      + {newBus.capacity - 16} more seats
+                    </p>
                   )}
                 </div>
-                {newBus.capacity > 16 && (
-                  <p className="mt-2 text-center text-xs text-muted-foreground">
-                    + {newBus.capacity - 16} more seats
-                  </p>
-                )}
-              </div>
+              )}
             </div>
           )}
+
           <DialogFooter>
             {addBusStep === 2 && (
               <Button variant="outline" onClick={() => setAddBusStep(1)}>

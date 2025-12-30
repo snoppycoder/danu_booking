@@ -2,21 +2,21 @@ import { useQuery } from "@tanstack/react-query";
 import { operatorApi, sessionMgmt, superAdminApi } from "@/app/api/api";
 import { Agent, Operator, Session, User } from "@/lib/model";
 
-export const useUsers = () => {
+export const useUsers = (page: number, per_page: number) => {
   return useQuery({
-    queryKey: ["users"],
+    queryKey: ["users", page, per_page],
     queryFn: async () => {
-      const res = await superAdminApi.getUsers();
+      const res = await superAdminApi.getUsers(page, per_page);
       return res.items as User[];
     },
     staleTime: 1000 * 60 * 5,
   });
 };
-export const useOperator = () => {
+export const useOperator = (page: number, per_page: number) => {
   return useQuery({
-    queryKey: ["operator"],
+    queryKey: ["operator", page, per_page],
     queryFn: async () => {
-      const res = await superAdminApi.getOperator();
+      const res = await superAdminApi.getOperator(page, per_page);
       return res.items as Operator[];
     },
     staleTime: 1000 * 60 * 5,
@@ -26,6 +26,7 @@ export const useTrips = (operator_id: string) => {
   return useQuery({
     queryKey: ["trips", operator_id],
     queryFn: async () => {
+      if (!operator_id) return [];
       const res = await operatorApi.getAllTrips(operator_id, 10);
       return res.items;
     },
@@ -34,10 +35,11 @@ export const useTrips = (operator_id: string) => {
   });
 };
 
-export const useDrivers = (operator_id: string) => {
+export const useDrivers = (operator_id?: string) => {
   return useQuery({
     queryKey: ["drivers", operator_id],
     queryFn: async () => {
+      if (!operator_id) return [];
       const res = await operatorApi.getAllDrivers(operator_id);
       return res.items;
     },
@@ -45,11 +47,13 @@ export const useDrivers = (operator_id: string) => {
     enabled: !!operator_id,
   });
 };
-export const useOperatorBuses = (operator_id: string) => {
+export const useOperatorBuses = (operator_id?: string) => {
   return useQuery({
     queryKey: ["buses", operator_id],
     queryFn: async () => {
+      if (!operator_id) return [];
       const res = await operatorApi.getAllBuses(operator_id);
+
       return res.items;
     },
     staleTime: 1000 * 60 * 5,
@@ -67,11 +71,11 @@ export const useSession = () => {
     staleTime: 1000 * 60 * 5,
   });
 };
-export const useAgent = () => {
+export const useAgent = (page: number, per_page: number) => {
   return useQuery({
-    queryKey: ["agent"],
+    queryKey: ["agent", page, per_page],
     queryFn: async () => {
-      const res = await superAdminApi.getAgents();
+      const res = await superAdminApi.getAgents(page, per_page);
 
       return res.items as Agent[];
     },

@@ -52,6 +52,7 @@ import {
 import InfoRow from "./InfoRow";
 import { useOperator, useUsers } from "./Query";
 import axios from "axios";
+import { exportToCSV } from "@/lib/common_functions";
 
 export default function OperatorList() {
   const [displayCount, setDisplayCount] = useState("10");
@@ -63,8 +64,11 @@ export default function OperatorList() {
   const [detailToggle, setDetailToggle] = useState(false);
   const [detail, setDetail] = useState<Operator>();
   const [spinning, setSpinning] = useState<boolean>(false);
-  const { data, isLoading, refetch } = useOperator();
-  const { data: users, ...rest } = useUsers();
+  const { data, isLoading, refetch } = useOperator(
+    currentPage,
+    Number(displayCount)
+  );
+  const { data: users, ...rest } = useUsers(10, 10); //make all
 
   const filteredOperators = data?.filter(
     (emp) =>
@@ -252,7 +256,6 @@ export default function OperatorList() {
             <span className="text-sm">Entries</span>
           </div>
 
-          {/* Export Buttons */}
           <div className="flex gap-2 flex-wrap">
             <Button
               variant="outline"
@@ -262,7 +265,23 @@ export default function OperatorList() {
               <Copy className="w-4 h-4" /> Copy
             </Button>
 
-            <Button variant="outline">CSV</Button>
+            <Button
+              variant="outline"
+              disabled={!data}
+              onClick={() =>
+                exportToCSV(
+                  data!.map((o) => ({
+                    name: o.name,
+                    email: o.contact_email,
+                    slug: o.slug,
+                    "create at": o.created_at,
+                  })),
+                  ` operators_${new Date()}.csv`
+                )
+              }
+            >
+              CSV
+            </Button>
             <Button variant="outline">PDF</Button>
             <Button variant="outline">Print</Button>
 
@@ -375,13 +394,22 @@ export default function OperatorList() {
             </p>
 
             <div className="flex gap-2">
-              <Button variant="outline" disabled={currentPage === 1}>
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
                 Previous
               </Button>
               <Button className="bg-primary text-primary-foreground">
                 {currentPage}
               </Button>
-              <Button variant="outline">Next</Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </Button>
             </div>
           </div>
         )}

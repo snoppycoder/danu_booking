@@ -22,6 +22,7 @@ import axios, {
   AxiosResponse,
   isAxiosError,
 } from "axios";
+import { de } from "zod/v4/locales";
 
 const api = axios.create({
   baseURL: "/api/proxy",
@@ -102,9 +103,10 @@ api.interceptors.response.use(
       const status = error.response.status;
       const data = error.response.data;
       const code = data.code;
+      const detail = data.detail;
 
       if (status === 401) {
-        switch (code) {
+        switch (detail) {
           case "CSRF_MISSING":
           case "CSRF_INVALID":
             // Retry once if not already retried
@@ -138,6 +140,10 @@ api.interceptors.response.use(
 
           case "REFRESH_INVALID":
             console.error("Refresh token invalid");
+            window.location.href = "/login";
+            break;
+          case "Not authenticated":
+            console.error("Not authenticated — redirecting to login");
             window.location.href = "/login";
             break;
 
@@ -270,8 +276,13 @@ export const superAdminApi = {
     const response = await api.post("/admin/operators", body);
     return response.data;
   },
-  getOperator: async () => {
-    const response = await api.get("/admin/operators");
+  getOperator: async (page?: number, per_page?: number) => {
+    const response = await api.get("/admin/operators", {
+      params: {
+        page,
+        per_page,
+      },
+    });
     return response.data;
   },
   viewOperatorDetail: async (id: string) => {
@@ -285,17 +296,26 @@ export const superAdminApi = {
   /**
    * This is the user operation below
    */
-  getUsers: async () => {
+  getUsers: async (page?: number, per_page?: number) => {
     try {
-      const response = await api.get(`/admin/users`);
+      const response = await api.get(`/admin/users`, {
+        params: {
+          page,
+          per_page,
+        },
+      });
       return response.data;
     } catch (error) {
       console.log(error, "error from getUsers func");
     }
   },
   addUser: async (body: AddUserForm) => {
-    const response = await api.post(`/admin/users`, body);
-    return response.data;
+    try {
+      const response = await api.post(`/admin/users`, body);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
   assignOperatorToUser: async (operatorId: string, userId: string) => {
     const response = await api.post(
@@ -334,8 +354,13 @@ export const superAdminApi = {
   /**
    * This is the Agent operation below
    */
-  getAgents: async () => {
-    const response = await api.get("/admin/agents");
+  getAgents: async (page?: number, per_page?: number) => {
+    const response = await api.get("/admin/agents", {
+      params: {
+        page,
+        per_page,
+      },
+    });
 
     return response.data;
   },
@@ -406,6 +431,7 @@ export const passengerApi = {
   },
   getTripDetails: async (tripId: string) => {
     const response = await api.get(`/passenger/${tripId}`);
+
     return response.data;
   },
   holdSeat: async (
@@ -415,18 +441,23 @@ export const passengerApi = {
       passenger_details: Passenger[];
     }
   ) => {
-    const uuid = crypto.randomUUID();
-    console.log(body, "body here");
-    const response = await api.post(`/passenger/${tripId}/holds`, {
-      ...body,
-      passenger_details: body.passenger_details.map((passenger) => ({
-        ...passenger,
-        name: passenger.phone.trim(),
-      })),
-      client_ref: uuid,
-    });
+    try {
+      const uuid = crypto.randomUUID();
+      console.log({ ...body, client_ref: `client_${uuid}` }, "body here");
+      const response = await api.post(`/passenger/${tripId}/holds`, {
+        ...body,
+        passenger_details: body.passenger_details.map((passenger) => ({
+          ...passenger,
+          name: passenger.phone.trim(),
+        })),
+        client_ref: uuid,
+      });
 
-    return response.data;
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from hold seat");
+      throw error;
+    }
   },
 };
 export const agentApi = {};
@@ -436,10 +467,12 @@ export const operatorApi = {
       plate_no: string;
       capacity: number;
       side_no: string;
+      seat_template_id: string;
     },
     operator_id: string
   ) => {
-    const response = await api.post(`/operator/${operator_id}/buses`, { body });
+    console.log("data to send", operator_id, body);
+    const response = await api.post(`/operator/${operator_id}/buses`, body);
     return response.data;
   },
   getAllBuses: async (operator_id: string) => {
@@ -463,9 +496,14 @@ export const operatorApi = {
     return response.data;
   },
   getAllSeatTemplates: async (operator_id: string) => {
-    console.log(operator_id, "operator id here");
-    const response = await api.get(`/operator/${operator_id}/seat-templates`);
-    return response.data;
+    try {
+      console.log(operator_id, "operator id here");
+      const response = await api.get(`/operator/${operator_id}/seat-templates`);
+      console.log(response.data.items, "seat templates response");
+      return response.data.items;
+    } catch (error) {
+      console.log(error, "error from get all seat templates");
+    }
   },
 };
 

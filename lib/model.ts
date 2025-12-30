@@ -71,6 +71,7 @@ export interface User {
   last_name: string;
   id: string;
   phone?: string;
+  organization_id?: string;
   phone_verified: boolean;
   email: string;
   email_verified: boolean;
@@ -83,9 +84,31 @@ export interface User {
   bio: string;
   address: Address;
 }
+export interface SeatExtraMetadata {
+  type: "window" | "asile"; // or string if other types are possible
+}
+
+export interface Seat {
+  id: string;
+  seat_code: string;
+  status: "available" | "unavailable";
+  row: number;
+  col: number;
+  extra_metadata: SeatExtraMetadata;
+}
+
+export interface SeatTemplate {
+  id: string;
+  name: string;
+  seats: Seat[];
+  created_at: string; // ISO date string
+}
+
 export interface Bus {
   id: string;
+  seat_template: SeatTemplate;
   operator_id: string;
+  bus_status: string;
   plate_no: string;
   side_no: string;
   capacity: number;

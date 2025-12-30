@@ -7,6 +7,7 @@ import Navbar from "@/components/navbar";
 import { AuthProtector } from "@/lib/authProtector";
 import { AuthProvider, useAuth } from "@/lib/authContext";
 import Sidebar from "@/components/SuperAdminSideBar";
+import { useState } from "react";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -40,6 +41,7 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const [isNavbarLoaded, setIsNavbarLoaded] = useState(false);
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
@@ -51,10 +53,15 @@ export default function DashboardLayout({
               { href: "/about-us", label: "About Us" },
               { href: "/contact", label: "Contact" },
             ]}
+            onLoaded={() => setIsNavbarLoaded(true)}
           />
-          <AuthProtector>
-            <main>{children}</main>
-          </AuthProtector>
+          {isNavbarLoaded ? (
+            <AuthProtector>
+              <main>{children}</main>
+            </AuthProtector>
+          ) : (
+            <div className="p-4"></div>
+          )}
         </AuthProvider>
       </body>
     </html>

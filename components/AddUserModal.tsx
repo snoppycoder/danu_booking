@@ -16,6 +16,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { AddOperatorForm, AddUserForm } from "@/lib/model";
+import { isAxiosError } from "axios";
 import { Plus, X } from "lucide-react";
 import { useState } from "react";
 import { toast, Toaster } from "sonner";
@@ -51,13 +52,38 @@ export function AddUserModal({ onSuccess }: AddUserModalProps) {
       return;
     }
 
-    const response = await superAdminApi.addUser(form);
-    if (response) {
-      onSuccess?.();
-    }
-    setOpen(false);
+    try {
+      const response = await superAdminApi.addUser(form);
+      if (response) {
+        onSuccess?.();
+      }
+      setOpen(false);
+      // setForm({
+      //   first_name: "",
+      //   last_name: "",
+      //   phone: "",
+      //   password: "",
+      //   email: "",
+      // });
+      toast.success("Successfully created a user");
 
-    console.log(response);
+      console.log(response);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        if (error.response?.data.detail?.[0]?.msg) {
+          if (error.response.data.detail[0].msg) {
+            toast.error(error.response.data.detail[0].msg);
+          }
+        } else {
+          if (error.response?.data.detail.reasons) {
+            toast.error(error.response?.data.detail.reasons[0]);
+          } else {
+            toast.error(error.response?.data.detail);
+          }
+        }
+      }
+      console.log(error);
+    }
   }
 
   return (

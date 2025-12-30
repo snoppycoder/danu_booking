@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,10 +12,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SeatLayoutDialog from "./SeatLayoutDialog";
-import { Passenger } from "@/lib/model";
-import { set } from "zod";
+import type { Bus, Passenger, Seat } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
+import { isAxiosError } from "axios";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -36,9 +36,29 @@ export default function SeatBookingDialog({
   const [passengerArr, setPassengerArr] = useState<Passenger[]>([]);
   const [seatDict, setSeatDict] = useState<Record<string, Passenger>>({});
   const [indexBeingEdited, setIndexBeingEdited] = useState<number | null>(null);
+  const [bus, setBus] = useState<Bus>();
+  const [idx, setIdx] = useState<number>();
+  const [seats, setSeats] = useState<Seat[]>([]);
+  const [editingPassenger, setEditingPassenger] = useState<
+    Record<number, number>
+  >({});
 
-  const [selectedSeat, setSelectedSeat] = useState<string>("");
-  console.log(passengers, "passenger");
+  const [selectedSeats, setSelectedSeats] = useState<Record<number, string>>(
+    {}
+  );
+
+  useEffect(() => {
+    const fetch = async () => {
+      if (tripId.length == 0) return;
+      const response = await passengerApi.getTripDetails(tripId);
+      console.log(response, "logged");
+      // const data = response.data as TripData;
+      // console.log(data);
+      setBus(response.bus);
+    };
+    fetch();
+  }, [tripId]);
+
   const handleProceed = () => {
     setPassengers(
       Array.from({ length: Number(seatCount) }, () => ({
@@ -67,28 +87,46 @@ export default function SeatBookingDialog({
       setPassengerArr((prev) => [...prev, passenger]);
     });
     try {
-      if (
-        seatArr.length == 0 ||
-        passengerArr.length == 0 ||
-        seatArr.length !== passengerArr.length
-      ) {
-        toast.error("Please select seats for all passengers.");
-        return;
-      }
-      await passengerApi.holdSeat(tripId, {
+      if (seatArr.length == 0 || passengerArr.length == 0) return;
+
+      const response = await passengerApi.holdSeat(tripId, {
         seat_codes: seatArr,
         passenger_details: passengerArr,
       });
+      if (response) setToggle(false);
+      console.log(response, "booking");
       toast.success("Seats successfully booked!");
     } catch (error) {
-      toast.error("Error trying to process your request. Please try again.");
+      if (isAxiosError(error)) {
+        if (error.response?.data.detail) {
+          toast.error(error.response?.data.detail?.[0].msg);
+        } else {
+          toast.error(error.response?.data.error, { duration: 2000 });
+        }
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Error trying to process your request. Please try again.");
+      }
     }
   };
 
   function handleSeatSelection(arg0: Passenger) {
     setSeatToggle(true);
   }
-
+  if (!bus) {
+    return <>Loading</>;
+  }
+  function handleBack(): void {
+    setStep(1);
+    setSeatDict({});
+    setPassengerArr([]);
+    setSeatArr([]);
+    setSelectedSeats({});
+    setSeats(bus?.seat_template.seats || []); // reset seat statuses
+    setIdx(undefined);
+    setIndexBeingEdited(null);
+  }
   return (
     <div>
       <Toaster richColors position="top-right" theme="system"></Toaster>
@@ -196,6 +234,11 @@ export default function SeatBookingDialog({
                       onClick={() => {
                         setIndexBeingEdited(index);
                         handleSeatSelection(passengers[index]);
+                        setIdx(index);
+                        setEditingPassenger((prev) => ({
+                          ...prev,
+                          [index]: (prev[index] ?? 0) + 1,
+                        }));
                       }}
                     >
                       {`Select Seat ${
@@ -209,9 +252,9 @@ export default function SeatBookingDialog({
               ))}
 
               <div className="flex gap-2">
-                {/* <Button variant="outline" onClick={() => setStep(1)}>
-                Back
-              </Button> */}
+                <Button variant="outline" onClick={() => handleBack()}>
+                  Back
+                </Button>
 
                 <Button className="flex-1" onClick={handleSubmit}>
                   Confirm Booking
@@ -223,14 +266,22 @@ export default function SeatBookingDialog({
       </Dialog>
       <SeatLayoutDialog
         toggle={seatToggle}
+        // toggle={editingPassenger === idx}
         setToggle={setSeatToggle}
+        setSelectedSeats={setSelectedSeats}
+        selectedSeats={selectedSeats}
+        editingPassenger={editingPassenger}
+        bus={bus!}
+        seats={seats!}
+        idx={Number(idx)}
+        setSeats={setSeats}
         onSelect={(seatId) => {
           // Map selected seat to the current passenger
           setSeatDict((prev) => ({
             ...prev,
             [seatId]: passengers[indexBeingEdited ?? 0], // track which passenger is selecting
           }));
-          setSelectedSeat(seatId); // optional if you want to show it in UI
+          // setSelectedSeat(seatId); // optional if you want to show it in UI
         }}
       />
     </div>
