@@ -6,23 +6,14 @@ import {
   getCSRFToken,
   getRefreshToken,
   getSessionId,
-  setAccessToken,
-  setAuthCookies,
 } from "@/lib/auth";
-import {
-  AddOperatorForm,
-  AddUserForm,
-  Agent,
-  LoginResponse,
-  Passenger,
-} from "@/lib/model";
+import { AddOperatorForm, AddUserForm, Agent, Passenger } from "@/lib/model";
 import axios, {
   AxiosError,
   AxiosRequestConfig,
   AxiosResponse,
   isAxiosError,
 } from "axios";
-import { de } from "zod/v4/locales";
 
 const api = axios.create({
   baseURL: "/api/proxy",
@@ -45,7 +36,17 @@ const refreshApi = axios.create({
     "Content-Type": "application/json",
     Accept: "application/json",
   },
-}); // THIS IS TO AVOID INFINITE REFRESH LOOP
+});
+const api_webhook = axios.create({
+  headers: {
+    "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+  baseURL: "https://chapa-webhook-bisho.onrender.com",
+  // baseURL: "http://localhost:8000",
+});
+
+// THIS IS TO AVOID INFINITE REFRESH LOOP
 
 // api.interceptors.response.use(
 //   (response) => response,
@@ -199,6 +200,22 @@ api.interceptors.request.use(
     return Promise.reject(error);
   }
 );
+
+export const tempAPI = {
+  payment: async (body: {
+    amount: number;
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    // client_ref: string;
+    hold_id: string;
+  }) => {
+    const response = await api_webhook.post("/payment", body);
+    console.log(response.data);
+    return response.data;
+  },
+};
 
 export const authAPI = {
   login: async (
@@ -439,18 +456,19 @@ export const passengerApi = {
     body: {
       seat_codes: string[];
       passenger_details: Passenger[];
+      client_ref: string;
     }
   ) => {
     try {
-      const uuid = crypto.randomUUID();
-      console.log({ ...body, client_ref: `client_${uuid}` }, "body here");
+      // const uuid = crypto.randomUUID();
+      // console.log({ ...body, client_ref: `client_${uuid}` }, "body here");
       const response = await api.post(`/passenger/${tripId}/holds`, {
         ...body,
         passenger_details: body.passenger_details.map((passenger) => ({
           ...passenger,
           name: passenger.phone.trim(),
         })),
-        client_ref: uuid,
+        // client_ref: uuid,
       });
 
       return response.data;

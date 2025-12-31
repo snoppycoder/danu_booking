@@ -170,7 +170,7 @@ export default function DanuBooking() {
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
                     <input
                       type="text"
-                      placeholder="Departure City"
+                      placeholder="Destination City"
                       value={form.route_to}
                       onChange={(e) => {
                         handleAutoCompleteTo(e.target.value);

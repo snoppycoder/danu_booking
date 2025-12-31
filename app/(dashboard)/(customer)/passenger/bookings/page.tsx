@@ -186,7 +186,7 @@ export default function BookingPage() {
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
                   <input
                     type="text"
-                    placeholder="Departure City"
+                    placeholder="Destination City"
                     value={form.route_to}
                     onChange={(e) => {
                       handleAutoCompleteTo(e.target.value);
@@ -378,16 +378,18 @@ export default function BookingPage() {
           )}
         </div>
       </div>
-      <TripDetailsModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        tripData={selectedTrip}
-      />
-      <SeatBookingDialog
-        toggle={useInfoToggle}
-        setToggle={setUseInfoToggle}
-        tripId={tripId}
-      />
+      <div className="hidden">
+        <SeatBookingDialog
+          toggle={useInfoToggle}
+          setToggle={setUseInfoToggle}
+          tripId={tripId}
+        />
+        <TripDetailsModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          tripData={selectedTrip}
+        />
+      </div>
     </div>
   );
 }

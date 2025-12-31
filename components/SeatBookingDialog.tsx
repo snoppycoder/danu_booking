@@ -8,14 +8,16 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
+import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import SeatLayoutDialog from "./SeatLayoutDialog";
 import type { Bus, Passenger, Seat } from "@/lib/model";
-import { passengerApi } from "@/app/api/api";
+import { passengerApi, tempAPI } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
+import { useAuth } from "@/lib/authContext";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -33,7 +35,8 @@ export default function SeatBookingDialog({
   const [seatToggle, setSeatToggle] = useState(false);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [seatArr, setSeatArr] = useState<string[]>([]);
-  const [passengerArr, setPassengerArr] = useState<Passenger[]>([]);
+  const { user } = useAuth();
+  // const [passengerArr, setPassengerArr] = useState<Passenger[]>([]);
   const [seatDict, setSeatDict] = useState<Record<string, Passenger>>({});
   const [indexBeingEdited, setIndexBeingEdited] = useState<number | null>(null);
   const [bus, setBus] = useState<Bus>();
@@ -82,18 +85,33 @@ export default function SeatBookingDialog({
   };
 
   const handleSubmit = async () => {
-    Object.entries(seatDict).forEach(([seat, passenger]) => {
-      setSeatArr((prev) => [...prev, seat]);
-      setPassengerArr((prev) => [...prev, passenger]);
-    });
+    const seatArr = Object.keys(seatDict);
+    const passengerArr = Object.values(seatDict);
+    let uuid = uuidv4();
+
     try {
       if (seatArr.length == 0 || passengerArr.length == 0) return;
 
       const response = await passengerApi.holdSeat(tripId, {
         seat_codes: seatArr,
         passenger_details: passengerArr,
+        client_ref: uuid,
       });
-      if (response) setToggle(false);
+      if (!response) return;
+
+      const response2 = await tempAPI.payment({
+        amount: response.total_amount,
+        email: user?.email ?? "",
+        first_name: user?.first_name ?? "",
+        last_name: user?.last_name ?? "",
+        phone_number: user?.phone ?? "",
+        // client_ref: client_ref,
+        hold_id: response.hold_id,
+      });
+      console.log("response from the payment", response2);
+      if (response2.status == "success")
+        window.open(response2.data.checkout_url, "_blank");
+      setToggle(false);
       console.log(response, "booking");
       toast.success("Seats successfully booked!", { duration: 1000 });
       setPassengers(
@@ -107,15 +125,15 @@ export default function SeatBookingDialog({
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.data.detail) {
-          toast.error(error.response?.data.detail?.[0].msg, { duration: 1000 });
+          toast.error(error.response?.data.detail?.[0].msg, { duration: 3000 });
         } else {
-          toast.error(error.response?.data.error, { duration: 1000 });
+          toast.error(error.response?.data.error, { duration: 3000 });
         }
       } else if (error instanceof Error) {
-        toast.error(error.message, { duration: 1000 });
+        toast.error(error.message, { duration: 3000 });
       } else {
         toast.error("Error trying to process your request. Please try again.", {
-          duration: 1000,
+          duration: 3000,
         });
       }
     }
@@ -130,7 +148,7 @@ export default function SeatBookingDialog({
   function handleBack(): void {
     setStep(1);
     setSeatDict({});
-    setPassengerArr([]);
+
     setSeatArr([]);
     setSelectedSeats({});
     setSeats(bus?.seat_template.seats || []); // reset seat statuses
