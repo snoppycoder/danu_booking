@@ -29,7 +29,8 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Bus, Driver } from "@/lib/model";
+import { Bus, Driver, Route, User } from "@/lib/model";
+import { useAuth } from "@/lib/authContext";
 
 const tripSchema = z.object({
   route_from: z.string().min(2, "Starting location is required"),
@@ -48,7 +49,14 @@ interface TripDialogProps {
   onSubmit: (data: TripFormData) => void;
   buses: Bus[];
   drivers: Driver[];
-  trip?: any;
+  trip?: {
+    route_from: string;
+    route_to: string;
+    departure_at: string;
+    price: number;
+    bus_id: string;
+    driver_id: string;
+  };
 }
 
 export function TripDialog({
@@ -60,6 +68,10 @@ export function TripDialog({
   trip,
 }: TripDialogProps) {
   const isEdit = !!trip;
+  const { user } = useAuth();
+  const filteredBus = buses.filter(
+    (b) => b.operator_id === user?.organization_id && b.bus_status === "active",
+  );
 
   const form = useForm<TripFormData>({
     resolver: zodResolver(tripSchema) as Resolver<TripFormData>,
@@ -74,7 +86,7 @@ export function TripDialog({
   });
 
   const selectedBusId = form.watch("bus_id");
-  const selectedBus = buses.find((b) => b.id === selectedBusId);
+  const selectedBus = filteredBus.find((b) => b.id === selectedBusId);
 
   // Filter drivers by selected bus operator
   const filteredDrivers = selectedBus
@@ -87,7 +99,7 @@ export function TripDialog({
       // Convert ISO string to datetime-local format
       const departureDate = new Date(trip.departure_at);
       const localDateTime = new Date(
-        departureDate.getTime() - departureDate.getTimezoneOffset() * 60000
+        departureDate.getTime() - departureDate.getTimezoneOffset() * 60000,
       )
         .toISOString()
         .slice(0, 16);
@@ -117,7 +129,7 @@ export function TripDialog({
     if (selectedBusId && !isEdit) {
       const currentDriverId = form.getValues("driver_id");
       const isDriverValid = filteredDrivers.some(
-        (d) => d.id === currentDriverId
+        (d) => d.id === currentDriverId,
       );
       if (!isDriverValid) {
         form.setValue("driver_id", "");
@@ -138,7 +150,7 @@ export function TripDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{isEdit ? "Edit Trip" : "Create New Trip"}</DialogTitle>
           <DialogDescription>
@@ -237,9 +249,9 @@ export function TripDialog({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {buses.map((bus) => (
+                      {filteredBus.map((bus) => (
                         <SelectItem key={bus.id} value={bus.id}>
-                          {bus.id} - {bus.operator_id} ({bus.capacity} seats)
+                          {bus.plate_no} | {bus.side_no}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -275,7 +287,7 @@ export function TripDialog({
                     <SelectContent>
                       {filteredDrivers.map((driver) => (
                         <SelectItem key={driver.id} value={driver.id}>
-                          {driver.first_name} ({driver.operator_id})
+                          {driver.first_name ?? ""} {driver.last_name ?? ""}
                         </SelectItem>
                       ))}
                     </SelectContent>

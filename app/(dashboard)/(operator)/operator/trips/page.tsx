@@ -25,13 +25,17 @@ import {
 } from "lucide-react";
 import { TripDialog } from "@/components/TripDialog";
 import { TripDetailDialog } from "@/components/TripDetailDialog";
-import { useDrivers, useOperatorBuses, useTrips } from "@/components/Query";
+import {
+  useCreateTrip,
+  useDrivers,
+  useOperatorBuses,
+  useTrips,
+} from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
-import { Bus, Driver, Route, Trip } from "@/lib/model";
-
-// Mock data - replace with your actual API call
-
-// Mock data for buses and drivers
+import { Bus, CreateTripPayload, Driver, Route, Trip } from "@/lib/model";
+import { operatorApi } from "@/app/api/api";
+import { toast, Toaster } from "sonner";
+import { isAxiosError } from "axios";
 
 export interface Trip_ extends Trip {
   id: string;
@@ -46,9 +50,9 @@ export interface Trip_ extends Trip {
 export default function TripManagement() {
   const { user } = useAuth();
 
-  const { data: buses_ } = useOperatorBuses(user?.id!);
-  const { data: trips_ } = useTrips(user?.id!);
-  const { data: driver_ } = useDrivers(user?.id!);
+  const { data: buses_ } = useOperatorBuses(user?.organization_id!);
+  const { data: trips_ } = useTrips(user?.organization_id!);
+  const { data: driver_ } = useDrivers(user?.organization_id!);
   const [trips, setTrips] = useState<Trip_[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
 
@@ -60,30 +64,23 @@ export default function TripManagement() {
     console.log("Buses:", buses_);
     console.log("Trips:", trips_);
     console.log("Drivers:", driver_);
-  }, [buses_, trips_]);
+  }, [buses_, trips_, driver_]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [filterOperator, setFilterOperator] = useState<string>("all");
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<Trip_ | null>(null);
   const [buses, setBuses] = useState<Bus[]>([]);
+  const { mutate, isPending, isSuccess, error } = useCreateTrip();
 
-  // Extract unique operators
-  const operators = Array.from(new Set(trips?.map((trip) => trip.operator)));
-
-  // Filter trips
   const filteredTrips = trips?.filter((trip) => {
     const matchesSearch =
       trip.route_from.toLowerCase().includes(searchQuery.toLowerCase()) ||
       trip.route_to.toLowerCase().includes(searchQuery.toLowerCase());
 
-    const matchesOperator =
-      filterOperator === "all" ||
-      trip.operator.operator_name === filterOperator;
-
-    return matchesSearch && matchesOperator;
+    return matchesSearch;
   });
+  console.log("Filtered Trips:", filteredTrips);
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -102,26 +99,56 @@ export default function TripManagement() {
       hour12: true,
     });
   };
-
-  const handleCreateTrip = (tripData: any) => {
-    const newTrip = {
+  //  departure_at: string;
+  //     operator_id: string;
+  //     route_from: string;
+  //     route_to: string;
+  //     price: number;
+  //     bus_id: string;
+  //     driver_id: string;
+  // }
+  const handleCreateTrip = (tripData: CreateTripPayload) => {
+    const newTrip: Trip_ = {
       id: `trip-${Date.now()}`,
-      ...tripData,
+      operator_id: user?.organization_id || "",
+      bus_id: tripData.bus_id,
+      driver_id: tripData.driver_id,
+      route_from: tripData.route_from,
+      route_to: tripData.route_to,
+      departure_at: tripData.departure_at,
+      price: tripData.price,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
-      // Add related data from selected IDs
-      operator_name:
-        buses.find((b) => b.id === tripData.bus_id)?.plate_no || "Unknown",
-      bus_number: buses.find((b) => b.id === tripData.bus_id)?.id || "Unknown",
-      driver_name:
-        drivers.find((d) => d.id === tripData.driver_id)?.first_name ||
-        "Unknown",
+      trip_id: "",
+      operator: {
+        operator_id: user?.organization_id || "",
+        operator_name: "",
+      },
     };
-    setTrips((prev) => [newTrip, ...prev]);
+
+    setTrips((prev) => [...prev, newTrip]);
+
+    mutate({
+      operator_id: user?.organization_id || "",
+      bus_id: tripData.bus_id,
+      driver_id: tripData.driver_id,
+      route_from: tripData.route_from,
+      route_to: tripData.route_to,
+      departure_at: tripData.departure_at,
+      price: tripData.price,
+    });
+
     setIsCreateDialogOpen(false);
   };
 
-  const handleUpdateTrip = (tripData: any) => {
+  const handleUpdateTrip = (tripData: {
+    route_from: string;
+    route_to: string;
+    departure_at: string;
+    price: number;
+    bus_id: string;
+    driver_id: string;
+  }) => {
     setTrips(
       trips?.map((trip) =>
         trip.id === selectedTrip?.id
@@ -130,21 +157,28 @@ export default function TripManagement() {
               ...tripData,
               updated_at: new Date().toISOString(),
               operator_name:
-                buses.find((b) => b.id === tripData.bus_id)?.operator_id ||
-                trip.operator.operator_name,
+                buses.find((b) => b.id === tripData.bus_id)?.operator_id || "",
             }
-          : trip
-      )
+          : trip,
+      ),
     );
     setIsEditDialogOpen(false);
     setSelectedTrip(null);
   };
 
-  const handleDeleteTrip = (tripId: string) => {
-    if (confirm("Are you sure you want to delete this trip?")) {
+  const handleDeleteTrip = async (tripId: string) => {
+    try {
+      await operatorApi.deleteTrip(user?.organization_id || "", tripId);
       setTrips(trips.filter((trip) => trip.id !== tripId));
       setIsDetailDialogOpen(false);
       setSelectedTrip(null);
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.error || "Failed to delete trip");
+      }
+
+      console.error("Error deleting trip:", error);
+      return;
     }
   };
 
@@ -160,6 +194,7 @@ export default function TripManagement() {
 
   return (
     <div className="min-h-screen bg-background p-6">
+      <Toaster position="top-right" richColors />
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
@@ -183,8 +218,8 @@ export default function TripManagement() {
         {/* Filters */}
 
         {/* Stats */}
-        <div className="grid gap-4 md:grid-cols-4">
-          <Card className="p-4">
+        <div className="grid justify-center gap-4 md:grid-cols-3">
+          <Card className="px-4 py-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total Trips</p>
               <p className="text-2xl font-bold text-foreground">
@@ -192,7 +227,7 @@ export default function TripManagement() {
               </p>
             </div>
           </Card>
-          <Card className="p-4">
+          <Card className="px-4 py-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Today</p>
               <p className="text-2xl font-bold text-primary">
@@ -200,27 +235,27 @@ export default function TripManagement() {
                   trips.filter(
                     (t) =>
                       new Date(t.departure_at).toDateString() ===
-                      new Date().toDateString()
+                      new Date().toDateString(),
                   ).length
                 }
               </p>
             </div>
           </Card>
-          <Card className="p-4">
+          {/* <Card className="px-4 py-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Operators</p>
               <p className="text-2xl font-bold text-foreground">
                 {operators.length}
               </p>
             </div>
-          </Card>
-          <Card className="p-4">
+          </Card> */}
+          <Card className="px-4 py-6">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Avg Price</p>
               <p className="text-2xl font-bold text-foreground">
                 {trips.length > 0
                   ? Math.round(
-                      trips.reduce((sum, t) => sum + t.price, 0) / trips.length
+                      trips.reduce((sum, t) => sum + t.price, 0) / trips.length,
                     )
                   : 0}{" "}
                 ETB
@@ -254,86 +289,84 @@ export default function TripManagement() {
             filteredTrips.map((trip) => (
               <Card
                 key={trip.id}
-                className="p-4 transition-shadow hover:shadow-md"
+                className="group p-5 transition-all hover:shadow-lg"
               >
-                <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-                  {/* Trip Info */}
-                  <div className="flex-1 space-y-3">
-                    {/* Route */}
-                    <div className="flex items-center gap-3">
-                      <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
+                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                  {/* LEFT: Trip Content */}
+                  <div className="flex-1 space-y-5">
+                    {/* Route (Hero Section) */}
+                    <div className="flex items-center justify-center gap-4 rounded-lg bg-muted/40 py-3">
+                      <div className="flex items-center gap-2 text-lg font-semibold">
                         <MapPin className="size-5 text-primary" />
                         {trip.route_from}
                       </div>
+
                       <ArrowRight className="size-5 text-muted-foreground" />
-                      <div className="flex items-center gap-2 text-lg font-semibold text-foreground">
+
+                      <div className="flex items-center gap-2 text-lg font-semibold">
                         <MapPin className="size-5 text-primary" />
                         {trip.route_to}
                       </div>
-                      <Badge variant="outline" className="ml-2 text-xs">
-                        {trip.operator.operator_name}
-                      </Badge>
                     </div>
 
-                    {/* Details Grid */}
-                    <div className="grid gap-3 text-sm md:grid-cols-2 lg:grid-cols-4">
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <Calendar className="size-4" />
+                    {/* Info Grid */}
+                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      {/* Departure */}
+                      <div className="flex items-center gap-3 rounded-md border p-3">
+                        <Calendar className="size-4 text-muted-foreground" />
                         <div>
-                          <div className="font-medium text-foreground">
+                          <div className="text-sm font-medium">
                             {formatDate(trip.departure_at)}
                           </div>
-                          <div className="text-xs">
+                          <div className="text-xs text-muted-foreground">
                             {formatTime(trip.departure_at)}
                           </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <DollarSign className="size-4" />
+                      {/* Price */}
+                      <div className="flex items-center gap-3 rounded-md border p-3">
+                        <DollarSign className="size-4 text-muted-foreground" />
                         <div>
-                          <div className="font-medium text-foreground">
+                          <div className="text-sm font-medium">
                             {trip.price} ETB
                           </div>
-                          <div className="text-xs">Price per seat</div>
+                          <div className="text-xs text-muted-foreground">
+                            Price per seat
+                          </div>
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        {/* <Bus className="size-4" /> */}
+                      {/* Driver */}
+                      <div className="flex items-center gap-3 rounded-md border p-3">
+                        <User className="size-4 text-muted-foreground" />
                         <div>
-                          <div className="font-medium text-foreground">
-                            {trip.bus_id}
+                          <div className="text-sm font-medium">Driver name</div>
+                          <div className="text-xs text-muted-foreground">
+                            Driver
                           </div>
-                          <div className="text-xs">Bus Number</div>
-                        </div>
-                      </div>
-
-                      <div className="flex items-center gap-2 text-muted-foreground">
-                        <User className="size-4" />
-                        <div>
-                          <div className="font-medium text-foreground">
-                            {/* {trip.driver_name} */} Driver name
-                          </div>
-                          <div className="text-xs">Driver</div>
                         </div>
                       </div>
                     </div>
                   </div>
 
-                  {/* Actions */}
-                  <div className="flex items-center gap-2 lg:flex-col">
+                  {/* RIGHT: Actions */}
+                  <div className="flex gap-2 lg:flex-col lg:items-end">
                     <Button
-                      variant="outline"
                       size="sm"
                       onClick={() => handleViewDetails(trip)}
-                      className="flex-1 lg:flex-none lg:w-full"
+                      className="w-full lg:w-36"
                     >
                       View Details
                     </Button>
+
                     <DropdownMenu>
                       <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="opacity-60 transition-opacity group-hover:opacity-100"
+                        >
                           <MoreVertical className="size-4" />
                         </Button>
                       </DropdownMenuTrigger>
@@ -372,7 +405,7 @@ export default function TripManagement() {
         onSubmit={handleUpdateTrip}
         buses={buses}
         drivers={drivers}
-        trip={selectedTrip}
+        trip={selectedTrip!}
       />
 
       {selectedTrip && (

@@ -74,84 +74,15 @@ import {
   Calendar,
   Bus,
 } from "lucide-react";
+import { useAuth } from "@/lib/authContext";
+import { useCreateDriver, useDrivers } from "@/components/Query";
+import { Driver } from "@/lib/model";
+import { set } from "zod";
+import { operatorApi } from "@/app/api/api";
+import { toast, Toaster } from "sonner";
+import { isAxiosError } from "axios";
 
 type DriverStatus = "Active" | "On Leave" | "Inactive";
-
-interface Driver {
-  id: string;
-  name: string;
-  licenseNumber: string;
-  phone: string;
-  email: string;
-  status: DriverStatus;
-  experience: number;
-  assignedBus: string | null;
-  joinDate: string;
-  rating: number;
-}
-
-const initialDrivers: Driver[] = [
-  {
-    id: "1",
-    name: "Rajesh Kumar",
-    licenseNumber: "DL-0720230001234",
-    phone: "+91 98765 43210",
-    email: "rajesh.kumar@fleetops.com",
-    status: "Active",
-    experience: 12,
-    assignedBus: "MH-12-AB-1234",
-    joinDate: "2015-03-15",
-    rating: 4.8,
-  },
-  {
-    id: "2",
-    name: "Amit Sharma",
-    licenseNumber: "DL-0720230002345",
-    phone: "+91 98765 43211",
-    email: "amit.sharma@fleetops.com",
-    status: "Active",
-    experience: 8,
-    assignedBus: "MH-12-CD-5678",
-    joinDate: "2018-07-22",
-    rating: 4.6,
-  },
-  {
-    id: "3",
-    name: "Prakash Yadav",
-    licenseNumber: "DL-0720230003456",
-    phone: "+91 98765 43212",
-    email: "prakash.yadav@fleetops.com",
-    status: "On Leave",
-    experience: 15,
-    assignedBus: null,
-    joinDate: "2012-11-08",
-    rating: 4.9,
-  },
-  {
-    id: "4",
-    name: "Suresh Patil",
-    licenseNumber: "DL-0720230004567",
-    phone: "+91 98765 43213",
-    email: "suresh.patil@fleetops.com",
-    status: "Active",
-    experience: 10,
-    assignedBus: "MH-12-GH-3456",
-    joinDate: "2016-05-19",
-    rating: 4.7,
-  },
-  {
-    id: "5",
-    name: "Vijay Singh",
-    licenseNumber: "DL-0720230005678",
-    phone: "+91 98765 43214",
-    email: "vijay.singh@fleetops.com",
-    status: "Active",
-    experience: 6,
-    assignedBus: null,
-    joinDate: "2020-02-10",
-    rating: 4.5,
-  },
-];
 
 const busOptions = [
   { id: "1", licensePlate: "MH-12-AB-1234", model: "Volvo 9400" },
@@ -161,7 +92,6 @@ const busOptions = [
 ];
 
 export default function DriversManagement() {
-  const [drivers, setDrivers] = useState<Driver[]>(initialDrivers);
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDriver, setSelectedDriver] = useState<Driver | null>(null);
   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
@@ -170,23 +100,33 @@ export default function DriversManagement() {
   const [driverToDelete, setDriverToDelete] = useState<string | null>(null);
   const [isAssignBusOpen, setIsAssignBusOpen] = useState(false);
   const [driverToAssign, setDriverToAssign] = useState<string | null>(null);
+  const { user } = useAuth();
+  const { data } = useDrivers(user?.organization_id!);
+  const [drivers, setDrivers] = useState<Driver[]>(data ?? []);
+  const { mutate, isSuccess, error } = useCreateDriver();
+  const [fullName, setFullName] = useState(
+    `${selectedDriver?.first_name || ""} ${selectedDriver?.last_name || ""}`,
+  );
 
   // New driver form state
-  const [newDriver, setNewDriver] = useState({
-    name: "",
-    licenseNumber: "",
-    phone: "",
-    email: "",
-    experience: 0,
-    joinDate: new Date().toISOString().split("T")[0],
+  const [newDriver, setNewDriver] = useState<Driver>({
+    id: "",
+    first_name: "",
+    last_name: "",
+    license_no: "",
+    created_at: "",
+    updated_at: "",
+    operator_id: user?.organization_id!,
   });
 
-  const filteredDrivers = drivers.filter(
-    (driver) =>
-      driver.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      driver.licenseNumber.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      driver.email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredDrivers =
+    data?.filter(
+      (driver) =>
+        driver.first_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        driver.last_name.toLowerCase().includes(searchQuery.toLowerCase()),
+    ) ?? [];
+
+  console.log("Filtered Drivers:", filteredDrivers);
 
   const handleViewDetails = (driver: Driver) => {
     setSelectedDriver(driver);
@@ -195,47 +135,62 @@ export default function DriversManagement() {
 
   const handleStatusChange = (driverId: string, newStatus: DriverStatus) => {
     setDrivers((prev) =>
-      prev.map((driver) =>
-        driver.id === driverId ? { ...driver, status: newStatus } : driver
-      )
+      prev?.map((driver) =>
+        driver.id === driverId ? { ...driver, status: newStatus } : driver,
+      ),
     );
   };
 
-  const handleDeleteDriver = () => {
-    if (driverToDelete) {
-      setDrivers((prev) =>
-        prev.filter((driver) => driver.id !== driverToDelete)
-      );
-      setDriverToDelete(null);
-      setIsDeleteDialogOpen(false);
+  const handleDeleteDriver = async () => {
+    try {
+      if (driverToDelete) {
+        await operatorApi.deleteDriver(user?.organization_id!, driverToDelete);
+        setDrivers((prev) =>
+          prev?.filter((driver) => driver.id !== driverToDelete),
+        );
+        setDriverToDelete(null);
+        setIsDeleteDialogOpen(false);
+      }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.error || "The driver is associated with an active trip(s)");
+      }
     }
   };
 
   const handleAddDriver = () => {
-    const driver: Driver = {
-      id: String(drivers.length + 1),
-      ...newDriver,
-      status: "Active",
-      assignedBus: null,
-      rating: 4.0,
-    };
-    setDrivers((prev) => [...prev, driver]);
-    setIsAddDriverOpen(false);
-    setNewDriver({
-      name: "",
-      licenseNumber: "",
-      phone: "",
-      email: "",
-      experience: 0,
-      joinDate: new Date().toISOString().split("T")[0],
-    });
+    try {
+      setDrivers((prev) => [...prev, newDriver]);
+      setIsAddDriverOpen(false);
+      console.log(newDriver);
+      mutate({
+        operator_id: user?.organization_id!,
+        body: {
+          first_name: fullName.split(" ")[0] || "",
+          last_name: fullName.split(" ")[1] || "",
+          license_no: newDriver.license_no,
+        },
+      });
+
+      setNewDriver({
+        id: "",
+        first_name: "",
+        last_name: "",
+        license_no: "",
+        created_at: "",
+        updated_at: "",
+        operator_id: user?.organization_id!,
+      });
+    } catch (error) {
+      console.error("Error adding driver:", error);
+    }
   };
 
   const handleUpdateDriver = (updatedDriver: Driver) => {
     setDrivers((prev) =>
       prev.map((driver) =>
-        driver.id === updatedDriver.id ? updatedDriver : driver
-      )
+        driver.id === updatedDriver.id ? updatedDriver : driver,
+      ),
     );
     setSelectedDriver(updatedDriver);
   };
@@ -247,8 +202,8 @@ export default function DriversManagement() {
         prev.map((driver) =>
           driver.id === driverToAssign
             ? { ...driver, assignedBus: bus?.licensePlate || null }
-            : driver
-        )
+            : driver,
+        ),
       );
       setDriverToAssign(null);
       setIsAssignBusOpen(false);
@@ -266,16 +221,21 @@ export default function DriversManagement() {
     }
   };
 
-  const activeCount = drivers.filter((d) => d.status === "Active").length;
-  const onLeaveCount = drivers.filter((d) => d.status === "On Leave").length;
-  const assignedCount = drivers.filter((d) => d.assignedBus !== null).length;
-  const avgExperience = Math.round(
-    drivers.reduce((sum, d) => sum + d.experience, 0) / drivers.length
-  );
+  // const activeCount = drivers.filter((d) => d. === "Active").length;
+  // const onLeaveCount = drivers.filter((d) => d.status === "On Leave").length;
+  // const assignedCount = drivers.filter((d) => d.assignedBus !== null).length;
+  // const avgExperience = Math.round(
+  //   drivers.reduce((sum, d) => sum + d.experience, 0) / drivers.length,
+  // );
+  const activeCount = 0;
+  const onLeaveCount = 0;
+  const assignedCount = 0;
+  const avgExperience = 0;
 
   return (
     <div className="flex flex-col">
       {/* Header */}
+      <Toaster position="top-right" richColors />
       <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
         <div className="flex h-16 items-center gap-4 px-6">
           <SidebarTrigger />
@@ -308,7 +268,7 @@ export default function DriversManagement() {
               <IdCard className="size-4 text-muted-foreground" />
             </CardHeader>
             <CardContent>
-              <div className="text-2xl font-bold">{drivers.length}</div>
+              <div className="text-2xl font-bold">{filteredDrivers.length}</div>
               <p className="text-xs text-muted-foreground">In workforce</p>
             </CardContent>
           </Card>
@@ -375,38 +335,42 @@ export default function DriversManagement() {
                   <TableHead>License Number</TableHead>
                   <TableHead>Status</TableHead>
                   <TableHead>Experience</TableHead>
-                  <TableHead>Assigned Bus</TableHead>
+                  {/* <TableHead>Assigned Bus</TableHead> */}
                   <TableHead className="text-right">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDrivers.map((driver) => (
-                  <TableRow
-                    key={driver.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleViewDetails(driver)}
-                  >
-                    <TableCell>
-                      <div className="flex flex-col">
-                        <span className="font-medium">{driver.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {driver.email}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-mono text-sm">
-                      {driver.licenseNumber}
-                    </TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getStatusColor(driver.status)}
-                      >
-                        {driver.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{driver.experience} years</TableCell>
-                    <TableCell>
+                {filteredDrivers.length > 0 ? (
+                  filteredDrivers.map((driver) => (
+                    <TableRow
+                      key={driver.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleViewDetails(driver)}
+                    >
+                      <TableCell>
+                        <div className="flex flex-col">
+                          <span className="font-medium">
+                            {driver.first_name} {driver.last_name}
+                          </span>
+                          {/* <span className="text-xs text-muted-foreground">
+                            
+                          </span> */}
+                        </div>
+                      </TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {driver.license_no}
+                      </TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className="bg-green-100 text-green-800"
+                        >
+                          Active
+                        </Badge>
+                      </TableCell>
+                      {/*  this is fixed for now */}
+                      <TableCell>7 years</TableCell>
+                      {/* <TableCell>
                       {driver.assignedBus ? (
                         <span className="font-mono text-sm">
                           {driver.assignedBus}
@@ -416,82 +380,89 @@ export default function DriversManagement() {
                           Not assigned
                         </span>
                       )}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          asChild
-                          onClick={(e) => e.stopPropagation()}
-                        >
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewDetails(driver);
-                            }}
+                    </TableCell> */}
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            asChild
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <Edit className="mr-2 size-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDriverToAssign(driver.id);
-                              setIsAssignBusOpen(true);
-                            }}
-                          >
-                            <Bus className="mr-2 size-4" />
-                            Assign Bus
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(driver.id, "Active");
-                            }}
-                          >
-                            Set Active
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(driver.id, "On Leave");
-                            }}
-                          >
-                            Set On Leave
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(driver.id, "Inactive");
-                            }}
-                          >
-                            Set Inactive
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDriverToDelete(driver.id);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="mr-2 size-4" />
-                            Delete Driver
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetails(driver);
+                              }}
+                            >
+                              <Edit className="mr-2 size-4" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDriverToAssign(driver.id);
+                                setIsAssignBusOpen(true);
+                              }}
+                            >
+                              <Bus className="mr-2 size-4" />
+                              Assign Bus
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange(driver.id, "Active");
+                              }}
+                            >
+                              Set Active
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange(driver.id, "On Leave");
+                              }}
+                            >
+                              Set On Leave
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange(driver.id, "Inactive");
+                              }}
+                            >
+                              Set Inactive
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDriverToDelete(driver.id);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="mr-2 size-4" />
+                              Delete Driver
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                ) : (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                      No drivers found
                     </TableCell>
                   </TableRow>
-                ))}
+                )}
               </TableBody>
             </Table>
           </CardContent>
@@ -519,17 +490,25 @@ export default function DriversManagement() {
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name</Label>
                       <Input
-                        id="name"
-                        value={selectedDriver.name}
-                        onChange={(e) =>
-                          handleUpdateDriver({
-                            ...selectedDriver,
-                            name: e.target.value,
-                          })
-                        }
+                        id="new-name"
+                        value={fullName}
+                        onChange={(e) => {
+                          const value = e.target.value;
+                          setFullName(value);
+
+                          const names = value.trim().split(" ");
+                          const first = names.shift() || "";
+                          const last = names.join(" ");
+                          setNewDriver((prev) => ({
+                            ...prev,
+                            first_name: first,
+                            last_name: last,
+                          }));
+                        }}
+                        placeholder="Enter driver's full name"
                       />
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="email">Email Address</Label>
                       <div className="relative">
                         <Mail className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
@@ -545,9 +524,9 @@ export default function DriversManagement() {
                           }
                           className="pl-8"
                         />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
+                      </div> */}
+                  </div>
+                  {/* <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number</Label>
                       <div className="relative">
                         <Phone className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
@@ -562,41 +541,41 @@ export default function DriversManagement() {
                           }
                           className="pl-8"
                         />
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="joinDate">Join Date</Label>
-                      <Input
-                        id="joinDate"
-                        type="date"
-                        value={selectedDriver.joinDate}
-                        onChange={(e) =>
-                          handleUpdateDriver({
-                            ...selectedDriver,
-                            joinDate: e.target.value,
-                          })
-                        }
-                      />
-                    </div>
+                      </div> 
+                    </div> */}
+                  <div className="space-y-2">
+                    <Label htmlFor="joinDate">Join Date</Label>
+                    <Input
+                      id="joinDate"
+                      type="date"
+                      value={selectedDriver.created_at?.split("T")[0] || ""}
+                      onChange={(e) =>
+                        handleUpdateDriver({
+                          ...selectedDriver,
+                          created_at: e.target.value,
+                        })
+                      }
+                    />
                   </div>
                 </TabsContent>
+
                 <TabsContent value="professional" className="space-y-4">
                   <div className="space-y-4">
                     <div className="space-y-2">
                       <Label htmlFor="license">License Number</Label>
                       <Input
                         id="license"
-                        value={selectedDriver.licenseNumber}
+                        value={newDriver.license_no}
                         onChange={(e) =>
-                          handleUpdateDriver({
-                            ...selectedDriver,
-                            licenseNumber: e.target.value,
+                          setNewDriver({
+                            ...newDriver,
+                            license_no: e.target.value,
                           })
                         }
                         className="font-mono"
                       />
                     </div>
-                    <div className="space-y-2">
+                    {/* <div className="space-y-2">
                       <Label htmlFor="status">Status</Label>
                       <Select
                         value={selectedDriver.status}
@@ -616,8 +595,8 @@ export default function DriversManagement() {
                           <SelectItem value="Inactive">Inactive</SelectItem>
                         </SelectContent>
                       </Select>
-                    </div>
-                    <div className="space-y-2">
+                    </div> */}
+                    {/* <div className="space-y-2">
                       <Label htmlFor="experience">Experience (years)</Label>
                       <Input
                         id="experience"
@@ -667,7 +646,7 @@ export default function DriversManagement() {
                           </span>
                         )}
                       </div>
-                    </div>
+                    </div> */}
                   </div>
                 </TabsContent>
               </Tabs>
@@ -690,10 +669,19 @@ export default function DriversManagement() {
               <Label htmlFor="new-name">Full Name</Label>
               <Input
                 id="new-name"
-                value={newDriver.name}
-                onChange={(e) =>
-                  setNewDriver({ ...newDriver, name: e.target.value })
-                }
+                value={fullName}
+                onChange={(e) => setFullName(e.target.value)}
+                onBlur={() => {
+                  const names = fullName.trim().split(" ");
+                  const first = names.shift() || ""; // first word
+                  const last = names.join(" "); // everything else as last name
+
+                  setNewDriver({
+                    ...newDriver,
+                    first_name: first,
+                    last_name: last,
+                  });
+                }}
                 placeholder="Enter driver's full name"
               />
             </div>
@@ -701,15 +689,15 @@ export default function DriversManagement() {
               <Label htmlFor="new-license">License Number</Label>
               <Input
                 id="new-license"
-                value={newDriver.licenseNumber}
+                value={newDriver.license_no}
                 onChange={(e) =>
-                  setNewDriver({ ...newDriver, licenseNumber: e.target.value })
+                  setNewDriver({ ...newDriver, license_no: e.target.value })
                 }
                 placeholder="DL-XXXXXXXXXX"
                 className="font-mono"
               />
             </div>
-            <div className="space-y-2">
+            {/* <div className="space-y-2">
               <Label htmlFor="new-phone">Phone Number</Label>
               <Input
                 id="new-phone"
@@ -731,8 +719,8 @@ export default function DriversManagement() {
                 }
                 placeholder="driver@fleetops.com"
               />
-            </div>
-            <div className="space-y-2">
+            </div> */}
+            {/* <div className="space-y-2">
               <Label htmlFor="new-experience">Experience (years)</Label>
               <Input
                 id="new-experience"
@@ -746,18 +734,18 @@ export default function DriversManagement() {
                 }
                 placeholder="0"
               />
-            </div>
-            <div className="space-y-2">
+            </div> */}
+            {/* <div className="space-y-2">
               <Label htmlFor="new-joinDate">Join Date</Label>
               <Input
                 id="new-joinDate"
                 type="date"
-                value={newDriver.joinDate}
+                value={newDriver.created_at?.split("T")[0] || ""}
                 onChange={(e) =>
-                  setNewDriver({ ...newDriver, joinDate: e.target.value })
+                  setNewDriver({ ...newDriver, created_at: e.target.value })
                 }
               />
-            </div>
+            </div> */}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDriverOpen(false)}>
@@ -765,9 +753,11 @@ export default function DriversManagement() {
             </Button>
             <Button
               onClick={handleAddDriver}
-              disabled={
-                !newDriver.name || !newDriver.licenseNumber || !newDriver.email
-              }
+              // disabled={
+              //   !newDriver.first_name ||
+              //   !newDriver.last_name ||
+              //   !newDriver.license_no
+              // }
             >
               Add Driver
             </Button>

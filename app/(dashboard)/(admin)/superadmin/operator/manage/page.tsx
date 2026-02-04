@@ -104,7 +104,7 @@ export default function OperatorUsersList() {
 
   // Extract unique operators
   const operators = Array.from(
-    new Set(mockOperatorUsers.map((user) => user.operator))
+    new Set(mockOperatorUsers.map((user) => user.operator)),
   );
 
   // Filter users based on search and filters
@@ -134,7 +134,7 @@ export default function OperatorUsersList() {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor(
-      (now.getTime() - date.getTime()) / (1000 * 60 * 60)
+      (now.getTime() - date.getTime()) / (1000 * 60 * 60),
     );
 
     if (diffInHours < 1) return "Just now";
@@ -317,7 +317,7 @@ export default function OperatorUsersList() {
                           <Shield className="size-4" />
                           <span>
                             {user.roles
-                              .map((role: any) => role.name)
+                              .map((role: { name: string }) => role.name)
                               .join(", ")}
                           </span>
                         </div>

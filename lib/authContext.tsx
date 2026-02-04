@@ -18,7 +18,7 @@ interface AuthContextType {
   login: (
     identifier: string,
     password: string,
-    remember: boolean
+    remember: boolean,
   ) => Promise<LoginResponse>;
 }
 
@@ -39,7 +39,7 @@ export const AuthProvider = ({
       const fetchCurrUser = async () => {
         const response = (await authAPI.whoAmI()) as User;
         const hasBlacklistedRole = response.roles.some((role) =>
-          blackListRoles.includes(role)
+          blackListRoles.includes(role.slug),
         );
 
         if (hasBlacklistedRole) {
@@ -56,7 +56,7 @@ export const AuthProvider = ({
   const login = async (
     identifier: string,
     password: string,
-    remember: boolean
+    remember: boolean,
   ) => {
     try {
       const response = await authAPI.login(identifier, password, remember);

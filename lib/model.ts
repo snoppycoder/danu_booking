@@ -63,9 +63,25 @@ interface Address {
   kebele: string;
   house_number: string;
 }
+export interface Role {
+  name: string;
+  slug: string;
+}
+
+export type CreateTripPayload = {
+  operator_id?: string;
+
+  bus_id: string;
+  driver_id: string;
+  route_from: string;
+  route_to: string;
+  departure_at: string;
+  price: number;
+};
+
 export interface User {
   sub: string;
-  roles: string[];
+  roles: Role[];
   portal: string;
   first_name: string;
   last_name: string;

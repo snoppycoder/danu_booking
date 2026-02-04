@@ -81,6 +81,8 @@ import { pl } from "zod/v4/locales";
 import { set } from "zod";
 import SeatTemplateDialog from "@/components/SeatTemplateModal";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast, Toaster } from "sonner";
+import { isAxiosError } from "axios";
 
 type BusStatus = "active" | "inactive";
 
@@ -144,7 +146,7 @@ export default function OperatorPage() {
     isError,
   } = useOperatorBuses(user?.organization_id!);
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-    null
+    null,
   );
 
   useEffect(() => {
@@ -172,7 +174,7 @@ export default function OperatorPage() {
     buses?.filter(
       (bus: Bus) =>
         bus.plate_no.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        bus.side_no.toLowerCase().includes(searchQuery.toLowerCase())
+        bus.side_no.toLowerCase().includes(searchQuery.toLowerCase()),
     ) ?? [];
 
   const handleViewDetails = (bus: Bus) => {
@@ -189,8 +191,8 @@ export default function OperatorPage() {
   const handleStatusChange = (busId: string, newStatus: BusStatus) => {
     setBuses((prev) =>
       prev.map((bus) =>
-        bus.id === busId ? { ...bus, status: newStatus } : bus
-      )
+        bus.id === busId ? { ...bus, status: newStatus } : bus,
+      ),
     );
   };
 
@@ -215,15 +217,9 @@ export default function OperatorPage() {
       id: Date.now().toString(),
       seat_template: selectedTemplate!,
     };
-    console.log(bus, "here ");
-    setBuses((prev) => [...prev, bus]);
-    if (selectedTemplateId)
-      setNewBus((prev) => ({
-        ...prev,
-        seat_template_id: selectedTemplateId,
-      }));
+
     console.log(newBus, "new bus");
-    setIsAddBusOpen(false);
+
     setAddBusStep(1);
     const dataT = {
       plate_no: bus.plate_no,
@@ -232,20 +228,40 @@ export default function OperatorPage() {
       seat_template_id: bus.seat_template_id,
       bus_status: bus.bus_status,
     };
-    console.log(dataT, "data T");
-    operatorApi.createBus(dataT, user?.organization_id || "");
-    setNewBus({
-      plate_no: "",
-      capacity: 0,
-      side_no: "",
-      seat_template_id: "",
-      bus_status: "active",
-    });
+
+    try {
+      await operatorApi.createBus(dataT, user?.organization_id || "");
+
+      setIsAddBusOpen(false);
+      if (selectedTemplateId) {
+        setNewBus((prev) => ({
+          ...prev,
+          seat_template_id: selectedTemplateId,
+        }));
+        setBuses((prev) => [...prev, bus]);
+      }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.error);
+      } else if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("An error occurred while trying to add the bus");
+      }
+    } finally {
+      setNewBus({
+        plate_no: "",
+        capacity: 0,
+        side_no: "",
+        seat_template_id: "",
+        bus_status: "active",
+      });
+    }
   };
 
   const handleUpdateBus = (updatedBus: Bus) => {
     setBuses((prev) =>
-      prev.map((bus) => (bus.id === updatedBus.id ? updatedBus : bus))
+      prev.map((bus) => (bus.id === updatedBus.id ? updatedBus : bus)),
     );
     setSelectedBus(updatedBus);
   };
@@ -262,12 +278,13 @@ export default function OperatorPage() {
 
   const activeCount = buses.filter((b) => b.bus_status === "active").length;
   const maintenanceCount = buses.filter(
-    (b) => b.bus_status === "inactive"
+    (b) => b.bus_status === "inactive",
   ).length;
   const totalCapacity = buses.reduce((sum, b) => sum + b.capacity, 0);
 
   return (
     <div className="flex flex-col">
+      <Toaster position="top-right" richColors />
       {/* Header */}
       <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
         <div className="flex h-16 items-center gap-4 px-6">
@@ -371,13 +388,13 @@ export default function OperatorPage() {
                   </TableRow>
                 )}
 
-                {/* {!isLoading && filteredBuses.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} className="text-center py-6 font-semibold">
-                    No buses found!
-                  </TableCell>
-                </TableRow>
-              )} */}
+                {!isLoading && filteredBuses.length === 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-6">
+                      No buses found
+                    </TableCell>
+                  </TableRow>
+                )}
                 {filteredBuses?.map((bus: Bus) => (
                   <TableRow
                     key={bus.id}
@@ -731,7 +748,7 @@ export default function OperatorPage() {
                         >
                           {i + 1}
                         </div>
-                      )
+                      ),
                     )}
                   </div>
                   {newBus.capacity > 16 && (

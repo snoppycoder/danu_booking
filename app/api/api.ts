@@ -14,6 +14,7 @@ import axios, {
   AxiosResponse,
   isAxiosError,
 } from "axios";
+import { createDecipheriv } from "crypto";
 
 const api = axios.create({
   baseURL: "/api/proxy",
@@ -105,7 +106,7 @@ api.interceptors.response.use(
       const data = error.response.data;
       const code = data.code;
       const detail = data.detail;
-
+      console.log(data, "error response data");
       if (status === 401) {
         switch (detail) {
           case "CSRF_MISSING":
@@ -129,7 +130,7 @@ api.interceptors.response.use(
             console.error("Refresh token reuse detected — security warning");
             // Optionally show an alert to the user
             alert(
-              "Security alert: Your session was used from another location. Please log in again."
+              "Security alert: Your session was used from another location. Please log in again.",
             );
             window.location.href = "/login";
             break;
@@ -167,15 +168,16 @@ api.interceptors.response.use(
             console.error("Unhandled 401 error:", data);
             throw Error("Invalid credentials");
         }
-      } else {
-        console.error(`HTTP ${status} error:`, data);
+        // } else {
+        //   console.error(`HTTP ${status} error:`, data);
+        // }
       }
     } else {
       console.error("Network or unknown error:", error.message);
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 api.interceptors.request.use(
@@ -198,7 +200,7 @@ api.interceptors.request.use(
   (error) => {
     console.error("[API Request Error]", error);
     return Promise.reject(error);
-  }
+  },
 );
 
 export const tempAPI = {
@@ -221,7 +223,7 @@ export const authAPI = {
   login: async (
     identifier: string,
     password: string,
-    remember: boolean
+    remember: boolean,
     // portal: string
   ) => {
     try {
@@ -336,14 +338,14 @@ export const superAdminApi = {
   },
   assignOperatorToUser: async (operatorId: string, userId: string) => {
     const response = await api.post(
-      `/admin/operators/${operatorId}/users/${userId}`
+      `/admin/operators/${operatorId}/users/${userId}`,
     );
     // console.log(response);
     return response.data;
   },
   unassignOperatorToUser: async (operatorId: string, userId: string) => {
     const response = await api.delete(
-      `/admin/operators/${operatorId}/users/${userId}`
+      `/admin/operators/${operatorId}/users/${userId}`,
     );
     return response.data;
   },
@@ -400,7 +402,7 @@ export const superAdminApi = {
   },
   unassignUserToAgent: async (agentId: string, userId: string) => {
     const response = await api.delete(
-      `/admin/agents/${agentId}/users/${userId}`
+      `/admin/agents/${agentId}/users/${userId}`,
     );
     return response.data;
   },
@@ -430,7 +432,7 @@ export const passengerApi = {
   },
   autoComplete: async (
     query: string,
-    type: "origin" | "destination" | "all" = "all"
+    type: "origin" | "destination" | "all" = "all",
   ) => {
     if (query.length < 2) return [];
     const response = await api.get("/passenger/routes/autocomplete", {
@@ -457,7 +459,7 @@ export const passengerApi = {
       seat_codes: string[];
       passenger_details: Passenger[];
       client_ref: string;
-    }
+    },
   ) => {
     try {
       // const uuid = crypto.randomUUID();
@@ -487,11 +489,31 @@ export const operatorApi = {
       side_no: string;
       seat_template_id: string;
     },
-    operator_id: string
+    operator_id: string,
   ) => {
     console.log("data to send", operator_id, body);
-    const response = await api.post(`/operator/${operator_id}/buses`, body);
-    return response.data;
+    try {
+      const response = await api.post(`/operator/${operator_id}/buses`, body);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  createDriver: async (
+    body: {
+      first_name: string;
+      last_name: string;
+      license_no: string;
+    },
+    operator_id: string,
+  ) => {
+    try {
+      const response = await api.post(`/operator/${operator_id}/drivers`, body);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
   },
   getAllBuses: async (operator_id: string) => {
     const response = await api.get(`/operator/${operator_id}/buses`);
@@ -499,7 +521,35 @@ export const operatorApi = {
   },
   deleteBus: async (operator_id: string, bus_id: string) => {
     const response = await api.delete(
-      `/operator/${operator_id}/buses/${bus_id}`
+      `/operator/${operator_id}/buses/${bus_id}`,
+    );
+    return response.data;
+  },
+
+  createTrip: async (
+    operator_id: string,
+    body: {
+      bus_id: string;
+      driver_id: string;
+      route_from: string;
+      route_to: string;
+      departure_at: string;
+      price: number;
+    },
+  ) => {
+    const response = await api.post(`/operator/${operator_id}/trips`, body);
+    return response.data;
+  },
+
+  deleteDriver: async (operator_id: string, driver_id: string) => {
+    const response = await api.delete(
+      `/operator/${operator_id}/drivers/${driver_id}`,
+    );
+    return response.data;
+  },
+  deleteTrip: async (operator_id: string, trip_id: string) => {
+    const response = await api.delete(
+      `/operator/${operator_id}/trips/${trip_id}`,
     );
     return response.data;
   },

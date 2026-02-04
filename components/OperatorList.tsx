@@ -66,14 +66,16 @@ export default function OperatorList() {
   const [spinning, setSpinning] = useState<boolean>(false);
   const { data, isLoading, refetch } = useOperator(
     currentPage,
-    Number(displayCount)
+    Number(displayCount),
   );
-  const { data: users, ...rest } = useUsers(10, 10); //make all
-
+  const { data: users, ...rest } = useUsers(); //make all
+  const filteredUsers =
+    users?.filter((u) => u.roles[0]?.name == "Operator Admin") ?? [];
+  console.log(users);
   const filteredOperators = data?.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase())
+      emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
 
   async function handleViewDetail(id: string) {
@@ -142,7 +144,7 @@ export default function OperatorList() {
   }
 
   async function handleRefetch(
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ): Promise<void> {
     event.preventDefault();
     setSpinning(true);
@@ -159,33 +161,37 @@ export default function OperatorList() {
         <AddOperatorModal onSuccess={refetch} />
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-md ">
           <DialogHeader>
             <DialogTitle>User List</DialogTitle>
           </DialogHeader>
 
           <div className="space-y-2 mt-4">
-            {users?.map((users) => (
-              <div
-                key={users.id}
-                className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
-              >
-                <div>
-                  <p className="font-medium">
-                    {(users.first_name ?? "") + " " + (users.last_name ?? "")}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    handleAssignOperatorToUser(users.id);
-                  }}
+            {filteredOperators ? (
+              filteredUsers.map((users) => (
+                <div
+                  key={users.id}
+                  className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
                 >
-                  Select
-                </Button>
-              </div>
-            ))}
+                  <div>
+                    <p className="font-medium">
+                      {(users.first_name ?? "") + " " + (users.last_name ?? "")}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      handleAssignOperatorToUser(users.id);
+                    }}
+                  >
+                    Select
+                  </Button>
+                </div>
+              ))
+            ) : (
+              <p>No users available for assignment.</p>
+            )}
           </div>
         </DialogContent>
       </Dialog>
@@ -276,7 +282,7 @@ export default function OperatorList() {
                     slug: o.slug,
                     "create at": o.created_at,
                   })),
-                  ` operators_${new Date()}.csv`
+                  ` operators_${new Date()}.csv`,
                 )
               }
             >
