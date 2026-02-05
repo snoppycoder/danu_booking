@@ -146,7 +146,9 @@ api.interceptors.response.use(
             break;
           case "Not authenticated":
             console.error("Not authenticated — redirecting to login");
+            // window.location.href = "/login";
             window.location.href = "/login";
+
             break;
 
           case "SESSION_INVALID":
@@ -396,21 +398,51 @@ export const superAdminApi = {
     const response = await api.put(`/admin/agents/${id}`, body);
     return response.data;
   },
-  assignUserToAgent: async (agentId: string, userId: string) => {
-    const response = await api.post(`/admin/agents/${agentId}/users/${userId}`);
+  assignUserToAgent: async (agent_id: string, user_id: string) => {
+    const response = await api.post(
+      `/admin/agents/${agent_id}/users/${user_id}`,
+    );
     return response.data;
   },
-  unassignUserToAgent: async (agentId: string, userId: string) => {
+  unassignUserToAgent: async (agent_id: string, user_id: string) => {
     const response = await api.delete(
-      `/admin/agents/${agentId}/users/${userId}`,
+      `/admin/agents/${agent_id}/users/${user_id}`,
     );
     return response.data;
   },
   /**
    * This operations is for agent users
    */
-  getAllAgentUsers: async (agentId: string) => {
-    const response = await api.get(`/admin/agents/${agentId}/users`);
+  getAllAgentUsers: async (agent_id: string) => {
+    const response = await api.get(`/admin/agents/${agent_id}/users`);
+    return response.data;
+  },
+
+  /**
+   * This operations is for super admin KYC documents
+   */
+  verifyKYCdocument: async (operator_id: string, document_id: string) => {
+    const response = await api.put(
+      `/admin/operators/kyc-documents/${operator_id}/${document_id}/verify`,
+      { status: "approved" },
+    );
+    return response.data;
+  },
+  bulkVerifyKYCdocuments: async (
+    operator_id: string,
+    document_ids: string[],
+    status: string,
+  ) => {
+    const response = await api.post(
+      `/admin/operators/kyc-documents/${operator_id}/bulk-verify`,
+      { document_ids, status },
+    );
+    return response.data;
+  },
+  getDetailKYCdocument: async (document_id: string) => {
+    const response = await api.get(
+      `/admin/operators/kyc-documents/${document_id}`,
+    );
     return response.data;
   },
 };
@@ -572,6 +604,13 @@ export const operatorApi = {
     } catch (error) {
       console.log(error, "error from get all seat templates");
     }
+  },
+  /**This is the KYC apis */
+
+  getKYCdocuments: async (operator_id: string) => {
+    const response = await api.get(`/operator/${operator_id}/kyc-documents`);
+
+    return response.data;
   },
 };
 

@@ -1,10 +1,17 @@
+"use client";
 import { Users, FileText, DollarSign, User } from "lucide-react";
+import { useTrips } from "./Query";
+import { useAuth } from "@/lib/authContext";
 
 export default function StatCards() {
+  const { user } = useAuth();
+  console.log(user);
+  const { data: trips } = useTrips(user?.organization_id || "");
+  console.log("Trips data in StatCards:", trips);
   const stats = [
     {
       title: "Total Trip",
-      value: "4",
+      value: trips?.length || "0",
       icon: Users,
       gradient: "from-cyan-400 to-red-500",
       accentColor: "from-teal-500 to-pink-600",

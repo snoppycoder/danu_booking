@@ -101,7 +101,7 @@ export default function DriversManagement() {
   const [isAssignBusOpen, setIsAssignBusOpen] = useState(false);
   const [driverToAssign, setDriverToAssign] = useState<string | null>(null);
   const { user } = useAuth();
-  const { data } = useDrivers(user?.organization_id!);
+  const { data, isLoading } = useDrivers(user?.organization_id!);
   const [drivers, setDrivers] = useState<Driver[]>(data ?? []);
   const { mutate, isSuccess, error } = useCreateDriver();
   const [fullName, setFullName] = useState(
@@ -126,7 +126,7 @@ export default function DriversManagement() {
         driver.last_name.toLowerCase().includes(searchQuery.toLowerCase()),
     ) ?? [];
 
-  console.log("Filtered Drivers:", filteredDrivers);
+  const isPageLoading = isLoading || !user?.organization_id;
 
   const handleViewDetails = (driver: Driver) => {
     setSelectedDriver(driver);
@@ -153,7 +153,10 @@ export default function DriversManagement() {
       }
     } catch (error) {
       if (isAxiosError(error)) {
-        toast.error(error.response?.data.error || "The driver is associated with an active trip(s)");
+        toast.error(
+          error.response?.data.error ||
+            "The driver is associated with an active trip(s)",
+        );
       }
     }
   };
@@ -340,37 +343,52 @@ export default function DriversManagement() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredDrivers.length > 0 ? (
-                  filteredDrivers.map((driver) => (
-                    <TableRow
-                      key={driver.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => handleViewDetails(driver)}
-                    >
-                      <TableCell>
-                        <div className="flex flex-col">
-                          <span className="font-medium">
-                            {driver.first_name} {driver.last_name}
-                          </span>
-                          {/* <span className="text-xs text-muted-foreground">
+                {isPageLoading && (
+                  <TableRow>
+                    <TableCell colSpan={7} className="h-24 text-center">
+                      Loading drivers...
+                    </TableCell>
+                  </TableRow>
+                )}
+                {!isPageLoading &&
+                  filteredDrivers &&
+                  filteredDrivers.length === 0 && (
+                    <TableRow>
+                      <TableCell colSpan={7} className="h-24 text-center">
+                        No drivers found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                {filteredDrivers?.map((driver) => (
+                  <TableRow
+                    key={driver.id}
+                    className="cursor-pointer hover:bg-muted/50"
+                    onClick={() => handleViewDetails(driver)}
+                  >
+                    <TableCell>
+                      <div className="flex flex-col">
+                        <span className="font-medium">
+                          {driver.first_name} {driver.last_name}
+                        </span>
+                        {/* <span className="text-xs text-muted-foreground">
                             
                           </span> */}
-                        </div>
-                      </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {driver.license_no}
-                      </TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className="bg-green-100 text-green-800"
-                        >
-                          Active
-                        </Badge>
-                      </TableCell>
-                      {/*  this is fixed for now */}
-                      <TableCell>7 years</TableCell>
-                      {/* <TableCell>
+                      </div>
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {driver.license_no}
+                    </TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className="bg-green-100 text-green-800"
+                      >
+                        Active
+                      </Badge>
+                    </TableCell>
+                    {/*  this is fixed for now */}
+                    <TableCell>7 years</TableCell>
+                    {/* <TableCell>
                       {driver.assignedBus ? (
                         <span className="font-mono text-sm">
                           {driver.assignedBus}
@@ -381,88 +399,81 @@ export default function DriversManagement() {
                         </span>
                       )}
                     </TableCell> */}
-                      <TableCell className="text-right">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger
-                            asChild
-                            onClick={(e) => e.stopPropagation()}
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger
+                          asChild
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <Button variant="ghost" size="icon">
+                            <MoreVertical className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleViewDetails(driver);
+                            }}
                           >
-                            <Button variant="ghost" size="icon">
-                              <MoreVertical className="size-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewDetails(driver);
-                              }}
-                            >
-                              <Edit className="mr-2 size-4" />
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDriverToAssign(driver.id);
-                                setIsAssignBusOpen(true);
-                              }}
-                            >
-                              <Bus className="mr-2 size-4" />
-                              Assign Bus
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuLabel>Change Status</DropdownMenuLabel>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStatusChange(driver.id, "Active");
-                              }}
-                            >
-                              Set Active
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStatusChange(driver.id, "On Leave");
-                              }}
-                            >
-                              Set On Leave
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleStatusChange(driver.id, "Inactive");
-                              }}
-                            >
-                              Set Inactive
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              className="text-destructive"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDriverToDelete(driver.id);
-                                setIsDeleteDialogOpen(true);
-                              }}
-                            >
-                              <Trash2 className="mr-2 size-4" />
-                              Delete Driver
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                ) : (
-                  <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      No drivers found
+                            <Edit className="mr-2 size-4" />
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDriverToAssign(driver.id);
+                              setIsAssignBusOpen(true);
+                            }}
+                          >
+                            <Bus className="mr-2 size-4" />
+                            Assign Bus
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuLabel>Change Status</DropdownMenuLabel>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(driver.id, "Active");
+                            }}
+                          >
+                            Set Active
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(driver.id, "On Leave");
+                            }}
+                          >
+                            Set On Leave
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleStatusChange(driver.id, "Inactive");
+                            }}
+                          >
+                            Set Inactive
+                          </DropdownMenuItem>
+                          <DropdownMenuSeparator />
+                          <DropdownMenuItem
+                            className="text-destructive"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDriverToDelete(driver.id);
+                              setIsDeleteDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="mr-2 size-4" />
+                            Delete Driver
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                )}
+                ))}
               </TableBody>
             </Table>
           </CardContent>

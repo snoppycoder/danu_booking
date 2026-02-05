@@ -22,8 +22,8 @@ export default function AvatarHero() {
         <Avatar className="h-9 w-9 cursor-pointer">
           <AvatarImage src={user?.avatar_file_id} alt={user?.display_name} />
           <AvatarFallback>
-            {user?.first_name[0]}
-            {user?.last_name[0]}
+            {user?.first_name[0].toUpperCase()}
+            {user?.last_name[0].toUpperCase()}
           </AvatarFallback>
         </Avatar>
       </DropdownMenuTrigger>

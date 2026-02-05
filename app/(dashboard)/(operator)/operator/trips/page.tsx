@@ -51,7 +51,7 @@ export default function TripManagement() {
   const { user } = useAuth();
 
   const { data: buses_ } = useOperatorBuses(user?.organization_id!);
-  const { data: trips_ } = useTrips(user?.organization_id!);
+  const { data: trips_, isLoading } = useTrips(user?.organization_id!);
   const { data: driver_ } = useDrivers(user?.organization_id!);
   const [trips, setTrips] = useState<Trip_[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -80,7 +80,7 @@ export default function TripManagement() {
 
     return matchesSearch;
   });
-  console.log("Filtered Trips:", filteredTrips);
+  const isPageLoading = isLoading || !user?.organization_id;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -275,118 +275,122 @@ export default function TripManagement() {
           </div>
         </div>
 
+        {isPageLoading && (
+          <Card className="p-12">
+            <div className="text-center">
+              <p className="text-muted-foreground">Loading trips...</p>
+            </div>
+          </Card>
+        )}
+        {!isPageLoading && filteredTrips && filteredTrips.length === 0 && (
+          <Card className="p-12">
+            <div className="text-center">
+              <p className="text-muted-foreground">Loading trips...</p>
+            </div>
+          </Card>
+        )}
         {/* Trip List */}
         <div className="space-y-3">
-          {filteredTrips.length === 0 ? (
-            <Card className="p-12">
-              <div className="text-center">
-                <p className="text-muted-foreground">
-                  No trips found matching your filters
-                </p>
-              </div>
-            </Card>
-          ) : (
-            filteredTrips.map((trip) => (
-              <Card
-                key={trip.id}
-                className="group p-5 transition-all hover:shadow-lg"
-              >
-                <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
-                  {/* LEFT: Trip Content */}
-                  <div className="flex-1 space-y-5">
-                    {/* Route (Hero Section) */}
-                    <div className="flex items-center justify-center gap-4 rounded-lg bg-muted/40 py-3">
-                      <div className="flex items-center gap-2 text-lg font-semibold">
-                        <MapPin className="size-5 text-primary" />
-                        {trip.route_from}
-                      </div>
-
-                      <ArrowRight className="size-5 text-muted-foreground" />
-
-                      <div className="flex items-center gap-2 text-lg font-semibold">
-                        <MapPin className="size-5 text-primary" />
-                        {trip.route_to}
-                      </div>
+          {filteredTrips.map((trip) => (
+            <Card
+              key={trip.id}
+              className="group p-5 transition-all hover:shadow-lg"
+            >
+              <div className="flex flex-col gap-6 lg:flex-row lg:items-center lg:justify-between">
+                {/* LEFT: Trip Content */}
+                <div className="flex-1 space-y-5">
+                  {/* Route (Hero Section) */}
+                  <div className="flex items-center justify-center gap-4 rounded-lg bg-muted/40 py-3">
+                    <div className="flex items-center gap-2 text-lg font-semibold">
+                      <MapPin className="size-5 text-primary" />
+                      {trip.route_from}
                     </div>
 
-                    {/* Info Grid */}
-                    <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                      {/* Departure */}
-                      <div className="flex items-center gap-3 rounded-md border p-3">
-                        <Calendar className="size-4 text-muted-foreground" />
-                        <div>
-                          <div className="text-sm font-medium">
-                            {formatDate(trip.departure_at)}
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            {formatTime(trip.departure_at)}
-                          </div>
-                        </div>
-                      </div>
+                    <ArrowRight className="size-5 text-muted-foreground" />
 
-                      {/* Price */}
-                      <div className="flex items-center gap-3 rounded-md border p-3">
-                        <DollarSign className="size-4 text-muted-foreground" />
-                        <div>
-                          <div className="text-sm font-medium">
-                            {trip.price} ETB
-                          </div>
-                          <div className="text-xs text-muted-foreground">
-                            Price per seat
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Driver */}
-                      <div className="flex items-center gap-3 rounded-md border p-3">
-                        <User className="size-4 text-muted-foreground" />
-                        <div>
-                          <div className="text-sm font-medium">Driver name</div>
-                          <div className="text-xs text-muted-foreground">
-                            Driver
-                          </div>
-                        </div>
-                      </div>
+                    <div className="flex items-center gap-2 text-lg font-semibold">
+                      <MapPin className="size-5 text-primary" />
+                      {trip.route_to}
                     </div>
                   </div>
 
-                  {/* RIGHT: Actions */}
-                  <div className="flex gap-2 lg:flex-col lg:items-end">
-                    <Button
-                      size="sm"
-                      onClick={() => handleViewDetails(trip)}
-                      className="w-full lg:w-36"
-                    >
-                      View Details
-                    </Button>
+                  {/* Info Grid */}
+                  <div className="grid  gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {/* Departure */}
+                    <div className="flex items-center gap-3 rounded-md border p-3">
+                      <Calendar className="size-4 text-muted-foreground" />
+                      <div>
+                        <div className="text-sm font-medium">
+                          {formatDate(trip.departure_at)}
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          {formatTime(trip.departure_at)}
+                        </div>
+                      </div>
+                    </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          className="opacity-60 transition-opacity group-hover:opacity-100"
-                        >
-                          <MoreVertical className="size-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem onClick={() => handleEditTrip(trip)}>
-                          Edit Trip
-                        </DropdownMenuItem>
-                        <DropdownMenuItem
-                          className="text-destructive"
-                          onClick={() => handleDeleteTrip(trip.id)}
-                        >
-                          Delete Trip
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    {/* Price */}
+                    <div className="flex items-center gap-3 rounded-md border p-3">
+                      <DollarSign className="size-4 text-muted-foreground" />
+                      <div>
+                        <div className="text-sm font-medium">
+                          {trip.price} ETB
+                        </div>
+                        <div className="text-xs text-muted-foreground">
+                          Price per seat
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Driver */}
+                    <div className="flex items-center gap-3 rounded-md border p-3">
+                      <User className="size-4 text-muted-foreground" />
+                      <div>
+                        <div className="text-sm font-medium">Driver name</div>
+                        <div className="text-xs text-muted-foreground">
+                          Driver
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
-              </Card>
-            ))
-          )}
+
+                {/* RIGHT: Actions */}
+                <div className="flex gap-2 lg:flex-col lg:items-end">
+                  <Button
+                    size="sm"
+                    onClick={() => handleViewDetails(trip)}
+                    className="w-full lg:w-36"
+                  >
+                    View Details
+                  </Button>
+
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="opacity-60 transition-opacity group-hover:opacity-100"
+                      >
+                        <MoreVertical className="size-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem onClick={() => handleEditTrip(trip)}>
+                        Edit Trip
+                      </DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-destructive"
+                        onClick={() => handleDeleteTrip(trip.id)}
+                      >
+                        Delete Trip
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+              </div>
+            </Card>
+          ))}
         </div>
       </div>
 

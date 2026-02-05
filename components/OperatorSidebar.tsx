@@ -1,6 +1,6 @@
 "use client";
 
-import { Bus, Calendar, Home, Users, Settings } from "lucide-react";
+import { Bus, Calendar, Home, Users, Settings, ScanFace } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -36,6 +36,11 @@ const menuItems = [
     title: "Drivers",
     url: "/operator/drivers",
     icon: Users,
+  },
+  {
+    title: "KYC Documents",
+    url: "/operator/kyc",
+    icon: ScanFace,
   },
 ];
 

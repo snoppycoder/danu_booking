@@ -73,7 +73,7 @@ export default function SignupPage() {
                     id="firstName"
                     name="firstName"
                     type="text"
-                    placeholder="John"
+                    // placeholder="John"
                     value={formData.firstName}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
@@ -91,7 +91,7 @@ export default function SignupPage() {
                     id="lastName"
                     name="lastName"
                     type="text"
-                    placeholder="Doe"
+                    // placeholder="Doe"
                     value={formData.lastName}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"

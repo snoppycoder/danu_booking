@@ -13,6 +13,7 @@ import {
   Users,
   Zap,
   ChevronDown,
+  ScanFace,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -57,9 +58,9 @@ export default function Sidebar() {
       ],
     },
     { icon: BarChart3, label: "Report", href: "/report" },
-    { icon: HelpCircle, label: "Inquiry", href: "/inquiry" },
+    { icon: ScanFace, label: "KYC Approval", href: "/superadmin/kyc" },
     { icon: Luggage, label: "Luggage", href: "/luggage" },
-    { icon: AlertCircle, label: "Settings", href: "/settings" },
+    { icon: AlertCircle, label: "Settings", href: "/superadmin/settings" },
   ];
 
   const pathname = usePathname();

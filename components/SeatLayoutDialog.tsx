@@ -50,15 +50,15 @@ export default function SeatLayoutDialog({
     if (!editCount) return;
 
     const prevSeat = Object.entries(selectedSeats).find(
-      ([key]) => Number(key) === idx
+      ([key]) => Number(key) === idx,
     )?.[1];
 
     if (!prevSeat) return;
 
     setSeats((prev) =>
       prev.map((seat) =>
-        seat.id === prevSeat ? { ...seat, status: "available" } : seat
-      )
+        seat.id === prevSeat ? { ...seat, status: "available" } : seat,
+      ),
     );
   }, [editingPassenger[idx]]);
 
@@ -89,8 +89,8 @@ export default function SeatLayoutDialog({
 
     setSeats((prev) =>
       prev?.map((s) =>
-        s.seat_code === selectedSeats[idx] ? { ...s, status: "booked" } : s
-      )
+        s.seat_code === selectedSeats[idx] ? { ...s, status: "booked" } : s,
+      ),
     );
     onSelect(selectedSeats[idx]);
     setToggle(false);
@@ -100,7 +100,6 @@ export default function SeatLayoutDialog({
   if (!bus) {
     return <div>Loading...</div>;
   }
-  console.log(bus.seat_template.seats, "here are the layouts");
 
   return (
     <Dialog open={toggle} onOpenChange={setToggle}>
@@ -135,7 +134,7 @@ export default function SeatLayoutDialog({
                       "bg-teal-600 text-white",
                     seat.status == "available" &&
                       selectedSeats[idx] !== seat.seat_code &&
-                      "bg-white hover:bg-teal-100"
+                      "bg-white hover:bg-teal-100",
                   )}
                 >
                   {seat.seat_code}

@@ -56,10 +56,10 @@ export default function DashboardLayout({
             onLoaded={() => setIsNavbarLoaded(true)}
           />
           {isNavbarLoaded ? (
-            <AuthProtector>
-              <main>{children}</main>
-            </AuthProtector>
+            // <AuthProtector>
+            <main>{children}</main>
           ) : (
+            // </AuthProtector>
             <div className="p-4"></div>
           )}
         </AuthProvider>

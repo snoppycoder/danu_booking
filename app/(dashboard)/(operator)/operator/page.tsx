@@ -148,6 +148,11 @@ export default function OperatorPage() {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     null,
   );
+  // Improved loading check that handles Auth delay AND State Sync delay
+  const isPageLoading =
+    isLoading ||
+    !user?.organization_id ||
+    (operatorBuses && operatorBuses.length > 0 && buses.length === 0);
 
   useEffect(() => {
     if (!operatorBuses || !user?.organization_id) return;
@@ -380,7 +385,7 @@ export default function OperatorPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isLoading && (
+                {isPageLoading && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-6">
                       Loading buses...
@@ -388,7 +393,7 @@ export default function OperatorPage() {
                   </TableRow>
                 )}
 
-                {!isLoading && filteredBuses.length === 0 && (
+                {!isPageLoading && filteredBuses.length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-6">
                       No buses found

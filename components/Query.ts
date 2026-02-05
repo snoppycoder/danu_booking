@@ -4,6 +4,7 @@ import {
   Agent,
   CreateTripPayload,
   Driver,
+  KYCDocument,
   Operator,
   Session,
   User,
@@ -94,7 +95,21 @@ export const useAgent = (page: number, per_page: number) => {
     staleTime: 1000 * 60 * 5,
   });
 };
+//** These are KYC hooks */
+export const useKYCdocuments = (operator_id: string) => {
+  return useQuery({
+    queryKey: ["kyc-documents", operator_id],
+    queryFn: async () => {
+      console.log("Fetching KYC documents for operator_id:", operator_id);
+      if (!operator_id) return [];
+      const res = await operatorApi.getKYCdocuments(operator_id);
 
+      return res.items as KYCDocument[];
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id,
+  });
+};
 /// mutations are below ///
 export const useCreateTrip = () => {
   const queryClient = useQueryClient();

@@ -181,6 +181,7 @@ export type Passenger = {
   phone: string;
   id_number: string;
 };
+
 export interface Trip {
   trip_id: string;
   operator: {
@@ -224,4 +225,25 @@ export interface SearchRouteResponse {
   page: number;
   items: Item[];
   per_page: number;
+}
+
+export interface KYCDocument {
+  id: string;
+  owner_type?: "operator" | "agent";
+  owner_id?: string;
+
+  operator_id?: string;
+  operator_name?: string;
+  agent_id?: string;
+  agent_name?: string;
+
+  document_type: string;
+  document_name: string;
+  document_url: string;
+
+  status: "pending" | "approved" | "rejected";
+  uploaded_at: string;
+  reviewed_at?: string;
+
+  uploaded_by?: string;
 }
