@@ -301,3 +301,9 @@
 //     </div>
 //   );
 // }
+"use client";
+export default function Home() {
+  const router = useRouter();
+  router.replace("/login");
+  return null;
+}
