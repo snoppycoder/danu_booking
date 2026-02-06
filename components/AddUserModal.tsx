@@ -36,7 +36,7 @@ export function AddUserModal({ onSuccess }: AddUserModalProps) {
   });
 
   async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     // Memo to future self write zod
     e.preventDefault();
@@ -70,9 +70,15 @@ export function AddUserModal({ onSuccess }: AddUserModalProps) {
       console.log(response);
     } catch (error) {
       if (isAxiosError(error)) {
+        console.log(error);
         if (error.response?.data.detail?.[0]?.msg) {
           if (error.response.data.detail[0].msg) {
-            toast.error(error.response.data.detail[0].msg);
+            let err_ = error.response.data.detail[0].msg.replace(
+              "String",
+              error.response.data.detail[0].loc[1],
+            );
+
+            toast.error(err_);
           }
         } else {
           if (error.response?.data.detail.reasons) {

@@ -7,8 +7,7 @@ import Link from "next/link";
 
 import { Eye, EyeOff, Router } from "lucide-react";
 import { toast, Toaster } from "sonner";
-import axios from "axios";
-import { useRouter } from "next/navigation";
+import axios, { isAxiosError } from "axios";
 
 import { useAuth } from "@/lib/authContext";
 import { decodeJWT, setAuthCookies } from "@/lib/auth";
@@ -33,13 +32,18 @@ export default function LoginPage() {
       const response = await login(
         phone.trim().toLowerCase(),
         password,
-        checked
+        checked,
         // "superadmin"
       );
       console.log(response);
     } catch (error) {
-      console.log(error);
-      toast.error("Invalid credentials. Please try again.");
+      if (isAxiosError(error)) {
+        console.log(error.response?.data?.error, "error");
+        toast.warning(
+          error.response?.data?.error ||
+            "Invalid credentials. Please try again.",
+        );
+      }
     }
   };
 

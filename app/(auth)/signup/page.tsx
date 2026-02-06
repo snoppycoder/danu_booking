@@ -8,13 +8,16 @@ import Link from "next/link";
 import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { toast, Toaster } from "sonner";
+import { authAPI } from "@/app/api/api";
+import { useRouter } from "next/navigation";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const router = useRouter();
   const [formData, setFormData] = useState({
-    firstName: "",
-    lastName: "",
+    first_name: "",
+    last_name: "",
     email: "",
     phone: "",
     password: "",
@@ -38,7 +41,17 @@ export default function SignupPage() {
       return;
     }
     //  api.signup(formData)
-    toast.success("Account created successfully!");
+    try {
+      const { confirmPassword, acceptTerms, password, ...cleanedFormData } =
+        formData;
+
+      const formattedData = { ...cleanedFormData, pin: password };
+      await authAPI.signup(formattedData);
+      toast.success("Account created successfully!");
+      router.replace("/login");
+    } catch (error) {
+      toast.error("Failed to create account");
+    }
   };
 
   return (
@@ -64,17 +77,17 @@ export default function SignupPage() {
               <div className="grid grid-cols-2 gap-3">
                 <div>
                   <label
-                    htmlFor="firstName"
+                    htmlFor="first_name"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
                     First Name
                   </label>
                   <input
-                    id="firstName"
-                    name="firstName"
+                    id="first_name"
+                    name="first_name"
                     type="text"
                     // placeholder="John"
-                    value={formData.firstName}
+                    value={formData.first_name}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                     required
@@ -82,17 +95,17 @@ export default function SignupPage() {
                 </div>
                 <div>
                   <label
-                    htmlFor="lastName"
+                    htmlFor="last_name"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
                     Last Name
                   </label>
                   <input
-                    id="lastName"
-                    name="lastName"
+                    id="last_name"
+                    name="last_name"
                     type="text"
                     // placeholder="Doe"
-                    value={formData.lastName}
+                    value={formData.last_name}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
                     required
@@ -111,7 +124,7 @@ export default function SignupPage() {
                   id="email"
                   name="email"
                   type="email"
-                  placeholder="you@example.com"
+                  // placeholder="you@example.com"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
@@ -131,7 +144,7 @@ export default function SignupPage() {
                   id="phone"
                   name="phone"
                   type="tel"
-                  placeholder="+2519XXXXXXXX or 09XXXXXXXX"
+                  // placeholder="+2519XXXXXXXX or 09XXXXXXXX"
                   value={formData.phone}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"

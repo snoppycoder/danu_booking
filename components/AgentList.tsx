@@ -38,8 +38,6 @@ import { AddOperatorModal } from "./AddOperatorModal";
 import { superAdminApi } from "@/app/api/api";
 import { toast } from "sonner";
 import { Operator } from "@/lib/model";
-
-import { Card, CardContent } from "./ui/card";
 import {
   Dialog,
   DialogContent,
@@ -66,15 +64,18 @@ export default function AgentList() {
   const [spinning, setSpinning] = useState<boolean>(false);
   const { data, isLoading, refetch } = useAgent(
     currentPage,
-    Number(displayCount)
+    Number(displayCount),
   );
   const { data: users } = useUsers(10, 10); // make default all
 
-  const filteredAgents = data?.filter(
+  const filteredAgents = data?.items.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase())
+      emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [displayCount]);
 
   async function handleViewDetail(id: string) {
     const res = await superAdminApi.viewOperatorDetail(id);
@@ -96,7 +97,7 @@ export default function AgentList() {
       if (axios.isAxiosError(error)) {
         if (error.status == 404) {
           toast.warning(
-            error.response?.data.detail || "The agent doesn't exist "
+            error.response?.data.detail || "The agent doesn't exist ",
           );
           return;
         }
@@ -153,7 +154,7 @@ export default function AgentList() {
   }
 
   async function handleRefetch(
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ): Promise<void> {
     event.preventDefault();
     setSpinning(true);
@@ -176,7 +177,7 @@ export default function AgentList() {
           </DialogHeader>
 
           <div className="space-y-2 mt-4">
-            {users?.map((users) => (
+            {users?.items.map((users) => (
               <div
                 key={users.id}
                 className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
@@ -301,7 +302,7 @@ export default function AgentList() {
         </div>
 
         {/* Table */}
-        {data?.length === 0 ? (
+        {data?.items.length === 0 ? (
           <p className="text-muted-foreground text-center py-10">
             No Agent registered.
           </p>
@@ -320,7 +321,9 @@ export default function AgentList() {
               <TableBody>
                 {filteredAgents?.map((op, i) => (
                   <TableRow key={op.id} className="hover:bg-muted/30">
-                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>
+                      {(currentPage - 1) * Number(displayCount) + i + 1}
+                    </TableCell>
                     <TableCell>{op.name}</TableCell>
                     <TableCell>{op.contact_email}</TableCell>
                     <TableCell>{op.contact_phone}</TableCell>
@@ -382,11 +385,13 @@ export default function AgentList() {
         )}
 
         {/* Pagination */}
-        {(data?.length ?? 0) > 0 && (
+        {(data?.items.length ?? 0) > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing 1 to {filteredAgents?.length} of {filteredAgents?.length}{" "}
-              entries
+              Showing {(currentPage - 1) * Number(displayCount) + 1} to{" "}
+              {(currentPage - 1) * Number(displayCount) +
+                (filteredAgents?.length ?? 0)}{" "}
+              of {data?.total} entries
             </p>
 
             <div className="flex gap-2">

@@ -99,6 +99,7 @@ export interface User {
   avatar_file_id: string;
   bio: string;
   address: Address;
+  last_login_at?: string;
 }
 export interface SeatExtraMetadata {
   type: "window" | "asile"; // or string if other types are possible

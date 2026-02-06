@@ -44,7 +44,6 @@ export function UpdateUserForm() {
 
     try {
       // TODO: Implement API call to update user
-      console.log("[v0] Update user data:", formData);
 
       // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 1000));

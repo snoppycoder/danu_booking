@@ -39,7 +39,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
-
+import { isAxiosError } from "axios";
 import DisableReasonModal from "./DisableReasonModal";
 import { useQueryClient } from "@tanstack/react-query";
 import { useOperator, useUsers } from "./Query";
@@ -51,48 +51,93 @@ import {
   DialogFooter,
 } from "@/components/ui/dialog";
 import { exportToCSV } from "@/lib/common_functions";
+import UserDetail from "./UserDetail";
 
 export default function UserList() {
   const [displayCount, setDisplayCount] = useState("10");
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+  const [selectUserAssign, setSelectUserAssign] = useState<User | null>(null);
   const [currentPage, setCurrentPage] = useState(1);
   const [detailToggle, setDetailToggle] = useState(false);
   const [spinning, setSpinning] = useState(false);
   const [_operator, setOperatorId] = useState("");
+  const [unassignRoleOpen, setUnassignRoleOpen] = useState(false);
+
   // const [data, setData] = useState<User[]>([]);
   const [disableOpen, setDisableOpen] = useState(false);
-  const [detail, setDetail] = useState<User>();
+  const [detail, setDetail] = useState<User | null>(null);
+  const [assignRoleOpen, setAssignRoleOpen] = useState(false);
 
   const { data, isLoading, refetch } = useUsers(
     currentPage,
-    Number(displayCount)
+    Number(displayCount),
   );
 
-  const filteredUser = data?.filter(
+  const filteredUser = data?.items?.filter(
     (emp) =>
       emp.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.email.toLowerCase().includes(searchTerm.toLowerCase())
+      emp.email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+  console.log("Filtered Users: ", data);
 
   async function handleViewDetail(id: string) {
-    const res = await superAdminApi.viewOperatorDetail(id);
+    const res = await superAdminApi.getUser(id);
     if (res) {
       setDetail(res);
       setDetailToggle(true);
     }
   }
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [displayCount]);
 
-  async function handleAssignRole(role_identifier: string, id: string) {
-    const response = await superAdminApi.assignRole(id, role_identifier);
-    console.log(response);
+  async function handleAssignRole(role_identifier: string, user: User) {
+    try {
+      if (user.roles.length > 0) {
+        throw Error(`User already has a role assigned ${user.roles[0].name}`);
+      }
+      const response = await superAdminApi.assignRole(user.id, role_identifier);
+      toast.success(`Role ${role_identifier} successfully assigned to user `);
+      refetch();
+
+      console.log(response);
+    } catch (error) {
+      if (error instanceof Error) {
+        toast.error(error.message);
+        return;
+      }
+    }
   }
 
   async function handleEnable(id: string) {
     const response = await superAdminApi.enableUser(id);
     if (response) {
       toast.success("User successfully enabled ");
+    }
+  }
+  async function handleUnassignRole(user: User) {
+    try {
+      if (!user.roles || user.roles.length === 0) {
+        toast.warning("User has no role to unassign");
+        return;
+      }
+
+      const response = await superAdminApi.unAssignRole(
+        user.id,
+        user.roles[0].slug,
+      );
+      console.log(response);
+
+      toast.success(`Role ${user.roles[0].name} unassigned successfully`);
+      refetch();
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data?.error || "Failed to unassign role");
+      } else {
+        toast.error("Failed to unassign role");
+      }
     }
   }
 
@@ -122,7 +167,7 @@ export default function UserList() {
   }
 
   async function handleRefetch(
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ): Promise<void> {
     event.preventDefault();
     setSpinning(true);
@@ -174,18 +219,14 @@ export default function UserList() {
               disabled={!data}
               onClick={() =>
                 exportToCSV(
-                  data!.map((u) => ({
+                  data!.items?.map((u) => ({
                     "First name": u.first_name,
                     "Last name": u.last_name,
                     email: u.email,
                     "email verified": u.email_verified ? "Yes" : "No",
-                    // address: `${u.address.country ?? "Ethiopia"}, ${
-                    //   u.address.city
-                    // }`,
-                    // kebele: u.address.kebele,
                     "Date of birth": u.dob,
                   })),
-                  ` users_${new Date()}.csv`
+                  ` users_${new Date()}.csv`,
                 )
               }
             >
@@ -213,7 +254,7 @@ export default function UserList() {
         </div>
 
         {/* Table */}
-        {data?.length === 0 ? (
+        {data?.items.length === 0 ? (
           <p className="text-muted-foreground text-center py-10">
             No User registered.
           </p> // though this is impossible
@@ -232,7 +273,9 @@ export default function UserList() {
               <TableBody>
                 {filteredUser?.map((u, i) => (
                   <TableRow key={i} className="hover:bg-muted/30">
-                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>
+                      {(currentPage - 1) * Number(displayCount) + i + 1}
+                    </TableCell>
                     <TableCell>
                       {(u.first_name ?? "") + " " + (u.last_name ?? "")}
                     </TableCell>
@@ -240,11 +283,6 @@ export default function UserList() {
                     <TableCell>{u.phone ?? "N/A"}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex gap-2 justify-center">
-                        {/* <pre className="z-90 absolute bottom-full left-1/2 -translate-x-1/2 mb-2 rounded bg-gray-700 px-3 py-1 max-w-xs text-white text-xs text-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 break-words pointer-events-none shadow-lg">
-                            This will enable you to assign {`\n`} a user to a
-                            operator
-                          </pre> */}
-
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="ghost" className="h-8 w-8 p-0">
@@ -254,7 +292,7 @@ export default function UserList() {
 
                           <DropdownMenuContent align="end">
                             <DropdownMenuItem
-                              onClick={() => console.log("View")}
+                              onClick={() => handleViewDetail(u.id)}
                             >
                               View
                             </DropdownMenuItem>
@@ -265,23 +303,36 @@ export default function UserList() {
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleEnable(u.id)}
+                              disabled={!u.is_disabled}
                             >
                               Enable
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() =>
-                                handleAssignRole("super_admin", u.id)
-                              }
+                              onClick={() => {
+                                setSelectUserAssign(u);
+                                setAssignRoleOpen(true);
+                              }}
                             >
                               Assign Role
                             </DropdownMenuItem>
+
                             <DropdownMenuItem
                               onClick={() => {
                                 setSelectedUserId(u.id); // track which user to disable
                                 setDisableOpen(true); // open the modal
                               }}
+                              disabled={u.is_disabled}
                             >
                               Disable
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setSelectUserAssign(u);
+                                setUnassignRoleOpen(true);
+                              }}
+                            >
+                              Unassign Role
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -302,11 +353,13 @@ export default function UserList() {
         )}
 
         {/* Pagination */}
-        {(data?.length ?? 0) > 0 && (
+        {(data?.items.length ?? 0) > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing 1 to {filteredUser?.length} of {filteredUser?.length}{" "}
-              entries
+              Showing {(currentPage - 1) * Number(displayCount) + 1} to{" "}
+              {(currentPage - 1) * Number(displayCount) +
+                (filteredUser?.length ?? 0)}{" "}
+              of {data?.total} entries
             </p>
 
             <div className="flex gap-2">
@@ -327,6 +380,9 @@ export default function UserList() {
                 onClick={() => {
                   setCurrentPage((p) => p + 1);
                 }}
+                disabled={
+                  (data?.total ?? 0) <= currentPage * Number(displayCount)
+                }
               >
                 Next
               </Button>
@@ -334,6 +390,92 @@ export default function UserList() {
           </div>
         )}
       </div>
+      <Dialog open={assignRoleOpen} onOpenChange={setAssignRoleOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Assign Role</DialogTitle>
+          </DialogHeader>
+
+          <div className="flex flex-col gap-3 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!selectUserAssign) return;
+                handleAssignRole("agent_admin", selectUserAssign);
+                setAssignRoleOpen(false);
+              }}
+            >
+              Agent
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!selectUserAssign) return;
+                handleAssignRole("super_admin", selectUserAssign);
+                setAssignRoleOpen(false);
+              }}
+            >
+              Super Admin
+            </Button>
+
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!selectUserAssign) return;
+                handleAssignRole("operator_admin", selectUserAssign);
+                setAssignRoleOpen(false);
+              }}
+            >
+              Operator
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+      <Dialog open={unassignRoleOpen} onOpenChange={setUnassignRoleOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Unassign Role</DialogTitle>
+          </DialogHeader>
+
+          <div className="mt-4 space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Are you sure you want to unassign the role{" "}
+              <span className="font-medium text-foreground">
+                {selectUserAssign?.roles?.[0]?.name ?? "—"}
+              </span>{" "}
+              from this user?
+            </p>
+
+            <div className="flex justify-end gap-2">
+              <Button
+                variant="outline"
+                onClick={() => setUnassignRoleOpen(false)}
+              >
+                Cancel
+              </Button>
+
+              <Button
+                variant="destructive"
+                onClick={() => {
+                  if (!selectUserAssign) return;
+                  handleUnassignRole(selectUserAssign);
+                  setUnassignRoleOpen(false);
+                }}
+              >
+                Unassign Role
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+      {detail && (
+        <UserDetail
+          userData={detail}
+          open={detailToggle}
+          setOpen={setDetailToggle}
+        />
+      )}
     </div>
   );
 }

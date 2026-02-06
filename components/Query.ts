@@ -9,6 +9,7 @@ import {
   Session,
   User,
 } from "@/lib/model";
+import { totalmem } from "os";
 
 export const useUsers = (page?: number, per_page?: number) => {
   return useQuery({
@@ -16,10 +17,10 @@ export const useUsers = (page?: number, per_page?: number) => {
     queryFn: async () => {
       if (page && per_page) {
         const res = await superAdminApi.getUsers(page, per_page);
-        return res.items as User[];
+        return { items: res.items as User[], total: res.total, page: res.page };
       } else {
         const res = await superAdminApi.getUsers();
-        return res.items as User[];
+        return { items: res.items as User[], total: res.total, page: res.page };
       }
     },
     staleTime: 1000 * 60 * 5,
@@ -30,7 +31,11 @@ export const useOperator = (page: number, per_page: number) => {
     queryKey: ["operator", page, per_page],
     queryFn: async () => {
       const res = await superAdminApi.getOperator(page, per_page);
-      return res.items as Operator[];
+      return {
+        items: res.items as Operator[],
+        total: res.total,
+        page: res.page,
+      };
     },
     staleTime: 1000 * 60 * 5,
   });
@@ -90,7 +95,7 @@ export const useAgent = (page: number, per_page: number) => {
     queryFn: async () => {
       const res = await superAdminApi.getAgents(page, per_page);
 
-      return res.items as Agent[];
+      return { items: res.items as Agent[], total: res.total, page: res.page };
     },
     staleTime: 1000 * 60 * 5,
   });

@@ -70,9 +70,9 @@ export default function OperatorList() {
   );
   const { data: users, ...rest } = useUsers(); //make all
   const filteredUsers =
-    users?.filter((u) => u.roles[0]?.name == "Operator Admin") ?? [];
+    users?.items?.filter((u) => u.roles[0]?.name == "Operator Admin") ?? [];
   console.log(users);
-  const filteredOperators = data?.filter(
+  const filteredOperators = data?.items?.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase()),
@@ -85,6 +85,9 @@ export default function OperatorList() {
       setDetailToggle(true);
     }
   }
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [displayCount]);
 
   async function handleDelete(id: string) {
     const response = await superAdminApi.deleteOperator(id);
@@ -276,7 +279,7 @@ export default function OperatorList() {
               disabled={!data}
               onClick={() =>
                 exportToCSV(
-                  data!.map((o) => ({
+                  data!.items.map((o) => ({
                     name: o.name,
                     email: o.contact_email,
                     slug: o.slug,
@@ -311,7 +314,7 @@ export default function OperatorList() {
         </div>
 
         {/* Table */}
-        {data?.length === 0 ? (
+        {data?.items.length === 0 ? (
           <p className="text-muted-foreground text-center py-10">
             No operators registered.
           </p>
@@ -330,7 +333,9 @@ export default function OperatorList() {
               <TableBody>
                 {filteredOperators?.map((op, i) => (
                   <TableRow key={op.id} className="hover:bg-muted/30">
-                    <TableCell>{i + 1}</TableCell>
+                    <TableCell>
+                      {(currentPage - 1) * Number(displayCount) + i + 1}
+                    </TableCell>
                     <TableCell>{op.name}</TableCell>
                     <TableCell>{op.contact_email}</TableCell>
                     <TableCell>{op.contact_phone}</TableCell>
@@ -392,11 +397,13 @@ export default function OperatorList() {
         )}
 
         {/* Pagination */}
-        {(data?.length ?? 0) > 0 && (
+        {(data?.items.length ?? 0) > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
-              Showing 1 to {filteredOperators?.length} of{" "}
-              {filteredOperators?.length} entries
+              Showing {(currentPage - 1) * Number(displayCount) + 1} to{" "}
+              {(currentPage - 1) * Number(displayCount) +
+                (filteredOperators?.length ?? 0)}{" "}
+              of {data?.total} entries
             </p>
 
             <div className="flex gap-2">
@@ -413,6 +420,9 @@ export default function OperatorList() {
               <Button
                 variant="outline"
                 onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={
+                  (data?.total ?? 0) <= currentPage * Number(displayCount)
+                }
               >
                 Next
               </Button>

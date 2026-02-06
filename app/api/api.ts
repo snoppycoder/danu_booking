@@ -168,7 +168,7 @@ api.interceptors.response.use(
 
           default:
             console.error("Unhandled 401 error:", data);
-            throw Error("Invalid credentials");
+            throw error;
         }
         // } else {
         //   console.error(`HTTP ${status} error:`, data);
@@ -222,6 +222,16 @@ export const tempAPI = {
 };
 
 export const authAPI = {
+  signup: async (body: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    pin: string; // need attention
+  }) => {
+    const response = await api.post("/auth/register", body);
+    return response.data;
+  },
   login: async (
     identifier: string,
     password: string,
@@ -238,6 +248,7 @@ export const authAPI = {
       return response.data;
     } catch (error) {
       console.log(error);
+      throw error;
     }
   },
   logout: async () => {
@@ -330,6 +341,14 @@ export const superAdminApi = {
       console.log(error, "error from getUsers func");
     }
   },
+  getUser: async (id: string) => {
+    try {
+      const response = await api.get(`/admin/users/${id}`);
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from getUser func");
+    }
+  },
   addUser: async (body: AddUserForm) => {
     try {
       const response = await api.post(`/admin/users`, body);
@@ -360,6 +379,12 @@ export const superAdminApi = {
     const response = await api.post(`/admin/users/${role_identifier}/users`, {
       users: [id],
     });
+    return response.data;
+  },
+  unAssignRole: async (id: string, role_identifier: string) => {
+    const response = await api.delete(
+      `/admin/users/${role_identifier}/users/${id}`,
+    );
     return response.data;
   },
   disableUser: async (id: string, reason: string) => {
