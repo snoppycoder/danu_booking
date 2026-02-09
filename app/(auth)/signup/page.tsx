@@ -104,7 +104,6 @@ export default function SignupPage() {
                     id="last_name"
                     name="last_name"
                     type="text"
-                    // placeholder="Doe"
                     value={formData.last_name}
                     onChange={handleChange}
                     className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
@@ -124,11 +123,9 @@ export default function SignupPage() {
                   id="email"
                   name="email"
                   type="email"
-                  // placeholder="you@example.com"
                   value={formData.email}
                   onChange={handleChange}
                   className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
-                  required
                 />
               </div>
 

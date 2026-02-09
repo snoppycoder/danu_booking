@@ -11,7 +11,7 @@ import {
 } from "@/lib/model";
 import { totalmem } from "os";
 
-export const useUsers = (page?: number, per_page?: number) => {
+export const useUsers = (page?: number, per_page?: number, noCache = false) => {
   return useQuery({
     queryKey: ["users", page, per_page],
     queryFn: async () => {
@@ -23,7 +23,11 @@ export const useUsers = (page?: number, per_page?: number) => {
         return { items: res.items as User[], total: res.total, page: res.page };
       }
     },
-    staleTime: 1000 * 60 * 5,
+    staleTime: noCache ? 0 : 1000 * 60 * 5,
+    gcTime: noCache ? 0 : 1000 * 60 * 10,
+
+    refetchOnMount: noCache ? true : false,
+    refetchOnWindowFocus: noCache ? true : false,
   });
 };
 export const useOperator = (page: number, per_page: number) => {

@@ -68,10 +68,12 @@ export default function OperatorList() {
     currentPage,
     Number(displayCount),
   );
-  const { data: users, ...rest } = useUsers(); //make all
+  const { data: users, ...rest } = useUsers(undefined, undefined, true); //make all
   const filteredUsers =
-    users?.items?.filter((u) => u.roles[0]?.name == "Operator Admin") ?? [];
-  console.log(users);
+    users?.items?.filter(
+      (u) => u.roles[0]?.name == "Operator Admin" && !u.organization_id,
+    ) ?? [];
+  console.log(users, "filtered users");
   const filteredOperators = data?.items?.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -134,8 +136,8 @@ export default function OperatorList() {
   async function handleAssignOperatorToUser(userId: string) {
     try {
       const res = await superAdminApi.assignOperatorToUser(operatorId, userId);
-      console.log(res);
       toast.success("Successfully assigned the user to the operator");
+      setOpen(false);
     } catch (error) {
       console.log(error);
       if (axios.isAxiosError(error)) {
@@ -169,7 +171,7 @@ export default function OperatorList() {
             <DialogTitle>User List</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-2 mt-4">
+          <div className="space-y-2 mt-4 max-h-[400px] overflow-y-auto">
             {filteredOperators ? (
               filteredUsers.map((users) => (
                 <div

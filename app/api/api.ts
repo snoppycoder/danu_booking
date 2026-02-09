@@ -47,55 +47,6 @@ const api_webhook = axios.create({
   // baseURL: "http://localhost:8000",
 });
 
-// THIS IS TO AVOID INFINITE REFRESH LOOP
-
-// api.interceptors.response.use(
-//   (response) => response,
-//   async (error) => {
-//     const originalRequest = error.config;
-
-//     if (
-//       error.response?.status === 401 &&
-//       !originalRequest._retry &&
-//       !originalRequest.url?.includes("/auth/refresh") &&
-//       error.response?.data?.detail !== "Invalid credentials "
-//     ) {
-//       originalRequest._retry = true;
-//       console.log("401 INTERCEPTOR");
-
-//       const refreshToken = await getRefreshToken();
-
-//       if (!refreshToken) {
-//         return Promise.reject(error);
-//       }
-
-//       try {
-//         const { data } = await refreshApi.post("/auth/refresh", {
-//           refresh_token: refreshToken,
-//         });
-//         originalRequest.headers = {
-//           ...originalRequest.headers,
-//           Authorization: `Bearer ${data.access_token}`,
-//         };
-
-//         await setAccessToken(data.access_token, data.access_expiry);
-
-//         return api(originalRequest); // retry original request
-//       } catch (refreshError) {
-//         if (AxiosError.isError(refreshError)){
-//           refreshError.da
-//         }
-//         // window.location.href = "/login";
-//         console.log(refreshError, "here is the error");
-//         return Promise.reject(refreshError);
-//       }
-//     }
-
-//     return Promise.reject(error);
-//   }
-// );
-
-// 409 interceptor
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -106,7 +57,7 @@ api.interceptors.response.use(
       const data = error.response.data;
       const code = data.code;
       const detail = data.detail;
-      console.log(data, "error response data");
+      console.log(error, "error response data");
       if (status === 401) {
         switch (detail) {
           case "CSRF_MISSING":

@@ -7,7 +7,7 @@ const TARGET_URL = process.env.API_BASE_URL;
 
 export async function GET(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
   return handleRequest(request, path, "GET");
@@ -15,7 +15,7 @@ export async function GET(
 
 export async function POST(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
   return handleRequest(request, path, "POST");
@@ -23,7 +23,7 @@ export async function POST(
 
 export async function PUT(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
   return handleRequest(request, path, "PUT");
@@ -31,7 +31,7 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  context: { params: Promise<{ path: string[] }> }
+  context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
   return handleRequest(request, path, "DELETE");
@@ -39,7 +39,7 @@ export async function DELETE(
 async function handleRequest(
   request: NextRequest,
   pathSegments: string[],
-  method: string
+  method: string,
 ) {
   try {
     const path = pathSegments.join("/");
@@ -68,17 +68,7 @@ async function handleRequest(
     const apiKey = request.headers.get("X-API-Key");
     const csrf_token = request.headers.get("x-csrf-token");
     if (csrf_token) headers.set("x-csrf-token", csrf_token);
-    if (apiKey) headers.set("X-API-Key", apiKey);
-    // request.headers.forEach((value, key) => {
-    //   // Skip problematic headers but keep important ones
-    //   if (
-    //     !["host", "connection", "content-length", "origin", "referer"].includes(
-    //       key.toLowerCase()
-    //     )
-    //   ) {
-    //     headers.set(key, value);
-    //   }
-    // });
+    if (apiKey) headers.set("X-API-KEY", apiKey);
 
     // Get request body for POST/PUT requests
     let body: string | undefined;
@@ -118,7 +108,7 @@ async function handleRequest(
     if (setCookies) {
       if (Array.isArray(setCookies)) {
         setCookies.forEach((cookie) =>
-          responseHeaders.append("Set-Cookie", cookie)
+          responseHeaders.append("Set-Cookie", cookie),
         );
       } else {
         responseHeaders.append("Set-Cookie", setCookies);
@@ -131,13 +121,19 @@ async function handleRequest(
     responseHeaders.set("Vary", "Origin");
     responseHeaders.set(
       "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS"
+      "GET, POST, PUT, DELETE, OPTIONS",
     );
     responseHeaders.set(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, Cookie"
+      "Content-Type, Authorization, Cookie",
     );
     responseHeaders.set("Access-Control-Allow-Credentials", "true");
+    if (response.status === 204) {
+      return new NextResponse(null, {
+        status: 204,
+        headers: responseHeaders,
+      });
+    }
 
     const raw = await response.arrayBuffer();
 
