@@ -14,6 +14,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { toast } from "sonner";
+import { useKYCdocuments } from "./Query";
+import { useAuth } from "@/lib/authContext";
 
 interface KYCUploadFormProps {
   onSubmit: (data: KYCDocumentInput) => void;
@@ -23,7 +26,7 @@ interface KYCUploadFormProps {
 export interface KYCDocumentInput {
   document_name: string;
   document_type: string;
-  document_url: string;
+  file: File | null;
 }
 
 export function KYCUploadForm({
@@ -33,10 +36,13 @@ export function KYCUploadForm({
   const [formData, setFormData] = useState<KYCDocumentInput>({
     document_name: "",
     document_type: "business_license",
-    document_url: "",
+    file: null,
   });
-  const [fileName, setFileName] = useState<string>("");
+  const { user } = useAuth();
 
+  const { data } = useKYCdocuments(user?.organization_id || "");
+  const [fileName, setFileName] = useState<string>("");
+  const [type, setType] = useState<string>("");
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
@@ -44,7 +50,7 @@ export function KYCUploadForm({
 
       setFormData((prev) => ({
         ...prev,
-        document_url: URL.createObjectURL(file),
+        file: file,
         document_name: file.name.split(".")[0],
       }));
     }
@@ -59,6 +65,7 @@ export function KYCUploadForm({
   };
 
   const handleDocumentTypeChange = (value: string) => {
+    setType(value);
     setFormData((prev) => ({
       ...prev,
       document_type: value,
@@ -67,15 +74,25 @@ export function KYCUploadForm({
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.document_name || !formData.document_url) {
-      alert("Please fill in all fields");
+    if (!formData.document_name || !formData.file) {
+      toast.error("Please fill in all fields");
       return;
+    }
+
+    for (const doc of data || []) {
+      if (doc.document_type === formData.document_type) {
+        toast.error(
+          `You have already uploaded a document of type "${formData.document_type}". Please delete the existing one before uploading a new one.`,
+          { duration: 10_000 },
+        );
+        return;
+      }
     }
     onSubmit(formData);
     setFormData({
       document_name: "",
       document_type: "business_license",
-      document_url: "",
+      file: null,
     });
     setFileName("");
   };
@@ -117,13 +134,13 @@ export function KYCUploadForm({
             <SelectContent>
               <SelectItem value="business_license">Business License</SelectItem>
               <SelectItem value="tax_certificate">Tax Certificate</SelectItem>
-              <SelectItem value="incorporation_certificate">
+              {/* <SelectItem value="incorporation_certificate">
                 Incorporation Certificate
-              </SelectItem>
-              <SelectItem value="identification">
+              </SelectItem> */}
+              {/* <SelectItem value="identification">
                 Identification Document
-              </SelectItem>
-              <SelectItem value="other">Other</SelectItem>
+              </SelectItem> */}
+              <SelectItem value="operator_license">Operator License</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -177,9 +194,7 @@ export function KYCUploadForm({
 
         <Button
           type="submit"
-          disabled={
-            isLoading || !formData.document_name || !formData.document_url
-          }
+          disabled={isLoading || !formData.document_name || !formData.file}
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
           {isLoading ? "Uploading..." : "Upload Document"}

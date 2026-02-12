@@ -92,11 +92,13 @@ export default function OperatorList() {
   }, [displayCount]);
 
   async function handleDelete(id: string) {
-    const response = await superAdminApi.deleteOperator(id);
-
-    if (response) {
-      await refetch();
+    try {
+      await superAdminApi.deleteOperator(id);
+      refetch();
       toast.success("Operator deleted");
+    } catch (error) {
+      console.log(error);
+      toast.error("Failed to delete operator. Please try again.");
     }
   }
   function dateformatter(date: Date) {

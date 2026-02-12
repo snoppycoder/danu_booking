@@ -9,75 +9,99 @@ import {
 import { KYCDocumentList } from "@/components/KYCDocumentList";
 import { KYCDocument } from "@/lib/model";
 import { useAuth } from "@/lib/authContext";
-import { useKYCdocuments } from "@/components/Query";
+import { useKYCdocuments, OperatorUseUploadKyc } from "@/components/Query";
+import { toast, Toaster } from "sonner";
+import { kycApi, operatorApi } from "@/app/api/api";
+import { isAxiosError } from "axios";
 
 // Mock data for demonstration
 
 export default function KYCPage() {
   const { user } = useAuth();
-  const { data, isLoading: isPageLoading } = useKYCdocuments(
-    user?.organization_id || "",
-  );
-  console.log(data, "KYC documents data");
-  const [documents, setDocuments] = useState<KYCDocument[]>(data || []);
+  const {
+    data,
+    isLoading: isPageLoading,
+    refetch,
+  } = useKYCdocuments(user?.organization_id || "");
+  console.log("KYC documents data:", data);
+
   const [isLoading, setIsLoading] = useState(false);
+  const { mutateAsync: uploadKyc, isPending } = OperatorUseUploadKyc();
 
-  const handleUpload = useCallback(async (data: KYCDocumentInput) => {
-    setIsLoading(true);
-    try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+  const handleUpload = useCallback(
+    async (formData: KYCDocumentInput) => {
+      if (!formData.file) {
+        toast.error("Please select a file to upload.");
+        return;
+      }
 
-      const newDocument: KYCDocument = {
-        id: Math.random().toString(36).substr(2, 9),
-        owner_type: "operator",
-        owner_id: "user-123",
-        document_name: data.document_name,
-        document_type: data.document_type,
-        document_url: data.document_url,
-        status: "pending",
-        uploaded_by: "user-123",
-        uploaded_at: new Date().toISOString(),
-      };
+      if (!user?.organization_id) {
+        return;
+      }
+      if (!formData.file) {
+        toast.error("Please select a file to upload.");
+        return;
+      }
 
-      setDocuments((prev) => [newDocument, ...prev]);
-      alert("Document uploaded successfully!");
-    } catch (error) {
-      console.error("Upload failed:", error);
-      alert("Failed to upload document. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  }, []);
+      try {
+        // const res = await kycApi.uploadKyc(
+        //   {
+        //     document_name: formData.document_name,
+        //     document_type: formData.document_type,
+        //     file: formData.file,
+        //   },
+        //   user.organization_id,
+        // );
+        const res = await uploadKyc({
+          operator_id: user.organization_id,
+          document_name: formData.document_name,
+          document_type: formData.document_type,
+          file: formData.file,
+        });
+        // console.log("Upload response:", res);
+        console.log("Upload response:", res);
+
+        toast.success("Document uploaded successfully!");
+        refetch();
+      } catch (error) {
+        if (isAxiosError(error)) {
+          const errorMessage =
+            error.response?.data?.detail?.[0]?.msg ||
+            error.response?.data.error ||
+            "Failed to upload document. Please try again.";
+          toast.error(errorMessage);
+        }
+      }
+    },
+    [uploadKyc, user],
+  );
 
   const handleDelete = useCallback(async (id: string) => {
+    console.log("Attempting to delete document with id:", id);
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
-      setDocuments((prev) => prev.filter((doc) => doc.id !== id));
-      alert("Document deleted successfully!");
+      await operatorApi.delteKYCdocument(user?.organization_id || "", id);
+
+      refetch();
+
+      toast.warning("Document deleted successfully!");
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("Failed to delete document. Please try again.");
+      toast.error("Failed to delete document. Please try again.");
     } finally {
       setIsLoading(false);
     }
-  }, []);
-
-  const handleUpdate = useCallback((id: string) => {
-    // In a real app, this would open a modal or redirect to an edit page
-    alert(`Update functionality for document ${id} would be implemented here.`);
   }, []);
 
   const stats = {
-    approved: documents.filter((d) => d.status === "approved").length,
-    pending: documents.filter((d) => d.status === "pending").length,
-    rejected: documents.filter((d) => d.status === "rejected").length,
+    approved: data?.filter((d) => d.status === "approved").length,
+    pending: data?.filter((d) => d.status === "pending").length,
+    rejected: data?.filter((d) => d.status === "rejected").length,
   };
 
   return (
     <main className="min-h-screen text-primary-foreground">
+      <Toaster position="top-right" richColors />
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         {/* Header */}
         <div className="mb-6">
@@ -126,7 +150,7 @@ export default function KYCPage() {
         <div className="mb-12">
           <div className="bg-card text-foreground p-8 rounded-lg border border-border">
             <h2 className="text-2xl font-bold mb-6">Upload New Document</h2>
-            <KYCUploadForm onSubmit={handleUpload} isLoading={isLoading} />
+            <KYCUploadForm onSubmit={handleUpload} isLoading={isPending} />
           </div>
         </div>
 
@@ -134,9 +158,9 @@ export default function KYCPage() {
         <div className="bg-card text-foreground p-8 rounded-lg border border-border">
           <h2 className="text-2xl font-bold mb-6">Your KYC Documents</h2>
           <KYCDocumentList
-            documents={documents}
+            documents={data || []}
             onDelete={handleDelete}
-            onUpdate={handleUpdate}
+            // onUpdate={handleUpdate}
             isLoading={isLoading}
           />
         </div>

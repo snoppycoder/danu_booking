@@ -1,16 +1,17 @@
 export const runtime = "nodejs";
 
 import { NextRequest, NextResponse } from "next/server";
-// import { decompress } from "fzstd";
 
-const TARGET_URL = process.env.API_BASE_URL;
+const TARGET_URL = process.env.API_BASE_URL!;
+
+// ---------------- ROUTE HANDLERS ----------------
 
 export async function GET(
   request: NextRequest,
   context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
-  return handleRequest(request, path, "GET");
+  return proxyRequest(request, path, "GET");
 }
 
 export async function POST(
@@ -18,7 +19,7 @@ export async function POST(
   context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
-  return handleRequest(request, path, "POST");
+  return proxyRequest(request, path, "POST");
 }
 
 export async function PUT(
@@ -26,7 +27,7 @@ export async function PUT(
   context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
-  return handleRequest(request, path, "PUT");
+  return proxyRequest(request, path, "PUT");
 }
 
 export async function DELETE(
@@ -34,9 +35,24 @@ export async function DELETE(
   context: { params: Promise<{ path: string[] }> },
 ) {
   const { path } = await context.params;
-  return handleRequest(request, path, "DELETE");
+  return proxyRequest(request, path, "DELETE");
 }
-async function handleRequest(
+
+export async function PATCH(
+  request: NextRequest,
+  context: { params: Promise<{ path: string[] }> },
+) {
+  const { path } = await context.params;
+  return proxyRequest(request, path, "PATCH");
+}
+
+export async function OPTIONS() {
+  return buildCorsResponse();
+}
+
+// ---------------- CORE PROXY ----------------
+
+async function proxyRequest(
   request: NextRequest,
   pathSegments: string[],
   method: string,
@@ -45,105 +61,69 @@ async function handleRequest(
     const path = pathSegments.join("/");
     const url = new URL(`${TARGET_URL}/${path}`);
 
-    console.log("Proxy request:", {
-      method,
-      path,
-      targetUrl: url.toString(),
-      headers: Object.fromEntries(request.headers.entries()),
-    });
-
-    // Copy query parameters
+    // Forward query params
     request.nextUrl.searchParams.forEach((value, key) => {
-      url.searchParams.set(key, value);
+      url.searchParams.append(key, value);
     });
 
-    // Prepare headers - preserve important headers
+    // ----------- FORWARD HEADERS -----------
     const headers = new Headers();
-    headers.set("Content-Type", "application/json");
-    headers.set("Accept", "application/json");
 
-    const auth = request.headers.get("Authorization");
-    if (auth) headers.set("Authorization", auth);
+    request.headers.forEach((value, key) => {
+      const lower = key.toLowerCase();
 
-    const apiKey = request.headers.get("X-API-Key");
-    const csrf_token = request.headers.get("x-csrf-token");
-    if (csrf_token) headers.set("x-csrf-token", csrf_token);
-    if (apiKey) headers.set("X-API-KEY", apiKey);
+      // Skip unsafe hop-by-hop headers
+      if (
+        lower === "host" ||
+        lower === "content-length" ||
+        lower === "connection"
+      ) {
+        return;
+      }
 
-    // Get request body for POST/PUT requests
-    let body: string | undefined;
-    if (["POST", "PUT", "PATCH"].includes(method)) {
-      body = await request.text();
-      console.log("Proxy forwarding body:", body);
+      headers.set(key, value);
+    });
+
+    // ----------- HANDLE BODY SAFELY (Node runtime fix) -----------
+    let body: BodyInit | undefined;
+
+    if (!["GET", "HEAD"].includes(method)) {
+      const contentType = request.headers.get("content-type") || "";
+
+      if (contentType.includes("application/json")) {
+        body = await request.text();
+      } else if (contentType.includes("multipart/form-data")) {
+        body = await request.arrayBuffer();
+      } else {
+        body = await request.arrayBuffer();
+      }
     }
 
-    // Make the proxied request
-    console.log("Making request to:", url.toString());
-    console.log("Request headers:", Object.fromEntries(headers.entries()));
-
+    // ----------- MAKE REQUEST -----------
     const response = await fetch(url.toString(), {
       method,
       headers,
       body,
+      redirect: "manual",
     });
 
-    // Create response with proper headers
+    // ----------- FORWARD RESPONSE -----------
     const responseHeaders = new Headers();
+
     response.headers.forEach((value, key) => {
-      if (key.toLowerCase() === "accept-encoding") return;
-      if (key.toLowerCase().startsWith("sec-fetch")) return;
-      if (key.toLowerCase().startsWith("x-forwarded")) return;
+      const lower = key.toLowerCase();
 
-      // Allow CORS headers
-      if (
-        key.toLowerCase().startsWith("access-control") ||
-        key.toLowerCase() === "content-type"
-      ) {
-        responseHeaders.set(key, value);
+      if (lower === "transfer-encoding" || lower === "connection") {
+        return;
       }
+
+      responseHeaders.set(key, value);
     });
-    const setCookies =
-      response.headers.getSetCookie?.() || response.headers.get("set-cookie");
 
-    if (setCookies) {
-      if (Array.isArray(setCookies)) {
-        setCookies.forEach((cookie) =>
-          responseHeaders.append("Set-Cookie", cookie),
-        );
-      } else {
-        responseHeaders.append("Set-Cookie", setCookies);
-      }
-    }
+    // Apply CORS
+    applyCors(responseHeaders);
 
-    // Add CORS headers
-
-    responseHeaders.set("Access-Control-Allow-Origin", "http://localhost:3000");
-    responseHeaders.set("Vary", "Origin");
-    responseHeaders.set(
-      "Access-Control-Allow-Methods",
-      "GET, POST, PUT, DELETE, OPTIONS",
-    );
-    responseHeaders.set(
-      "Access-Control-Allow-Headers",
-      "Content-Type, Authorization, Cookie",
-    );
-    responseHeaders.set("Access-Control-Allow-Credentials", "true");
-    if (response.status === 204) {
-      return new NextResponse(null, {
-        status: 204,
-        headers: responseHeaders,
-      });
-    }
-
-    const raw = await response.arrayBuffer();
-
-    let decoded: string;
-
-    decoded = Buffer.from(raw).toString();
-
-    responseHeaders.set("Content-Type", "application/json");
-
-    return new NextResponse(decoded, {
+    return new NextResponse(response.body, {
       status: response.status,
       statusText: response.statusText,
       headers: responseHeaders,
@@ -154,15 +134,24 @@ async function handleRequest(
   }
 }
 
-// Handle OPTIONS requests for CORS preflight
-export async function OPTIONS() {
-  return new NextResponse(null, {
-    status: 200,
-    headers: {
-      "Access-Control-Allow-Origin": "http://localhost:3000",
-      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, OPTIONS",
-      "Access-Control-Allow-Headers": "Content-Type, Authorization, Cookie",
-      "Access-Control-Allow-Credentials": "true",
-    },
-  });
+// ---------------- CORS ----------------
+
+function applyCors(headers: Headers) {
+  headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
+  headers.set("Access-Control-Allow-Credentials", "true");
+  headers.set(
+    "Access-Control-Allow-Methods",
+    "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+  );
+  headers.set(
+    "Access-Control-Allow-Headers",
+    "Content-Type, Authorization, X-API-Key, Cookie",
+  );
+  headers.set("Vary", "Origin");
+}
+
+function buildCorsResponse() {
+  const headers = new Headers();
+  applyCors(headers);
+  return new NextResponse(null, { status: 200, headers });
 }

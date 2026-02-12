@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useRef, useState } from "react";
 import {
   Eye,
   Trash2,
@@ -51,6 +51,7 @@ import InfoRow from "./InfoRow";
 import { useAgent, useOperator, useUsers } from "./Query";
 import axios from "axios";
 import { AddAgentModal } from "./AddAgentModal";
+import { exportToCSV } from "@/lib/common_functions";
 
 export default function AgentList() {
   const [displayCount, setDisplayCount] = useState("10");
@@ -62,6 +63,7 @@ export default function AgentList() {
   const [detailToggle, setDetailToggle] = useState(false);
   const [detail, setDetail] = useState<Operator>();
   const [spinning, setSpinning] = useState<boolean>(false);
+  const printRef = useRef<HTMLDivElement>(null);
   const { data, isLoading, refetch } = useAgent(
     currentPage,
     Number(displayCount),
@@ -161,6 +163,26 @@ export default function AgentList() {
     await refetch();
     setSpinning(false);
   }
+  const handlePrint = () => {
+    const printContents = printRef.current?.innerHTML;
+    const win = window.open("", "", "width=900,height=650");
+
+    if (!win || !printContents) return;
+
+    win.document.write(`
+    <html>
+      <head>
+        <title>User List</title>
+      </head>
+      <body>
+        ${printContents}
+      </body>
+    </html>
+  `);
+
+    win.document.close();
+    win.print();
+  };
 
   return (
     <div className="relative space-y-6">
@@ -175,29 +197,30 @@ export default function AgentList() {
           <DialogHeader>
             <DialogTitle>User List</DialogTitle>
           </DialogHeader>
-
-          <div className="space-y-2 mt-4">
-            {users?.items.map((users) => (
-              <div
-                key={users.id}
-                className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
-              >
-                <div>
-                  <p className="font-medium">
-                    {(users.first_name ?? "") + " " + (users.last_name ?? "")}
-                  </p>
-                </div>
-                <Button
-                  size="sm"
-                  variant="outline"
-                  onClick={() => {
-                    handleAssignAgentToUser(users.id);
-                  }}
+          <div ref={printRef}>
+            <div className="space-y-2 mt-4">
+              {users?.items.map((users) => (
+                <div
+                  key={users.id}
+                  className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
                 >
-                  Select
-                </Button>
-              </div>
-            ))}
+                  <div>
+                    <p className="font-medium">
+                      {(users.first_name ?? "") + " " + (users.last_name ?? "")}
+                    </p>
+                  </div>
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => {
+                      handleAssignAgentToUser(users.id);
+                    }}
+                  >
+                    Select
+                  </Button>
+                </div>
+              ))}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
@@ -278,9 +301,27 @@ export default function AgentList() {
               <Copy className="w-4 h-4" /> Copy
             </Button>
 
-            <Button variant="outline">CSV</Button>
-            <Button variant="outline">PDF</Button>
-            <Button variant="outline">Print</Button>
+            <Button
+              variant="outline"
+              onClick={() =>
+                exportToCSV(
+                  data!.items?.map((u) => ({
+                    "First name": u.name[0],
+                    "Last name": u.name[1] ?? "",
+                    email: u.contact_email,
+                    slug: u.slug,
+                    mobile: u.contact_phone,
+                  })),
+                  `agents_${new Date()}.csv`,
+                )
+              }
+            >
+              CSV
+            </Button>
+
+            <Button variant="outline" onClick={handlePrint}>
+              Print
+            </Button>
 
             <Button
               className="ml-3.5 "

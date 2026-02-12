@@ -15,21 +15,12 @@ import {
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
 import { useAuth } from "@/lib/authContext";
-
-interface KYCDocument {
-  id: string;
-  document_name: string;
-  document_type: string;
-  document_url: string;
-  status: "pending" | "approved" | "rejected";
-  uploaded_at: string;
-  reviewed_at?: string;
-}
+import { KYCDocument } from "@/lib/model";
 
 interface KYCDocumentListProps {
   documents: KYCDocument[];
   onDelete?: (id: string) => void;
-  onUpdate?: (id: string) => void;
+  // onUpdate?: (id: string) => void;
   isLoading?: boolean;
 }
 
@@ -65,7 +56,7 @@ const formatDate = (dateString: string) => {
 export function KYCDocumentList({
   documents,
   onDelete,
-  onUpdate,
+  // onUpdate,
   isLoading = false,
 }: KYCDocumentListProps) {
   const [deleteId, setDeleteId] = useState<string | null>(null);
@@ -107,7 +98,12 @@ export function KYCDocumentList({
           <Button
             size="sm"
             variant="outline"
-            onClick={() => window.open(doc.document_url, "_blank")}
+            onClick={() => {
+              if (doc.document_url) {
+                console.log("Viewing document:", doc.document_name);
+                window.open(doc.document_url, "_blank");
+              }
+            }}
             className="flex-1"
           >
             <Eye className="w-4 h-4 mr-2" />
@@ -115,7 +111,7 @@ export function KYCDocumentList({
           </Button>
           {doc.status === "pending" || doc.status === "rejected" ? (
             <>
-              <Button
+              {/* <Button
                 size="sm"
                 variant="outline"
                 onClick={() => onUpdate?.(doc.id)}
@@ -124,7 +120,7 @@ export function KYCDocumentList({
               >
                 <Edit2 className="w-4 h-4 mr-2" />
                 Update
-              </Button>
+              </Button> */}
               <Button
                 size="sm"
                 variant="outline"
@@ -217,7 +213,7 @@ export function KYCDocumentList({
                 setDeleteId(null);
               }}
               disabled={isLoading}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              className="bg-destructive text-white hover:bg-destructive/90 "
             >
               Delete
             </AlertDialogAction>

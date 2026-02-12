@@ -54,11 +54,18 @@ export default function Sidebar() {
 
       subItems: [
         { label: "Operator List", href: "/superadmin/operator" },
-        { label: "Operator Users", href: "/superadmin/operator/manage" },
+        // { label: "Operator Users", href: "/superadmin/operator/manage" },
       ],
     },
     { icon: BarChart3, label: "Report", href: "/report" },
-    { icon: ScanFace, label: "KYC Approval", href: "/superadmin/kyc" },
+    {
+      icon: ScanFace,
+      label: "KYC Approval",
+      subItems: [
+        { label: "Operator KYC Approval", href: "/superadmin/operator/kyc" },
+        { label: "Agent KYC Approval", href: "/superadmin/agent/kyc" },
+      ],
+    },
     { icon: Luggage, label: "Luggage", href: "/luggage" },
     { icon: AlertCircle, label: "Settings", href: "/superadmin/settings" },
   ];

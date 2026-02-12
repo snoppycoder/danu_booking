@@ -1,21 +1,8 @@
 "use client";
 
+import { KYCDocument } from "@/lib/model";
 import { format } from "date-fns";
 import { AlertCircle, CheckCircle, XCircle } from "lucide-react";
-
-interface KYCDocument {
-  id: string;
-  operator_id?: string;
-  operator_name?: string;
-  agent_id?: string;
-  agent_name?: string;
-  document_type: string;
-  document_name: string;
-  document_url: string;
-  status: "pending" | "approved" | "rejected";
-  uploaded_at: string;
-  reviewed_at?: string;
-}
 
 interface AdminKYCListProps {
   documents: KYCDocument[];

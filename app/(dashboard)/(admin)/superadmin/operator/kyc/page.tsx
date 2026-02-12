@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import {
   AlertCircle,
   CheckCircle,
@@ -19,28 +19,36 @@ import {
 import { KYCDocument } from "@/lib/model";
 import { AdminKYCList } from "@/components/AdminKYCList";
 import { AdminKYCDetail } from "@/components/AdminKYCDetail";
-import { useKYCdocuments } from "@/components/Query";
+import { useKYCdocuments, useOperatorsKYCdocuments } from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
 import { toast, Toaster } from "sonner";
+import { superAdminApi } from "@/app/api/api";
 
 // Mock data for demonstration
 
 type StatusFilter = "all" | "pending" | "approved" | "rejected";
 
 export default function AdminKYCPage() {
-  const { user } = useAuth();
-  const { data, isLoading: isPageLoading } = useKYCdocuments(
-    user?.organization_id || "",
-  );
-  const [documents, setDocuments] = useState<KYCDocument[]>(data || []); // Replace with fetched data
-  const [statusFilter, setStatusFilter] = useState<StatusFilter>("pending");
+  const {
+    data,
+    isLoading: isPageLoading,
+    refetch,
+  } = useOperatorsKYCdocuments();
+  const [documents, setDocuments] = useState<KYCDocument[]>([]); // Replace with fetched data
+  const [statusFilter, setStatusFilter] = useState<StatusFilter>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedDocument, setSelectedDocument] = useState<KYCDocument | null>(
     null,
   );
+  console.log("Fetched KYC documents:", documents);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (data) {
+      setDocuments(data);
+    }
+  }, [data]);
   // Filter documents
   const filteredDocuments = useMemo(() => {
     return documents.filter((doc) => {
@@ -68,7 +76,7 @@ export default function AdminKYCPage() {
     [documents],
   );
 
-  // Handle bulk verification
+  // I will simulate it for now intergrate it with real API later
   const handleBulkApprove = useCallback(async () => {
     if (selectedIds.size === 0) {
       toast.warning("Please select documents to approve");
@@ -139,14 +147,19 @@ export default function AdminKYCPage() {
   const handleDelete = useCallback(async (id: string) => {
     setIsLoading(true);
     try {
+      console.log(selectedDocument, "Selected document for deletion");
       // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      await superAdminApi.deleteKYCdocument(
+        selectedDocument?.operator_id || "",
+        id,
+      );
+      refetch();
       setDocuments((prev) => prev.filter((doc) => doc.id !== id));
       setSelectedDocument(null);
-      alert("Document deleted successfully!");
+      toast.success("Document deleted successfully!");
     } catch (error) {
       console.error("Delete failed:", error);
-      alert("Failed to delete document. Please try again.");
+      toast.error("Failed to delete document. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -175,15 +188,14 @@ export default function AdminKYCPage() {
   return (
     <main className="min-h-screen ">
       <Toaster position="top-right" richColors />
-      <div className="max-w-7xl mx-auto px-4 py-8 md:py-12">
+      <div className="max-w-7xl mx-auto px-4 py-6">
         {/* Header */}
         <div className="mb-6">
           <h1 className="text-2xl md:text-3xl font-bold mb-1 text-balance">
-            KYC Document Review
+            Operator KYC Document Review
           </h1>
-          <p className="text-lg text-primary-foreground/80">
-            Review and approve Know-Your-Customer documents from operators and
-            agents
+          <p className="text-md text-gray-400 mt-2">
+            Review and approve Know-Your-Customer documents from operators
           </p>
         </div>
 
@@ -269,8 +281,7 @@ export default function AdminKYCPage() {
                   </div>
                 </div>
 
-                {/* Bulk Actions */}
-                {selectedIds.size > 0 && (
+                {selectedIds.size > 0 && statusFilter === "pending" && (
                   <div className="flex items-center justify-between bg-secondary p-4 rounded-lg mb-4">
                     <p className="text-sm font-medium">
                       {selectedIds.size} document(s) selected
@@ -295,7 +306,7 @@ export default function AdminKYCPage() {
                 )}
 
                 {/* Select All Checkbox */}
-                {filteredDocuments.length > 0 && (
+                {filteredDocuments.length > 0 && statusFilter === "pending" && (
                   <div className="flex items-center gap-2 mb-4">
                     <input
                       type="checkbox"
@@ -333,20 +344,17 @@ export default function AdminKYCPage() {
                 onApprove={async () => {
                   setIsLoading(true);
                   try {
-                    await new Promise((resolve) => setTimeout(resolve, 500));
-                    setDocuments((prev) =>
-                      prev.map((doc) =>
-                        doc.id === selectedDocument.id
-                          ? {
-                              ...doc,
-                              status: "approved" as const,
-                              reviewed_at: new Date().toISOString(),
-                            }
-                          : doc,
-                      ),
+                    await superAdminApi.verifyKYCdocument(
+                      selectedDocument.operator_id || "",
+                      selectedDocument.id,
+                      "approved",
                     );
+                    refetch();
+
                     setSelectedDocument(null);
-                    alert("Document approved!");
+                    toast.success("Document has been approved!");
+                  } catch (error) {
+                    console.log(error);
                   } finally {
                     setIsLoading(false);
                   }
@@ -354,20 +362,15 @@ export default function AdminKYCPage() {
                 onReject={async () => {
                   setIsLoading(true);
                   try {
-                    await new Promise((resolve) => setTimeout(resolve, 500));
-                    setDocuments((prev) =>
-                      prev.map((doc) =>
-                        doc.id === selectedDocument.id
-                          ? {
-                              ...doc,
-                              status: "rejected" as const,
-                              reviewed_at: new Date().toISOString(),
-                            }
-                          : doc,
-                      ),
+                    await superAdminApi.verifyKYCdocument(
+                      selectedDocument.operator_id || "",
+                      selectedDocument.id,
+                      "rejected",
                     );
+                    refetch();
+
                     setSelectedDocument(null);
-                    alert("Document rejected!");
+                    toast.success("Document has been rejected!");
                   } finally {
                     setIsLoading(false);
                   }

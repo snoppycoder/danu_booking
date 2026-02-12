@@ -124,10 +124,7 @@ export default function UserList() {
         return;
       }
 
-      const response = await superAdminApi.unAssignRole(
-        user.id,
-        user.roles[0].slug,
-      );
+      await superAdminApi.unAssignRole(user.id, user.roles[0].slug);
 
       toast.success(`Role ${user.roles[0].name} unassigned successfully`);
       refetch();
@@ -232,7 +229,7 @@ export default function UserList() {
             >
               CSV
             </Button>
-            <Button variant="outline">PDF</Button>
+            {/* <Button variant="outline">PDF</Button> */}
             <Button variant="outline">Print</Button>
             <Button
               className="ml-3.5 "

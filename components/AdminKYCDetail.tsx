@@ -1,21 +1,10 @@
 "use client";
 
+import { KYCDocument } from "@/lib/model";
 import { format } from "date-fns";
+import { create } from "domain";
+import { url } from "inspector";
 import { AlertCircle, CheckCircle, XCircle, Eye, Trash2 } from "lucide-react";
-
-interface KYCDocument {
-  id: string;
-  operator_id?: string;
-  operator_name?: string;
-  agent_id?: string;
-  agent_name?: string;
-  document_type: string;
-  document_name: string;
-  document_url: string;
-  status: "pending" | "approved" | "rejected";
-  uploaded_at: string;
-  reviewed_at?: string;
-}
 
 interface AdminKYCDetailProps {
   document: KYCDocument;
@@ -71,11 +60,11 @@ export function AdminKYCDetail({
       {/* Document Name */}
       <div>
         <h3 className="text-lg font-bold mb-2">{document.document_name}</h3>
-        <p className="text-sm text-muted-foreground">ID: {document.id}</p>
+        {/* <p className="text-sm text-muted-foreground">ID: {document.id}</p> */}
       </div>
 
       {/* Owner Information */}
-      <div className="space-y-3 border-t border-border pt-4">
+      <div className="space-y-3 border-t border-border ">
         <h4 className="font-semibold text-foreground">Owner Information</h4>
         <div className="space-y-2 text-sm">
           <div className="flex justify-between">
@@ -85,12 +74,6 @@ export function AdminKYCDetail({
           <div className="flex justify-between">
             <span className="text-muted-foreground">Name:</span>
             <span className="font-medium">{ownerName}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-muted-foreground">ID:</span>
-            <span className="font-medium text-xs">
-              {document.operator_id || document.agent_id}
-            </span>
           </div>
         </div>
       </div>

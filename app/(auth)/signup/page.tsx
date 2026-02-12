@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import { toast, Toaster } from "sonner";
 import { authAPI } from "@/app/api/api";
 import { useRouter } from "next/navigation";
+import { isAxiosError } from "axios";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -45,12 +46,22 @@ export default function SignupPage() {
       const { confirmPassword, acceptTerms, password, ...cleanedFormData } =
         formData;
 
-      const formattedData = { ...cleanedFormData, pin: password };
+      const formattedData = { ...cleanedFormData, password };
       await authAPI.signup(formattedData);
-      toast.success("Account created successfully!");
-      router.replace("/login");
+
+      toast.success("Account created successfully, please verify your account");
+      setTimeout(() => {
+        router.replace("/login");
+      }, 1500);
     } catch (error) {
-      toast.error("Failed to create account");
+      if (isAxiosError(error)) {
+        const message =
+          error.response?.data?.error?.reasons?.[0] ||
+          error.response?.data?.error?.message ||
+          error.response?.data?.detail?.[0]?.msg;
+        console.log(message, "signup error message");
+        toast.error(message);
+      } else toast.error("Failed to create account");
     }
   };
 
