@@ -18,14 +18,12 @@ import { isAxiosError } from "axios";
 
 export default function KYCPage() {
   const { user } = useAuth();
-  const {
-    data,
-    isLoading: isPageLoading,
-    refetch,
-  } = useKYCdocuments(user?.organization_id || "");
+  const { data, isLoading, refetch } = useKYCdocuments(
+    user?.organization_id || "",
+  );
   console.log("KYC documents data:", data);
 
-  const [isLoading, setIsLoading] = useState(false);
+  const isPageLoading = !user?.organization_id || isLoading;
   const { mutateAsync: uploadKyc, isPending } = OperatorUseUploadKyc();
 
   const handleUpload = useCallback(
@@ -58,9 +56,6 @@ export default function KYCPage() {
           document_type: formData.document_type,
           file: formData.file,
         });
-        // console.log("Upload response:", res);
-        console.log("Upload response:", res);
-
         toast.success("Document uploaded successfully!");
         refetch();
       } catch (error) {
@@ -78,18 +73,16 @@ export default function KYCPage() {
 
   const handleDelete = useCallback(async (id: string) => {
     console.log("Attempting to delete document with id:", id);
-    setIsLoading(true);
+
     try {
       await operatorApi.delteKYCdocument(user?.organization_id || "", id);
-
+      console.log(user?.organization_id, id);
       refetch();
 
       toast.warning("Document deleted successfully!");
     } catch (error) {
       console.error("Delete failed:", error);
       toast.error("Failed to delete document. Please try again.");
-    } finally {
-      setIsLoading(false);
     }
   }, []);
 
@@ -157,11 +150,11 @@ export default function KYCPage() {
         {/* Documents List Section */}
         <div className="bg-card text-foreground p-8 rounded-lg border border-border">
           <h2 className="text-2xl font-bold mb-6">Your KYC Documents</h2>
+
           <KYCDocumentList
             documents={data || []}
             onDelete={handleDelete}
-            // onUpdate={handleUpdate}
-            isLoading={isLoading}
+            isLoading={isPageLoading}
           />
         </div>
       </div>

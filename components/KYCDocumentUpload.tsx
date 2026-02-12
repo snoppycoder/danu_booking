@@ -39,7 +39,7 @@ export function KYCUploadForm({
     file: null,
   });
   const { user } = useAuth();
-
+  const [fileExist, setFileExist] = useState(false);
   const { data } = useKYCdocuments(user?.organization_id || "");
   const [fileName, setFileName] = useState<string>("");
   const [type, setType] = useState<string>("");
@@ -47,7 +47,7 @@ export function KYCUploadForm({
     const file = e.target.files?.[0];
     if (file) {
       setFileName(file.name);
-
+      setFileExist(true);
       setFormData((prev) => ({
         ...prev,
         file: file,
@@ -183,6 +183,7 @@ export function KYCUploadForm({
                 onClick={() => {
                   setFileName("");
                   setFormData((prev) => ({ ...prev, document_url: "" }));
+                  setFileExist(false);
                 }}
                 className="text-muted-foreground hover:text-foreground"
               >
@@ -194,7 +195,7 @@ export function KYCUploadForm({
 
         <Button
           type="submit"
-          disabled={isLoading || !formData.document_name || !formData.file}
+          disabled={isLoading || !formData.document_name || !fileExist}
           className="w-full bg-primary text-primary-foreground hover:bg-primary/90"
         >
           {isLoading ? "Uploading..." : "Upload Document"}

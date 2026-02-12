@@ -137,10 +137,17 @@ export function KYCDocumentList({
     );
   };
 
-  if (documents.length === 0) {
+  if (!isLoading && documents.length === 0) {
     return (
       <div className="text-center py-12">
         <p className="text-muted-foreground">No documents uploaded yet.</p>
+      </div>
+    );
+  }
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-muted-foreground">Loading documents...</p>
       </div>
     );
   }
