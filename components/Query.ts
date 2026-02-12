@@ -54,6 +54,7 @@ export const useTrips = (operator_id: string) => {
       return res.items;
     },
     staleTime: 1000 * 60 * 5,
+    retry: false,
     enabled: !!operator_id,
   });
 };
@@ -75,12 +76,15 @@ export const useOperatorBuses = (operator_id?: string) => {
     queryKey: ["buses", operator_id],
     queryFn: async () => {
       if (!operator_id) return [];
+
       const res = await operatorApi.getAllBuses(operator_id);
 
       return res.items;
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!operator_id,
+    retry: false,
+    refetchOnWindowFocus: false,
   });
 };
 export const useSession = () => {

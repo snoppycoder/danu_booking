@@ -5,6 +5,7 @@ import {
   useState,
   ReactNode,
   useEffect,
+  useMemo,
 } from "react";
 import { decodeJWT, getAccessToken, setAuthCookies } from "./auth";
 import { useRouter } from "next/navigation";
@@ -51,7 +52,7 @@ export const AuthProvider = ({
       };
       fetchCurrUser();
     }
-  }, []);
+  }, [path, blackListRoles]); // ✅ FIXED: Added missing dependencies
 
   const login = async (
     identifier: string,
@@ -96,11 +97,10 @@ export const AuthProvider = ({
     }
   };
 
-  return (
-    <AuthContext.Provider value={{ user, setUser, login }}>
-      {children}
-    </AuthContext.Provider>
-  );
+  // ✅ FIXED: Memoize context value to prevent unnecessary re-renders
+  const value = useMemo(() => ({ user, setUser, login }), [user]);
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
 export const useAuth = () => {

@@ -2,6 +2,7 @@ import type React from "react";
 import type { Metadata } from "next";
 
 import "@/app/globals.css";
+import QueryProvider from "@/components/QueryProvide";
 
 export const metadata: Metadata = {
   title: "Danu Booking - Intercity Bus Ticket Management System",
@@ -34,7 +35,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`font-sans antialiased`}>{children}</body>
+      <body className={`font-sans antialiased`}>
+        <QueryProvider>{children}</QueryProvider>
+      </body>
     </html>
   );
 }

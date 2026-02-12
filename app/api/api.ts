@@ -125,6 +125,9 @@ api.interceptors.response.use(
         // } else {
         //   console.error(`HTTP ${status} error:`, data);
         // }
+      } else if (status === 403) {
+        console.log(error);
+        throw error;
       }
     } else {
       console.error("Network or unknown error:", error.message);
@@ -670,8 +673,13 @@ export const operatorApi = {
     }
   },
   getAllBuses: async (operator_id: string) => {
-    const response = await api.get(`/operator/${operator_id}/buses`);
-    return response.data;
+    try {
+      const response = await api.get(`/operator/${operator_id}/buses`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
   deleteBus: async (operator_id: string, bus_id: string) => {
     const response = await api.delete(

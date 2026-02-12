@@ -7,7 +7,6 @@ import Navbar from "@/components/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/OperatorSidebar";
 import { AuthProvider } from "@/lib/authContext";
-import QueryProvider from "@/components/QueryProvide";
 import AvatarHero from "@/components/HeroAvatar";
 
 export default function DashboardLayout({
@@ -17,19 +16,17 @@ export default function DashboardLayout({
 }>) {
   return (
     <AuthProvider blackListRoles={["agent", "passenger"]}>
-      <QueryProvider>
-        <SidebarProvider>
-          <div className="flex min-h-screen w-full">
-            <AppSidebar />
-            <main className="relative flex flex-col flex-1">
-              <div className="absolute top-0 right-0 z-50 w-full flex flex-row-reverse px-4 py-3 border-b border-gray-300 bg-white">
-                <AvatarHero />
-              </div>
-              <div className="pt-14">{children}</div>
-            </main>
-          </div>
-        </SidebarProvider>
-      </QueryProvider>
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AppSidebar />
+          <main className="relative flex flex-col flex-1">
+            <div className="absolute top-0 right-0 z-50 w-full flex flex-row-reverse px-4 py-3 border-b border-gray-300 bg-white">
+              <AvatarHero />
+            </div>
+            <div className="pt-14">{children}</div>
+          </main>
+        </div>
+      </SidebarProvider>
     </AuthProvider>
   );
 }

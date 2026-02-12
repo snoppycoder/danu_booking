@@ -36,6 +36,7 @@ import { Bus, CreateTripPayload, Driver, Route, Trip } from "@/lib/model";
 import { operatorApi } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
+import AccountNotActiveBanner from "@/components/AccountBanner";
 
 export interface Trip_ extends Trip {
   id: string;
@@ -51,7 +52,12 @@ export default function TripManagement() {
   const { user } = useAuth();
 
   const { data: buses_ } = useOperatorBuses(user?.organization_id!);
-  const { data: trips_, isLoading } = useTrips(user?.organization_id!);
+  const {
+    data: trips_,
+    isLoading,
+    isError,
+    error,
+  } = useTrips(user?.organization_id!);
   const { data: driver_ } = useDrivers(user?.organization_id!);
   const [trips, setTrips] = useState<Trip_[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
@@ -71,7 +77,7 @@ export default function TripManagement() {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<Trip_ | null>(null);
   const [buses, setBuses] = useState<Bus[]>([]);
-  const { mutate, isPending, isSuccess, error } = useCreateTrip();
+  const { mutate, isPending, isSuccess } = useCreateTrip();
 
   const filteredTrips = trips?.filter((trip) => {
     const matchesSearch =
@@ -81,6 +87,12 @@ export default function TripManagement() {
     return matchesSearch;
   });
   const isPageLoading = isLoading || !user?.organization_id;
+  const showAccountBanner =
+    isError &&
+    error &&
+    typeof error === "object" &&
+    "response" in error &&
+    (error as any).response?.status === 403;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -195,8 +207,10 @@ export default function TripManagement() {
   return (
     <div className="min-h-screen bg-background p-6">
       <Toaster position="top-right" richColors />
+
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
+
         <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
@@ -209,6 +223,7 @@ export default function TripManagement() {
           <Button
             onClick={() => setIsCreateDialogOpen(true)}
             className="w-full sm:w-auto"
+            disabled={isLoading || isError}
           >
             <Plus className="size-4" />
             Create Trip
@@ -285,7 +300,7 @@ export default function TripManagement() {
         {!isPageLoading && filteredTrips && filteredTrips.length === 0 && (
           <Card className="p-12">
             <div className="text-center">
-              <p className="text-muted-foreground">Loading trips...</p>
+              <p className="text-muted-foreground">No trips found</p>
             </div>
           </Card>
         )}

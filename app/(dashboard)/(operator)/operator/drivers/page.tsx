@@ -101,9 +101,11 @@ export default function DriversManagement() {
   const [isAssignBusOpen, setIsAssignBusOpen] = useState(false);
   const [driverToAssign, setDriverToAssign] = useState<string | null>(null);
   const { user } = useAuth();
-  const { data, isLoading } = useDrivers(user?.organization_id!);
+  const { data, isLoading, isError, error } = useDrivers(
+    user?.organization_id!,
+  );
   const [drivers, setDrivers] = useState<Driver[]>(data ?? []);
-  const { mutate, isSuccess, error } = useCreateDriver();
+  const { mutate, isSuccess } = useCreateDriver();
   const [fullName, setFullName] = useState(
     `${selectedDriver?.first_name || ""} ${selectedDriver?.last_name || ""}`,
   );
@@ -251,7 +253,11 @@ export default function DriversManagement() {
                 Manage your driver workforce
               </p>
             </div>
-            <Button onClick={() => setIsAddDriverOpen(true)} className="gap-2">
+            <Button
+              onClick={() => setIsAddDriverOpen(true)}
+              className="gap-2"
+              disabled={isLoading || isError}
+            >
               <Plus className="size-4" />
               Add New Driver
             </Button>

@@ -9,6 +9,7 @@ export default function QueryProvider({
   children: React.ReactNode;
 }) {
   const [queryClient] = useState(() => new QueryClient());
+  console.log("Query client mounted");
 
   return (
     <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
