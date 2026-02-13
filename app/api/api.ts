@@ -566,6 +566,7 @@ export const superAdminApi = {
     return response.data;
   },
 };
+
 export const passengerApi = {
   searchRoute: async (body: {
     route_from: string;
@@ -582,6 +583,7 @@ export const passengerApi = {
     console.log(response.data);
     return response.data;
   },
+
   autoComplete: async (
     query: string,
     type: "origin" | "destination" | "all" = "all",

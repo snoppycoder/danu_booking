@@ -349,13 +349,6 @@ export default function OperatorPage() {
     (sum: number, b: Bus) => sum + b.capacity,
     0,
   );
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex h-screen items-center justify-center">
-  //       <p className="text-muted-foreground">Loading buses...</p>
-  //     </div>
-  //   );
-  // }
 
   return (
     <div className="flex flex-col">

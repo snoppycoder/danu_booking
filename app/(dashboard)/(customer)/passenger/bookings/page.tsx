@@ -75,7 +75,7 @@ export default function BookingPage() {
   }, []);
 
   async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     e.preventDefault();
 
@@ -99,7 +99,7 @@ export default function BookingPage() {
     setSuggestionsTo([]);
   };
 
-  function handleAutoCompleteFrom(value: string) {
+  async function handleAutoCompleteFrom(value: string) {
     try {
       setTimeout(async () => {
         const response = await passengerApi.autoComplete(value, "origin");
@@ -112,7 +112,7 @@ export default function BookingPage() {
       console.error("Auto complete error:", error);
     }
   }
-  function handleAutoCompleteTo(value: string) {
+  async function handleAutoCompleteTo(value: string) {
     try {
       setTimeout(async () => {
         const response = await passengerApi.autoComplete(value, "destination");
@@ -218,6 +218,7 @@ export default function BookingPage() {
                 </label>
                 <input
                   type="date"
+                  min={new Date().toISOString().split("T")[0]}
                   value={form.departure_date}
                   onChange={(e) =>
                     setForm({ ...form, departure_date: e.target.value })

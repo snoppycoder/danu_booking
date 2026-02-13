@@ -76,9 +76,9 @@ export default function UserList() {
 
   const filteredUser = data?.items?.filter(
     (emp) =>
-      emp.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp.email.toLowerCase().includes(searchTerm.toLowerCase()),
+      emp?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp?.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   console.log("Filtered Users: ", data);
 
@@ -427,6 +427,16 @@ export default function UserList() {
               }}
             >
               Operator
+            </Button>
+            <Button
+              variant="outline"
+              onClick={() => {
+                if (!selectUserAssign) return;
+                handleAssignRole("passenger", selectUserAssign);
+                setAssignRoleOpen(false);
+              }}
+            >
+              Passenger
             </Button>
           </div>
         </DialogContent>
