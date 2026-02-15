@@ -62,9 +62,6 @@ export function AgentSideBar() {
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          {/* <SidebarGroupLabel className=" mb-8  px-6 text-xs uppercase tracking-wider text-sidebar-foreground/50">
-            
-          </SidebarGroupLabel> */}
           <SidebarGroupContent className="mt-8">
             <SidebarMenu className="gap-5">
               {menuItems.map((item) => {
