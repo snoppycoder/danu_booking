@@ -32,7 +32,6 @@ import AvatarHero from "./HeroAvatar";
 export default function Sidebar() {
   const [expandedMenu, setExpandedMenu] = useState<string | null>(null);
   const [isOpen, setIsOpen] = useState(false);
-  const { user } = useAuth();
 
   const menuItems = [
     { icon: Zap, label: "Dashboard", href: "/superadmin" },

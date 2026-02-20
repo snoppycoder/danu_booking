@@ -6,6 +6,7 @@ import {
   Download,
   MoreVertical,
   MoreHorizontal,
+  Clock,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -38,6 +39,8 @@ import {
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { set } from "zod";
+import { Badge } from "@/components/ui/badge";
+import { Toaster } from "sonner";
 
 export default function BookingPage() {
   const searchParams = useSearchParams();
@@ -46,6 +49,9 @@ export default function BookingPage() {
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
+  const route_from = searchParams.get("from") || "";
+  const route_to = searchParams.get("to") || "";
+  const date = searchParams.get("date") || "";
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
@@ -128,7 +134,7 @@ export default function BookingPage() {
 
   async function handleBookNow(trip: Item): Promise<void> {
     if (isTrip(trip)) {
-      const response = await passengerApi.getTripDetails(trip.trip_id);
+      await passengerApi.getTripDetails(trip.trip_id);
       console.log(trip);
       setTripId(trip.trip_id);
     }
@@ -137,6 +143,7 @@ export default function BookingPage() {
 
   return (
     <div className="">
+      <Toaster richColors position="top-right" />
       <div className="p-8 bg-primary">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
@@ -214,7 +221,7 @@ export default function BookingPage() {
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                  Depart
+                  Departure Date
                 </label>
                 <input
                   type="date"
@@ -241,20 +248,16 @@ export default function BookingPage() {
           <CardContent className="px-4 py-2 flex space-x-[40%] items-center">
             <div>
               <h2 className="text-lg font-mono mb-2.5">Departure</h2>
-              <div className="text-md font-mono">{form.route_from}</div>
-              <div className="text-md font-mono">
-                {formatTime(form.departure_date)}
-              </div>
+              <div className="text-md font-mono">{route_from}</div>
+              <div className="text-md font-mono">{formatTime(date)}</div>
             </div>
 
             <div className="flex gap-x-8 h-full">
               <div className="h-full py-2 w-[1px] bg-gray-400 mx-2"></div>
               <div>
                 <h2 className="text-lg font-mono mb-2.5">Return</h2>
-                <div className="text-md font-mono">{form.route_to}</div>
-                <div className="text-md font-mono">
-                  {formatTime(form.departure_date)}
-                </div>
+                <div className="text-md font-mono">{route_to}</div>
+                <div className="text-md font-mono">{formatTime(date)}</div>
               </div>
             </div>
           </CardContent>
@@ -276,99 +279,143 @@ export default function BookingPage() {
               <p className="text-gray-500">No trips found</p>
             </div>
           ) : (
-            <div className="overflow-hidden rounded-xl bg-white shadow-lg">
+            <div className="overflow-hidden rounded-2xl bg-white shadow-lg ring-1 ring-slate-200/50">
               <Table>
-                <TableHeader className="">
-                  <TableRow className="border border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50 hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50">
-                    <TableHead className="font-semibold text-gray-900">
-                      Bus Name
+                <TableHeader>
+                  <TableRow className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50 hover:bg-gradient-to-r hover:from-slate-50 hover:to-blue-50">
+                    <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
+                      Bus Operator
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-900">
+                    {/* <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
+                      Route
+                    </TableHead> */}
+                    <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
                       Departure
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-900">
+                    <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
                       Arrival
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-900">
-                      Duration
-                    </TableHead>
-                    <TableHead className="text-right font-semibold text-gray-900">
+                    {/* <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
+                  Duration
+                </TableHead> */}
+                    <TableHead className="px-6 py-4 text-right text-sm font-semibold text-slate-900">
                       Fare
                     </TableHead>
-                    <TableHead className="text-center font-semibold text-gray-900">
-                      Seats
+                    <TableHead className="px-6 py-4 text-center text-sm font-semibold text-slate-900">
+                      Availability
                     </TableHead>
-                    <TableHead className="text-center font-semibold text-gray-900">
+                    <TableHead className="px-6 py-4 text-center text-sm font-semibold text-slate-900">
                       Action
                     </TableHead>
                   </TableRow>
                 </TableHeader>
 
-                <TableBody>
+                <TableBody className="divide-y divide-slate-100">
                   {data.map((route, index) => (
                     <TableRow
                       key={index}
-                      className="border-b p border-gray-100 transition-colors hover:bg-teal-50/50"
+                      className="transition-all duration-200 hover:bg-slate-50/60"
                     >
-                      <TableCell className="py-4 font-medium text-gray-900">
-                        {route.operator.operator_name}
+                      {/* Bus Operator */}
+                      <TableCell className="px-6 py-5">
+                        <p className="font-semibold text-slate-900">
+                          {route.operator.operator_name}
+                        </p>
                       </TableCell>
-                      <TableCell className="py-4 text-gray-700">
-                        {form.route_from}
+
+                      {/* Route */}
+                      {/* <TableCell className="px-6 py-5">
+                        <div className="flex items-center gap-2 text-slate-700">
+                          <MapPin className="h-4 w-4 text-teal-600" />
+                          <span className="text-sm">
+                            {route_from.split(" ")[0]} →{" "}
+                            {route_to.split(" ")[0]}
+                          </span>
+                        </div>
+                      </TableCell> */}
+
+                      {/* Departure */}
+                      <TableCell className="px-6 py-5">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-medium text-slate-900">
+                            {formatTime(route.departure_at)}
+                          </span>
+                        </div>
                       </TableCell>
-                      <TableCell className="py-4 text-gray-700">
-                        {form.route_to}
-                      </TableCell>
-                      <TableCell className="py-4 text-gray-700">
-                        {formatTime(route.departure_at)}
-                      </TableCell>
-                      <TableCell className="py-4 text-right font-semibold text-teal-600">
-                        {route.price} Birr
-                      </TableCell>
-                      <TableCell className="py-4 text-center">
-                        <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                          12 Available
+
+                      {/* Arrival */}
+                      <TableCell className="px-6 py-5">
+                        <span className="text-sm text-slate-700">
+                          {route_to}
                         </span>
                       </TableCell>
-                      <TableCell className="py-4 ">
-                        <div className="flex justify-center">
+
+                      {/* Duration */}
+                      {/* <TableCell className="px-6 py-5">
+                    <div className="flex items-center gap-2 text-slate-700">
+                      <Clock className="h-4 w-4 text-slate-400" />
+                      <span className="text-sm">{route.}</span>
+                    </div>
+                  </TableCell> */}
+
+                      {/* Fare */}
+                      <TableCell className="px-6 py-5 text-right">
+                        <span className="text-lg font-bold text-teal-600">
+                          {route.price} Birr
+                        </span>
+                      </TableCell>
+
+                      {/* Availability */}
+                      <TableCell className="px-6 py-5 text-center">
+                        <Badge
+                          variant="secondary"
+                          className={`${
+                            route.available_seats < 5
+                              ? "bg-red-100/80 text-red-800 hover:bg-red-100"
+                              : "bg-green-100/80 text-green-800 hover:bg-green-100"
+                          }`}
+                        >
+                          {route.available_seats} Available
+                        </Badge>
+                      </TableCell>
+
+                      {/* Actions */}
+                      <TableCell className="px-6 py-5">
+                        <div className="flex items-center justify-center gap-2">
                           <Button
                             size="sm"
-                            variant="default"
-                            className="mr-1.5"
+                            className="bg-teal-600 px-4 font-medium hover:bg-teal-700"
                             onClick={() => handleBookNow(route)}
                           >
-                            Book Now
+                            Book
                           </Button>
-                          <div className="ml-2">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  className="h-8 w-8 p-0 hover:bg-teal-100"
-                                >
-                                  <MoreHorizontal className="h-6 w-6 text-gray-600" />
-                                  <span className="sr-only">Open menu</span>
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48">
-                                <DropdownMenuItem
-                                  className="cursor-pointer "
-                                  onClick={() => {
-                                    if (isTrip(route)) {
-                                      handleViewDetails(route);
-                                    }
-                                  }}
-                                >
-                                  View Details
-                                </DropdownMenuItem>
-                                <DropdownMenuItem className="cursor-pointer">
-                                  Check Seats
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-9 w-9 p-0 hover:bg-slate-100"
+                              >
+                                <MoreHorizontal className="h-5 w-5 text-slate-500" />
+                                <span className="sr-only">Open menu</span>
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-48">
+                              <DropdownMenuItem
+                                className="cursor-pointer"
+                                onClick={() => {
+                                  if (isTrip(route)) {
+                                    handleViewDetails(route);
+                                  }
+                                }}
+                              >
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem className="cursor-pointer">
+                                Check Seat Map
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
                         </div>
                       </TableCell>
                     </TableRow>

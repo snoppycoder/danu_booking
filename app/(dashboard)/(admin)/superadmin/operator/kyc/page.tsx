@@ -259,7 +259,6 @@ export default function AdminKYCPage() {
                     />
                   </div>
 
-                  {/* Status Filter */}
                   <div className="w-[180px]">
                     <Select
                       value={statusFilter}
@@ -305,7 +304,6 @@ export default function AdminKYCPage() {
                   </div>
                 )}
 
-                {/* Select All Checkbox */}
                 {filteredDocuments.length > 0 && statusFilter === "pending" && (
                   <div className="flex items-center gap-2 mb-4">
                     <input
@@ -330,7 +328,7 @@ export default function AdminKYCPage() {
                 selectedIds={selectedIds}
                 onToggleSelect={toggleSelect}
                 onSelectDocument={(doc) => setSelectedDocument(doc)}
-                isLoading={isLoading}
+                isLoading={isPageLoading}
               />
             </div>
           </div>
@@ -377,6 +375,8 @@ export default function AdminKYCPage() {
                 }}
                 isLoading={isLoading}
               />
+            ) : isPageLoading ? (
+              <></>
             ) : (
               <div className="bg-card text-foreground p-6 rounded-lg border border-border text-center py-12">
                 <Eye className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />

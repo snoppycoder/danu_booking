@@ -151,6 +151,7 @@ export interface Route {
   driver: Driver;
   departure_at: string;
   price: number;
+  available_seats: number;
   created_at: string;
   updated_at: string;
 }
@@ -161,6 +162,7 @@ export interface TripData {
   driver: Driver;
   route_from: string;
   route_to: string;
+  available_seats: number;
   departure_at: string;
   price: number;
   created_at: string;
@@ -185,6 +187,7 @@ export type Passenger = {
 
 export interface Trip {
   trip_id: string;
+  available_seats: number;
   operator: {
     operator_id: string;
     operator_name: string;
@@ -199,6 +202,7 @@ export type Item = Trip | Route;
 export interface SearchRouteResponse {
   route_from: string;
   route_to: string;
+  available_seats: number;
   // items: Item[
   //   {
   //     route_id: string;

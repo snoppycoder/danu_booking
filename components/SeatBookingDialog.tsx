@@ -35,8 +35,6 @@ export default function SeatBookingDialog({
   const [seatToggle, setSeatToggle] = useState(false);
   const [passengers, setPassengers] = useState<Passenger[]>([]);
   const [seatArr, setSeatArr] = useState<string[]>([]);
-  const { user } = useAuth();
-  // const [passengerArr, setPassengerArr] = useState<Passenger[]>([]);
   const [seatDict, setSeatDict] = useState<Record<string, Passenger>>({});
   const [indexBeingEdited, setIndexBeingEdited] = useState<number | null>(null);
   const [bus, setBus] = useState<Bus>();
@@ -47,16 +45,13 @@ export default function SeatBookingDialog({
   >({});
 
   const [selectedSeats, setSelectedSeats] = useState<Record<number, string>>(
-    {}
+    {},
   );
 
   useEffect(() => {
     const fetch = async () => {
       if (tripId.length == 0) return;
       const response = await passengerApi.getTripDetails(tripId);
-      console.log(response, "logged");
-      // const data = response.data as TripData;
-      // console.log(data);
       setBus(response.bus);
     };
     fetch();
@@ -69,7 +64,7 @@ export default function SeatBookingDialog({
         email: "",
         phone: "",
         id_number: "",
-      }))
+      })),
     );
     setStep(2);
   };
@@ -77,7 +72,7 @@ export default function SeatBookingDialog({
   const updatePassenger = (
     index: number,
     field: keyof Passenger,
-    value: string
+    value: string,
   ) => {
     const updated = [...passengers];
     updated[index][field] = value;
@@ -97,31 +92,47 @@ export default function SeatBookingDialog({
         passenger_details: passengerArr,
         client_ref: uuid,
       });
-      if (!response) return;
 
-      const response2 = await tempAPI.payment({
-        amount: response.total_amount,
-        email: user?.email ?? "",
-        first_name: user?.first_name ?? "",
-        last_name: user?.last_name ?? "",
-        phone_number: user?.phone ?? "",
-        // client_ref: client_ref,
-        hold_id: response.hold_id,
-      });
-      console.log("response from the payment", response2);
-      if (response2.status == "success")
-        window.open(response2.data.checkout_url, "_blank");
-      setToggle(false);
-      console.log(response, "booking");
-      toast.success("Seats successfully booked!", { duration: 1000 });
+      await passengerApi.confirmBooking(
+        response.hold_id,
+        `devpay_${uuid}`,
+        "cash",
+      );
+
+      toast.success("Seats successfully booked!", { duration: 3000 });
+
       setPassengers(
         Array.from({ length: Number(seatCount) }, () => ({
           name: "",
           email: "",
           phone: "",
           id_number: "",
-        }))
+        })),
       );
+      setToggle(false);
+
+      // const response2 = await tempAPI.payment({
+      //   amount: response.total_amount,
+      //   email: user?.email ?? "",
+      //   first_name: user?.first_name ?? "",
+      //   last_name: user?.last_name ?? "",
+      //   phone_number: user?.phone ?? "",
+      //   hold_id: response.hold_id,
+      // });
+      // console.log("response from the payment", response2);
+      // if (response2.status == "success")
+      //   window.open(response2.data.checkout_url, "_blank");
+      // setToggle(false);
+      // console.log(response, "booking");
+      // toast.success("Seats successfully booked!", { duration: 1000 });
+      // setPassengers(
+      //   Array.from({ length: Number(seatCount) }, () => ({
+      //     name: "",
+      //     email: "",
+      //     phone: "",
+      //     id_number: "",
+      //   })),
+      // );
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.data.detail) {
@@ -148,7 +159,6 @@ export default function SeatBookingDialog({
   function handleBack(): void {
     setStep(1);
     setSeatDict({});
-
     setSeatArr([]);
     setSelectedSeats({});
     setSeats(bus?.seat_template.seats || []); // reset seat statuses
@@ -157,7 +167,7 @@ export default function SeatBookingDialog({
   }
   return (
     <div>
-      <Toaster richColors position="top-right" theme="system"></Toaster>
+      <Toaster richColors position="top-right"></Toaster>
       <Dialog open={toggle} onOpenChange={setToggle}>
         <DialogTrigger asChild>
           <Button>Book Seats</Button>
@@ -199,7 +209,7 @@ export default function SeatBookingDialog({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                       <Label className="mb-3" htmlFor="name">
-                        Name
+                        Name <span className="text-red-400">*</span>
                       </Label>
                       <Input
                         required
@@ -215,7 +225,6 @@ export default function SeatBookingDialog({
                         Email
                       </Label>
                       <Input
-                        required
                         type="email"
                         value={passenger.email}
                         id="email"
@@ -227,7 +236,7 @@ export default function SeatBookingDialog({
 
                     <div>
                       <Label className="mb-2" htmlFor="phone">
-                        Phone
+                        Phone Number <span className="text-red-400">*</span>
                       </Label>
                       <Input
                         required
@@ -240,7 +249,7 @@ export default function SeatBookingDialog({
                     </div>
                     <div>
                       <Label className="mb-2" htmlFor="id_number">
-                        ID Number
+                        ID Number <span className="text-red-400">*</span>
                       </Label>
                       <Input
                         required
@@ -255,7 +264,6 @@ export default function SeatBookingDialog({
                       variant="default"
                       disabled={
                         passenger.name === "" ||
-                        passenger.email === "" ||
                         passenger.phone === "" ||
                         passenger.id_number === ""
                       }
@@ -271,7 +279,7 @@ export default function SeatBookingDialog({
                     >
                       {`Select Seat ${
                         Object.entries(seatDict).find(
-                          ([, p]) => p === passenger
+                          ([, p]) => p === passenger,
                         )?.[0] || ""
                       }`}
                     </Button>

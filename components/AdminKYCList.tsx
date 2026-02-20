@@ -45,11 +45,19 @@ export function AdminKYCList({
   onSelectDocument,
   isLoading,
 }: AdminKYCListProps) {
-  if (documents.length === 0) {
+  if (!isLoading && documents.length === 0) {
     return (
       <div className="text-center py-12">
         <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
         <p className="text-muted-foreground">No documents found</p>
+      </div>
+    );
+  }
+  if (isLoading) {
+    return (
+      <div className="text-center py-12">
+        <AlertCircle className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+        <p className="text-muted-foreground">Loading...</p>
       </div>
     );
   }

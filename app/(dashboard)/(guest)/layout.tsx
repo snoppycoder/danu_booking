@@ -8,6 +8,7 @@ import { AuthProtector } from "@/lib/authProtector";
 import { AuthProvider, useAuth } from "@/lib/authContext";
 import Sidebar from "@/components/SuperAdminSideBar";
 import { useState } from "react";
+import GuestNavBar from "@/components/GuestNavBar";
 
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
@@ -45,24 +46,24 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        <AuthProvider blackListRoles={[]}>
-          <Navbar
-            initalPath={[
-              { href: "/passenger", label: "Home" },
-              // { href: "/passenger/bookings", label: "Bookings" },
-              { href: "/about-us", label: "About Us" },
-              { href: "/contact", label: "Contact" },
-            ]}
-            onLoaded={() => setIsNavbarLoaded(true)}
-          />
-          {isNavbarLoaded ? (
-            // <AuthProtector>
-            <main>{children}</main>
-          ) : (
-            // </AuthProtector>
-            <div className="p-4"></div>
-          )}
-        </AuthProvider>
+        {/* <AuthProvider blackListRoles={[]}> */}
+        <GuestNavBar
+          initalPath={[
+            { href: "/passenger", label: "Home" },
+            // { href: "/passenger/bookings", label: "Bookings" },
+            { href: "/about-us", label: "About Us" },
+            { href: "/contact", label: "Contact" },
+          ]}
+          onLoaded={() => setIsNavbarLoaded(true)}
+        />
+        {isNavbarLoaded ? (
+          // <AuthProtector>
+          <main>{children}</main>
+        ) : (
+          // </AuthProtector>
+          <div className="p-4"></div>
+        )}
+        {/* </AuthProvider> */}
       </body>
     </html>
   );

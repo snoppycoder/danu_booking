@@ -31,6 +31,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
+import { Toaster } from "sonner";
 
 export default function GuestBooking() {
   const searchParams = useSearchParams();
@@ -130,6 +131,7 @@ export default function GuestBooking() {
 
   return (
     <div className="">
+      <Toaster richColors position="top-right" />
       <div className="p-8 bg-primary">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">

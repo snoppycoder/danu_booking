@@ -3,18 +3,11 @@
 import {
   deleteAllCookies,
   getAccessToken,
-  getCSRFToken,
   getRefreshToken,
   getSessionId,
 } from "@/lib/auth";
 import { AddOperatorForm, AddUserForm, Agent, Passenger } from "@/lib/model";
-import axios, {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse,
-  isAxiosError,
-} from "axios";
-import { createDecipheriv } from "crypto";
+import axios from "axios";
 
 const api = axios.create({
   baseURL: "/api/proxy",
@@ -30,15 +23,14 @@ const api = axios.create({
   withCredentials: true,
 });
 
-const refreshApi = axios.create({
-  baseURL: "/api/proxy",
-  withCredentials: true,
-  headers: {
-    "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
-    "Content-Type": "application/json",
-    Accept: "application/json",
-  },
-});
+const getCookie = (name: string) => {
+  if (typeof document === "undefined") return null;
+
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+
+  return match ? match[2] : null;
+};
+
 const api_webhook = axios.create({
   headers: {
     "Content-Type": "application/json",
@@ -98,8 +90,12 @@ api.interceptors.response.use(
             break;
           case "Not authenticated":
             console.error("Not authenticated — redirecting to login");
+            console.log(window.location.pathname);
             // window.location.href = "/login";
-            window.location.href = "/login";
+
+            /**
+             * Note to fur
+             */
 
             break;
 
@@ -140,16 +136,16 @@ api.interceptors.response.use(
 api.interceptors.request.use(
   async (config) => {
     const token = await getAccessToken();
-    const csrf_token = await getCSRFToken();
-    console.log(csrf_token, "csrf token here");
 
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
-    if (csrf_token) {
-      console.log(csrf_token, "csrf token");
-      config.headers["x-csrf-token"] = csrf_token;
+    const csrf = getCookie("csrf_token");
+    console.log(csrf, "trying to get csrf from cookie");
+    if (csrf) {
+      config.headers["X-CSRF-Token"] = csrf;
     }
+
     console.log("[API Request]", config.method?.toUpperCase(), config.url);
 
     return config;
@@ -167,7 +163,7 @@ export const tempAPI = {
     first_name: string;
     last_name: string;
     phone_number: string;
-    // client_ref: string;
+
     hold_id: string;
   }) => {
     const response = await api_webhook.post("/payment", body);
@@ -200,11 +196,6 @@ export const kycApi = {
       const response = await api.post(
         `/operator/${operator_id}/kyc-documents`,
         formData,
-        // {
-        //   headers: {
-        //     "Content-Type": "multipart/form-data",
-        //   },
-        // },
       );
 
       return response.data;
@@ -272,6 +263,7 @@ export const authAPI = {
         remember,
         // portal,
       });
+
       return response.data;
     } catch (error) {
       console.log(error);
@@ -283,14 +275,15 @@ export const authAPI = {
       const session_id = await getSessionId();
       const refresh_token = await getRefreshToken();
 
-      await api.post("/user/me/sessions/logout", {
+      const response = await api.post("/user/me/sessions/logout", {
         refresh_token,
         session_id,
       });
+      console.log(response);
       await deleteAllCookies();
-      window.location.href = "/login";
+      // window.location.href = "/login";
     } catch (error) {
-      window.location.href = "/login";
+      // window.location.href = "/login";
       console.log(error);
     }
   },
@@ -351,6 +344,16 @@ export const superAdminApi = {
   deleteOperator: async (id: string) => {
     const response = await api.delete(`/admin/operators/${id}`);
     return response.data;
+  },
+
+  activateOperator: async (id: string) => {
+    try {
+      const response = await api.post(`/admin/operators/${id}/activate`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
   /**
    * This is the user operation below
@@ -568,12 +571,28 @@ export const superAdminApi = {
 };
 
 export const passengerApi = {
+  confirmBooking: async (
+    hold_id: string,
+    payment_reference: string,
+    payment_method: string,
+  ) => {
+    try {
+      const response = await api.post(`/user/holds/${hold_id}/confirm`, {
+        payment_reference,
+        payment_method,
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   searchRoute: async (body: {
     route_from: string;
     route_to: string;
     departure_date: string;
   }) => {
-    const response = await api.get("/passenger/search", {
+    const response = await api.get("/guest/search", {
       params: {
         route_from: body.route_from,
         route_to: body.route_to,
@@ -589,7 +608,7 @@ export const passengerApi = {
     type: "origin" | "destination" | "all" = "all",
   ) => {
     if (query.length < 2) return [];
-    const response = await api.get("/passenger/routes/autocomplete", {
+    const response = await api.get("/guest/routes/autocomplete", {
       params: {
         q: query,
         type: type,
@@ -599,11 +618,11 @@ export const passengerApi = {
     return response.data.routes;
   },
   getPopularRoutes: async () => {
-    const response = await api.get("/passenger/routes/popular");
+    const response = await api.get("/guest/routes/popular");
     return response.data.routes;
   },
   getTripDetails: async (tripId: string) => {
-    const response = await api.get(`/passenger/${tripId}`);
+    const response = await api.get(`/guest/${tripId}`);
 
     return response.data;
   },
@@ -618,7 +637,7 @@ export const passengerApi = {
     try {
       // const uuid = crypto.randomUUID();
       // console.log({ ...body, client_ref: `client_${uuid}` }, "body here");
-      const response = await api.post(`/passenger/${tripId}/holds`, {
+      const response = await api.post(`/user/holds/${tripId}`, {
         ...body,
         passenger_details: body.passenger_details.map((passenger) => ({
           ...passenger,

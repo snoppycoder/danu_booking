@@ -110,8 +110,19 @@ async function proxyRequest(
     // ----------- FORWARD RESPONSE -----------
     const responseHeaders = new Headers();
 
+    const setCookies =
+      response.headers.getSetCookie?.() ?? response.headers.get("set-cookie");
+
+    if (setCookies && setCookies.length > 0) {
+      for (const cookie of setCookies) {
+        responseHeaders.append("set-cookie", cookie);
+      }
+    }
+
     response.headers.forEach((value, key) => {
       const lower = key.toLowerCase();
+
+      if (lower === "set-cookie") return;
 
       if (lower === "transfer-encoding" || lower === "connection") {
         return;
@@ -136,7 +147,7 @@ async function proxyRequest(
 
 // ---------------- CORS ----------------
 
-function applyCors(headers: Headers) {
+async function applyCors(headers: Headers) {
   headers.set("Access-Control-Allow-Origin", "http://localhost:3000");
   headers.set("Access-Control-Allow-Credentials", "true");
   headers.set(

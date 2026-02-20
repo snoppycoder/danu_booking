@@ -1,25 +1,19 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useReducer, useState } from "react";
 import { Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
-import { useAuth } from "@/lib/authContext";
-import AvatarHero from "./HeroAvatar";
+
 import { authAPI } from "@/app/api/api";
+import { useRouter } from "next/navigation";
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
   onLoaded: () => void;
 }
-export default function Navbar(Props: NavbarProps) {
+export default function GuestNavBar(Props: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
-  useEffect(() => {
-    if (user) {
-      Props.onLoaded();
-    }
-  }, [user, Props.onLoaded]);
-  if (!user) return <></>;
+  const router = useRouter();
 
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
@@ -42,15 +36,6 @@ export default function Navbar(Props: NavbarProps) {
                   {path.label}
                 </Link>
               ))}
-              <AvatarHero />
-
-              {!user ? (
-                <Button className="bg-primary cursor-pointer hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors">
-                  <Link href={"/login"}> Log In </Link>
-                </Button>
-              ) : (
-                <></>
-              )}
             </div>
           </div>
 
@@ -97,33 +82,26 @@ export default function Navbar(Props: NavbarProps) {
               Contact
             </Link>
 
-            {!user ? (
-              <div className="px-3 w-full py-2 flex justify-center gap-2">
-                <Button
-                  variant="default"
-                  className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded transition-colors text-sm"
-                >
-                  Sign In
-                </Button>
-                <Button
-                  variant="default"
-                  className="flex-1 bg-coral-500 hover:bg-coral-600 text-white font-semibold px-4 py-2 rounded transition-colors text-sm"
-                >
-                  Sign Up
-                </Button>
-              </div>
-            ) : (
-              <div className="px-3 mt-2 w-full py-2 flex justify-center gap-2">
-                <Button
-                  variant="destructive"
-                  onClick={async () => {
-                    authAPI.logout();
-                  }}
-                >
-                  Logout
-                </Button>
-              </div>
-            )}
+            <div className="px-3 w-full py-2 flex justify-center gap-2">
+              <Button
+                variant="default"
+                className="flex-1 bg-teal-600 hover:bg-teal-700 text-white font-semibold px-4 py-2 rounded transition-colors text-sm"
+                onClick={() => {
+                  router.replace("/login");
+                }}
+              >
+                Sign In
+              </Button>
+              <Button
+                variant="default"
+                onClick={() => {
+                  router.replace("/signup");
+                }}
+                className="flex-1 border border-gray-300 bg-coral-500 hover:bg-coral-600 text-black font-semibold px-4 py-2 rounded transition-colors text-sm"
+              >
+                Sign Up
+              </Button>
+            </div>
           </div>
         )}
       </div>

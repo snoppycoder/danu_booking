@@ -51,7 +51,7 @@ import {
 } from "./ui/dialog";
 import InfoRow from "./InfoRow";
 import { useOperator, useUsers } from "./Query";
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { exportToCSV } from "@/lib/common_functions";
 
 export default function OperatorList() {
@@ -74,6 +74,9 @@ export default function OperatorList() {
       (u) => u.roles[0]?.name == "Operator Admin" && !u.organization_id,
     ) ?? [];
   console.log(users, "filtered users");
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [displayCount]);
   const filteredOperators = data?.items?.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -87,9 +90,20 @@ export default function OperatorList() {
       setDetailToggle(true);
     }
   }
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [displayCount]);
+  async function handleActivate(id: string) {
+    try {
+      await superAdminApi.activateOperator(id);
+      refetch();
+      toast.success("Operator sucessfully activated");
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(
+          error.response?.data.error ||
+            "Error while trying to activate the operator",
+        );
+      }
+    }
+  }
 
   async function handleDelete(id: string) {
     try {
@@ -379,9 +393,11 @@ export default function OperatorList() {
                               View
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => console.log(op.id)}
+                              onClick={() => {
+                                handleActivate(op.id);
+                              }}
                             >
-                              Unassign
+                              Activate
                             </DropdownMenuItem>
 
                             <DropdownMenuItem

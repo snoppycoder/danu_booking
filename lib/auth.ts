@@ -60,7 +60,7 @@ export const setAuthCookies = async (response: {
 
 export const setRefreshToken = async (
   refresh_token: string,
-  refresh_expiry: number
+  refresh_expiry: number,
 ) => {
   const cookie = await cookies();
   cookie.set({
@@ -83,11 +83,6 @@ export const getRefreshToken = async () => {
   const refresh_token = cookie.get("refresh_token")?.value;
   return refresh_token;
 };
-export const getCSRFToken = async () => {
-  const cookie = await cookies();
-  const csrf_token = cookie.get("csrf_token")?.value;
-  return csrf_token;
-};
 
 export const getAccessToken = async () => {
   const cookie = await cookies();
@@ -95,6 +90,7 @@ export const getAccessToken = async () => {
 };
 export const deleteAllCookies = async () => {
   const cookie = await cookies();
+  console.log(cookie);
   cookie.delete("refresh_token");
   cookie.delete("access_token");
   cookie.delete("session_id");
@@ -111,7 +107,7 @@ export async function decodeJWT(token: string) {
 
 export const setAccessToken = async (
   access_token: string,
-  access_expires_at: string
+  access_expires_at: string,
 ) => {
   const now = new Date().getTime();
   const cookie = await cookies();
