@@ -5,6 +5,21 @@ export interface AddOperatorForm {
   contact_email: string;
   extra_metadata: Record<string, string>;
 }
+
+export interface History {
+  booking_id: string;
+  booking_ref: string;
+  booked_at: string;
+  booking_status: string;
+  trip_id: string;
+  route_from: string;
+  route_to: string;
+  departure_at: string;
+  operator_id: string;
+  operator_name: string;
+  total_amount: 0;
+  passenger_count: 0;
+}
 export interface Session {
   id: string;
   created_at?: string;
@@ -103,6 +118,28 @@ export interface User {
 }
 export interface SeatExtraMetadata {
   type: "window" | "asile"; // or string if other types are possible
+}
+export interface UseAuthUser {
+  sub: string;
+  roles: string[];
+  portal: string;
+  first_name: string;
+  last_name: string;
+  id: string;
+  phone?: string;
+  organization_id?: string;
+  phone_verified: boolean;
+  email: string;
+  email_verified: boolean;
+  is_disabled: boolean;
+  is_active: boolean;
+  display_name: string;
+  dob: string;
+  gender: string;
+  avatar_file_id: string;
+  bio: string;
+  address: Address;
+  last_login_at?: string;
 }
 
 export interface Seat {

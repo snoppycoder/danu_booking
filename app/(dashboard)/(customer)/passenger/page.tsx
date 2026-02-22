@@ -3,19 +3,15 @@
 import { useEffect, useState } from "react";
 import { MapPin, Calendar, ArrowRight, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
+
 import { Toaster, toast } from "sonner";
 
-import { useAuth } from "@/lib/authContext";
-import {
-  PopularRoute,
-  PopularRoutesResponse,
-  SearchRouteResponse,
-} from "@/lib/model";
-import api, { passengerApi } from "@/app/api/api";
-import { handleSearch } from "@/lib/common_functions";
+import { PopularRoute } from "@/lib/model";
+import { passengerApi } from "@/app/api/api";
+import EtDatePicker from "habesha-datepicker";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
+
 export default function DanuBooking() {
   const router = useRouter();
   const today = new Date().toISOString().split("T")[0];
@@ -25,6 +21,7 @@ export default function DanuBooking() {
   const [showDropdownTo, setShowDropdownTo] = useState(false);
   const [loading, setLoading] = useState<boolean>(true);
   const [popularRoutes, setPopularRoutes] = useState<PopularRoute[]>([]);
+  const [date, setDate] = useState<Date | null>();
 
   const [form, setForm] = useState({
     route_from: "",
@@ -55,7 +52,7 @@ export default function DanuBooking() {
       route_from: route.route_from,
       route_to: route.route_to,
     });
-    // Scroll to booking form
+
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   async function handleSubmit(
@@ -108,12 +105,16 @@ export default function DanuBooking() {
     }
   }
 
+  const handleSelect = (newSelected: Date | undefined) => {
+    // Update the selected dates
+    setDate(newSelected);
+  };
+
   return (
     <div className="w-full">
       <Toaster richColors position="top-right"></Toaster>
-      {/* Hero Section */}
+
       <section className="relative py-20 px-4 sm:py-32 text-center text-white overflow-hidden">
-        {/* VIDEO BACKGROUND */}
         <video
           autoPlay
           muted
@@ -123,7 +124,6 @@ export default function DanuBooking() {
         >
           <source src="/videos/bus.mp4" type="video/mp4" />
         </video>
-        {/* <div className="absolute inset-0 bg-primary"></div> */}
 
         <div className="relative max-w-6xl mx-auto z-10">
           <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">
@@ -211,7 +211,7 @@ export default function DanuBooking() {
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Departure Date
                   </label>
-                  <input
+                  {/* <input
                     type="date"
                     value={form.departure_date}
                     min={new Date().toISOString().split("T")[0]}
@@ -219,11 +219,47 @@ export default function DanuBooking() {
                       setForm({ ...form, departure_date: e.target.value })
                     }
                     className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                  /> */}
+                  <EtDatePicker
+                    minDate={new Date()}
+                    value={
+                      form.departure_date
+                        ? (() => {
+                            const [y, m, d] = form.departure_date
+                              .split("-")
+                              .map(Number);
+                            return new Date(y, m - 1, d); // LOCAL date
+                          })()
+                        : null
+                    }
+                    sx={{ color: "#00a896", width: "100%" }}
+                    onChange={(
+                      date: Date | [Date | null, Date | null] | null,
+                    ) => {
+                      let selectedDate: Date | null = null;
+                      if (Array.isArray(date)) {
+                        selectedDate = date[0] ?? null;
+                      } else {
+                        selectedDate = date ?? null;
+                      }
+                      setForm({
+                        ...form,
+                        departure_date: selectedDate
+                          ? selectedDate.toISOString().split("T")[0]
+                          : "",
+                      });
+                    }}
+                    className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
                   />
                 </div>
 
                 <div className="flex items-end">
-                  <Button className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
+                  <Button
+                    disabled={
+                      !form.route_from || !form.route_to || !form.departure_date
+                    }
+                    className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold"
+                  >
                     Find Tickets
                   </Button>
                 </div>

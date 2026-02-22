@@ -16,6 +16,7 @@ export default function AvatarHero() {
   const router = useRouter();
   const { user } = useAuth();
   const path = usePathname();
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -37,6 +38,16 @@ export default function AvatarHero() {
         >
           Profile
         </DropdownMenuItem>
+        {user?.roles[0] == "passenger" && (
+          <DropdownMenuItem
+            onClick={() => {
+              router.replace(`/history?from=${path}`);
+            }}
+            className="text-black cursor-pointer"
+          >
+            History
+          </DropdownMenuItem>
+        )}
         <DropdownMenuItem
           onClick={() => {
             router.replace("/manage-sessions");

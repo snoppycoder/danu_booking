@@ -23,7 +23,6 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
@@ -77,9 +76,6 @@ import { operatorApi } from "@/app/api/api";
 import { useAuth } from "@/lib/authContext";
 import { useOperatorBuses } from "@/components/Query";
 import { Bus, SeatTemplate } from "@/lib/model";
-import { pl } from "zod/v4/locales";
-import { set } from "zod";
-import SeatTemplateDialog from "@/components/SeatTemplateModal";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
@@ -95,14 +91,6 @@ const scheduleOptions = [
   { id: "3", route: "Mumbai - Goa", time: "10:00 AM" },
   { id: "4", route: "Pune - Bangalore", time: "07:00 PM" },
 ];
-interface createBusRequest extends Bus {
-  plate_no: string;
-  side_no: string;
-  capacity: number;
-  seat_template_id: string;
-  bus_status: "active" | "inactive";
-  // facilities: [] as string[],
-}
 
 export default function OperatorPage() {
   // const [buses, setBuses] = useState<Bus[]>([]);
@@ -118,11 +106,6 @@ export default function OperatorPage() {
   const { user } = useAuth();
   const queryClient = useQueryClient();
   const [seatTemplates, setSeatTemplates] = useState<SeatTemplate[]>();
-  // const {
-  //   data: operatorBuses,
-  //   isLoading,
-  //   isError,
-  // } = useOperatorBuses(user?.organization_id!);
   const {
     data: buses = [],
     isLoading,
@@ -134,22 +117,6 @@ export default function OperatorPage() {
     null,
   );
 
-  // Improved loading check that handles Auth delay AND State Sync delay
-  // const isPageLoading =
-  //   isLoading ||
-  //   !user?.organization_id ||
-  //   (buses && buses.length > 0 && buses.length === 0);
-
-  // useEffect(() => {
-  //   if (!operatorBuses || !user?.organization_id) return;
-
-  //   setBuses(operatorBuses);
-
-  //   operatorApi
-  //     .getAllSeatTemplates(user.organization_id)
-  //     .then(setSeatTemplates)
-  //     .catch(console.error);
-  // }, [operatorBuses, user?.organization_id]);
   useEffect(() => {
     if (!user?.organization_id) return;
 
@@ -186,7 +153,13 @@ export default function OperatorPage() {
     error &&
     typeof error === "object" &&
     "response" in error &&
-    (error as any).response?.status === 403;
+    (
+      error as {
+        response: {
+          status: number;
+        };
+      }
+    ).response?.status === 403;
   const isPageLoading = isLoading && !showAccountBanner;
 
   const handleTemplateSelect = (template: SeatTemplate) => {
@@ -194,15 +167,11 @@ export default function OperatorPage() {
     setSelectedTemplate(template);
   };
 
-  const handleStatusChange = async (busId: string, newStatus: BusStatus) => {
+  const handleStatusChange = async (bus: Bus, newStatus: BusStatus) => {
     if (!user?.organization_id) return;
 
     try {
-      // await operatorApi.updateBusStatus(
-      //   user.organization_id,
-      //   busId,
-      //   newStatus,
-      // );
+      await operatorApi.updateBusStatus(user.organization_id, bus, newStatus);
 
       await queryClient.invalidateQueries({
         queryKey: ["buses", user.organization_id],
@@ -524,7 +493,7 @@ export default function OperatorPage() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusChange(bus.id, "active");
+                              handleStatusChange(bus, "active");
                             }}
                           >
                             Set Active
@@ -532,7 +501,7 @@ export default function OperatorPage() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusChange(bus.id, "inactive");
+                              handleStatusChange(bus, "inactive");
                             }}
                           >
                             Set Inactive
@@ -697,12 +666,12 @@ export default function OperatorPage() {
         <DialogContent className="sm:max-w-[500px] max-h-[92vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New Bus</DialogTitle>
-            <DialogDescription>
+            {/* <DialogDescription>
               Step {addBusStep} of 2:{" "}
               {addBusStep === 1
                 ? "Vehicle Specifications"
                 : "Seat Configuration"}
-            </DialogDescription>
+            </DialogDescription> */}
           </DialogHeader>
           {addBusStep === 1 ? (
             <div className="flex-1 space-y-4 py-4 overflow-y-auto">
@@ -730,7 +699,7 @@ export default function OperatorPage() {
                   className="font-mono"
                 />
               </div>
-              <div className="space-y-2">
+              {/* <div className="space-y-2">
                 <Label htmlFor="new-license">Capacity</Label>
                 <Input
                   id="capacity"
@@ -742,7 +711,7 @@ export default function OperatorPage() {
                   }
                   className="font-mono"
                 />
-              </div>
+              </div> */}
 
               {/* <div className="space-y-2">
                 <Label htmlFor="new-facilities">

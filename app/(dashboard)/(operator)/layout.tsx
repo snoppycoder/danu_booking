@@ -15,7 +15,7 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <AuthProvider blackListRoles={["agent", "passenger"]}>
+    <AuthProvider blackListRoles={["agent_admin", "passenger"]}>
       <SidebarProvider>
         <div className="flex min-h-screen w-full">
           <AppSidebar />

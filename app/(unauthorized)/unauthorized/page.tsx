@@ -9,11 +9,13 @@ export default function UnauthorizedPage() {
   const { user } = useAuth();
   const [redirect, setRedirect] = useState("");
   if (user && user.roles.length > 0) {
-    if (user.roles[0].slug.includes("passenger")) {
+    console.log("User roles:", user.roles);
+    if (user.roles[0].includes("passenger")) {
       if (redirect !== "/passenger") setRedirect("/passenger");
-    } else if (user.roles[0].slug.includes("agent")) {
-      if (redirect !== "/agent") setRedirect("/agent");
-    } else if (user.roles[0].slug.includes("operator-admin")) {
+    } else if (user.roles[0].includes("agent")) {
+      if (redirect !== "/agent-ticket-booking")
+        setRedirect("/agent-ticket-booking");
+    } else if (user.roles[0].includes("operator-admin")) {
       if (redirect !== "/operator") setRedirect("/operator");
     }
   }

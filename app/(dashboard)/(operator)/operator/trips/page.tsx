@@ -92,7 +92,13 @@ export default function TripManagement() {
     error &&
     typeof error === "object" &&
     "response" in error &&
-    (error as any).response?.status === 403;
+    (
+      error as {
+        response: {
+          status: number;
+        };
+      }
+    ).response?.status === 403;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -124,6 +130,8 @@ export default function TripManagement() {
       id: `trip-${Date.now()}`,
       operator_id: user?.organization_id || "",
       bus_id: tripData.bus_id,
+      available_seats:
+        buses.find((b) => b.id === tripData.bus_id)?.capacity || 0,
       driver_id: tripData.driver_id,
       route_from: tripData.route_from,
       route_to: tripData.route_to,

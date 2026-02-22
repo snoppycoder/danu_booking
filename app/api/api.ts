@@ -6,8 +6,15 @@ import {
   getRefreshToken,
   getSessionId,
 } from "@/lib/auth";
-import { AddOperatorForm, AddUserForm, Agent, Passenger } from "@/lib/model";
+import {
+  AddOperatorForm,
+  AddUserForm,
+  Agent,
+  Bus,
+  Passenger,
+} from "@/lib/model";
 import axios from "axios";
+import error from "next/error";
 
 const api = axios.create({
   baseURL: "/api/proxy",
@@ -50,7 +57,9 @@ api.interceptors.response.use(
       const data = error.response.data;
       const code = data.code;
       const detail = data.detail;
-      console.log(error, "error response data");
+      if (data.error && data.error.includes("role")) {
+        window.location.href = "/unauthorized";
+      }
       if (status === 401) {
         switch (detail) {
           case "CSRF_MISSING":
@@ -91,7 +100,7 @@ api.interceptors.response.use(
           case "Not authenticated":
             console.error("Not authenticated — redirecting to login");
             console.log(window.location.pathname);
-            // window.location.href = "/login";
+            window.location.href = "/login";
 
             /**
              * Note to fur
@@ -270,6 +279,15 @@ export const authAPI = {
       throw error;
     }
   },
+  refresh: async () => {
+    try {
+      const response = await api.post(`/auth/refresh`, {});
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   logout: async () => {
     try {
       const session_id = await getSessionId();
@@ -283,7 +301,7 @@ export const authAPI = {
       await deleteAllCookies();
       // window.location.href = "/login";
     } catch (error) {
-      // window.location.href = "/login";
+      window.location.href = "/login";
       console.log(error);
     }
   },
@@ -571,6 +589,20 @@ export const superAdminApi = {
 };
 
 export const passengerApi = {
+  getBookingHistory: async (page?: number, per_page?: number) => {
+    try {
+      const response = await api.get(`/user/bookings`, {
+        params: {
+          page,
+          per_page,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   confirmBooking: async (
     hold_id: string,
     payment_reference: string,
@@ -581,6 +613,7 @@ export const passengerApi = {
         payment_reference,
         payment_method,
       });
+
       return response.data;
     } catch (error) {
       console.log(error);
@@ -618,7 +651,9 @@ export const passengerApi = {
     return response.data.routes;
   },
   getPopularRoutes: async () => {
-    const response = await api.get("/guest/routes/popular");
+    const response = await api.get("/guest/routes/popular", {
+      params: { limit: 3 },
+    });
     return response.data.routes;
   },
   getTripDetails: async (tripId: string) => {
@@ -658,6 +693,26 @@ export const agentApi = {
     const response = await api.get(`/agent/${agent_id}/kyc-documents`);
     return response.data;
   },
+  handleBooking: async (
+    agent_id: string,
+
+    body: {
+      trip_id: string;
+      seat_codes: string[];
+      passenger_details: Passenger[];
+      payment_method: "cash" | "wallet";
+      payment_reference: string;
+      external_ref: string;
+    },
+  ) => {
+    try {
+      const response = await api.post(`/agent/${agent_id}/bookings`, body);
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from agent handle booking");
+      throw error;
+    }
+  },
 };
 export const operatorApi = {
   createBus: async (
@@ -676,6 +731,25 @@ export const operatorApi = {
     } catch (error) {
       throw error;
     }
+  },
+
+  updateBusStatus: async (
+    operator_id: string,
+    bus: Bus,
+    status: "active" | "inactive",
+  ) => {
+    const response = await api.patch(
+      `/operator/${operator_id}/buses/${bus.id}`,
+      {
+        plate_no: bus.plate_no,
+        side_no: bus.side_no,
+        capacity: bus.capacity,
+        seat_template_id: bus.seat_template,
+
+        bus_status: status,
+      },
+    );
+    return response;
   },
 
   createDriver: async (

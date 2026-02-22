@@ -80,6 +80,7 @@ export const getSessionId = async () => {
 };
 export const getRefreshToken = async () => {
   const cookie = await cookies();
+  console.log(cookie, "here cookies");
   const refresh_token = cookie.get("refresh_token")?.value;
   return refresh_token;
 };

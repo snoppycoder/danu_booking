@@ -30,6 +30,8 @@ export default function SeatBookingDialog({
   toggle,
   setToggle,
 }: SeatBookingDialogProps) {
+  console.log(tripId, "tripId in dialog");
+  console.log("Rendering...");
   const [step, setStep] = useState<1 | 2>(1);
   const [seatCount, setSeatCount] = useState("");
   const [seatToggle, setSeatToggle] = useState(false);
@@ -52,6 +54,7 @@ export default function SeatBookingDialog({
     const fetch = async () => {
       if (tripId.length == 0) return;
       const response = await passengerApi.getTripDetails(tripId);
+
       setBus(response.bus);
     };
     fetch();
@@ -110,29 +113,6 @@ export default function SeatBookingDialog({
         })),
       );
       setToggle(false);
-
-      // const response2 = await tempAPI.payment({
-      //   amount: response.total_amount,
-      //   email: user?.email ?? "",
-      //   first_name: user?.first_name ?? "",
-      //   last_name: user?.last_name ?? "",
-      //   phone_number: user?.phone ?? "",
-      //   hold_id: response.hold_id,
-      // });
-      // console.log("response from the payment", response2);
-      // if (response2.status == "success")
-      //   window.open(response2.data.checkout_url, "_blank");
-      // setToggle(false);
-      // console.log(response, "booking");
-      // toast.success("Seats successfully booked!", { duration: 1000 });
-      // setPassengers(
-      //   Array.from({ length: Number(seatCount) }, () => ({
-      //     name: "",
-      //     email: "",
-      //     phone: "",
-      //     id_number: "",
-      //   })),
-      // );
     } catch (error) {
       if (isAxiosError(error)) {
         if (error.response?.data.detail) {

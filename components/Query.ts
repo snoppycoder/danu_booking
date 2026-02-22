@@ -1,9 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { kycApi, operatorApi, sessionMgmt, superAdminApi } from "@/app/api/api";
+import {
+  kycApi,
+  operatorApi,
+  passengerApi,
+  sessionMgmt,
+  superAdminApi,
+} from "@/app/api/api";
 import {
   Agent,
   CreateTripPayload,
   Driver,
+  History,
   KYCDocument,
   KYCUpload,
   Operator,
@@ -29,6 +36,19 @@ export const useUsers = (page?: number, per_page?: number, noCache = false) => {
 
     refetchOnMount: noCache ? true : false,
     refetchOnWindowFocus: noCache ? true : false,
+  });
+};
+export const usePassengerHistory = (page: number, per_page: number) => {
+  return useQuery({
+    queryKey: ["history", per_page, page],
+    queryFn: async () => {
+      const res = await passengerApi.getBookingHistory(page, per_page);
+      return {
+        items: res.items as History[],
+        total: res.total,
+        page: res.page,
+      };
+    },
   });
 };
 export const useOperator = (page: number, per_page: number) => {

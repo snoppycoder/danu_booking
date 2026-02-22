@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { getAccessToken, getRefreshToken } from "./auth";
 import { RequestCookie } from "next/dist/compiled/@edge-runtime/cookies";
 import { refresh } from "next/cache";
+import { authAPI } from "@/app/api/api";
 
 interface AuthProtectorProps {
   children: ReactNode;
@@ -18,14 +19,12 @@ export const AuthProtector = ({ children }: AuthProtectorProps) => {
   useEffect(() => {
     const fetchAccessToken = async () => {
       const refresh_token = (await getRefreshToken()) || "";
+
       setToken(refresh_token);
-      console.log(refresh_token, "here");
 
       if (refresh_token.trim().length == 0 || !refresh_token) {
         console.log("It is a falsy value");
-        window.location.href = "/login";
         // setLoading(false);
-        return;
       } else {
         setLoading(false);
       }

@@ -48,7 +48,7 @@ import {
   DialogTitle,
 } from "./ui/dialog";
 import InfoRow from "./InfoRow";
-import { useAgent, useOperator, useUsers } from "./Query";
+import { useAgent, useUsers } from "./Query";
 import axios from "axios";
 import { AddAgentModal } from "./AddAgentModal";
 import { exportToCSV } from "@/lib/common_functions";

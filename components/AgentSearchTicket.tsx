@@ -5,12 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card } from "./ui/card";
 import { MapPin } from "lucide-react";
 import { passengerApi } from "@/app/api/api";
+import { useRouter } from "next/navigation";
 
 export function SearchTicketForm() {
   const [form, setForm] = useState({
     route_from: "",
     route_to: "",
-    departure_date: "",
+    departure_date: new Date().toISOString().split("T")[0],
   });
 
   const [suggestionsFrom, setSuggestionsFrom] = useState<string[]>([]);
@@ -18,10 +19,8 @@ export function SearchTicketForm() {
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
   const today = new Date().toISOString().split("T")[0];
+  const router = useRouter();
 
-  // =========================
-  // Debounced Origin Search
-  // =========================
   useEffect(() => {
     if (!form.route_from.trim()) {
       setSuggestionsFrom([]);
@@ -42,9 +41,6 @@ export function SearchTicketForm() {
     return () => clearTimeout(timer);
   }, [form.route_from]);
 
-  // =========================
-  // Debounced Destination Search
-  // =========================
   useEffect(() => {
     if (!form.route_to.trim()) {
       setSuggestionsTo([]);
@@ -81,12 +77,11 @@ export function SearchTicketForm() {
     setShowDropdownTo(false);
   };
 
-  // =========================
-  // Submit
-  // =========================
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Form submitted:", form);
+    router.push(
+      `/agent/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
+    );
   };
 
   return (
@@ -132,7 +127,6 @@ export function SearchTicketForm() {
               </div>
             </div>
 
-            {/* TO */}
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">
                 To
@@ -171,7 +165,7 @@ export function SearchTicketForm() {
             {/* DATE */}
             <div>
               <label className="block text-sm font-medium text-muted-foreground mb-2">
-                Depart
+                Departure Date
               </label>
               <input
                 type="date"

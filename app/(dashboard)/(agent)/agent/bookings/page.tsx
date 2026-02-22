@@ -22,8 +22,14 @@ import {
 } from "@/components/ui/table";
 import { formatTime, handleSearch } from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
-import { Item, Trip, TripData } from "@/lib/model";
-import { passengerApi } from "@/app/api/api";
+import {
+  Item,
+  PopularRoute,
+  SearchRouteResponse,
+  Trip,
+  TripData,
+} from "@/lib/model";
+import { agentApi, passengerApi } from "@/app/api/api";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -33,19 +39,16 @@ import {
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Badge } from "@/components/ui/badge";
-import { toast, Toaster } from "sonner";
+import { Toaster } from "sonner";
+import { useAuth } from "@/lib/authContext";
 
-import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
-import { isAxiosError } from "axios";
-
-export default function BookingPage() {
+export default function AgentBooking() {
   const searchParams = useSearchParams();
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
-
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const date = searchParams.get("date") || "";
@@ -53,6 +56,7 @@ export default function BookingPage() {
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
+  const { user } = useAuth();
   const [data, setData] = useState<Item[]>([]);
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
@@ -65,7 +69,7 @@ export default function BookingPage() {
 
   const handleViewDetails = async (trip: Trip) => {
     const response = await passengerApi.getTripDetails(trip.trip_id);
-    console.log(response, "trip details response");
+    console.log(response, "trip details");
     setSelectedTrip(response);
     setIsModalOpen(true);
   };
@@ -130,28 +134,20 @@ export default function BookingPage() {
   }
 
   async function handleBookNow(trip: Item): Promise<void> {
-    try {
-      if (isTrip(trip)) {
-        const res = await passengerApi.getTripDetails(trip.trip_id);
-        setSelectedTrip(res);
+    // if (isTrip(trip)) {
+    //   await agentApi.handleBooking(user?.id || "", {
+    //     trip_id: trip.trip_id,
 
-        setTripId(trip.trip_id);
-      }
-      setUseInfoToggle(true);
-    } catch (error) {
-      if (isAxiosError(error) && error.response) {
-        toast.warning(error.response.data.detail);
-        return;
-      }
-      toast.warning("Failed to fetch trip details. Please try again.");
-      console.error("Error fetching trip details:", error);
-    }
+    //   });
+    //   setTripId(trip.trip_id);
+    // }
+    setUseInfoToggle(true);
   }
 
   return (
     <div className="">
       <Toaster richColors position="top-right" />
-      <div className="p-8 bg-primary">
+      <div className="p-8 mt-10">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -230,36 +226,14 @@ export default function BookingPage() {
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Departure Date
                 </label>
-                <EtDatePicker
-                  minDate={new Date()}
-                  value={
-                    form.departure_date
-                      ? (() => {
-                          const [y, m, d] = form.departure_date
-                            .split("-")
-                            .map(Number);
-                          return new Date(y, m - 1, d); // LOCAL date
-                        })()
-                      : null
+                <input
+                  type="date"
+                  min={new Date().toISOString().split("T")[0]}
+                  value={form.departure_date}
+                  onChange={(e) =>
+                    setForm({ ...form, departure_date: e.target.value })
                   }
-                  sx={{ color: "#00a896", width: "100%" }}
-                  onChange={(
-                    date: Date | [Date | null, Date | null] | null,
-                  ) => {
-                    let selectedDate: Date | null = null;
-                    if (Array.isArray(date)) {
-                      selectedDate = date[0] ?? null;
-                    } else {
-                      selectedDate = date ?? null;
-                    }
-                    setForm({
-                      ...form,
-                      departure_date: selectedDate
-                        ? selectedDate.toISOString().split("T")[0]
-                        : "",
-                    });
-                  }}
-                  className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                  className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
                 />
               </div>
 
@@ -272,26 +246,7 @@ export default function BookingPage() {
           </Card>
         </form>
       </div>
-      <div className="w-full flex justify-center mt-8 mb-8">
-        <Card className="hover:shadow-lg w-[70%] p-4 rounded-md border border-gray-300">
-          <CardContent className="px-4 py-2 flex space-x-[40%] items-center">
-            <div>
-              <h2 className="text-lg font-mono mb-2.5">Departure</h2>
-              <div className="text-md font-mono">{route_from}</div>
-              <div className="text-md font-mono">{formatTime(date)}</div>
-            </div>
 
-            <div className="flex gap-x-8 h-full">
-              <div className="h-full py-2 w-[1px] bg-gray-400 mx-2"></div>
-              <div>
-                <h2 className="text-lg font-mono mb-2.5">Return</h2>
-                <div className="text-md font-mono">{route_to}</div>
-                <div className="text-md font-mono">{formatTime(date)}</div>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 p-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8">
@@ -324,9 +279,7 @@ export default function BookingPage() {
                     <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
                       Arrival
                     </TableHead>
-                    {/* <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
-                  Duration
-                </TableHead> */}
+
                     <TableHead className="px-6 py-4 text-right text-sm font-semibold text-slate-900">
                       Fare
                     </TableHead>
@@ -433,18 +386,8 @@ export default function BookingPage() {
                               <DropdownMenuItem
                                 className="cursor-pointer"
                                 onClick={() => {
-                                  try {
-                                    if (isTrip(route)) {
-                                      handleViewDetails(route);
-                                    }
-                                  } catch (error) {
-                                    toast.error(
-                                      "Failed to fetch trip details. Please try again.",
-                                    );
-                                    console.error(
-                                      "Error fetching trip details:",
-                                      error,
-                                    );
+                                  if (isTrip(route)) {
+                                    handleViewDetails(route);
                                   }
                                 }}
                               >

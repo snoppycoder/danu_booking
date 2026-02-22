@@ -136,13 +136,13 @@ export function TripDetailsModal({
               <div className="flex justify-between">
                 <span className="text-gray-600">Side Number</span>
                 <span className="font-medium text-gray-900">
-                  {tripData.bus.side_no}
+                  {tripData.bus?.side_no ?? "-"}
                 </span>
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">Capacity</span>
                 <Badge className="bg-green-100 text-green-700 hover:bg-green-100">
-                  {tripData.bus.capacity} seats
+                  {tripData.bus?.capacity ?? "0"} seats
                 </Badge>
               </div>
             </div>

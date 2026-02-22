@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import { SearchRouteResponse } from "./model";
 
 export async function onLogout(
-  event: React.MouseEvent<HTMLDivElement, MouseEvent>
+  event: React.MouseEvent<HTMLDivElement, MouseEvent>,
 ): Promise<void> {
   event.preventDefault();
   const response = await authAPI.logout();
@@ -21,16 +21,22 @@ export async function handleSearch(form: {
   route_from: string;
   route_to: string;
 }): Promise<SearchRouteResponse | undefined> {
-  if (!form.departure_date || !form.route_from || !form.route_to) {
-    toast.error("Please enter all necessary inputs");
-    return;
+  try {
+    if (!form.departure_date || !form.route_from || !form.route_to) {
+      toast.error("Please enter all necessary inputs");
+      return;
+    }
+
+    const res = (await passengerApi.searchRoute(form)) as SearchRouteResponse;
+    return res;
+  } catch (error) {
+    console.error("Error searching routes:", error);
+    toast.error(
+      "An error occurred while searching for routes. Please try again.",
+    );
   }
-  const res = (await passengerApi.searchRoute(form)) as SearchRouteResponse;
-  return res;
 }
 export type CSVRow = Record<string, string | number | boolean | null>;
-
-
 
 export const exportToCSV = <T extends CSVRow>(data: T[], filename: string) => {
   if (!data.length) return;
@@ -43,7 +49,7 @@ export const exportToCSV = <T extends CSVRow>(data: T[], filename: string) => {
     ...data.map((row) =>
       headers
         .map((key) => `"${String(row[key] ?? "").replace(/"/g, '""')}"`)
-        .join(",")
+        .join(","),
     ),
   ];
 
