@@ -8,14 +8,16 @@ import React from "react";
 import { styled } from "@mui/material/styles";
 import { EthiopianDate } from "../util/EthiopianDateUtils";
 
-interface CustomPickerDayProps extends PickersDayProps<Date> {
+interface CustomPickerDayProps extends PickersDayProps {
   isRangeStart?: boolean;
   isRangeEnd?: boolean;
   inRange?: boolean;
 }
 
 // Styled component for the date range
-const StyledDay = styled(PickersDay as React.ComponentType<PickersDayProps<Date>>)<CustomPickerDayProps>(({ theme, isRangeStart, isRangeEnd, inRange }) => ({
+const StyledDay = styled(
+  PickersDay as React.ComponentType<PickersDayProps>,
+)<CustomPickerDayProps>(({ theme, isRangeStart, isRangeEnd, inRange }) => ({
   ...(inRange && {
     backgroundColor: theme.palette.action.selected, // A light background for dates within the range
     borderRadius: 0, // Make it a rectangle for continuous range
@@ -23,18 +25,23 @@ const StyledDay = styled(PickersDay as React.ComponentType<PickersDayProps<Date>
   ...(isRangeStart && {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
-    borderTopLeftRadius: '50%', // Round corners for start of range
-    borderBottomLeftRadius: '50%',
+    borderTopLeftRadius: "50%", // Round corners for start of range
+    borderBottomLeftRadius: "50%",
   }),
   ...(isRangeEnd && {
     backgroundColor: theme.palette.primary.main,
     color: theme.palette.primary.contrastText,
-    borderTopRightRadius: '50%', // Round corners for end of range
-    borderBottomRightRadius: '50%',
+    borderTopRightRadius: "50%", // Round corners for end of range
+    borderBottomRightRadius: "50%",
   }),
   // Override default PickersDay styles if needed
-  '&:hover': {
-    backgroundColor: isRangeStart || isRangeEnd ? theme.palette.primary.dark : inRange ? theme.palette.action.hover : undefined,
+  "&:hover": {
+    backgroundColor:
+      isRangeStart || isRangeEnd
+        ? theme.palette.primary.dark
+        : inRange
+          ? theme.palette.action.hover
+          : undefined,
   },
 }));
 
@@ -55,16 +62,28 @@ const EtGrDateCalendar = () => {
     endDate,
   } = etDatePickerContext;
 
-  const [gregDatePicker, setGregDatePicker] = useState<Date | null>(gregDate || null);
+  const [gregDatePicker, setGregDatePicker] = useState<Date | null>(
+    gregDate || null,
+  );
   const [hoveredDate, setHoveredDate] = useState<Date | null>(null);
 
-  const [startMonth, setStartMonth] = useState<Date | null>(startDate || gregDate || new Date());
-  const [endMonth, setEndMonth] = useState<Date | null>(startDate ? new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1) : gregDate ? new Date(gregDate.getFullYear(), gregDate.getMonth() + 1, 1) : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1));
+  const [startMonth, setStartMonth] = useState<Date | null>(
+    startDate || gregDate || new Date(),
+  );
+  const [endMonth, setEndMonth] = useState<Date | null>(
+    startDate
+      ? new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1)
+      : gregDate
+        ? new Date(gregDate.getFullYear(), gregDate.getMonth() + 1, 1)
+        : new Date(new Date().getFullYear(), new Date().getMonth() + 1, 1),
+  );
 
   useEffect(() => {
     if (isRange && startDate) {
       setStartMonth(startDate);
-      setEndMonth(new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1));
+      setEndMonth(
+        new Date(startDate.getFullYear(), startDate.getMonth() + 1, 1),
+      );
     } else if (!isRange) {
       setGregDatePicker(gregDate || null);
     }
@@ -86,11 +105,13 @@ const EtGrDateCalendar = () => {
       <Box display={"flex"}>
         {isRange ? (
           // Range mode: Display two calendars
-          (dateType === "EC" || dateType === "AO" || dateType === "CUSTOM") ? (
+          dateType === "EC" || dateType === "AO" || dateType === "CUSTOM" ? (
             // Ethiopian/Afan Oromo range pickers
             <>
               <Box width={295} display="flex" flexDirection="column" mr={1}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Start Date</Typography>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  Start Date
+                </Typography>
                 <EthiopianDateCalendar
                   isRange={isRange}
                   startDate={startDate}
@@ -102,13 +123,30 @@ const EtGrDateCalendar = () => {
                 />
               </Box>
               <Divider orientation="vertical" flexItem />
-              <Box width={295} display="flex" flexDirection="column" ml={1} pr={4}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>End Date</Typography>
+              <Box
+                width={295}
+                display="flex"
+                flexDirection="column"
+                ml={1}
+                pr={4}
+              >
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  End Date
+                </Typography>
                 <EthiopianDateCalendar
                   isRange={isRange}
                   startDate={startDate}
                   endDate={endDate}
-                  initialViewDate={startDate ? EthiopianDate.toGreg(EthiopianDate.addMonth(EthiopianDate.toEth(startDate), 1)) : null}
+                  initialViewDate={
+                    startDate
+                      ? EthiopianDate.toGreg(
+                          EthiopianDate.addMonth(
+                            EthiopianDate.toEth(startDate),
+                            1,
+                          ),
+                        )
+                      : null
+                  }
                   hoveredDate={hoveredDate}
                   setHoveredDate={setHoveredDate}
                   onDateChange={onDateChange}
@@ -120,8 +158,10 @@ const EtGrDateCalendar = () => {
             // Gregorian range pickers (dateType === "GC")
             <>
               <Box width={295} display="flex" flexDirection="column" mr={1}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>Start Date</Typography>
-                <DateCalendar<Date>
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  Start Date
+                </Typography>
+                <DateCalendar
                   monthsPerRow={3}
                   value={startDate}
                   onChange={(date) => {
@@ -144,18 +184,36 @@ const EtGrDateCalendar = () => {
                   disablePast={disablePast}
                   minDate={minDate}
                   maxDate={maxDate}
-                  slots={{ day: StyledDay as React.ComponentType<PickersDayProps<Date>> }}
+                  slots={{
+                    day: StyledDay as React.ComponentType<PickersDayProps>,
+                  }}
                   slotProps={{
                     day: (ownerState: any) => {
-                      const isRangeStart = startDate && ownerState.day.getTime() === startDate.getTime();
-                      const isRangeEnd = endDate && ownerState.day.getTime() === endDate.getTime();
-                      const isInRange = (
+                      const isRangeStart =
                         startDate &&
-                        (
-                          (endDate && ownerState.day.getTime() > Math.min(startDate.getTime(), endDate.getTime()) && ownerState.day.getTime() < Math.max(startDate.getTime(), endDate.getTime())) ||
-                          (!endDate && hoveredDate && ownerState.day.getTime() > Math.min(startDate.getTime(), hoveredDate.getTime()) && ownerState.day.getTime() < Math.max(startDate.getTime(), hoveredDate.getTime()))
-                        )
-                      );
+                        ownerState.day.getTime() === startDate.getTime();
+                      const isRangeEnd =
+                        endDate &&
+                        ownerState.day.getTime() === endDate.getTime();
+                      const isInRange =
+                        startDate &&
+                        ((endDate &&
+                          ownerState.day.getTime() >
+                            Math.min(startDate.getTime(), endDate.getTime()) &&
+                          ownerState.day.getTime() <
+                            Math.max(startDate.getTime(), endDate.getTime())) ||
+                          (!endDate &&
+                            hoveredDate &&
+                            ownerState.day.getTime() >
+                              Math.min(
+                                startDate.getTime(),
+                                hoveredDate.getTime(),
+                              ) &&
+                            ownerState.day.getTime() <
+                              Math.max(
+                                startDate.getTime(),
+                                hoveredDate.getTime(),
+                              )));
                       return {
                         ...ownerState,
                         isRangeStart: isRangeStart,
@@ -175,13 +233,21 @@ const EtGrDateCalendar = () => {
                     },
                   }}
                   openTo="day"
-                  views={['month', 'year', 'day']}
+                  views={["month", "year", "day"]}
                 />
               </Box>
               <Divider orientation="vertical" flexItem />
-              <Box width={295} display="flex" flexDirection="column" ml={1} pr={4}>
-                <Typography variant="subtitle1" sx={{ mb: 1 }}>End Date</Typography>
-                <DateCalendar<Date>
+              <Box
+                width={295}
+                display="flex"
+                flexDirection="column"
+                ml={1}
+                pr={4}
+              >
+                <Typography variant="subtitle1" sx={{ mb: 1 }}>
+                  End Date
+                </Typography>
+                <DateCalendar
                   monthsPerRow={3}
                   value={endDate || endMonth}
                   onChange={(date) => {
@@ -204,18 +270,36 @@ const EtGrDateCalendar = () => {
                   disablePast={disablePast}
                   minDate={minDate}
                   maxDate={maxDate}
-                  slots={{ day: StyledDay as React.ComponentType<PickersDayProps<Date>> }}
+                  slots={{
+                    day: StyledDay as React.ComponentType<PickersDayProps>,
+                  }}
                   slotProps={{
                     day: (ownerState: any) => {
-                      const isRangeStart = startDate && ownerState.day.getTime() === startDate.getTime();
-                      const isRangeEnd = endDate && ownerState.day.getTime() === endDate.getTime();
-                      const isInRange = (
+                      const isRangeStart =
                         startDate &&
-                        (
-                          (endDate && ownerState.day.getTime() > Math.min(startDate.getTime(), endDate.getTime()) && ownerState.day.getTime() < Math.max(startDate.getTime(), endDate.getTime())) ||
-                          (!endDate && hoveredDate && ownerState.day.getTime() > Math.min(startDate.getTime(), hoveredDate.getTime()) && ownerState.day.getTime() < Math.max(startDate.getTime(), hoveredDate.getTime()))
-                        )
-                      );
+                        ownerState.day.getTime() === startDate.getTime();
+                      const isRangeEnd =
+                        endDate &&
+                        ownerState.day.getTime() === endDate.getTime();
+                      const isInRange =
+                        startDate &&
+                        ((endDate &&
+                          ownerState.day.getTime() >
+                            Math.min(startDate.getTime(), endDate.getTime()) &&
+                          ownerState.day.getTime() <
+                            Math.max(startDate.getTime(), endDate.getTime())) ||
+                          (!endDate &&
+                            hoveredDate &&
+                            ownerState.day.getTime() >
+                              Math.min(
+                                startDate.getTime(),
+                                hoveredDate.getTime(),
+                              ) &&
+                            ownerState.day.getTime() <
+                              Math.max(
+                                startDate.getTime(),
+                                hoveredDate.getTime(),
+                              )));
                       return {
                         ...ownerState,
                         isRangeStart: isRangeStart,
@@ -235,7 +319,7 @@ const EtGrDateCalendar = () => {
                     },
                   }}
                   openTo="day"
-                  views={['month', 'year', 'day']}
+                  views={["month", "year", "day"]}
                 />
               </Box>
             </>
@@ -267,7 +351,7 @@ const EtGrDateCalendar = () => {
             {showGregorianCalendar && (
               <Box width={295} mr={showEthiopianCalendar ? 0 : 2}>
                 <Box width={295} pr={4}>
-                  <DateCalendar<Date>
+                  <DateCalendar
                     monthsPerRow={3}
                     value={gregDatePicker}
                     onChange={(date) => {
@@ -285,17 +369,30 @@ const EtGrDateCalendar = () => {
                     disablePast={disablePast}
                     minDate={minDate}
                     maxDate={maxDate}
-                    slots={{ day: StyledDay as React.ComponentType<PickersDayProps<Date>> }}
+                    slots={{
+                      day: StyledDay as React.ComponentType<PickersDayProps>,
+                    }}
                     slotProps={{
                       day: (ownerState: any) => ({
                         ...ownerState,
-                        isRangeStart: isRange && startDate && ownerState.day.getTime() === startDate.getTime(),
-                        isRangeEnd: isRange && endDate && ownerState.day.getTime() === endDate.getTime(),
-                        inRange: isRange && startDate && endDate && ownerState.day.getTime() > startDate.getTime() && ownerState.day.getTime() < endDate.getTime(),
+                        isRangeStart:
+                          isRange &&
+                          startDate &&
+                          ownerState.day.getTime() === startDate.getTime(),
+                        isRangeEnd:
+                          isRange &&
+                          endDate &&
+                          ownerState.day.getTime() === endDate.getTime(),
+                        inRange:
+                          isRange &&
+                          startDate &&
+                          endDate &&
+                          ownerState.day.getTime() > startDate.getTime() &&
+                          ownerState.day.getTime() < endDate.getTime(),
                       }),
                     }}
                     openTo="day"
-                    views={['month', 'year', 'day']}
+                    views={["month", "year", "day"]}
                   />
                 </Box>
               </Box>
