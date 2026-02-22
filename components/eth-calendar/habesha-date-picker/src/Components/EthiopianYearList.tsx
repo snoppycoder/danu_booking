@@ -1,4 +1,3 @@
-
 import { Grid, Chip, Box } from "@mui/material";
 import React, { useContext, useEffect, useRef } from "react";
 import { EthiopianDate } from "../util/EthiopianDateUtils";
@@ -24,8 +23,8 @@ const EthiopianYearList: React.FC<EthiopianYearListProps> = ({
   const END_YEAR = maxDate
     ? EthiopianDate.toEth(maxDate).Year
     : yearRange
-    ? START_YEAR + yearRange
-    : START_YEAR + 201;
+      ? START_YEAR + yearRange
+      : START_YEAR + 201;
 
   const currentYearRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,23 +70,19 @@ const EthiopianYearList: React.FC<EthiopianYearListProps> = ({
         },
         "&::-webkit-scrollbar-track": {
           backgroundColor: "transparent",
-
         },
       }}
     >
-      <Grid container spacing={2} style={{ flexGrow: 1 }}>
+      <Grid container spacing={2}>
         {Array.from(
           { length: END_YEAR - START_YEAR + 1 },
-          (_, index) => START_YEAR + index
+          (_, index) => START_YEAR + index,
         ).map((year) => (
           <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
             key={year}
-            style={{ display: "flex", justifyContent: "center" }}
-            ref={year === CURRENT_YEAR ? currentYearRef : null}
+            size={{ xs: 12, sm: 6, md: 4 }}
+            sx={{ display: "flex", justifyContent: "center" }}
+            ref={year === CURRENT_YEAR ? currentYearRef : undefined}
           >
             <Chip
               label={year}
