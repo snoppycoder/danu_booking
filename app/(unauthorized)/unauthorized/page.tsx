@@ -13,7 +13,7 @@ export default function UnauthorizedPage() {
     if (user.roles[0].includes("passenger")) {
       if (redirect !== "/passenger") setRedirect("/passenger");
     } else if (user.roles[0].includes("agent")) {
-      if (redirect !== "/agent-ticket-booking")
+      if (redirect !== "/agent/ticket-booking")
         setRedirect("/agent-ticket-booking");
     } else if (user.roles[0].includes("operator-admin")) {
       if (redirect !== "/operator") setRedirect("/operator");

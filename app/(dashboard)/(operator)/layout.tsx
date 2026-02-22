@@ -9,7 +9,7 @@ import { AppSidebar } from "@/components/OperatorSidebar";
 import { AuthProvider } from "@/lib/authContext";
 import AvatarHero from "@/components/HeroAvatar";
 
-export default function DashboardLayout({
+export default function OperatorDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;

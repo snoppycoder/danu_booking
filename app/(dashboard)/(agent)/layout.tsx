@@ -1,48 +1,33 @@
-import { AgentSideBar } from "@/components/AgentSideBar";
-import AvatarHero from "@/components/HeroAvatar";
-import QueryProvider from "@/components/QueryProvide";
+"use client";
+import type React from "react";
+import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
+import "@/app/globals.css";
+import Navbar from "@/components/navbar";
 import { SidebarProvider } from "@/components/ui/sidebar";
-
+import { AppSidebar } from "@/components/OperatorSidebar";
 import { AuthProvider } from "@/lib/authContext";
+import AvatarHero from "@/components/HeroAvatar";
+import { AgentSideBar } from "@/components/AgentSideBar";
 
-export default function RootLayout({
+export default function AgentDashboardLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    // <html lang="en">
-    //   <AuthProvider blackListRoles={["passenger", "operator-admin"]}>
-    //     <SidebarProvider>
-    //       <AgentSideBar />
-    //       <AvatarHero />
-    //       <body className="font-sans antialiased">{children}</body>
-    //     </SidebarProvider>
-    //   </AuthProvider>
-    // </html>
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <AuthProvider
-          blackListRoles={["passenger", "operator-admin"]}
-        >
-          <QueryProvider>
-            <div className="min-h-screen  flex flex-col md:flex-row">
-              <SidebarProvider>  
-          
-                  <AgentSideBar />
-              
-              </SidebarProvider>
-            
-              <div className="md:flex md:flex-col w-full h-full">
-                <div className="h-12 w-full hidden md:flex md:flex-row-reverse px-4 py-3">
-                  <AvatarHero />
-                </div>
-                <main className="flex-1">{children}</main>
-              </div>
+    <AuthProvider blackListRoles={["operator_admin", "passenger"]}>
+      <SidebarProvider>
+        <div className="flex min-h-screen w-full">
+          <AgentSideBar />
+          <main className="relative flex flex-col flex-1">
+            <div className="absolute top-0 right-0 z-50 w-full flex flex-row-reverse px-4 py-3 border-b border-gray-300 bg-white">
+              <AvatarHero />
             </div>
-          </QueryProvider>
-        </AuthProvider>
-      </body>
-    </html>
+            <div className="pt-14">{children}</div>
+          </main>
+        </div>
+      </SidebarProvider>
+    </AuthProvider>
   );
 }

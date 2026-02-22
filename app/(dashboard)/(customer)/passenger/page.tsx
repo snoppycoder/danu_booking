@@ -127,7 +127,7 @@ export default function DanuBooking() {
         </video>
 
         <div className="relative max-w-6xl mx-auto z-10">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">
+          <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">
             BOOK YOUR BUS TICKET
           </h1>
           <p className="text-lg sm:text-xl text-teal-50 mb-8">

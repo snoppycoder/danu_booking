@@ -41,6 +41,8 @@ import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Badge } from "@/components/ui/badge";
 import { Toaster } from "sonner";
 import { useAuth } from "@/lib/authContext";
+import EtDatePicker from "./eth-calendar/habesha-date-picker/src/EtDatePicker";
+import { SidebarTrigger } from "./ui/sidebar";
 
 export default function AgentClientBooking() {
   const searchParams = useSearchParams();
@@ -147,7 +149,7 @@ export default function AgentClientBooking() {
   return (
     <div className="">
       <Toaster richColors position="top-right" />
-      <div className="p-8 mt-10">
+      <div className="pb-8 mt-10">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -179,7 +181,7 @@ export default function AgentClientBooking() {
                           onClick={() => handleSelectFromCity(city)}
                           className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                         >
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <MapPin className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{city}</span>
                         </button>
                       ))}
@@ -226,19 +228,47 @@ export default function AgentClientBooking() {
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
                   Departure Date
                 </label>
-                <input
-                  type="date"
-                  min={new Date().toISOString().split("T")[0]}
-                  value={form.departure_date}
-                  onChange={(e) =>
-                    setForm({ ...form, departure_date: e.target.value })
+
+                <EtDatePicker
+                  minDate={new Date()}
+                  value={
+                    form.departure_date
+                      ? (() => {
+                          const [y, m, d] = form.departure_date
+                            .split("-")
+                            .map(Number);
+                          return new Date(y, m - 1, d); // LOCAL date
+                        })()
+                      : null
                   }
-                  className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                  sx={{ color: "#00a896", width: "100%" }}
+                  onChange={(
+                    date: Date | [Date | null, Date | null] | null,
+                  ) => {
+                    let selectedDate: Date | null = null;
+                    if (Array.isArray(date)) {
+                      selectedDate = date[0] ?? null;
+                    } else {
+                      selectedDate = date ?? null;
+                    }
+                    setForm({
+                      ...form,
+                      departure_date: selectedDate
+                        ? selectedDate.toISOString().split("T")[0]
+                        : "",
+                    });
+                  }}
+                  className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
                 />
               </div>
 
               <div className="flex items-end">
-                <Button className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
+                <Button
+                  disabled={
+                    !form.route_from || !form.route_to || !form.departure_date
+                  }
+                  className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold"
+                >
                   Find Tickets
                 </Button>
               </div>

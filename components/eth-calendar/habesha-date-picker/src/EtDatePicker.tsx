@@ -89,8 +89,10 @@ const EtDatePicker: React.FC<EtDatePickerProps> = ({
         setAnchorEl(null);
       }
     } else {
-      setDate(newValue as Date | null);
-      onChange?.(newValue as Date | null);
+      // setDate(newValue as Date | null);
+      // onChange?.(newValue as Date | null);
+      setDate(normalizeDate(newValue as Date | null));
+      onChange?.(normalizeDate(newValue as Date | null));
       if (newValue instanceof Date) {
         setAnchorEl(null);
       }
@@ -101,6 +103,12 @@ const EtDatePicker: React.FC<EtDatePickerProps> = ({
     const newDateType = dateType === "GC" ? localType : "GC";
     setDateType(newDateType);
     event.stopPropagation();
+  };
+  const normalizeDate = (d: Date | null) => {
+    if (!d) return d;
+    const newDate = new Date(d);
+    newDate.setHours(12, 0, 0, 0);
+    return newDate;
   };
 
   const { disableSwitcher } = useEtLocalization();
@@ -126,15 +134,16 @@ const EtDatePicker: React.FC<EtDatePickerProps> = ({
   return (
     <>
       <TextField
+        className="border border-bg-primary"
         {...props}
         value={
           isRange
             ? dateType === "GC"
-              ? `${startDate ? datefns.format(startDate, "dd/MMM/yyyy") : "-"} - ${endDate ? datefns.format(endDate, "dd/MMM/yyyy") : "-"}`
+              ? `${startDate ? datefns.format(startDate, "MMM d, yyyy") : "-"} - ${endDate ? datefns.format(endDate, "MMM d, yyyy") : "-"}`
               : `${startDate ? EthiopianDate.formatEtDate(EthiopianDate.toEth(startDate), localType, getLocalMonthName) : "-"} - ${endDate ? EthiopianDate.formatEtDate(EthiopianDate.toEth(endDate), localType, getLocalMonthName) : "-"}`
             : date
               ? dateType === "GC"
-                ? datefns.format(date, "dd/MMM/yyyy")
+                ? datefns.format(date, "MMM d, yyyy")
                 : EthiopianDate.formatEtDate(
                     EthiopianDate.toEth(date),
                     localType,
@@ -151,7 +160,7 @@ const EtDatePicker: React.FC<EtDatePickerProps> = ({
           startAdornment: disableSwitcher ? undefined : (
             <InputAdornment position="start">
               <ButtonBase onClick={handleDateTypeChange}>
-                <Typography fontWeight={700} color="primary">
+                <Typography fontWeight={700} sx={{ color: "#4fb9af" }}>
                   {dateType === "CUSTOM" ? "CU" : dateType}
                 </Typography>
               </ButtonBase>
