@@ -8,9 +8,10 @@ import { Toaster, toast } from "sonner";
 
 import { PopularRoute } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
-import EtDatePicker from "habesha-datepicker";
+
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
+import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src";
 
 export default function DanuBooking() {
   const router = useRouter();

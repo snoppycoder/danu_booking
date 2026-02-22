@@ -1,3 +1,4 @@
+"use client";
 import {
   ButtonBase,
   IconButton,
@@ -10,7 +11,7 @@ import { useEffect, useState } from "react";
 
 import React from "react";
 
-import { format } from "date-fns";
+import * as datefns from "date-fns";
 import { EventOutlined } from "@mui/icons-material";
 import {
   EtDatePickerProvider,
@@ -36,6 +37,10 @@ type EtDatePickerProps = {
   isRange?: boolean;
   value?: Date | null | [Date | null, Date | null];
   onChange?: (date: Date | null | [Date | null, Date | null]) => void;
+  disableFuture?: boolean;
+  disablePast?: boolean;
+  minDate?: Date;
+  maxDate?: Date;
 } & CustomFieldProps &
   EtDateFieldProps;
 const EtDatePicker: React.FC<EtDatePickerProps> = ({
@@ -43,6 +48,11 @@ const EtDatePicker: React.FC<EtDatePickerProps> = ({
   value,
   onChange,
   isRange,
+  minDate,
+  maxDate,
+  disableFuture,
+  disablePast,
+
   ...props
 }) => {
   const { localType, getLocalMonthName } = useEtLocalization();
@@ -120,11 +130,11 @@ const EtDatePicker: React.FC<EtDatePickerProps> = ({
         value={
           isRange
             ? dateType === "GC"
-              ? `${startDate ? format(startDate, "dd/MMM/yyyy") : "-"} - ${endDate ? format(endDate, "dd/MMM/yyyy") : "-"}`
+              ? `${startDate ? datefns.format(startDate, "dd/MMM/yyyy") : "-"} - ${endDate ? datefns.format(endDate, "dd/MMM/yyyy") : "-"}`
               : `${startDate ? EthiopianDate.formatEtDate(EthiopianDate.toEth(startDate), localType, getLocalMonthName) : "-"} - ${endDate ? EthiopianDate.formatEtDate(EthiopianDate.toEth(endDate), localType, getLocalMonthName) : "-"}`
             : date
               ? dateType === "GC"
-                ? format(date, "dd/MMM/yyyy")
+                ? datefns.format(date, "dd/MMM/yyyy")
                 : EthiopianDate.formatEtDate(
                     EthiopianDate.toEth(date),
                     localType,
@@ -167,10 +177,10 @@ const EtDatePicker: React.FC<EtDatePickerProps> = ({
       >
         <EtDatePickerProvider
           onChange={handleDateChange}
-          disableFuture={props.disableFuture}
-          disablePast={props.disablePast}
-          minDate={props.minDate}
-          maxDate={props.maxDate}
+          disableFuture={disableFuture}
+          disablePast={disablePast}
+          minDate={minDate}
+          maxDate={maxDate}
           value={isRange ? [startDate, endDate] : date}
           dateType={
             dateType === "AO" || dateType === "CUSTOM" ? "GC" : dateType
