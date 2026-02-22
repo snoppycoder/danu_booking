@@ -164,7 +164,7 @@ export default function DanuBooking() {
                             onClick={() => handleSelectFromCity(city)}
                             className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                           >
-                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <MapPin className="w-4 h-4 shrink-0" />
                             <span className="text-sm font-medium">{city}</span>
                           </button>
                         ))}
