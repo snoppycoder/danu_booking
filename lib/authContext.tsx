@@ -7,11 +7,12 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { decodeJWT, getAccessToken, setAuthCookies } from "./auth";
-import { useRouter } from "next/navigation";
+import { setAuthCookies } from "./auth";
+
 import { LoginResponse, UseAuthUser, User } from "./model";
 import { authAPI } from "@/app/api/api";
 import { usePathname } from "next/navigation";
+import { decodeJWT } from "./jwt";
 
 interface AuthContextType {
   user: UseAuthUser | null;
@@ -68,8 +69,6 @@ export const AuthProvider = ({
       if (response) {
         await setAuthCookies(response);
         const decoded = await decodeJWT(response.access_token);
-        // toast.success("You have successfully Logged In");
-        // console.log(decoded);
 
         if (decoded.roles.includes("passenger")) {
           // route.replace("/passenger");

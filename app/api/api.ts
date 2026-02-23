@@ -3,6 +3,7 @@
 import {
   deleteAllCookies,
   getAccessToken,
+  getCSRFToken,
   getRefreshToken,
   getSessionId,
 } from "@/lib/auth";
@@ -127,9 +128,6 @@ api.interceptors.response.use(
             console.error("Unhandled 401 error:", data);
             throw error;
         }
-        // } else {
-        //   console.error(`HTTP ${status} error:`, data);
-        // }
       } else if (status === 403) {
         console.log(error);
         throw error;
@@ -150,7 +148,15 @@ api.interceptors.request.use(
       config.headers.Authorization = `Bearer ${token}`;
     }
     const csrf = getCookie("csrf_token");
-    console.log(csrf, "trying to get csrf from cookie");
+    if (!csrf) {
+      getCSRFToken().then((csrfToken) => {
+        if (csrfToken) {
+          config.headers["x-csrf-token"] = csrfToken;
+        }
+        console.log("csrf token set in request interceptor:", csrfToken);
+      });
+    }
+
     if (csrf) {
       config.headers["X-CSRF-Token"] = csrf;
     }
@@ -298,10 +304,10 @@ export const authAPI = {
         session_id,
       });
       console.log(response);
-      await deleteAllCookies();
+      // await deleteAllCookies();
       // window.location.href = "/login";
     } catch (error) {
-      window.location.href = "/login";
+      // window.location.href = "/login";
       console.log(error);
     }
   },

@@ -10,7 +10,6 @@ import { toast, Toaster } from "sonner";
 import axios, { isAxiosError } from "axios";
 
 import { useAuth } from "@/lib/authContext";
-import { decodeJWT, setAuthCookies } from "@/lib/auth";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);

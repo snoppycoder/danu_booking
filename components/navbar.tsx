@@ -27,7 +27,7 @@ export default function Navbar(Props: NavbarProps) {
         <div className="flex items-center justify-between h-16">
           <div className="relative flex-shrink-0">
             <span className="text-2xl font-bold text-primary ml-0 mr-15">
-              DANU BOOKING
+              <Link href="/passenger">DANU BOOKING</Link>
             </span>
           </div>
 

@@ -65,3 +65,20 @@ export const exportToCSV = <T extends CSVRow>(data: T[], filename: string) => {
 
   URL.revokeObjectURL(url);
 };
+
+export function normalizeEthiopianPhone(phone: string): string {
+  if (!phone) return phone;
+
+  // remove spaces and dashes (optional but useful)
+  let cleaned = phone.replace(/[\s-]/g, "");
+
+  if (cleaned.startsWith("+251")) {
+    return "0" + cleaned.slice(4);
+  }
+
+  if (cleaned.startsWith("251")) {
+    return "0" + cleaned.slice(3);
+  }
+
+  return cleaned;
+}

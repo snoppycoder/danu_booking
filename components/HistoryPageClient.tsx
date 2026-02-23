@@ -61,16 +61,16 @@ export default function HistoryPageClient() {
   }
 
   return (
-    <div className="relative min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 p-4 md:p-8">
+    <div className="relative min-h-screen from-blue-50 to-indigo-100 p-6 md:p-8">
       <Button
         onClick={() => {
           router.replace(data.get("from") || "/");
         }}
         size={"lg"}
         variant="secondary"
-        className="absolute cursor-pointer top-8 left-8 bg-transparent hover:bg-transparent"
+        className="absolute cursor-pointer top-4 left-4 p-6 bg-transparent hover:bg-transparent"
       >
-        <ArrowLeft className=" w-15 h-15 " />
+        <ArrowLeft size={24} className="w-6 h-6 text-gray-700" />
       </Button>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8">
@@ -129,15 +129,12 @@ export default function HistoryPageClient() {
               return (
                 <Card
                   key={booking.booking_id}
-                  className="overflow-hidden border-gray-200 hover:shadow-lg transition-shadow"
+                  className="overflow-hidden border-gray-200 hover:shadow-lg transition-shadow pt-0"
                 >
-                  {/* Card Header with Status */}
-                  <div className="bg-gradient-to-r bg-primary px-6 py-4">
+                  <div className="bg-primary px-6 py-4">
                     <div className="flex items-center justify-between">
                       <div>
-                        <p className="text-white/80 text-sm">
-                          Booking Reference
-                        </p>
+                        <p className="text-white text-sm">Booking Reference</p>
                         <p className="text-white font-mono font-semibold text-lg">
                           {booking.booking_ref}
                         </p>
@@ -150,15 +147,13 @@ export default function HistoryPageClient() {
                     </div>
                   </div>
 
-                  {/* Card Body */}
-                  <div className="p-6 space-y-4">
-                    {/* Route */}
+                  <div className="px-6 py-4 space-y-4">
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <MapPin className="w-5 h-5 text-indigo-600 mt-1" />
                       </div>
                       <div className="flex-1">
-                        <p className="text-gray-600 text-sm mb-1">Route</p>
+                        <p className="text-gray-600 text-sm">Route</p>
                         <div className="flex items-center gap-2">
                           <span className="font-semibold text-gray-900">
                             {booking.route_from}

@@ -11,11 +11,16 @@ import { toast, Toaster } from "sonner";
 import { authAPI } from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { isAxiosError } from "axios";
+import { TermsConditionsModal } from "@/components/TermsAndConditionModal";
+import { normalize } from "path";
+import { normalizeEthiopianPhone } from "@/lib/common_functions";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showTermsModal, setShowTermsModal] = useState(false);
   const router = useRouter();
+  const [onRead, setOnRead] = useState(false);
   const [formData, setFormData] = useState({
     first_name: "",
     last_name: "",
@@ -23,7 +28,7 @@ export default function SignupPage() {
     phone: "",
     password: "",
     confirmPassword: "",
-    acceptTerms: false,
+    acceptTerms: onRead,
   });
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -41,12 +46,21 @@ export default function SignupPage() {
       toast.error("Passwords do not match");
       return;
     }
-    //  api.signup(formData)
+    if (!formData.acceptTerms) {
+      toast.error("You must accept the terms and conditions");
+      return;
+    }
+    const cleanedPhone = normalizeEthiopianPhone(formData.phone);
+
     try {
       const { confirmPassword, acceptTerms, password, ...cleanedFormData } =
         formData;
 
-      const formattedData = { ...cleanedFormData, password };
+      const formattedData = {
+        ...cleanedFormData,
+        password,
+        phone: cleanedPhone,
+      };
       await authAPI.signup(formattedData);
 
       toast.success("Account created successfully, please verify your account");
@@ -55,11 +69,41 @@ export default function SignupPage() {
       }, 1500);
     } catch (error) {
       if (isAxiosError(error)) {
+        if (typeof error.response?.data?.error === "string") {
+          console.log(error.response.data.error, "signup error message");
+          toast.error(error.response.data.error);
+          return;
+        }
         const message =
           error.response?.data?.error?.reasons?.[0] ||
           error.response?.data?.error?.message ||
           error.response?.data?.detail?.[0]?.msg;
-        console.log(message, "signup error message");
+        console.log(error);
+        if (
+          (message && message?.includes("String")) ||
+          message?.includes("string")
+        ) {
+          let newMessage = message.replace(
+            "String",
+            error.response?.data.detail?.[0]?.loc[1],
+          );
+          !newMessage
+            ? message.replace(
+                "string",
+                error.response?.data.detail?.[0]?.loc[1],
+              )
+            : message.replace(
+                "String",
+                error.response?.data.detail?.[0]?.loc[1],
+              );
+          console.log(
+            newMessage,
+            error.response?.data.detail?.[0]?.loc[1],
+            "after replacement",
+          );
+          toast.error(newMessage);
+          return;
+        }
         toast.error(message);
       } else toast.error("Failed to create account");
     }
@@ -68,6 +112,14 @@ export default function SignupPage() {
   return (
     <>
       <Toaster richColors position="top-right" />
+      <TermsConditionsModal
+        setOnRead={() =>
+          setFormData((prev) => ({ ...prev, acceptTerms: true }))
+        }
+        read={onRead}
+        isOpen={showTermsModal}
+        onClose={() => setShowTermsModal(false)}
+      />
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           {/* Card Container */}
@@ -231,18 +283,24 @@ export default function SignupPage() {
                   name="acceptTerms"
                   type="checkbox"
                   checked={formData.acceptTerms}
+                  onInvalid={(e) =>
+                    (e.target as HTMLInputElement).setCustomValidity(
+                      "You have to read and review the terms and conditions to proceed",
+                    )
+                  }
                   onChange={handleChange}
                   className="mt-1 rounded border-gray-300 accent-teal-600"
                   required
                 />
                 <span className="ml-2 text-sm text-gray-600">
                   I read and agree to the{" "}
-                  <a
-                    href="#"
-                    className="text-teal-600 hover:text-teal-700 font-medium"
+                  <button
+                    type="button"
+                    onClick={() => setShowTermsModal(true)}
+                    className="text-teal-600 cursor-pointer hover:text-teal-700 font-medium underline"
                   >
                     Terms & Conditions
-                  </a>
+                  </button>
                 </span>
               </label>
 
