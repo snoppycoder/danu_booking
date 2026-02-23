@@ -11,12 +11,11 @@ export function proxy(request: NextRequest) {
     pathname.startsWith("/login") ||
     pathname.startsWith("/unauthorized") ||
     pathname.startsWith("/_next") ||
-    pathname === "/"
+    pathname === "/guest"
   ) {
     return NextResponse.next();
   }
 
-  // ❌ If no token → redirect to login
   if (!token) {
     return NextResponse.redirect(new URL("/login", request.url));
   }

@@ -133,22 +133,38 @@ export default function LoginPage() {
               </div>
 
               {/* Sign In Button */}
+              {/* Sign In Button */}
               <button
                 type="submit"
-                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-colors mt-6"
+                className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-colors"
               >
                 Sign In
               </button>
+
+              {/* Divider */}
+              <div className="flex items-center my-6">
+                <div className="flex-grow border-t border-gray-200"></div>
+                <span className="px-3 text-sm text-gray-400">OR</span>
+                <div className="flex-grow border-t border-gray-200"></div>
+              </div>
+
+              {/* Guest Button */}
+              <Link
+                href="/guest"
+                className="block w-full text-center border border-gray-300 hover:border-teal-500 text-gray-700 font-medium py-3 rounded-lg transition-colors"
+              >
+                Continue as Guest
+              </Link>
             </form>
 
             {/* Divider */}
 
             {/* Sign Up Link */}
-            <p className="text-center mt-6 text-gray-600">
+            <p className="p-0.5 mt-6 text-gray-600">
               Don't have an account?{" "}
               <Link
                 href="/signup"
-                className="text-coral-600 hover:text-coral-700 font-semibold"
+                className="text-teal-600 hover:text-teal-700 font-semibold"
               >
                 Sign up
               </Link>
