@@ -4,58 +4,59 @@ import { decodeJWT } from "./lib/jwt";
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
-  const token = request.cookies.get("access_token")?.value;
 
-  if (
+  // 1. Separate Auth pages from the Unauthorized page
+  const isAuthPage =
     pathname.startsWith("/login") ||
     pathname.startsWith("/signup") ||
-    pathname.startsWith("/unauthorized") ||
-    pathname.startsWith("/_next") ||
-    pathname === "/guest"
-  ) {
+    pathname.startsWith("/guest");
+
+  const isUnauthorizedPage = pathname.startsWith("/unauthorized");
+  const isNextInternal = pathname.startsWith("/_next");
+
+  const token = request.cookies.get("access_token")?.value;
+  const decoded = token ? decodeJWT(token) : null;
+  const userRole = decoded?.roles?.[0];
+
+  // 2. Redirect logged-in users AWAY from login/signup pages
+  if (isAuthPage) {
+    if (userRole) {
+      if (userRole === "superadmin")
+        return NextResponse.redirect(new URL("/superadmin", request.url));
+      if (userRole === "operator_admin")
+        return NextResponse.redirect(new URL("/operator", request.url));
+      if (userRole === "passenger")
+        return NextResponse.redirect(new URL("/passenger", request.url));
+    }
     return NextResponse.next();
   }
 
-  if (!token) {
+  // 3. Let anyone (logged in or not) view the unauthorized page & internal Next files
+  if (isUnauthorizedPage || isNextInternal) {
+    return NextResponse.next();
+  }
+
+  // 4. Block unauthenticated users from protected routes
+  if (!userRole) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  const decoded = decodeJWT(token);
-
-  if (!decoded || !decoded.roles || decoded.roles.length === 0) {
-    return NextResponse.redirect(new URL("/login", request.url));
-  }
-
-  const role = decoded.roles[0];
-
-  // Role-based route protection
-  if (pathname.startsWith("/superadmin") && role !== "superadmin") {
+  // 5. Role-based access control for protected routes
+  if (pathname.startsWith("/superadmin") && userRole !== "superadmin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
-  if (pathname.startsWith("/operator") && role !== "operator_admin") {
+  if (pathname.startsWith("/operator") && userRole !== "operator_admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 
-  if (pathname.startsWith("/passenger") && role !== "passenger") {
+  if (pathname.startsWith("/passenger") && userRole !== "passenger") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
-  }
-
-  // Prevent logged-in users from accessing login
-  if (pathname.startsWith("/login")) {
-    if (role === "superadmin") {
-      return NextResponse.redirect(new URL("/superadmin", request.url));
-    }
-    if (role === "operator_admin") {
-      return NextResponse.redirect(new URL("/operator", request.url));
-    }
-    if (role === "passenger") {
-      return NextResponse.redirect(new URL("/passenger", request.url));
-    }
-    if (role === "agent_admin") {
-      return NextResponse.redirect(new URL("/agent", request.url));
-    }
   }
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ["/((?!api|_next/static|_next/image|favicon.ico).*)"],
+};
