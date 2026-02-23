@@ -304,7 +304,7 @@ export const authAPI = {
         session_id,
       });
       console.log(response);
-      // await deleteAllCookies();
+      await deleteAllCookies();
       // window.location.href = "/login";
     } catch (error) {
       // window.location.href = "/login";
