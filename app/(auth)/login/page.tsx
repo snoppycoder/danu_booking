@@ -142,13 +142,12 @@ export default function LoginPage() {
               </button>
 
               {/* Divider */}
-              <div className="flex items-center my-6">
-                <div className="flex-grow border-t border-gray-200"></div>
-                <span className="px-3 text-sm text-gray-400">OR</span>
-                <div className="flex-grow border-t border-gray-200"></div>
+              <div className="flex items-center my-2">
+                <div className="grow border-t border-gray-200"></div>
+                <span className="px-3 text-sm text-gray-600">OR</span>
+                <div className="grow border-t border-gray-200"></div>
               </div>
 
-              {/* Guest Button */}
               <Link
                 href="/guest"
                 className="block w-full text-center border border-gray-300 hover:border-teal-500 text-gray-700 font-medium py-3 rounded-lg transition-colors"
@@ -157,10 +156,7 @@ export default function LoginPage() {
               </Link>
             </form>
 
-            {/* Divider */}
-
-            {/* Sign Up Link */}
-            <p className="p-0.5 mt-6 text-gray-600">
+            <p className="text-center  mt-6 text-gray-600">
               Don't have an account?{" "}
               <Link
                 href="/signup"

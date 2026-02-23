@@ -6,9 +6,9 @@ export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   const token = request.cookies.get("access_token")?.value;
 
-  // ✅ Allow public routes
   if (
     pathname.startsWith("/login") ||
+    pathname.startsWith("/signup") ||
     pathname.startsWith("/unauthorized") ||
     pathname.startsWith("/_next") ||
     pathname === "/guest"
