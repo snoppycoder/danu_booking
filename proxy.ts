@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decodeJWT } from "./lib/jwt";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const token = request.cookies.get("access_token");
   if (!token) {
     return NextResponse.redirect(new URL("/guest", request.url));
