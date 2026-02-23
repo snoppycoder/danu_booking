@@ -3,46 +3,58 @@ import type { NextRequest } from "next/server";
 import { decodeJWT } from "./lib/jwt";
 
 export function proxy(request: NextRequest) {
-  const token = request.cookies.get("access_token");
-  if (!token) {
-    return NextResponse.redirect(new URL("/guest", request.url));
+  const { pathname } = request.nextUrl;
+  const token = request.cookies.get("access_token")?.value;
+
+  // ✅ Allow public routes
+  if (
+    pathname.startsWith("/login") ||
+    pathname.startsWith("/unauthorized") ||
+    pathname.startsWith("/_next") ||
+    pathname === "/"
+  ) {
+    return NextResponse.next();
   }
-  const decoded = decodeJWT(token?.value || "");
+
+  // ❌ If no token → redirect to login
+  if (!token) {
+    return NextResponse.redirect(new URL("/login", request.url));
+  }
+
+  const decoded = decodeJWT(token);
 
   if (!decoded || !decoded.roles || decoded.roles.length === 0) {
-    return NextResponse.redirect(new URL("/guest", request.url));
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (!token) {
-    return NextResponse.redirect(new URL("/guest", request.url));
+  const role = decoded.roles[0];
+
+  // Role-based route protection
+  if (pathname.startsWith("/superadmin") && role !== "superadmin") {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-  if (request.nextUrl.pathname.startsWith("/superadmin")) {
-    if (decoded.roles[0] !== "superadmin") {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+
+  if (pathname.startsWith("/operator") && role !== "operator_admin") {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+
+  if (pathname.startsWith("/passenger") && role !== "passenger") {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+
+  // Prevent logged-in users from accessing login
+  if (pathname.startsWith("/login")) {
+    if (role === "superadmin") {
+      return NextResponse.redirect(new URL("/superadmin", request.url));
     }
-  }
-  if (request.nextUrl.pathname.startsWith("/operator")) {
-    if (decoded.roles[0] !== "operator_admin") {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    if (role === "operator_admin") {
+      return NextResponse.redirect(new URL("/operator", request.url));
     }
-  }
-  if (request.nextUrl.pathname.startsWith("/passenger")) {
-    if (decoded.roles[0] !== "passenger") {
-      return NextResponse.redirect(new URL("/unauthorized", request.url));
+    if (role === "passenger") {
+      return NextResponse.redirect(new URL("/passenger", request.url));
     }
-  }
-  // Guest-only routes
-  if (request.nextUrl.pathname.startsWith("/login")) {
-    if (token) {
-      if (decoded.roles[0] == "superadmin") {
-        return NextResponse.redirect(new URL("/superadmin", request.url));
-      } else if (decoded.roles[0] == "operator_admin") {
-        return NextResponse.redirect(new URL("/operator", request.url));
-      } else if (decoded.roles[0] == "passenger") {
-        return NextResponse.redirect(new URL("/passenger", request.url));
-      } else if (decoded.roles[0] == "agent_admin") {
-        return NextResponse.redirect(new URL("/agent", request.url));
-      }
+    if (role === "agent_admin") {
+      return NextResponse.redirect(new URL("/agent", request.url));
     }
   }
 
