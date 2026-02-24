@@ -13,13 +13,24 @@ export function proxy(request: NextRequest) {
   const isUnauthorizedPage = pathname.startsWith("/unauthorized");
   const isNextInternal = pathname.startsWith("/_next");
 
+  const public_paths = [
+    "/login",
+    "/signup",
+    "/guest",
+    "/unauthorized",
+    "/_next",
+    "/favicon.ico",
+    "/api",
+  ];
+
   const token = request.cookies.get("access_token")?.value;
   const decoded = token ? decodeJWT(token) : null;
   const userRole = decoded?.roles?.[0];
 
   if (isAuthPage) {
+    console.log(token, "token from proxy");
     if (userRole) {
-      if (userRole === "superadmin")
+      if (userRole === "super_admin")
         return NextResponse.redirect(new URL("/superadmin", request.url));
       if (userRole === "operator_admin")
         return NextResponse.redirect(new URL("/operator", request.url));
@@ -34,6 +45,10 @@ export function proxy(request: NextRequest) {
   }
 
   if (!userRole) {
+    if (public_paths.some((path) => pathname.startsWith(path))) {
+      return NextResponse.next();
+    }
+
     return NextResponse.redirect(new URL("/login", request.url));
   }
 

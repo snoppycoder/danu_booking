@@ -80,6 +80,7 @@ export default function OperatorAgentList() {
     (emp) =>
       emp?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp?.phone?.includes(searchTerm) ||
       emp?.email?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   console.log("Filtered Users: ", data);
@@ -196,8 +197,12 @@ export default function OperatorAgentList() {
               onClick={() =>
                 exportToCSV(
                   data!.items?.map((u) => ({
+                    id: u.id,
                     "First name": u.first_name,
                     "Last name": u.last_name,
+                    phone: u.phone,
+                    "organization id": u.organization_id,
+
                     email: u.email,
                     "email verified": u.is_active ? "Yes" : "No",
                   })),
