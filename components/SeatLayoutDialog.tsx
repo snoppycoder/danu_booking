@@ -13,7 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import type { Bus, Seat } from "@/lib/model";
-import SteeringWheel from "@/asset/wheel.svg";
+// import SteeringWheel from "@/components/SteeringWheel";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -121,12 +121,9 @@ export default function SeatLayoutDialog({
         <div className="flex flex-col items-center gap-4 mt-4">
           <div className="grid gap-2">
             <div className="flex justify-start pl-6 mb-2">
-              <div className="w-10 h-10 flex items-center justify-center text-xs font-bold">
-                <SteeringWheel
-                  style={{ width: 40, height: 40 }}
-                  className="text-gray-500"
-                />
-              </div>
+              {/* <div className="w-10 h-10 flex items-center justify-center text-xs font-bold">
+                <SteeringWheel />
+              </div> */}
             </div>
             <div className="flex flex-col gap-2">
               {Object.entries(grouped).map(([rowNumber, rowSeats]) => (
