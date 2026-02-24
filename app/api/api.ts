@@ -60,6 +60,7 @@ api.interceptors.response.use(
       if (data.error && data.error.includes("role")) {
         window.location.href = "/unauthorized";
       }
+      console.log(detail, "error detail from response interceptor");
       if (detail && detail?.includes("revoked")) {
         deleteAllCookies().then(() => {
           console.error("Session revoked — clearing cookies and redirecting");
@@ -784,6 +785,7 @@ export const operatorApi = {
   ) => {
     try {
       const response = await api.post(`/operator/${operator_id}/agents`, body);
+      console.log(body, "data to send to create operator agent");
       return response.data;
     } catch (error) {
       console.log(error, "error from createOperatorAgent func");

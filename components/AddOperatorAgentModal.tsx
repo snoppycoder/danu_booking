@@ -79,6 +79,7 @@ export function CreateOperatorAgentDialog({
       onSuccess?.();
     } catch (error: any) {
       const errorMessage =
+        error?.response?.data.error ||
         error?.response?.data?.detail ||
         error?.message ||
         "Failed to create operator agent";

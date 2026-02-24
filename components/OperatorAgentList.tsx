@@ -157,7 +157,7 @@ export default function OperatorAgentList() {
 
       <p>
         Welcome to the Agent Dashboard! Here you can manage your Organization's
-        agents,
+        agents
       </p>
 
       {/* Controls Section */}
