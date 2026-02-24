@@ -758,7 +758,7 @@ export const operatorApi = {
       throw error;
     }
   },
-  getOperatorAgent: async (
+  getOperatorAgents: async (
     page?: number,
     per_page?: number,
     operator_id?: string,
@@ -769,6 +769,12 @@ export const operatorApi = {
         per_page,
       },
     });
+    return response.data;
+  },
+  getOperatorAgentDetail: async (operator_id: string, agent_id: string) => {
+    const response = await api.get(
+      `/operator/${operator_id}/agents/${agent_id}`,
+    );
     return response.data;
   },
 

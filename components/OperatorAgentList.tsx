@@ -54,6 +54,7 @@ import { exportToCSV } from "@/lib/common_functions";
 import UserDetail from "./UserDetail";
 import { useAuth } from "@/lib/authContext";
 import { CreateOperatorAgentDialog } from "./AddOperatorAgentModal";
+import { OperatorAgentDetailDialog } from "./OperatorAgentDetail";
 
 export default function OperatorAgentList() {
   const [displayCount, setDisplayCount] = useState("10");
@@ -68,7 +69,7 @@ export default function OperatorAgentList() {
   const { user } = useAuth();
 
   const [disableOpen, setDisableOpen] = useState(false);
-  const [detail, setDetail] = useState<User | null>(null);
+  const [detail, setDetail] = useState<OperatorAgent | null>(null);
 
   const { data, isLoading, refetch } = useOperatorAgent(
     user?.organization_id || "",
@@ -86,7 +87,10 @@ export default function OperatorAgentList() {
   console.log("Filtered Users: ", data);
 
   async function handleViewDetail(id: string) {
-    const res = await superAdminApi.getUser(id);
+    const res = await operatorApi.getOperatorAgentDetail(
+      user?.organization_id || "",
+      id,
+    );
     if (res) {
       setDetail(res);
       setDetailToggle(true);
@@ -350,8 +354,8 @@ export default function OperatorAgentList() {
       </div>
 
       {detail && (
-        <UserDetail
-          userData={detail}
+        <OperatorAgentDetailDialog
+          agentData={detail}
           open={detailToggle}
           setOpen={setDetailToggle}
         />

@@ -240,7 +240,7 @@ export const useOperatorAgent = (
     queryKey: ["operator_agent", operator_id, page, per_page],
     queryFn: async () => {
       if (!operator_id) return { items: [], total: 0, page: 1 };
-      const res = await operatorApi.getOperatorAgent(
+      const res = await operatorApi.getOperatorAgents(
         page,
         per_page,
         operator_id,
@@ -253,6 +253,25 @@ export const useOperatorAgent = (
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!operator_id,
+  });
+};
+
+export const useOperatorAgentDetail = (
+  operator_id: string,
+  agent_id: string,
+) => {
+  return useQuery({
+    queryKey: ["operator_agent_detail", operator_id, agent_id],
+    queryFn: async () => {
+      if (!operator_id || !agent_id) return null;
+      const res = await operatorApi.getOperatorAgentDetail(
+        operator_id,
+        agent_id,
+      );
+      return res as OperatorAgent;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id && !!agent_id,
   });
 };
 export const AgentUseUploadKyc = () => {
