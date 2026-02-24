@@ -28,6 +28,11 @@ const menuItems = [
     icon: Bus,
   },
   {
+    title: "Agents",
+    url: "/operator/agents",
+    icon: Users,
+  },
+  {
     title: "Schedules",
     url: "/schedules",
     icon: Calendar,

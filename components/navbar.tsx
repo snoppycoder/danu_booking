@@ -61,9 +61,9 @@ export default function Navbar(Props: NavbarProps) {
               className="text-gray-700 hover:text-primary"
             >
               {isMenuOpen ? (
-                <X className="w-6 h-6" />
+                <X className="w-6 h-6 cursor-pointer" />
               ) : (
-                <Menu className="w-6 h-6" />
+                <Menu className="w-6 h-6 cursor-pointer" />
               )}
             </button>
           </div>
@@ -116,6 +116,7 @@ export default function Navbar(Props: NavbarProps) {
               <div className="px-3 mt-2 w-full py-2 flex justify-center gap-2">
                 <Button
                   variant="destructive"
+                  className="cursor-pointer"
                   onClick={async () => {
                     authAPI.logout();
                   }}

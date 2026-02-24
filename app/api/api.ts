@@ -15,7 +15,6 @@ import {
   Passenger,
 } from "@/lib/model";
 import axios from "axios";
-import error from "next/error";
 
 const api = axios.create({
   baseURL: "/api/proxy",
@@ -60,6 +59,12 @@ api.interceptors.response.use(
       const detail = data.detail;
       if (data.error && data.error.includes("role")) {
         window.location.href = "/unauthorized";
+      }
+      if (detail && detail?.includes("revoked")) {
+        deleteAllCookies().then(() => {
+          console.error("Session revoked — clearing cookies and redirecting");
+          window.location.href = "/login";
+        });
       }
       if (status === 401) {
         switch (detail) {
@@ -298,16 +303,30 @@ export const authAPI = {
     try {
       const session_id = await getSessionId();
       const refresh_token = await getRefreshToken();
-
-      const response = await api.post("/user/me/sessions/logout", {
-        refresh_token,
+      const csrf_token = await getCSRFToken();
+      console.log(
+        "Logging out with session_id:",
         session_id,
-      });
-      console.log(response);
+        "and refresh_token:",
+        refresh_token,
+        "and csrf_token:",
+        csrf_token,
+      );
+      await api.post(
+        "/user/me/sessions/logout",
+        {
+          refresh_token,
+          session_id,
+        },
+        {
+          headers: {
+            "x-csrf-token": csrf_token,
+          },
+        },
+      );
       await deleteAllCookies();
-      // window.location.href = "/login";
     } catch (error) {
-      // window.location.href = "/login";
+      await deleteAllCookies();
       console.log(error);
     }
   },
@@ -737,6 +756,46 @@ export const operatorApi = {
     } catch (error) {
       throw error;
     }
+  },
+  getOperatorAgent: async (
+    page?: number,
+    per_page?: number,
+    operator_id?: string,
+  ) => {
+    const response = await api.get(`/operator/${operator_id}/agents`, {
+      params: {
+        page,
+        per_page,
+      },
+    });
+    return response.data;
+  },
+
+  createOperatorAgent: async (
+    operator_id: string,
+    body: {
+      first_name: string;
+      last_name: string;
+      email: string;
+      phone: string;
+      password: string;
+      is_active: boolean;
+    },
+  ) => {
+    try {
+      const response = await api.post(`/operator/${operator_id}/agents`, body);
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from createOperatorAgent func");
+      throw error;
+    }
+  },
+
+  deleteOperatorAgent: async (operator_id: string, agent_id: string) => {
+    const response = await api.delete(
+      `/operator/${operator_id}/agents/${agent_id}`,
+    );
+    return response.data;
   },
 
   updateBusStatus: async (

@@ -94,6 +94,23 @@ export type CreateTripPayload = {
   price: number;
 };
 
+export interface OperatorAgent {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  phone: string;
+  is_active: boolean;
+  created_at: string;
+  roles: {
+    additionalProp1: {};
+  };
+  organization_id: string;
+  verification: {
+    additionalProp1: {};
+  };
+}
+
 export interface User {
   sub: string;
   roles: Role[];
