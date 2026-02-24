@@ -1,7 +1,18 @@
 import { authAPI, passengerApi } from "@/app/api/api";
 import { toast } from "sonner";
 import { SearchRouteResponse } from "./model";
-
+export const normalizeDate = (d?: Date | null) => {
+  if (!d) return d;
+  const copy = new Date(d);
+  copy.setHours(0, 0, 0, 0);
+  return copy;
+};
+export const formatLocalDate = (date: Date) => {
+  const y = date.getFullYear();
+  const m = String(date.getMonth() + 1).padStart(2, "0");
+  const d = String(date.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+};
 export async function onLogout(
   event: React.MouseEvent<HTMLDivElement, MouseEvent>,
 ): Promise<void> {

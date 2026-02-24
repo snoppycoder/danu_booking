@@ -20,7 +20,11 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatTime, handleSearch } from "@/lib/common_functions";
+import {
+  formatTime,
+  handleSearch,
+  normalizeDate,
+} from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
 import { Item, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
@@ -233,7 +237,7 @@ export default function BookingPage() {
                 <EtDatePicker
                   minDate={new Date()}
                   value={
-                    form.departure_date
+                    normalizeDate(new Date(form.departure_date))
                       ? (() => {
                           const [y, m, d] = form.departure_date
                             .split("-")

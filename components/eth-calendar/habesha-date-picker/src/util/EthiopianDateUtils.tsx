@@ -5,9 +5,12 @@ export type DateType = "GC" | "EC" | "AO" | "CUSTOM";
 // export type EtLocal = "EC" | "AO" | "CUSTOM";
 
 export namespace EthiopianDate {
-  export const shortDays = ["ሰ", "ማ", "ረ", "ሐ", "ዓ", "ቅ", "እ"];
-  export const englishShortDays = ["M", "T", "W", "T", "F", "S", "S"];
-  export const longDays = ["ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ", "እሁድ"];
+  // export const shortDays = ["ሰ", "ማ", "ረ", "ሐ", "ዓ", "ቅ", "እ"];
+  // export const englishShortDays = ["M", "T", "W", "T", "F", "S", "S"];
+  // export const longDays = ["ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ", "እሁድ"];
+  export const shortDays = ["እ", "ሰ", "ማ", "ረ", "ሐ", "ዓ", "ቅ"];
+  export const englishShortDays = ["S", "M", "T", "W", "T", "F", "S"];
+  export const longDays = ["እሁድ", "ሰኞ", "ማክሰኞ", "ረቡዕ", "ሐሙስ", "ዓርብ", "ቅዳሜ"];
   export const ethMonths = [
     "መስከረም",
     "ጥቅምት",
@@ -48,7 +51,7 @@ export namespace EthiopianDate {
   export function createEthiopianDateFromParts(
     d: number,
     m: number,
-    y: number
+    y: number,
   ): EtDate {
     return {
       Day: d,
@@ -93,9 +96,18 @@ export namespace EthiopianDate {
     return 30; // April, June, September, November
   }
 
+  // export function getEtMonthStartDate(Month: number, Year: number): number {
+  //   const grDate = toGreg({ Day: 1, Month, Year });
+  //   return ((grDate.getUTCDay() || 7) % 7) + 1;
+  // }
   export function getEtMonthStartDate(Month: number, Year: number): number {
     const grDate = toGreg({ Day: 1, Month, Year });
-    return ((grDate.getUTCDay() || 7) % 7) + 1;
+
+    // getDay(): 0=Sunday, 1=Monday ...
+    const day = grDate.getDay();
+
+    // Convert to 1–7 format (Monday = 1)
+    return day === 0 ? 7 : day;
   }
 
   export function grigorianDateFromDayNo(dayNum: number): Date {
@@ -127,7 +139,7 @@ export namespace EthiopianDate {
       return new Date(
         400 * num400 + 100 * num100 + 4 * num4 + num1,
         12 - 1,
-        31
+        31,
       );
     }
 
@@ -211,7 +223,7 @@ export namespace EthiopianDate {
     dt: EtDate,
     locale: DateType,
     getLocalMonth?: (month: number) => string,
-    time?: number
+    time?: number,
   ) {
     let month = "";
     switch (locale) {
@@ -230,7 +242,7 @@ export namespace EthiopianDate {
     return time
       ? `${month} ${dt.Day}/${dt.Year}  ${format(
           new Date(time - 6 * 60 * 60 * 1000),
-          "hh:mm a"
+          "hh:mm a",
         )}`
       : `${month} ${dt.Day}/${dt.Year}`;
   }
@@ -243,7 +255,7 @@ export namespace EthiopianDate {
   export function getEtMonthName(
     m: number,
     locale: DateType = "EC",
-    getLocalMonth?: (month: number) => string
+    getLocalMonth?: (month: number) => string,
   ): string {
     if (m > 0 && m <= 13) {
       switch (locale) {
@@ -295,7 +307,7 @@ export namespace EthiopianDate {
   export function addYears(etDate: EtDate, years: number): EtDate {
     if (!isValid(etDate))
       throw new Error(
-        `Invalid ethiopian date ${etDate.Day}-${etDate.Month}-${etDate.Year}`
+        `Invalid ethiopian date ${etDate.Day}-${etDate.Month}-${etDate.Year}`,
       );
 
     let newYear = etDate.Year + years;
@@ -342,7 +354,7 @@ export namespace EthiopianDate {
   export function ethiopianYearDifference(
     d1: Date,
     d2: Date,
-    upperBoundInclusive: boolean
+    upperBoundInclusive: boolean,
   ): number {
     let date1 = toEth(d1);
     let date2 = toEth(d2);
@@ -363,7 +375,7 @@ export namespace EthiopianDate {
   export function fullEthiopianYearDifference(
     d1: Date,
     d2: Date,
-    upperBoundInclusive: boolean
+    upperBoundInclusive: boolean,
   ): { years: number; remainder: number } {
     let date1 = toEth(d1);
     let date2 = toEth(d2);

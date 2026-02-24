@@ -12,6 +12,7 @@ import { passengerApi } from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src";
+import { formatLocalDate, normalizeDate } from "@/lib/common_functions";
 
 export default function DanuBooking() {
   const router = useRouter();
@@ -212,17 +213,8 @@ export default function DanuBooking() {
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
                     Departure Date
                   </label>
-                  {/* <input
-                    type="date"
-                    value={form.departure_date}
-                    min={new Date().toISOString().split("T")[0]}
-                    onChange={(e) =>
-                      setForm({ ...form, departure_date: e.target.value })
-                    }
-                    className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
-                  /> */}
                   <EtDatePicker
-                    minDate={new Date()}
+                    minDate={new Date() ?? undefined}
                     value={
                       form.departure_date
                         ? (() => {
