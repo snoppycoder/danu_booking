@@ -115,8 +115,11 @@ export default function SeatBookingDialog({
       setToggle(false);
     } catch (error) {
       if (isAxiosError(error)) {
+        console.error("Axios error:", error.response?.data || error.message);
         if (error.response?.data.detail) {
-          toast.error(error.response?.data.detail?.[0].msg, { duration: 3000 });
+          toast.error(`${error.response?.data.detail?.[0].msg}`, {
+            duration: 3000,
+          });
         } else {
           toast.error(error.response?.data.error, { duration: 3000 });
         }
@@ -179,7 +182,6 @@ export default function SeatBookingDialog({
             </div>
           )}
 
-          {/* STEP 2: Passenger Forms */}
           {step === 2 && (
             <div className="space-y-6">
               {passengers.map((passenger, index) => (

@@ -255,12 +255,15 @@ export default function OperatorPage() {
   // };
   const handleAddBus = async () => {
     if (!user?.organization_id) return;
+    const seat51template = seatTemplates?.find((s) => s.name.includes("51"));
+    //FIXED
+    const seat_numbers = 51;
 
     const data = {
       plate_no: newBus.plate_no,
       side_no: newBus.side_no,
-      capacity: newBus.capacity,
-      seat_template_id: selectedTemplateId ?? "",
+      capacity: seat_numbers,
+      seat_template_id: seat51template?.id ?? "",
       bus_status: "active",
     };
 
@@ -666,40 +669,34 @@ export default function OperatorPage() {
         <DialogContent className="sm:max-w-[500px] max-h-[92vh] flex flex-col">
           <DialogHeader>
             <DialogTitle>Add New Bus</DialogTitle>
-            {/* <DialogDescription>
-              Step {addBusStep} of 2:{" "}
-              {addBusStep === 1
-                ? "Vehicle Specifications"
-                : "Seat Configuration"}
-            </DialogDescription> */}
           </DialogHeader>
-          {addBusStep === 1 ? (
-            <div className="flex-1 space-y-4 py-4 overflow-y-auto">
-              <div className="space-y-2">
-                <Label htmlFor="new-license">License Plate</Label>
-                <Input
-                  id="new-license"
-                  placeholder="MH-12-XX-0000"
-                  value={newBus.plate_no}
-                  onChange={(e) =>
-                    setNewBus({ ...newBus, plate_no: e.target.value })
-                  }
-                  className="font-mono"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="side-number">Side Number</Label>
-                <Input
-                  id="side-number"
-                  placeholder="MH-12-XX-0000"
-                  value={newBus.side_no}
-                  onChange={(e) =>
-                    setNewBus({ ...newBus, side_no: e.target.value })
-                  }
-                  className="font-mono"
-                />
-              </div>
-              {/* <div className="space-y-2">
+
+          <div className="flex-1 space-y-4 py-4 overflow-y-auto">
+            <div className="space-y-2">
+              <Label htmlFor="new-license">License Plate</Label>
+              <Input
+                id="new-license"
+                placeholder="MH-12-XX-0000"
+                value={newBus.plate_no}
+                onChange={(e) =>
+                  setNewBus({ ...newBus, plate_no: e.target.value })
+                }
+                className="font-mono"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="side-number">Side Number</Label>
+              <Input
+                id="side-number"
+                placeholder="MH-12-XX-0000"
+                value={newBus.side_no}
+                onChange={(e) =>
+                  setNewBus({ ...newBus, side_no: e.target.value })
+                }
+                className="font-mono"
+              />
+            </div>
+            {/* <div className="space-y-2">
                 <Label htmlFor="new-license">Capacity</Label>
                 <Input
                   id="capacity"
@@ -713,7 +710,7 @@ export default function OperatorPage() {
                 />
               </div> */}
 
-              {/* <div className="space-y-2">
+            {/* <div className="space-y-2">
                 <Label htmlFor="new-facilities">
                   Facilities (comma-separated)
                 </Label>
@@ -730,94 +727,10 @@ export default function OperatorPage() {
                   }
                 />
               </div> */}
-            </div>
-          ) : (
-            <div className="space-y-4 py-4 overflow-auto">
-              {seatTemplates ? (
-                <RadioGroup
-                  value={selectedTemplateId || undefined}
-                  onValueChange={(value) => setSelectedTemplateId(value)}
-                  className="flex flex-col space-y-2 mt-4"
-                >
-                  {seatTemplates.map((template) => (
-                    <div
-                      key={template.id}
-                      className="flex items-center space-x-2"
-                    >
-                      <RadioGroupItem value={template.id} id={template.id} />
-                      <Label htmlFor={template.id}>{template.name}</Label>
-                    </div>
-                  ))}
-                </RadioGroup>
-              ) : (
-                <div className="rounded-lg border border-border bg-muted/30 p-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="new-capacity">Seating Capacity</Label>
-                    <Input
-                      id="new-capacity"
-                      type="number"
-                      min="20"
-                      max="60"
-                      value={newBus.capacity}
-                      onChange={(e) =>
-                        setNewBus({
-                          ...newBus,
-                          capacity: Number.parseInt(e.target.value),
-                        })
-                      }
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      Layout will be generated as{" "}
-                      {Math.ceil(newBus.capacity / 4)} rows × 4 columns
-                    </p>
-                  </div>
-                  <div className="mb-3 flex items-center justify-center">
-                    <div className="rounded-md bg-secondary px-3 py-1.5 text-xs font-medium">
-                      Driver
-                    </div>
-                  </div>
-                  <div
-                    className="grid gap-2"
-                    style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
-                  >
-                    {Array.from(
-                      { length: Math.min(newBus.capacity, 16) },
-                      (_, i) => (
-                        <div
-                          key={i}
-                          className="flex aspect-square items-center justify-center rounded-md border border-border bg-card text-xs font-medium"
-                        >
-                          {i + 1}
-                        </div>
-                      ),
-                    )}
-                  </div>
-                  {newBus.capacity > 16 && (
-                    <p className="mt-2 text-center text-xs text-muted-foreground">
-                      + {newBus.capacity - 16} more seats
-                    </p>
-                  )}
-                </div>
-              )}
-            </div>
-          )}
+          </div>
 
           <DialogFooter>
-            {addBusStep === 2 && (
-              <Button variant="outline" onClick={() => setAddBusStep(1)}>
-                Back
-              </Button>
-            )}
-            {addBusStep === 1 ? (
-              <Button
-                onClick={() => setAddBusStep(2)}
-                disabled={!newBus.plate_no}
-              >
-                Next
-              </Button>
-            ) : (
-              <Button onClick={handleAddBus}>Add Bus</Button>
-            )}
+            <Button onClick={handleAddBus}>Add Bus</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

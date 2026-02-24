@@ -110,6 +110,19 @@ export interface OperatorAgent {
     additionalProp1: {};
   };
 }
+export interface Refund {
+  id: string;
+  booking_id: string;
+  booking_ref: string;
+  passenger_name: string;
+  total_amount: number;
+  processed_amount: number;
+  status: "pending" | "completed" | "failed" | "processing";
+  method: string;
+  created_at: string;
+  processed_at: string;
+  notes?: string;
+}
 
 export interface User {
   sub: string;

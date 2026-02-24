@@ -41,14 +41,24 @@ import { toast, Toaster } from "sonner";
 
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
 import { isAxiosError } from "axios";
+import { useRouter } from "next/navigation";
 
 export default function BookingPage() {
   const searchParams = useSearchParams();
+  const router = useRouter();
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
+  if (
+    !searchParams.get("from") ||
+    !searchParams.get("to") ||
+    !searchParams.get("date")
+  ) {
+    router.push("/passenger");
+    return;
+  }
 
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
@@ -236,6 +246,7 @@ export default function BookingPage() {
                 </label>
                 <EtDatePicker
                   minDate={new Date()}
+                  defaultValue={new Date()}
                   value={
                     normalizeDate(new Date(form.departure_date))
                       ? (() => {
@@ -276,7 +287,7 @@ export default function BookingPage() {
           </Card>
         </form>
       </div>
-      <div className="w-full flex justify-center mt-8 mb-8">
+      <div className="w-full lg:flex justify-center mt-8 mb-8 hidden">
         <Card className="hover:shadow-lg w-[70%] p-4 rounded-md border border-gray-300">
           <CardContent className="px-4 py-2 flex space-x-[40%] items-center">
             <div>
@@ -319,9 +330,7 @@ export default function BookingPage() {
                     <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
                       Bus Operator
                     </TableHead>
-                    {/* <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
-                      Route
-                    </TableHead> */}
+
                     <TableHead className="px-6 py-4 text-sm font-semibold text-slate-900">
                       Departure
                     </TableHead>

@@ -1,6 +1,14 @@
 "use client";
 
-import { Bus, Calendar, Home, Users, Settings, ScanFace } from "lucide-react";
+import {
+  Bus,
+  Calendar,
+  Home,
+  Users,
+  Settings,
+  ScanFace,
+  DollarSign,
+} from "lucide-react";
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +34,11 @@ const menuItems = [
     title: "Trip Management",
     url: "/operator/trips",
     icon: Bus,
+  },
+  {
+    title: "Refund Management",
+    url: "/operator/refunds",
+    icon: DollarSign,
   },
   {
     title: "Agents",

@@ -758,6 +758,29 @@ export const operatorApi = {
       throw error;
     }
   },
+
+  getRefundList: async (
+    operator_id: string,
+    page?: number,
+    per_page?: number,
+    from_date?: string,
+    to_date?: string,
+  ) => {
+    try {
+      const response = await api.get(`/operator/${operator_id}/refunds`, {
+        params: {
+          page,
+          per_page,
+          from_date,
+          to_date,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from getRefundList func");
+      throw error;
+    }
+  },
   getOperatorAgents: async (
     page?: number,
     per_page?: number,

@@ -274,6 +274,36 @@ export const useOperatorAgentDetail = (
     enabled: !!operator_id && !!agent_id,
   });
 };
+export const useRefundList = (
+  operator_id: string,
+  page?: number,
+  per_page?: number,
+  from_date?: string,
+  to_date?: string,
+) => {
+  return useQuery({
+    queryKey: [
+      "operator_refund_list",
+      operator_id,
+      page,
+      per_page,
+      from_date,
+      to_date,
+    ],
+    queryFn: async () => {
+      const res = await operatorApi.getRefundList(
+        operator_id,
+        page,
+        per_page,
+        from_date,
+        to_date,
+      );
+      return res;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id,
+  });
+};
 export const AgentUseUploadKyc = () => {
   const queryClient = useQueryClient();
 

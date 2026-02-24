@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { SetStateAction, useEffect, useState } from "react";
+import { useEffect } from "react";
 import {
   Dialog,
   DialogContent,
@@ -13,6 +13,7 @@ import {
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import type { Bus, Seat } from "@/lib/model";
+import SteeringWheel from "@/asset/wheel.svg";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -42,9 +43,6 @@ export default function SeatLayoutDialog({
   setToggle,
   onSelect,
 }: SeatLayoutProps) {
-  // const [selectedSeats, setSelectedSeats] = useState<Record<number, string>>(
-  //   {}
-  // );
   useEffect(() => {
     const editCount = editingPassenger[idx];
     if (!editCount) return;
@@ -97,9 +95,17 @@ export default function SeatLayoutDialog({
 
     setSelectedSeats({}); // reset selection after confirm
   };
+
   if (!bus) {
     return <div>Loading...</div>;
   }
+  const grouped = seats.reduce<Record<number, Seat[]>>((acc, seat) => {
+    if (!acc[seat.row]) acc[seat.row] = [];
+    acc[seat.row].push(seat);
+    return acc;
+  }, {});
+
+  Object.values(grouped).forEach((row) => row.sort((a, b) => a.col - b.col));
 
   return (
     <Dialog open={toggle} onOpenChange={setToggle}>
@@ -112,55 +118,75 @@ export default function SeatLayoutDialog({
           <DialogTitle>Select Your Seats</DialogTitle>
         </DialogHeader>
 
-        <div className="grid grid-cols-5  gap-3 justify-items-center mt-4">
-          {seats?.map((seat, index) => {
-            const isAisle = index % 4 === 2;
-
-            return (
-              <div key={seat.id} className="contents">
-                {/* Insert aisle gap */}
-                {isAisle && <div className="col-span-1"></div>}
-
-                <button
-                  onClick={() => toggleSeat(seat)}
-                  disabled={seat.status == "booked" || seat.status == "held"}
-                  className={clsx(
-                    "w-12 h-12 rounded-lg border text-sm font-semibold",
-                    "transition-colors",
-                    (seat.status == "booked" || seat.status == "held") &&
-                      "bg-gray-300 cursor-not-allowed",
-                    // Now correctly checks if this seat is selected for THIS passenger
-                    selectedSeats[idx] === seat.seat_code &&
-                      "bg-teal-600 text-white",
-                    seat.status == "available" &&
-                      selectedSeats[idx] !== seat.seat_code &&
-                      "bg-white hover:bg-teal-100",
-                  )}
-                >
-                  {seat.seat_code}
-                </button>
+        <div className="flex flex-col items-center gap-4 mt-4">
+          <div className="grid gap-2">
+            <div className="flex justify-start pl-6 mb-2">
+              <div className="w-10 h-10 flex items-center justify-center text-xs font-bold">
+                <SteeringWheel
+                  style={{ width: 40, height: 40 }}
+                  className="text-gray-500"
+                />
               </div>
-            );
-          })}
+            </div>
+            <div className="flex flex-col gap-2">
+              {Object.entries(grouped).map(([rowNumber, rowSeats]) => (
+                <div
+                  key={rowNumber}
+                  className="flex gap-2 justify-start items-center"
+                >
+                  {rowSeats.map((seat, index) => (
+                    <>
+                      {/* aisle gap between col 2 and 3 */}
+                      {rowSeats.length === 4 && index === 2 && (
+                        <div className="w-4" />
+                      )}
+
+                      <button
+                        key={seat.id}
+                        onClick={() => toggleSeat(seat)}
+                        disabled={
+                          seat.status === "booked" || seat.status === "held"
+                        }
+                        className={clsx(
+                          "w-10 h-10 rounded border text-xs font-semibold",
+                          (seat.status === "booked" ||
+                            seat.status === "held") &&
+                            "bg-gray-300 cursor-not-allowed",
+                          selectedSeats[idx] === seat.seat_code &&
+                            "bg-primary hover:bg-primary/90 text-white",
+                          seat.status === "available" &&
+                            selectedSeats[idx] !== seat.seat_code &&
+                            "bg-white hover:bg-primary/60 border-gray-400",
+                        )}
+                      >
+                        {seat.seat_code}
+                      </button>
+                    </>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
 
         {/* Legend */}
-        <div className="flex justify-between text-sm mt-4">
+        <div className="flex justify-between text-xs mt-4 gap-2">
           <span className="flex items-center gap-1">
-            <span className="w-4 h-4 bg-white border rounded" /> Available
+            <span className="w-3 h-3 bg-white border border-gray-400 rounded" />{" "}
+            Available
           </span>
           <span className="flex items-center gap-1">
-            <span className="w-4 h-4 bg-teal-600 border rounded" /> Selected
+            <span className="w-3 h-3 bg-primary border border-primary rounded" />{" "}
+            Selected
           </span>
-
           <span className="flex items-center gap-1">
-            <span className="w-4 h-4 bg-gray-300 rounded" /> Held
+            <span className="w-3 h-3 bg-gray-300 rounded" /> Booked
           </span>
         </div>
 
         <Button
           className="w-full mt-4"
-          disabled={!selectedSeats[idx]} // Check if seat is selected using passenger index
+          disabled={!selectedSeats[idx]}
           onClick={handleConfirm}
         >
           Confirm Seats
