@@ -639,6 +639,7 @@ export const passengerApi = {
       throw error;
     }
   },
+
   confirmBooking: async (
     hold_id: string,
     payment_reference: string,
@@ -788,6 +789,17 @@ export const operatorApi = {
       return response.data;
     } catch (error) {
       console.log(error, "error from getRefundList func");
+      throw error;
+    }
+  },
+  getRefundDetail: async (operator_id: string, refund_id: string) => {
+    try {
+      const response = await api.get(
+        `/operator/${operator_id}/refunds/${refund_id}`,
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from getRefundDetail func");
       throw error;
     }
   },

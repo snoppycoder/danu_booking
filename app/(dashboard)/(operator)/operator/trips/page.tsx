@@ -37,12 +37,30 @@ import { operatorApi } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
 import AccountNotActiveBanner from "@/components/AccountBanner";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 export interface Trip_ extends Trip {
   id: string;
   operator_id: string;
   bus_id: string;
   driver_id: string;
+  driver?: {
+    id: string;
+    name: string;
+  };
+  route_from: string;
+  route_to: string;
+  departure_at: string;
+}
+
+export interface Trip__ extends Trip {
+  id: string;
+  operator_id: string;
+  bus_id: string;
+  driver: {
+    id: string;
+    name: string;
+  };
   route_from: string;
   route_to: string;
   departure_at: string;
@@ -117,14 +135,7 @@ export default function TripManagement() {
       hour12: true,
     });
   };
-  //  departure_at: string;
-  //     operator_id: string;
-  //     route_from: string;
-  //     route_to: string;
-  //     price: number;
-  //     bus_id: string;
-  //     driver_id: string;
-  // }
+
   const handleCreateTrip = (tripData: CreateTripPayload) => {
     const newTrip: Trip_ = {
       id: `trip-${Date.now()}`,
@@ -213,13 +224,16 @@ export default function TripManagement() {
   };
 
   return (
-    <div className="min-h-screen bg-background p-6">
+    <div className="min-h-screen bg-background">
       <Toaster position="top-right" richColors />
+      <div className="mb-1 p-4 border-b border-gray-300 pt-4">
+        <SidebarTrigger />
+      </div>
 
       <div className="mx-auto max-w-7xl space-y-6">
         {/* Header */}
 
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="p-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="space-y-2">
             <h1 className="text-3xl font-bold tracking-tight text-foreground">
               Trip Management
@@ -241,8 +255,8 @@ export default function TripManagement() {
         {/* Filters */}
 
         {/* Stats */}
-        <div className="grid justify-center gap-4 md:grid-cols-3">
-          <Card className="px-4 py-6">
+        <div className="p-4 grid justify-center gap-4 md:grid-cols-3">
+          <Card className="px-4 py-8">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total Trips</p>
               <p className="text-2xl font-bold text-foreground">
@@ -250,7 +264,7 @@ export default function TripManagement() {
               </p>
             </div>
           </Card>
-          <Card className="px-4 py-6">
+          <Card className="px-4 py-8">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Today</p>
               <p className="text-2xl font-bold text-primary">
@@ -272,7 +286,7 @@ export default function TripManagement() {
               </p>
             </div>
           </Card> */}
-          <Card className="px-4 py-6">
+          <Card className="px-4 py-8">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Avg Price</p>
               <p className="text-2xl font-bold text-foreground">
@@ -338,7 +352,7 @@ export default function TripManagement() {
                   </div>
 
                   {/* Info Grid */}
-                  <div className="grid  gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     {/* Departure */}
                     <div className="flex items-center gap-3 rounded-md border p-3">
                       <Calendar className="size-4 text-muted-foreground" />
@@ -354,7 +368,7 @@ export default function TripManagement() {
 
                     {/* Price */}
                     <div className="flex items-center gap-3 rounded-md border p-3">
-                      <DollarSign className="size-4 text-muted-foreground" />
+                      {/* <DollarSign className="size-4 text-muted-foreground" /> */}
                       <div>
                         <div className="text-sm font-medium">
                           {trip.price} ETB
@@ -365,13 +379,12 @@ export default function TripManagement() {
                       </div>
                     </div>
 
-                    {/* Driver */}
-                    <div className="flex items-center gap-3 rounded-md border p-3">
+                    <div className="flex sm:w-full items-center gap-3 rounded-md border p-3">
                       <User className="size-4 text-muted-foreground" />
-                      <div>
+                      <div className="sm:w-full">
                         <div className="text-sm font-medium">Driver name</div>
                         <div className="text-xs text-muted-foreground">
-                          Driver
+                          {trip?.driver?.name || "No driver assigned"}
                         </div>
                       </div>
                     </div>

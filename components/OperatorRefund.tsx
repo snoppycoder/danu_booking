@@ -12,6 +12,7 @@ import {
   CheckCircle,
   XCircle,
   Download,
+  User,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -22,10 +23,11 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { Refund } from "@/lib/model";
 import { useRefundList } from "./Query";
+import { useAuth } from "@/lib/authContext";
+import { RefundDetailDialog } from "./RefundDetailDialog";
 
 interface RefundListProps {
   operator_id: string;
-  onViewDetails?: (refund: Refund) => void;
   onApprove?: (refund: Refund) => void;
   onReject?: (refund: Refund) => void;
 }
@@ -63,10 +65,11 @@ function RefundCard({
   onReject,
 }: {
   refund: Refund;
-  onViewDetails?: (refund: Refund) => void;
+  onViewDetails?: (refund_id: string, operator_id: string) => void;
   onApprove?: (refund: Refund) => void;
   onReject?: (refund: Refund) => void;
 }) {
+  const { user } = useAuth();
   return (
     <Card className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
@@ -82,15 +85,17 @@ function RefundCard({
           <h3 className="font-semibold text-sm text-gray-600">Amount</h3>
           <div className="flex items-baseline gap-2">
             <p className="font-bold text-xl text-gray-900">
-              ${refund.processed_amount.toFixed(2)}
+              {refund?.processed_amount?.toFixed(2) ?? "0.00"} Birr
             </p>
-            {refund.total_amount !== refund.processed_amount && (
+            {refund.total_amount !== refund?.processed_amount && (
               <p className="text-xs text-gray-500">
-                of ${refund.total_amount.toFixed(2)}
+                of {refund.total_amount.toFixed(2)} Birr
               </p>
             )}
           </div>
-          <p className="text-xs text-gray-500">via {refund.method}</p>
+          <p className="text-xs text-gray-500">
+            via {refund?.method ?? "Unknown"}
+          </p>
         </div>
 
         {/* Right Section - Status & Time */}
@@ -125,7 +130,9 @@ function RefundCard({
           <Button
             variant="outline"
             size="sm"
-            onClick={() => onViewDetails?.(refund)}
+            onClick={() =>
+              onViewDetails?.(refund.id, user?.organization_id || "")
+            }
             className="gap-2"
           >
             <Eye className="w-4 h-4" />
@@ -162,7 +169,11 @@ function RefundCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem onClick={() => onViewDetails?.(refund)}>
+            <DropdownMenuItem
+              onClick={() =>
+                onViewDetails?.(refund.id, user?.organization_id || "")
+              }
+            >
               <Eye className="w-4 h-4 mr-2" />
               View Details
             </DropdownMenuItem>
@@ -195,7 +206,6 @@ function RefundListSkeleton() {
 
 export default function OperatorRefundList({
   operator_id,
-  onViewDetails,
   onApprove,
   onReject,
 }: RefundListProps) {
@@ -204,6 +214,9 @@ export default function OperatorRefundList({
   const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>(
     {},
   );
+  const { user } = useAuth();
+  const [open, setOpen] = useState(false);
+  const [selectedRefundId, setSelectedRefundId] = useState<string>("");
 
   const { data, isLoading, error } = useRefundList(
     operator_id,
@@ -212,6 +225,9 @@ export default function OperatorRefundList({
     dateRange.from,
     dateRange.to,
   );
+  if (operator_id.trim().length === 0) {
+    return <RefundListSkeleton></RefundListSkeleton>;
+  }
 
   if (isLoading) {
     return <RefundListSkeleton />;
@@ -227,11 +243,11 @@ export default function OperatorRefundList({
     );
   }
 
-  const refunds = data?.refunds || [];
-  const total = data?.total || 0;
+  const refunds = data || [];
+  const total = data?.length || 0;
   const totalPages = Math.ceil(total / pageSize);
 
-  if (refunds.length === 0) {
+  if (operator_id.trim().length > 0 && refunds.length === 0) {
     return (
       <Card className="p-12 text-center">
         <p className="text-gray-500 mb-2">No refunds found</p>
@@ -242,13 +258,17 @@ export default function OperatorRefundList({
     );
   }
 
+  function onViewDetails(id: string, operator_id: string) {
+    setSelectedRefundId(id);
+    setOpen(true);
+  }
+
   return (
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold">Refunds</h2>
-          <p className="text-sm text-gray-500 mt-1">
+          <p className="text-sm text-gray-500 mt-4">
             Showing {(page - 1) * pageSize + 1} to{" "}
             {Math.min(page * pageSize, total)} of {total} refunds
           </p>
@@ -261,7 +281,7 @@ export default function OperatorRefundList({
           <RefundCard
             key={refund.id}
             refund={refund}
-            onViewDetails={onViewDetails}
+            onViewDetails={() => onViewDetails?.(refund.id, operator_id)}
             onApprove={onApprove}
             onReject={onReject}
           />
@@ -299,6 +319,12 @@ export default function OperatorRefundList({
           </Button>
         </div>
       )}
+      <RefundDetailDialog
+        operator_id={user?.organization_id || ""}
+        isOpen={open}
+        onOpenChange={setOpen}
+        refund_id={selectedRefundId}
+      />
     </div>
   );
 }

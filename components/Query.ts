@@ -15,6 +15,8 @@ import {
   KYCUpload,
   Operator,
   OperatorAgent,
+  Refund,
+  RefundDetail,
   Session,
   User,
 } from "@/lib/model";
@@ -298,10 +300,21 @@ export const useRefundList = (
         from_date,
         to_date,
       );
-      return res;
+      return res.items as Refund[];
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!operator_id,
+  });
+};
+export const useRefundDetail = (operator_id: string, refund_id: string) => {
+  return useQuery({
+    queryKey: ["refund_detail", operator_id, refund_id],
+    queryFn: async () => {
+      const res = await operatorApi.getRefundDetail(operator_id, refund_id);
+      return res as RefundDetail;
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id && !!refund_id,
   });
 };
 export const AgentUseUploadKyc = () => {

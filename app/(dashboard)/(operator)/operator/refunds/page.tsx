@@ -2,17 +2,27 @@
 import { useAuth } from "@/lib/authContext";
 
 import OperatorRefundList from "@/components/OperatorRefund";
+import { SidebarTrigger } from "@/components/ui/sidebar";
+import { Toaster } from "sonner";
 
 export default function RefundsPage() {
   const { user } = useAuth();
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Refund Management</h1>
-      <p>Manage and process refund requests from customers.</p>
 
-      <div className="mt-6">
+  return (
+    <div className="">
+      <Toaster richColors position="top-right" />
+
+      <div className="p-4">
+        <h2 className="text-2xl font-bold mb-2">Refund Management</h2>
+        <p>Manage and process refund requests from customers.</p>
+      </div>
+
+      <div className="p-4 mt-2">
         <OperatorRefundList operator_id={user?.organization_id || ""} />
       </div>
     </div>
   );
 }
+<div className="mb-1 p-4 border-b border-gray-300 pt-4">
+  <SidebarTrigger />
+</div>;

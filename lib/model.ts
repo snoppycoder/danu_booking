@@ -110,6 +110,40 @@ export interface OperatorAgent {
     additionalProp1: {};
   };
 }
+export interface RefundDetail {
+  id: string;
+
+  booking: {
+    id: string;
+    booking_ref: string;
+    total_amount: number;
+    passenger_count: number;
+
+    passengers: {
+      name: string;
+      seat_code: string;
+      fare: number;
+    }[];
+  };
+
+  operator_id: string;
+  agent_id: string;
+  booked_by_id: string;
+  booked_by_name: string;
+
+  processed_amount: number;
+  processed_by_id: string;
+  processed_by_name: string;
+  processed_at: string;
+
+  method: string;
+  notes: string;
+  status: string;
+  external_ref: string;
+
+  created_at: string;
+  updated_at: string;
+}
 export interface Refund {
   id: string;
   booking_id: string;
