@@ -17,16 +17,18 @@ import { usePassengerHistory } from "@/components/Query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
+import { passengerApi } from "@/app/api/api";
 
 export default function HistoryPageClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const data = useSearchParams();
   const router = useRouter();
-  const numberOfCard = 3;
+  const numberOfCard = 5;
   const {
     data: bookings,
     isLoading,
     error,
+    refetch,
   } = usePassengerHistory(currentPage, numberOfCard);
 
   if (isLoading) {
@@ -109,7 +111,7 @@ export default function HistoryPageClient() {
                   label: "Pending",
                 },
                 cancelled: {
-                  text: "text-red-800",
+                  text: "text-red-500 ",
                   label: "Cancelled",
                 },
                 completed: {
@@ -125,6 +127,11 @@ export default function HistoryPageClient() {
                 text: "text-gray-800",
                 label: booking.booking_status,
               };
+
+              async function cancelBooking(id: string) {
+                await passengerApi.cancelBooking(id);
+                refetch();
+              }
 
               return (
                 <Card
@@ -216,17 +223,30 @@ export default function HistoryPageClient() {
                         </div>
                       </div>
                     </div>
-
-                    {/* Booked At */}
-                    <div className="pt-2 border-t border-gray-200">
-                      <p className="text-gray-500 text-xs">
-                        Booked on{" "}
-                        {format(
-                          new Date(booking.booked_at),
-                          "MMM dd, yyyy HH:mm",
+                    <div className="w-full pt-4 flex justify-between border-t border-gray-200">
+                      <div className="">
+                        <p className="text-gray-500 text-xs">
+                          Booked on{" "}
+                          {format(
+                            new Date(booking.booked_at),
+                            "MMM dd, yyyy HH:mm",
+                          )}
+                        </p>
+                      </div>
+                      {booking.booking_status === "confirmed" &&
+                        new Date(booking.departure_at) > new Date() && (
+                          <Button
+                            variant="destructive"
+                            size="sm"
+                            onClick={() => {
+                              cancelBooking(booking.booking_id);
+                            }}
+                          >
+                            Cancel Booking
+                          </Button>
                         )}
-                      </p>
                     </div>
+                    {/* Booked At */}
                   </div>
                 </Card>
               );

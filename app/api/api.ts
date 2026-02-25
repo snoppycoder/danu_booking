@@ -629,6 +629,16 @@ export const passengerApi = {
       throw error;
     }
   },
+
+  cancelBooking: async (booking_id: string) => {
+    try {
+      const response = await api.delete(`/user/bookings/${booking_id}`);
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   confirmBooking: async (
     hold_id: string,
     payment_reference: string,
