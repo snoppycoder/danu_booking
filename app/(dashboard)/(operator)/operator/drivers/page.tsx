@@ -241,34 +241,33 @@ export default function DriversManagement() {
     <div className="flex flex-col">
       {/* Header */}
       <Toaster position="top-right" richColors />
-      <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
-        <div className="flex h-16 items-center gap-4 px-6">
-          <SidebarTrigger />
-          <div className="flex flex-1 items-center justify-between">
-            <div>
-              <h1 className="text-lg font-semibold text-foreground">
-                Driver Management
-              </h1>
-              <p className="text-xs text-muted-foreground">
-                Manage your driver workforce
-              </p>
-            </div>
-            <Button
-              onClick={() => setIsAddDriverOpen(true)}
-              className="gap-2"
-              disabled={isLoading || isError}
-            >
-              <Plus className="size-4" />
-              Add New Driver
-            </Button>
-          </div>
+      <div className="flex mb-2 w-full justify-between h-16 items-center gap-4 px-6">
+        <SidebarTrigger />
+        <div className="flex items-center justify-between">
+          <Button
+            onClick={() => setIsAddDriverOpen(true)}
+            className="gap-2"
+            disabled={isLoading || isError}
+          >
+            <Plus className="size-4" />
+            Add New Driver
+          </Button>
         </div>
-      </header>
+      </div>
+
+      <div className="px-6">
+        <h1 className="text-lg  font-semibold text-foreground">
+          Driver Management
+        </h1>
+        <p className="text-xs text-muted-foreground">
+          Manage your driver workforce
+        </p>
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 space-y-6 p-6">
         {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-4">
+        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">

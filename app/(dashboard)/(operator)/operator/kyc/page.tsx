@@ -13,6 +13,7 @@ import { useKYCdocuments, OperatorUseUploadKyc } from "@/components/Query";
 import { toast, Toaster } from "sonner";
 import { kycApi, operatorApi } from "@/app/api/api";
 import { isAxiosError } from "axios";
+import { SidebarTrigger } from "@/components/ui/sidebar";
 
 // Mock data for demonstration
 
@@ -42,14 +43,6 @@ export default function KYCPage() {
       }
 
       try {
-        // const res = await kycApi.uploadKyc(
-        //   {
-        //     document_name: formData.document_name,
-        //     document_type: formData.document_type,
-        //     file: formData.file,
-        //   },
-        //   user.organization_id,
-        // );
         const res = await uploadKyc({
           operator_id: user.organization_id,
           document_name: formData.document_name,
@@ -72,8 +65,6 @@ export default function KYCPage() {
   );
 
   const handleDelete = useCallback(async (id: string) => {
-    console.log("Attempting to delete document with id:", id);
-
     try {
       await operatorApi.delteKYCdocument(user?.organization_id || "", id);
       console.log(user?.organization_id, id);
@@ -93,7 +84,10 @@ export default function KYCPage() {
   };
 
   return (
-    <main className="min-h-screen text-primary-foreground">
+    <main className="min-h-screen ">
+      <div className="mb-1 p-4 border-b border-gray-300 pt-4">
+        <SidebarTrigger />
+      </div>
       <Toaster position="top-right" richColors />
       <div className="max-w-6xl mx-auto px-4 py-8 md:py-12">
         {/* Header */}
