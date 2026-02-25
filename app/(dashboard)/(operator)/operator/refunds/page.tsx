@@ -11,18 +11,17 @@ export default function RefundsPage() {
   return (
     <div className="">
       <Toaster richColors position="top-right" />
+      <div className="mb-1 p-4 border-b border-gray-300 pt-4">
+        <SidebarTrigger />
+      </div>
 
       <div className="p-4">
         <h2 className="text-2xl font-bold mb-2">Refund Management</h2>
         <p>Manage and process refund requests from customers.</p>
       </div>
-
       <div className="p-4 mt-2">
         <OperatorRefundList operator_id={user?.organization_id || ""} />
       </div>
     </div>
   );
 }
-<div className="mb-1 p-4 border-b border-gray-300 pt-4">
-  <SidebarTrigger />
-</div>;
