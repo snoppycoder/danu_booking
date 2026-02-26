@@ -14,6 +14,7 @@ import {
   Zap,
   ChevronDown,
   ScanFace,
+  TicketCheck,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -59,7 +60,7 @@ export default function Sidebar() {
         { label: "Agent KYC Approval", href: "/superadmin/agent/kyc" },
       ],
     },
-    { icon: Luggage, label: "Luggage", href: "/luggage" },
+    { icon: TicketCheck, label: "Lottery", href: "/superadmin/lottery" },
     { icon: AlertCircle, label: "Settings", href: "/superadmin/settings" },
   ];
 

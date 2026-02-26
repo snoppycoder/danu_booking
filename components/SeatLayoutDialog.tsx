@@ -135,7 +135,7 @@ export default function SeatLayoutDialog({
                     <>
                       {/* aisle gap between col 2 and 3 */}
                       {rowSeats.length === 4 && index === 2 && (
-                        <div className="w-4" />
+                        <div className="w-9" />
                       )}
 
                       <button

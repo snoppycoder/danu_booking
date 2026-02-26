@@ -48,7 +48,7 @@ export default function Driver() {
   }
 
   return (
-    <div className="p-4 w-full min-h-screen ">
+    <div className="p-4 w-full min-h-screen">
       <h1 className="text-2xl font-semibold mb-4">Driver Dashboard</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <Card className="hover:shadow-lg transition-shadow duration-300 rounded-lg p-4 text-center">

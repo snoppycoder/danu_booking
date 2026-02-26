@@ -31,6 +31,15 @@ export default function HistoryPageClient() {
     refetch,
   } = usePassengerHistory(currentPage, numberOfCard);
 
+  const canCancel = (departure_at: string) => {
+    const now = new Date().getTime();
+    const departure = new Date(departure_at).getTime();
+
+    const diffMs = departure - now;
+    const diffDays = diffMs / (1000 * 60 * 60 * 24);
+    return diffDays >= 0 && diffDays <= 5;
+  };
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br  flex items-center justify-center p-4">
@@ -234,7 +243,7 @@ export default function HistoryPageClient() {
                         </p>
                       </div>
                       {booking.booking_status === "confirmed" &&
-                        new Date(booking.departure_at) > new Date() && (
+                        canCancel(booking.departure_at) && (
                           <Button
                             variant="destructive"
                             size="sm"

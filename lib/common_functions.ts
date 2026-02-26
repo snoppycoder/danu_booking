@@ -13,6 +13,20 @@ export const formatLocalDate = (date: Date) => {
   const d = String(date.getDate()).padStart(2, "0");
   return `${y}-${m}-${d}`;
 };
+export function downloadCSV(
+  csvString: string,
+  fileName = `lottery_bookings.csv_${new Date()}`,
+) {
+  const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.href = url;
+  link.setAttribute("download", fileName);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+}
 export async function onLogout(
   event: React.MouseEvent<HTMLDivElement, MouseEvent>,
 ): Promise<void> {

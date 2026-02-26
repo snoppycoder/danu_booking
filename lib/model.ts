@@ -82,6 +82,19 @@ export interface Role {
   name: string;
   slug: string;
 }
+export interface getLotteryListDTO {
+  ticket_id: string;
+  booking_id: string;
+  booking_ref: string;
+  lottery_number: string;
+  passenger_name: string;
+  trip_id: string;
+  route_from: string;
+  route_to: string;
+  departure_at: string; // ISO string
+  created_at: string; // ISO string
+  status: string;
+}
 
 export type CreateTripPayload = {
   operator_id?: string;

@@ -26,6 +26,9 @@ import { useRefundList } from "./Query";
 import { useAuth } from "@/lib/authContext";
 import { RefundDetailDialog } from "./RefundDetailDialog";
 import RefundForm from "./RefundForm";
+import { toast } from "sonner";
+import { isAxiosError } from "axios";
+import { operatorApi } from "@/app/api/api";
 
 interface RefundListProps {
   operator_id: string;
@@ -34,16 +37,38 @@ interface RefundListProps {
   onReject?: (refund: Refund) => void;
 }
 
+function calculateRefundSuggestion(
+  tripFee: number,
+  // issueAt: string | Date,
+  // departureAt: string | Date
+): number {
+  // const issue = new Date(issueAt).getTime();
+  // const departure = new Date(departureAt).getTime();
+
+  // const diffDays = Math.ceil(
+  //   (departure - issue) / (1000 * 60 * 60 * 24)
+  // );
+
+  // if (diffDays >= 0 && diffDays <= 5) {
+  //   return tripFee * 0.5;
+  // }
+
+  // return 0;
+  return tripFee * 0.5;
+}
+
 const getStatusColor = (status: string) => {
   switch (status.toLowerCase()) {
     case "completed":
       return "bg-green-100 text-green-800";
     case "pending":
       return "bg-yellow-100 text-yellow-800";
-    case "processing":
+    case "processed":
       return "bg-blue-100 text-blue-800";
     case "failed":
       return "bg-red-100 text-red-800";
+    case "rejected":
+      return "bg-white text-red-500";
     default:
       return "bg-gray-100 text-gray-800";
   }
@@ -80,6 +105,12 @@ function RefundCard({
           <h3 className="font-semibold text-sm text-gray-600">Passenger</h3>
           <p className="font-medium text-lg">{refund.passenger_name}</p>
           <p className="text-xs text-gray-500">Ref: {refund.booking_ref}</p>
+          <div className="mt-8">
+            <p className="text-xs text-gray-500">
+              Suggested refund amount is{" "}
+              {calculateRefundSuggestion(refund.total_amount)} Birr
+            </p>
+          </div>
         </div>
 
         {/* Middle Section - Amount Info */}
@@ -263,10 +294,22 @@ export default function OperatorRefundList({
     setSelectedRefundId(refund.id);
     setOpenRefundForm(true);
   }
-  function onReject(refund: Refund) {
+  async function onReject(refund: Refund) {
     setMethod("rejected");
-    setSelectedRefundId(refund.id);
-    setOpenRefundForm(true);
+
+    try {
+      await operatorApi.processRefund(operator_id, refund.id, {
+        status: "rejected",
+      });
+      refetch();
+    } catch (error) {
+      console.log(error);
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.detail);
+      } else {
+        toast.error("Unable to proceed with your request");
+      }
+    }
   }
   return (
     <div className="space-y-6">

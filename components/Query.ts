@@ -10,6 +10,7 @@ import {
   Agent,
   CreateTripPayload,
   Driver,
+  getLotteryListDTO,
   History,
   KYCDocument,
   KYCUpload,
@@ -187,6 +188,33 @@ export const useCreateDriver = () => {
     },
   });
 };
+
+export const useLotteryList = (
+  page?: number,
+  per_page?: number,
+  from_date?: Date,
+  to_date?: Date,
+) => {
+  return useQuery({
+    queryKey: ["lottery", page, per_page],
+    queryFn: async () => {
+      const res = await superAdminApi.getLotteryList(
+        page,
+        per_page,
+        from_date,
+        to_date,
+      );
+
+      return {
+        items: res.items as getLotteryListDTO[],
+        total: res.total,
+        page: res.page,
+      };
+    },
+    staleTime: 1000 * 60 * 5,
+  });
+};
+
 export const OperatorUseUploadKyc = () => {
   const queryClient = useQueryClient();
 

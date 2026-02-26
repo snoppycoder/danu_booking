@@ -399,6 +399,47 @@ export const superAdminApi = {
       throw error;
     }
   },
+
+  /**
+   *
+   *  Lottery
+   */
+  /**
+   * Superadmin lotter handles
+   */
+  getLotteryList: async (
+    page?: number,
+    page_number?: number,
+    from_date?: Date,
+    to_date?: Date,
+  ) => {
+    try {
+      const response = await api.get(`/admin/lottery/numbers`, {
+        params: {
+          page,
+          page_number,
+          from_date,
+          to_date,
+        },
+      });
+
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  exportLotteryNumbers: async (from_date?: Date, to_date?: Date) => {
+    const response = await api.get(`/admin/lottery/numbers/export`, {
+      params: {
+        from_date,
+        to_date,
+      },
+    });
+    console.log("response", response.data);
+    return response.data;
+  },
+
   /**
    * This is the user operation below
    */
@@ -813,9 +854,9 @@ export const operatorApi = {
       notes,
     }: {
       status: string;
-      processed_amount: number;
-      method: string;
-      notes: string;
+      processed_amount?: number;
+      method?: string;
+      notes?: string;
     },
   ) => {
     try {
