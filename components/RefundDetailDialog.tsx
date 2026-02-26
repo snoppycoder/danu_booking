@@ -232,7 +232,9 @@ export function RefundDetailDialog({
                     Processed At
                   </p>
                   <p className="font-medium text-foreground mt-1">
-                    {formatDate(data.processed_at)}
+                    {!data.processed_amount
+                      ? ""
+                      : formatDate(data.processed_at)}
                   </p>
                 </div>
                 <div className="p-3 rounded-lg bg-background">

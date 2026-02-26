@@ -116,7 +116,6 @@ export function CreateOperatorAgentDialog({
                 <Input
                   id="fname"
                   required
-                  placeholder="John"
                   value={form.first_name}
                   onChange={(e) => {
                     setForm((prev) => ({
@@ -136,7 +135,6 @@ export function CreateOperatorAgentDialog({
                 <Input
                   id="lname"
                   required
-                  placeholder="Doe"
                   value={form.last_name}
                   onChange={(e) => {
                     setForm((prev) => ({

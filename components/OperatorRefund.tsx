@@ -25,10 +25,12 @@ import { Refund } from "@/lib/model";
 import { useRefundList } from "./Query";
 import { useAuth } from "@/lib/authContext";
 import { RefundDetailDialog } from "./RefundDetailDialog";
+import RefundForm from "./RefundForm";
 
 interface RefundListProps {
   operator_id: string;
   onApprove?: (refund: Refund) => void;
+  onSuccess?: () => void;
   onReject?: (refund: Refund) => void;
 }
 
@@ -169,14 +171,6 @@ function RefundCard({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
-            <DropdownMenuItem
-              onClick={() =>
-                onViewDetails?.(refund.id, user?.organization_id || "")
-              }
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              View Details
-            </DropdownMenuItem>
             <DropdownMenuItem>
               <Download className="w-4 h-4 mr-2" />
               Download Receipt
@@ -206,8 +200,7 @@ function RefundListSkeleton() {
 
 export default function OperatorRefundList({
   operator_id,
-  onApprove,
-  onReject,
+  onSuccess,
 }: RefundListProps) {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
@@ -217,8 +210,11 @@ export default function OperatorRefundList({
   const { user } = useAuth();
   const [open, setOpen] = useState(false);
   const [selectedRefundId, setSelectedRefundId] = useState<string>("");
-
-  const { data, isLoading, error } = useRefundList(
+  const [openRefundForm, setOpenRefundForm] = useState(false);
+  const [method, setMethod] = useState<"processed" | "rejected" | "pending">(
+    "pending",
+  );
+  const { data, isLoading, error, refetch } = useRefundList(
     operator_id,
     page,
     pageSize,
@@ -262,7 +258,16 @@ export default function OperatorRefundList({
     setSelectedRefundId(id);
     setOpen(true);
   }
-
+  function onApprove(refund: Refund) {
+    setMethod("processed");
+    setSelectedRefundId(refund.id);
+    setOpenRefundForm(true);
+  }
+  function onReject(refund: Refund) {
+    setMethod("rejected");
+    setSelectedRefundId(refund.id);
+    setOpenRefundForm(true);
+  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -324,6 +329,14 @@ export default function OperatorRefundList({
         isOpen={open}
         onOpenChange={setOpen}
         refund_id={selectedRefundId}
+      />
+      <RefundForm
+        open={openRefundForm}
+        onOpenChange={setOpenRefundForm}
+        refund_id={selectedRefundId}
+        operator_id={user?.organization_id || ""}
+        method={method}
+        OnSucess={refetch}
       />
     </div>
   );

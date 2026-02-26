@@ -30,10 +30,11 @@ import { useSession } from "@/components/Query";
 import { sessionMgmt } from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { formatTime } from "@/lib/common_functions";
+import { useAuth } from "@/lib/authContext";
 
 export default function SessionManager() {
   const { data = [], isLoading, refetch } = useSession();
-
+  const { user } = useAuth();
   const [sessions, setSessions] = useState<Session[]>([]);
   useEffect(() => {
     setSessions(data);
@@ -57,13 +58,13 @@ export default function SessionManager() {
   const handleRevokeAll = async () => {
     // Keep only the current session
     await sessionMgmt.revokeAllSession();
-    toast("All sessions revoked");
+    toast.success("All sessions revoked");
     window.location.href = "/login";
 
     // setSessions((prev) => prev.filter((s) => s.isCurrent));
   };
   async function handleRevokeOther(
-    event: React.MouseEvent<HTMLButtonElement, MouseEvent>
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
   ): Promise<void> {
     event.preventDefault();
 
@@ -92,6 +93,23 @@ export default function SessionManager() {
           size="icon"
           className="h-10 w-10 absolute top-2.5 left-2.5"
           onClick={() => {
+            if (user?.roles[0] === "super_admin") {
+              router.replace("/superadmin");
+              return;
+            }
+            if (user?.roles[0] === "agent") {
+              router.replace("/agent/ticket-booking");
+              return;
+            }
+            if (user?.roles[0] === "passenger") {
+              router.replace("/passenger");
+              return;
+            }
+            if (user?.roles[0] === "operator") {
+              router.replace("/operator");
+              return;
+            }
+
             router.back();
           }}
         >

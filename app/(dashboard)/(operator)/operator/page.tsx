@@ -161,6 +161,9 @@ export default function OperatorPage() {
       }
     ).response?.status === 403;
   const isPageLoading = isLoading && !showAccountBanner;
+  const isAuthReady = !!user?.organization_id;
+  const isDataLoading = isAuthReady && isLoading;
+  const isEmpty = isAuthReady && !isLoading && filteredBuses.length === 0;
 
   const handleTemplateSelect = (template: SeatTemplate) => {
     console.log("Selected template:", template);
@@ -202,60 +205,11 @@ export default function OperatorPage() {
     }
   };
 
-  // const handleAddBus = async () => {
-  //   const bus: createBusRequest = {
-  //     ...newBus,
-
-  //     bus_status: "active",
-  //     seat_template_id: selectedTemplateId ?? "",
-  //     created_at: new Date().toString(),
-  //     operator_id: user?.organization_id ?? "",
-  //     updated_at: new Date().toString(),
-  //     id: Date.now().toString(),
-  //     seat_template: selectedTemplate!,
-  //   };
-
-  //   setAddBusStep(1);
-  //   const dataT = {
-  //     plate_no: bus.plate_no,
-  //     side_no: bus.side_no,
-  //     capacity: bus.capacity,
-  //     seat_template_id: bus.seat_template_id,
-  //     bus_status: bus.bus_status,
-  //   };
-
-  //   try {
-  //     await operatorApi.createBus(dataT, user?.organization_id || "");
-
-  //     setIsAddBusOpen(false);
-  //     // if (selectedTemplateId) {
-  //     //   setNewBus((prev) => ({
-  //     //     ...prev,
-  //     //     seat_template_id: selectedTemplateId,
-  //     //   }));
-  //     //   setBuses((prev) => [...prev, bus]);
-  //     // }
-  //   } catch (error) {
-  //     if (isAxiosError(error)) {
-  //       toast.error(error.response?.data.error);
-  //     } else if (error instanceof Error) {
-  //       toast.error(error.message);
-  //     } else {
-  //       toast.error("An error occurred while trying to add the bus");
-  //     }
-  //   } finally {
-  //     setNewBus({
-  //       plate_no: "",
-  //       capacity: 0,
-  //       side_no: "",
-  //       seat_template_id: "",
-  //       bus_status: "active",
-  //     });
-  //   }
-  // };
   const handleAddBus = async () => {
     if (!user?.organization_id) return;
-    const seat51template = seatTemplates?.find((s) => s.name.includes("51"));
+    const seat51template = seatTemplates?.find(
+      (s) => s.name == "Standard 51 Seat Layout",
+    );
     //FIXED
     const seat_numbers = 51;
 
@@ -424,7 +378,7 @@ export default function OperatorPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {isPageLoading && (
+                {/* {( user?.organization_id || "").length == 0 && (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-6">
                       Loading buses...
@@ -432,108 +386,134 @@ export default function OperatorPage() {
                   </TableRow>
                 )}
 
-                {!isPageLoading && filteredBuses.length === 0 && (
+                {isPageLoading &&( user?.organization_id || "").length == 0 && (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-6">
+                      Loading buses...
+                    </TableCell>
+                  </TableRow>
+                )} */}
+
+                {/* {!isPageLoading &&
+                  filteredBuses.length === 0 &&
+                  (user?.organization_id || "").length > 0 && (
+                    <TableRow>
+                      <TableCell colSpan={5} className="text-center py-6">
+                        No buses found
+                      </TableCell>
+                    </TableRow>
+                  )} */}
+                {!isAuthReady || isDataLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={5} className="text-center py-6">
+                      Loading buses...
+                    </TableCell>
+                  </TableRow>
+                ) : isEmpty ? (
                   <TableRow>
                     <TableCell colSpan={5} className="text-center py-6">
                       No buses found
                     </TableCell>
                   </TableRow>
-                )}
-                {filteredBuses?.map((bus: Bus) => (
-                  <TableRow
-                    key={bus.id}
-                    className="cursor-pointer hover:bg-muted/50"
-                    onClick={() => handleViewDetails(bus)}
-                  >
-                    <TableCell className="font-mono font-medium">
-                      {bus.plate_no}
-                    </TableCell>
-                    <TableCell className="font-mono font-medium">
-                      {bus.side_no}
-                    </TableCell>
-                    {/* <TableCell>{bus.model}</TableCell> */}
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={getStatusColor(bus.bus_status as BusStatus)}
-                      >
-                        {bus.bus_status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{bus.capacity} seats</TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger
-                          asChild
-                          onClick={(e) => e.stopPropagation()}
+                ) : (
+                  filteredBuses?.map((bus: Bus) => (
+                    <TableRow
+                      key={bus.id}
+                      className="cursor-pointer hover:bg-muted/50"
+                      onClick={() => handleViewDetails(bus)}
+                    >
+                      <TableCell className="font-mono font-medium">
+                        {bus.plate_no}
+                      </TableCell>
+                      <TableCell className="font-mono font-medium">
+                        {bus.side_no}
+                      </TableCell>
+                      {/* <TableCell>{bus.model}</TableCell> */}
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={getStatusColor(
+                            bus.bus_status as BusStatus,
+                          )}
                         >
-                          <Button variant="ghost" size="icon">
-                            <MoreVertical className="size-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleViewDetails(bus);
-                            }}
+                          {bus.bus_status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{bus.capacity} seats</TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger
+                            asChild
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <Edit className="mr-2 size-4" />
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setBusToAssign(bus.id);
-                              setIsAssignTripOpen(true);
-                            }}
-                          >
-                            <Calendar className="mr-2 size-4" />
-                            Assign Trip
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          {/* <DropdownMenuLabel>Change Status</DropdownMenuLabel> */}
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(bus, "active");
-                            }}
-                          >
-                            Set Active
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleStatusChange(bus, "inactive");
-                            }}
-                          >
-                            Set Inactive
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                            }}
-                          >
-                            Add Seatmap
-                          </DropdownMenuItem>
+                            <Button variant="ghost" size="icon">
+                              <MoreVertical className="size-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleViewDetails(bus);
+                              }}
+                            >
+                              <Edit className="mr-2 size-4" />
+                              View Details
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBusToAssign(bus.id);
+                                setIsAssignTripOpen(true);
+                              }}
+                            >
+                              <Calendar className="mr-2 size-4" />
+                              Assign Trip
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator />
+                            {/* <DropdownMenuLabel>Change Status</DropdownMenuLabel> */}
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange(bus, "active");
+                              }}
+                            >
+                              Set Active
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleStatusChange(bus, "inactive");
+                              }}
+                            >
+                              Set Inactive
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                            >
+                              Add Seatmap
+                            </DropdownMenuItem>
 
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            className="text-destructive"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setBusToDelete(bus.id);
-                              setIsDeleteDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="mr-2 size-4" />
-                            Delete Bus
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              className="text-destructive"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBusToDelete(bus.id);
+                                setIsDeleteDialogOpen(true);
+                              }}
+                            >
+                              <Trash2 className="mr-2 size-4" />
+                              Delete Bus
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </CardContent>

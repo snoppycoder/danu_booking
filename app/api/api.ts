@@ -803,6 +803,37 @@ export const operatorApi = {
       throw error;
     }
   },
+  processRefund: async (
+    operator_id: string,
+    refund_id: string,
+    {
+      status,
+      processed_amount,
+      method,
+      notes,
+    }: {
+      status: string;
+      processed_amount: number;
+      method: string;
+      notes: string;
+    },
+  ) => {
+    try {
+      const response = await api.patch(
+        `/operator/${operator_id}/refunds/${refund_id}`,
+        {
+          status,
+          processed_amount,
+          method,
+          notes,
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from approveRefund func");
+      throw error;
+    }
+  },
   getOperatorAgents: async (
     page?: number,
     per_page?: number,
