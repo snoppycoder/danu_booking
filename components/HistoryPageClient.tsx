@@ -13,16 +13,28 @@ import {
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { usePassengerHistory } from "@/components/Query";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useRouter, useSearchParams } from "next/navigation";
 import { passengerApi } from "@/app/api/api";
+import CancelTripDialog from "./CancelBookingConfirm";
 
 export default function HistoryPageClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const data = useSearchParams();
   const router = useRouter();
+
+  const [bookingId, setBookingId] = useState<string>("");
   const numberOfCard = 5;
   const {
     data: bookings,
@@ -30,6 +42,7 @@ export default function HistoryPageClient() {
     error,
     refetch,
   } = usePassengerHistory(currentPage, numberOfCard);
+  const [open, setOpen] = useState(false);
 
   const canCancel = (departure_at: string) => {
     const now = new Date().getTime();
@@ -39,6 +52,10 @@ export default function HistoryPageClient() {
     const diffDays = diffMs / (1000 * 60 * 60 * 24);
     return diffDays >= 0 && diffDays <= 5;
   };
+  async function cancelBooking(id: string) {
+    await passengerApi.cancelBooking(id);
+    refetch();
+  }
 
   if (isLoading) {
     return (
@@ -136,11 +153,6 @@ export default function HistoryPageClient() {
                 text: "text-gray-800",
                 label: booking.booking_status,
               };
-
-              async function cancelBooking(id: string) {
-                await passengerApi.cancelBooking(id);
-                refetch();
-              }
 
               return (
                 <Card
@@ -248,7 +260,8 @@ export default function HistoryPageClient() {
                             variant="destructive"
                             size="sm"
                             onClick={() => {
-                              cancelBooking(booking.booking_id);
+                              setBookingId(booking.booking_id);
+                              setOpen(true);
                             }}
                           >
                             Cancel Booking
@@ -295,6 +308,13 @@ export default function HistoryPageClient() {
           </div>
         )}
       </div>
+      <CancelTripDialog
+        open={open}
+        setOpen={setOpen}
+        onConfirm={() => {
+          cancelBooking(bookingId);
+        }}
+      />
     </div>
   );
 }

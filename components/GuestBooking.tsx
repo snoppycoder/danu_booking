@@ -30,7 +30,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TripDetailsModal } from "@/components/TripDetailModal";
-import SeatBookingDialog from "@/components/SeatBookingDialog";
+import SeatBookingDialog from "@/components/SeatBookingDialog_";
 import { Toaster } from "sonner";
 
 export default function GuestBooking() {

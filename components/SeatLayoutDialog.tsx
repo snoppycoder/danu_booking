@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -12,8 +12,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import type { Bus, Seat } from "@/lib/model";
-// import SteeringWheel from "@/components/SteeringWheel";
+import type { Bus, Passenger, Seat } from "@/lib/model";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -21,14 +20,15 @@ type SeatLayoutProps = {
   idx: number;
   seats: Seat[];
   selectedSeats: Record<number, string>;
-  setSelectedSeats: React.Dispatch<
-    React.SetStateAction<Record<number, string>>
-  >;
+  setSelectedSeats: React.Dispatch<React.SetStateAction<string[]>>;
   editingPassenger: Record<number, number>;
 
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
+
+  seatDict: Record<string, Passenger>;
   setToggle: (val: boolean) => void;
-  onSelect: (seatId: string) => void;
+
+  passengers?: Passenger[];
 };
 
 export default function SeatLayoutDialog({
@@ -37,12 +37,15 @@ export default function SeatLayoutDialog({
   idx,
   seats,
   editingPassenger,
-  setSelectedSeats,
   selectedSeats,
   setSeats,
+  setSelectedSeats,
   setToggle,
-  onSelect,
+
+  passengers = [],
 }: SeatLayoutProps) {
+  const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
+
   useEffect(() => {
     const editCount = editingPassenger[idx];
     if (!editCount) return;
@@ -66,36 +69,42 @@ export default function SeatLayoutDialog({
     }
   }, [bus]);
 
+  useEffect(() => {
+    // Reset multi-select when dialog closes
+    if (!toggle) {
+      setMultiSelectSeats([]);
+    }
+  }, [toggle]);
+  console.log(multiSelectSeats);
+
   const toggleSeat = (seat: Seat) => {
-    if (seat.status === "booked" || seat.status == "held") return;
+    if (seat.status === "booked" || seat.status === "held") return;
 
-    setSelectedSeats((prev) => {
-      // If this passenger already has this seat, unselect it
-      if (prev[idx] === seat.seat_code) {
-        const copy = { ...prev };
-        delete copy[idx];
-        return copy;
+    setMultiSelectSeats((prev) => {
+      const isSelected = prev.includes(seat.seat_code);
+      if (isSelected) {
+        return prev.filter((s) => s !== seat.seat_code);
+      } else {
+        return [...prev, seat.seat_code];
       }
-
-      // Otherwise, select the new seat for this passenger
-      return { ...prev, [idx]: seat.seat_code };
     });
   };
 
   const handleConfirm = () => {
-    // Check if seat is selected using passenger index
-
+    if (multiSelectSeats.length === 0) return;
+    setSelectedSeats(multiSelectSeats);
+    // Mark selected seats as booked
     setSeats((prev) =>
       prev?.map((s) =>
-        s.seat_code === selectedSeats[idx] ? { ...s, status: "booked" } : s,
+        multiSelectSeats.includes(s.seat_code) ? { ...s, status: "booked" } : s,
       ),
     );
-    onSelect(selectedSeats[idx]);
+
+    // Assign seats to passengers in order - first selected seat to first passenger, etc.
     setToggle(false);
 
-    setSelectedSeats({}); // reset selection after confirm
+    setMultiSelectSeats([]);
   };
-
   if (!bus) {
     return <div>Loading...</div>;
   }
@@ -114,11 +123,19 @@ export default function SeatLayoutDialog({
       </DialogTrigger>
 
       <DialogContent className="max-w-md h-[80%] overflow-y-scroll">
-        <DialogHeader>
-          <DialogTitle>Select Your Seats</DialogTitle>
-        </DialogHeader>
-
         <div className="flex flex-col items-center gap-4 mt-4">
+          {multiSelectSeats.length > 0 && (
+            <div className="w-full bg-blue-50 p-3 rounded border border-blue-200">
+              <p className="text-sm font-medium">
+                Selected: {multiSelectSeats.join(", ")}
+              </p>
+              <p className="text-xs text-gray-600 mt-1">
+                {multiSelectSeats.length} of {passengers.length} seat
+                {passengers.length !== 1 ? "s" : ""} selected
+              </p>
+            </div>
+          )}
+
           <div className="grid gap-2">
             <div className="flex justify-start pl-6 mb-2">
               {/* <div className="w-10 h-10 flex items-center justify-center text-xs font-bold">
@@ -140,7 +157,18 @@ export default function SeatLayoutDialog({
 
                       <button
                         key={seat.id}
-                        onClick={() => toggleSeat(seat)}
+                        onClick={() => {
+                          setMultiSelectSeats((prev) => {
+                            // check if it is above passenger number or below
+
+                            if (!prev.includes(seat.seat_code)) {
+                              return [...prev, seat.seat_code]; // return a new array with the new seat
+                            } else {
+                              // Remove if already selected
+                              return prev.filter((s) => s !== seat.seat_code);
+                            }
+                          });
+                        }}
                         disabled={
                           seat.status === "booked" || seat.status === "held"
                         }
@@ -149,10 +177,10 @@ export default function SeatLayoutDialog({
                           (seat.status === "booked" ||
                             seat.status === "held") &&
                             "bg-gray-300 cursor-not-allowed",
-                          selectedSeats[idx] === seat.seat_code &&
+                          multiSelectSeats.includes(seat.seat_code) &&
                             "bg-primary hover:bg-primary/90 text-white",
                           seat.status === "available" &&
-                            selectedSeats[idx] !== seat.seat_code &&
+                            !multiSelectSeats.includes(seat.seat_code) &&
                             "bg-white hover:bg-primary/60 border-gray-400",
                         )}
                       >
@@ -183,10 +211,13 @@ export default function SeatLayoutDialog({
 
         <Button
           className="w-full mt-4"
-          disabled={!selectedSeats[idx]}
+          disabled={multiSelectSeats.length === 0}
           onClick={handleConfirm}
         >
-          Confirm Seats
+          Confirm{" "}
+          {multiSelectSeats.length > 0
+            ? `${multiSelectSeats.length} Seat${multiSelectSeats.length !== 1 ? "s" : ""}`
+            : "Seats"}
         </Button>
       </DialogContent>
     </Dialog>

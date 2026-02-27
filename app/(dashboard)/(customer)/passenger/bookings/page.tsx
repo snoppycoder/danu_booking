@@ -79,7 +79,6 @@ export default function BookingPage() {
 
   const handleViewDetails = async (trip: Trip) => {
     const response = await passengerApi.getTripDetails(trip.trip_id);
-    console.log(response, "trip details response");
     setSelectedTrip(response);
     setIsModalOpen(true);
   };
