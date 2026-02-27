@@ -132,7 +132,7 @@ export default function AgentDanuBooking() {
   return (
     <div className="">
       <Toaster richColors position="top-right" />
-      <div className="p-8 bg-primary">
+      <div className="p-8 ">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
