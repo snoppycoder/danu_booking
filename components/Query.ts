@@ -54,6 +54,16 @@ export const usePassengerHistory = (page: number, per_page: number) => {
     },
   });
 };
+
+export const useSuperAdminStat = () => {
+  return useQuery({
+    queryKey: ["superadmin-stat"],
+    queryFn: async () => {
+      const res = await superAdminApi.getStats();
+      return res;
+    },
+  });
+};
 export const useOperator = (page: number, per_page: number) => {
   return useQuery({
     queryKey: ["operator", page, per_page],

@@ -393,6 +393,7 @@ export const superAdminApi = {
     });
     return response.data;
   },
+
   viewOperatorDetail: async (id: string) => {
     const response = await api.get(`/admin/operators/${id}`);
     return response.data;
@@ -410,6 +411,25 @@ export const superAdminApi = {
       console.log(error);
       throw error;
     }
+  },
+
+  /***
+   * Dashboard
+   */
+  getStats: async () => {
+    const response = await api.get(`/admin/dashboard/dashboard`);
+    return response.data as {
+      total_trips: number;
+      trips_today: number;
+      total_bookings: number;
+      bookings_today: number;
+      total_amount: number;
+      amount_today: number;
+      total_passengers: number;
+      passengers_today: number;
+      total_operators: number;
+      operators_today: number;
+    };
   },
 
   /**
