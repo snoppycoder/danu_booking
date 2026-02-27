@@ -355,11 +355,23 @@ export const sessionMgmt = {
     return response.data;
   },
   revokeAllSession: async () => {
-    const response = await api.post(`/user/me/sessions/revoke-all`);
+    const csrf_token = await getCSRFToken();
+    console.log(csrf_token);
+    const response = await api.post(`/user/me/sessions/revoke-all`, {
+      // headers: {
+      //   "x-csrf-token": csrf_token,
+      // },
+    });
     return response.data;
   },
   revokeOtherSession: async () => {
-    const response = await api.post("/user/me/sessions/revoke-others");
+    const csrf_token = await getCSRFToken();
+    console.log(csrf_token);
+    const response = await api.post("/user/me/sessions/revoke-others", {
+      headers: {
+        "x-csrf-token": csrf_token,
+      },
+    });
     return response.data;
   },
 };

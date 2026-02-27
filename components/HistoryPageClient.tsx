@@ -101,11 +101,13 @@ export default function HistoryPageClient() {
         <ArrowLeft size={24} className="w-6 h-6 text-gray-700" />
       </Button>
       <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-2">
+        <div className="mb-8 mt-4">
+          <h1 className="text-center text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
             Booking History
           </h1>
-          <p className="text-gray-600">View all your past and upcoming trips</p>
+          <p className="text-gray-600 text-center">
+            View all your past and upcoming trips
+          </p>
         </div>
 
         {/* Empty State */}

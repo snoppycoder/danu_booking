@@ -9,8 +9,10 @@ import {
   Smartphone,
   Tablet,
   MapPin,
-  Calendar,
+  Clock,
   Shield,
+  CheckCircle2,
+  AlertCircle,
 } from "lucide-react";
 import {
   AlertDialog,
@@ -23,33 +25,35 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
-import { toast } from "sonner";
-
-import { Session } from "@/lib/model";
 import { useSession } from "@/components/Query";
 import { sessionMgmt } from "@/app/api/api";
+import { toast } from "sonner";
+import { Session } from "@/lib/model";
 import { useRouter } from "next/navigation";
-import { formatTime } from "@/lib/common_functions";
+import SessionManagerSkeleton from "@/components/SessionSkeleton";
 import { useAuth } from "@/lib/authContext";
 
+// Mock data for demonstration
+
 export default function SessionManager() {
-  const { data = [], isLoading, refetch } = useSession();
+  const router = useRouter();
   const { user } = useAuth();
-  const [sessions, setSessions] = useState<Session[]>([]);
-  useEffect(() => {
-    setSessions(data);
-  }, [data]);
-  const getDeviceIcon = (type: Session["deviceType"]) => {
+  const { data, isLoading, refetch } = useSession();
+  const getDeviceIcon = (type: "desktop" | "mobile" | "tablet") => {
+    const iconClass = "h-6 w-6";
     switch (type) {
       case "desktop":
-        return <Monitor className="h-5 w-5" />;
+        return <Monitor className={iconClass} />;
       case "mobile":
-        return <Smartphone className="h-5 w-5" />;
+        return <Smartphone className={iconClass} />;
       case "tablet":
-        return <Tablet className="h-5 w-5" />;
+        return <Tablet className={iconClass} />;
     }
   };
-
+  const [sessions, setSessions] = useState<Session[]>([]);
+  useEffect(() => {
+    setSessions(data ?? []);
+  }, [data]);
   const handleRevokeSession = (sessionId: string) => {
     setSessions((prev) => prev.filter((s) => s.id !== sessionId));
     toast("The session has been successfully terminated.");
@@ -57,7 +61,7 @@ export default function SessionManager() {
 
   const handleRevokeAll = async () => {
     // Keep only the current session
-    await sessionMgmt.revokeAllSession();
+    const res = await sessionMgmt.revokeAllSession();
     toast.success("All sessions revoked");
     window.location.href = "/login";
 
@@ -72,216 +76,285 @@ export default function SessionManager() {
     setSessions((prev) => prev.filter((s) => s.isCurrent));
   }
 
-  const router = useRouter();
-
-  const activeSessionCount = sessions.length;
-  const otherSessionCount = sessions.filter((s) => !s.isCurrent).length;
+  const activeSessionCount = sessions?.length ?? 0;
+  const otherSessionCount = sessions?.filter((s) => !s.isCurrent).length ?? 0;
   if (isLoading) {
-    return (
-      <div className="flex h-[60vh] items-center justify-center">
-        <p className="text-muted-foreground">Loading sessions...</p>
-      </div>
-    );
+    return <SessionManagerSkeleton />;
   }
 
   return (
-    <div className="relative inset-0 w-full mx-auto p-2 md:p-12">
-      {/* Header with back button */}
-      <div className="mb-8 flex items-center gap-4">
-        <Button
-          variant="ghost"
-          size="icon"
-          className="h-10 w-10 absolute top-2.5 left-2.5"
-          onClick={() => {
-            if (user?.roles[0] === "super_admin") {
-              router.replace("/superadmin");
-              return;
-            }
-            if (user?.roles[0] === "agent") {
-              router.replace("/agent/ticket-booking");
-              return;
-            }
-            if (user?.roles[0] === "passenger") {
-              router.replace("/passenger");
-              return;
-            }
-            if (user?.roles[0] === "operator") {
-              router.replace("/operator");
-              return;
-            }
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-secondary/30">
+      <div className="w-full mx-auto px-4 py-6 md:py-8">
+        {/* Header Section */}
+        <div className="mb-12">
+          <Button
+            variant="ghost"
+            size="icon"
+            className="mb-6 hover:bg-secondary"
+            onClick={() => {
+              if (user?.roles[0] == "super_admin") {
+                router.replace("/superadmin");
+                return;
+              }
+              if (user?.roles[0] == "passenger") {
+                router.replace("/passenger");
+                return;
+              }
+              if (user?.roles[0] == "operator_admin") {
+                router.replace("/operator");
+                return;
+              }
+              if (user?.roles[0] == "agent_admin") {
+                router.replace("/agent/ticket-booking");
+                return;
+              }
+            }}
+          >
+            <ArrowLeft className="h-10 w-10" />
+          </Button>
 
-            router.back();
-          }}
-        >
-          <ArrowLeft className="h-15 w-15" />
-        </Button>
-        <div>
-          <h1 className="text-3xl font-semibold text-foreground">
-            Active Sessions
-          </h1>
-          <p className="mt-1 text-muted-foreground">
-            Manage and monitor all devices currently signed into your account
-          </p>
-        </div>
-      </div>
-
-      {/* Stats and Actions */}
-      <div className="mb-6 flex flex-col gap-6 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-2">
-            <Shield className="h-5 w-5 text-muted-foreground" />
-            <span className="text-sm text-muted-foreground">
-              {activeSessionCount}{" "}
-              {activeSessionCount === 1 ? "session" : "sessions"} active
-            </span>
+          <div className="space-y-3">
+            <h1 className="text-center text-2xl md:text-5xl font-bold text-foreground">
+              Active Sessions
+            </h1>
           </div>
         </div>
 
-        {otherSessionCount > 0 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">Revoke All Sessions</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Revoke all other sessions?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will sign you out of all devices including the current
-                  one. You'll need to sign in again on those devices.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleRevokeAll}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Revoke All
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-        {otherSessionCount > 1 && (
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="destructive">Revoke All Other Sessions</Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Revoke all other sessions?</AlertDialogTitle>
-                <AlertDialogDescription>
-                  This will sign you out of all devices excluding the current
-                  one. You'll need to sign in again on those devices.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction
-                  onClick={handleRevokeOther}
-                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                >
-                  Revoke other
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
-        )}
-      </div>
-
-      {/* Sessions List */}
-      <div className="space-y-3">
-        {sessions.map((session) => (
-          <Card
-            key={session.id}
-            className="overflow-hidden border-border bg-card transition-colors hover:border-muted-foreground/20"
-          >
-            <div className="flex flex-col gap-4 p-5 sm:flex-row sm:items-center sm:justify-between">
-              <div className="flex gap-4">
-                <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-muted text-muted-foreground">
-                  {getDeviceIcon(session.deviceType)}
-                </div>
-
-                <div className="flex-1 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-medium text-foreground">
-                      {session.user_agent}
-                    </h3>
-                    {session.isCurrent && (
-                      <span className="inline-flex items-center gap-1 rounded-md bg-primary/10 px-2 py-0.5 text-xs font-medium text-primary">
-                        <span className="h-1.5 w-1.5 rounded-full bg-primary" />
-                        Current
-                      </span>
-                    )}
-                  </div>
-
-                  <div className="flex flex-col gap-1 text-sm text-muted-foreground sm:flex-row sm:items-center sm:gap-4">
-                    <div className="flex items-center gap-1.5">
-                      <MapPin className="h-3.5 w-3.5" />
-                      <span>{session.location ?? "Ethiopia, Addis Ababa"}</span>
-                    </div>
-                    <span className="hidden sm:inline">•</span>
-                    <div className="flex items-center gap-1.5">
-                      <Calendar className="h-3.5 w-3.5" />
-                      <span>{formatTime(session.last_seen_at)}</span>
-                    </div>
-                  </div>
-
-                  <div className="text-xs  text-black">
-                    IP: {session.ip_address}
-                  </div>
-                </div>
+        {/* Stats Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+          <Card className="border-primary/20 bg-card/50 backdrop-blur-sm p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <CheckCircle2 className="h-6 w-6 text-primary" />
               </div>
-
-              {!session.isCurrent && (
-                <AlertDialog>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="shrink-0 bg-transparent"
-                    >
-                      Revoke
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Revoke this session?</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        This will sign you out of{" "}
-                        <strong>{session.user_agent}</strong>. You'll need to
-                        sign in again on that device.
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Cancel</AlertDialogCancel>
-                      <AlertDialogAction
-                        onClick={() => handleRevokeSession(session.id)}
-                        className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-                      >
-                        Revoke Session
-                      </AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
+              <div>
+                <p className="text-sm text-muted-foreground">Active Sessions</p>
+                <p className="text-3xl font-bold text-foreground">
+                  {activeSessionCount}
+                </p>
+              </div>
             </div>
           </Card>
-        ))}
-      </div>
 
-      {/* Security notice */}
-      <div className="mt-8 rounded-lg border border-border bg-muted/50 p-4">
-        <div className="flex gap-3">
-          <Shield className="h-5 w-5 shrink-0 text-muted-foreground" />
-          <div className="space-y-1 text-sm">
-            <p className="font-medium text-foreground">Security tip</p>
-            <p className="text-muted-foreground">
-              If you notice any unfamiliar sessions, revoke them immediately and
-              consider changing your password.
-            </p>
-          </div>
+          <Card className="border-accent/20 bg-card/50 backdrop-blur-sm p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-accent/10 rounded-lg">
+                <Shield className="h-6 w-6 text-accent" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Other Devices</p>
+                <p className="text-3xl font-bold text-foreground">
+                  {otherSessionCount}
+                </p>
+              </div>
+            </div>
+          </Card>
+
+          <Card className="border-primary/20 bg-card/50 backdrop-blur-sm p-6">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-lg">
+                <Clock className="h-6 w-6 text-primary" />
+              </div>
+              <div>
+                <p className="text-sm text-muted-foreground">Last Updated</p>
+                <p className="text-3xl font-bold text-foreground">Just now</p>
+              </div>
+            </div>
+          </Card>
         </div>
+
+        {/* Action Buttons */}
+        {otherSessionCount > 0 && (
+          <div className="mb-8 flex  flex-col justify-center sm:flex-row gap-3">
+            {otherSessionCount > 1 && (
+              <AlertDialog>
+                <AlertDialogTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className="border-border hover:bg-secondary"
+                  >
+                    Revoke Other Sessions
+                  </Button>
+                </AlertDialogTrigger>
+                <AlertDialogContent className="border-border">
+                  <AlertDialogHeader>
+                    <AlertDialogTitle className="text-foreground">
+                      Revoke all other sessions?
+                    </AlertDialogTitle>
+                    <AlertDialogDescription className="text-muted-foreground">
+                      This will sign you out of all devices except this one. You
+                      can sign back in on those devices at any time.
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel className="border-border">
+                      Cancel
+                    </AlertDialogCancel>
+                    <AlertDialogAction
+                      onClick={handleRevokeOther}
+                      className="bg-primary text-primary-foreground hover:bg-primary/90"
+                    >
+                      Revoke Sessions
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button className="bg-destructive text-white hover:bg-destructive/90">
+                  Revoke All Sessions
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent className="border-border">
+                <AlertDialogHeader>
+                  <AlertDialogTitle className="text-foreground">
+                    Sign out everywhere?
+                  </AlertDialogTitle>
+                  <AlertDialogDescription className="text-muted-foreground">
+                    This will sign you out of all devices including this one.
+                    You'll need to sign in again on all devices.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel className="border-border">
+                    Cancel
+                  </AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={handleRevokeAll}
+                    className="bg-destructive text-white hover:bg-destructive/90"
+                  >
+                    Sign Out Everywhere
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+          </div>
+        )}
+
+        {sessions.length > 0 ? (
+          <div className="space-y-4 mb-12">
+            {sessions.map((session) => (
+              <Card
+                key={session.id}
+                className={`overflow-hidden border transition-all duration-300 hover:shadow-lg ${
+                  session.isCurrent
+                    ? "border-primary/30 bg-gradient-to-r from-primary/5 to-transparent"
+                    : "border-border/50 hover:border-primary/20"
+                }`}
+              >
+                <div className="p-6">
+                  <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
+                    {/* Device Info */}
+                    <div className="flex gap-4 flex-1">
+                      <div className="flex-shrink-0">
+                        <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary/10 text-primary">
+                          {getDeviceIcon(session.deviceType)}
+                        </div>
+                      </div>
+
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 mb-2">
+                          <h3 className="font-semibold text-foreground truncate">
+                            {session.user_agent}
+                          </h3>
+                          {session.isCurrent && (
+                            <span className="inline-flex items-center gap-1.5 rounded-full bg-primary/15 px-3 py-1 text-xs font-semibold text-primary whitespace-nowrap">
+                              <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
+                              Current Device
+                            </span>
+                          )}
+                        </div>
+
+                        <div className="space-y-2 text-sm text-muted-foreground">
+                          <div className="flex items-center gap-1.5">
+                            <MapPin className="h-4 w-4 flex-shrink-0" />
+                            <span>{session.location}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5">
+                            <Clock className="h-4 w-4 flex-shrink-0" />
+                            <span>Last active: {session.last_seen_at}</span>
+                          </div>
+                          <div className="text-xs">
+                            IP:{" "}
+                            <span className="font-mono">
+                              {session.ip_address}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Action Button */}
+                    {!session.isCurrent && (
+                      <div className="sm:flex-shrink-0">
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              className="w-full sm:w-auto border-destructive/50 text-destructive hover:bg-destructive/10"
+                            >
+                              Revoke
+                            </Button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent className="border-border">
+                            <AlertDialogHeader>
+                              <AlertDialogTitle className="text-foreground">
+                                Revoke this session?
+                              </AlertDialogTitle>
+                              <AlertDialogDescription className="text-muted-foreground">
+                                This will sign you out of{" "}
+                                <strong className="text-foreground">
+                                  {session.user_agent}
+                                </strong>
+                                . You can sign back in at any time.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel className="border-border">
+                                Cancel
+                              </AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleRevokeSession(session.id)}
+                                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                              >
+                                Revoke Session
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </Card>
+            ))}
+          </div>
+        ) : (
+          <Card className="border-border/50 bg-card/50 p-12 text-center mb-12">
+            <AlertCircle className="h-12 w-12 text-muted-foreground mx-auto mb-4 opacity-50" />
+            <p className="text-muted-foreground text-lg">
+              No active sessions. Sign in to begin.
+            </p>
+          </Card>
+        )}
+
+        {/* Security Notice */}
+        <Card className="border-primary/20 bg-gradient-to-r from-primary/5 to-accent/5 p-6">
+          <div className="flex gap-4">
+            <Shield className="h-5 w-5 text-primary flex-shrink-0 mt-0.5" />
+            <div className="space-y-2">
+              <h3 className="font-semibold text-foreground">Security Tip</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">
+                Review your sessions regularly and revoke any unfamiliar
+                devices. If you notice suspicious activity, we recommend
+                changing your password immediately.
+              </p>
+            </div>
+          </div>
+        </Card>
       </div>
     </div>
   );
