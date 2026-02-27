@@ -7,6 +7,7 @@ import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
 import AvatarHero from "./HeroAvatar";
 import { authAPI } from "@/app/api/api";
+import clsx from "clsx";
 
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
@@ -62,13 +63,25 @@ export default function Navbar(props: NavbarProps) {
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className="text-gray-700 hover:text-primary"
+              className="relative w-6 h-6 text-gray-700 hover:text-primary"
             >
-              {isMenuOpen ? (
-                <X className="w-6 h-6 cursor-pointer" />
-              ) : (
-                <Menu className="w-6 h-6 cursor-pointer" />
-              )}
+              <Menu
+                className={clsx(
+                  "absolute cursor-pointer inset-0 transition-all duration-300",
+                  isMenuOpen
+                    ? "opacity-0 rotate-90 scale-75"
+                    : "opacity-100 rotate-0 scale-100",
+                )}
+              />
+
+              <X
+                className={clsx(
+                  "absolute inset-0 cursor-pointer transition-all duration-300",
+                  isMenuOpen
+                    ? "opacity-100 rotate-0 scale-100"
+                    : "opacity-0 -rotate-90 scale-75",
+                )}
+              />
             </button>
           </div>
         </div>

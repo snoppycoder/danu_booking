@@ -19,15 +19,15 @@ import { isAxiosError } from "axios";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
-  onSucess: () => void;
   setToggle: (val: boolean) => void;
   tripId: string;
+  onSucess: () => void;
 };
 
-export default function SeatBookingDialog({
+export default function GuestSeatBookingDialog({
   tripId,
-  onSucess,
   toggle,
+  onSucess,
   setToggle,
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
@@ -108,13 +108,13 @@ export default function SeatBookingDialog({
       console.log(selectedSeats, passengers);
       if (selectedSeats.length === 0 || passengers.length === 0) return;
 
-      const response = await passengerApi.holdSeat(tripId, {
+      const response = await passengerApi.guestHoldBooking(tripId, {
         seat_codes: selectedSeats,
         passenger_details: passengers,
         client_ref: uuid,
       });
 
-      await passengerApi.confirmBooking(
+      await passengerApi.guestConfirmBooking(
         response.hold_id,
         `devpay_${uuid}`,
         "cash",
@@ -255,7 +255,7 @@ export default function SeatBookingDialog({
                 </Button>
                 <Button
                   className="flex-1"
-                  disabled={selectedSeats.length !== passengers.length}
+                  disabled={selectedSeats.length != passengers.length}
                   onClick={handleSubmit}
                 >
                   Confirm Booking

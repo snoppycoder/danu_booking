@@ -1,16 +1,10 @@
 "use client";
 
-import {
-  MapPin,
-  Calendar,
-  Download,
-  MoreVertical,
-  MoreHorizontal,
-} from "lucide-react";
+import { MapPin, Calendar, MoreVertical, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -32,6 +26,9 @@ import {
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
+import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
+import { useSearchRoute } from "./Query";
+import EtDatePicker from "./eth-calendar/habesha-date-picker/src/EtDatePicker";
 
 export default function GuestBooking() {
   const searchParams = useSearchParams();
@@ -40,15 +37,23 @@ export default function GuestBooking() {
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
+  const route_from = searchParams.get("from") || "";
+  const route_to = searchParams.get("to") || "";
+  const departure_date = searchParams.get("date") || new Date().toString();
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
-  const [data, setData] = useState<Item[]>([]);
+
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tripId, setTripId] = useState<string>("");
+  const { data, isLoading, refetch } = useSearchRoute(
+    form.route_from,
+    form.route_to,
+    form.departure_date,
+  );
 
   function isTrip(item: Item): item is Trip {
     return "trip_id" in item;
@@ -61,32 +66,20 @@ export default function GuestBooking() {
     setIsModalOpen(true);
   };
 
-  useEffect(() => {
-    handleSearch(form).then((res) => {
-      const data_ = res?.items || [];
-      setData(data_);
-    }); // for it fetch the data on load
-  }, []);
-
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     e.preventDefault();
-
-    const res = (await handleSearch(form)) ?? {
-      departure_date: form.departure_date,
-      route_from: form.route_from,
-      items: [],
-    };
-    const data_ = res.items;
-    console.log(data_, "items");
-    setData(data_);
+    // Refetch data with updated form values
+    refetch();
   }
+
   const handleSelectFromCity = (city: string) => {
     setForm({ ...form, route_from: city });
     setShowDropdownFrom(false);
     setSuggestionsFrom([]);
   };
+
   const handleSelectToCity = (city: string) => {
     setForm({ ...form, route_to: city });
     setShowDropdownTo(false);
@@ -106,6 +99,7 @@ export default function GuestBooking() {
       console.error("Auto complete error:", error);
     }
   }
+
   function handleAutoCompleteTo(value: string) {
     try {
       setTimeout(async () => {
@@ -209,15 +203,38 @@ export default function GuestBooking() {
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                  Depart
+                  Departure Date
                 </label>
-                <input
-                  type="date"
-                  value={form.departure_date}
-                  onChange={(e) =>
-                    setForm({ ...form, departure_date: e.target.value })
+                <EtDatePicker
+                  minDate={new Date() ?? undefined}
+                  value={
+                    form.departure_date
+                      ? (() => {
+                          const [y, m, d] = form.departure_date
+                            .split("-")
+                            .map(Number);
+                          return new Date(y, m - 1, d); // LOCAL date
+                        })()
+                      : null
                   }
-                  className="w-full px-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                  sx={{ color: "#00a896", width: "100%" }}
+                  onChange={(
+                    date: Date | [Date | null, Date | null] | null,
+                  ) => {
+                    let selectedDate: Date | null = null;
+                    if (Array.isArray(date)) {
+                      selectedDate = date[0] ?? null;
+                    } else {
+                      selectedDate = date ?? null;
+                    }
+                    setForm({
+                      ...form,
+                      departure_date: selectedDate
+                        ? selectedDate.toISOString().split("T")[0]
+                        : "",
+                    });
+                  }}
+                  className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
                 />
               </div>
 
@@ -230,14 +247,14 @@ export default function GuestBooking() {
           </Card>
         </form>
       </div>
-      <div className="w-full flex justify-center mt-8 mb-8">
+      <div className="w-full hidden md:flex justify-center mt-8 mb-8">
         <Card className="hover:shadow-lg w-[70%] p-4 rounded-md border border-gray-300">
           <CardContent className="px-4 py-2 flex space-x-[40%] items-center">
             <div>
               <h2 className="text-lg font-mono mb-2.5">Departure</h2>
-              <div className="text-md font-mono">{form.route_from}</div>
+              <div className="text-md font-mono">{route_from}</div>
               <div className="text-md font-mono">
-                {formatTime(form.departure_date)}
+                {formatTime(departure_date)}
               </div>
             </div>
 
@@ -245,9 +262,9 @@ export default function GuestBooking() {
               <div className="h-full py-2 w-[1px] bg-gray-400 mx-2"></div>
               <div>
                 <h2 className="text-lg font-mono mb-2.5">Return</h2>
-                <div className="text-md font-mono">{form.route_to}</div>
+                <div className="text-md font-mono">{route_to}</div>
                 <div className="text-md font-mono">
-                  {formatTime(form.departure_date)}
+                  {formatTime(departure_date)}
                 </div>
               </div>
             </div>
@@ -265,7 +282,7 @@ export default function GuestBooking() {
             </p>
           </div>
 
-          {data.length === 0 ? (
+          {data?.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
@@ -283,9 +300,7 @@ export default function GuestBooking() {
                     <TableHead className="font-semibold text-gray-900">
                       Arrival
                     </TableHead>
-                    <TableHead className="font-semibold text-gray-900">
-                      Duration
-                    </TableHead>
+
                     <TableHead className="text-right font-semibold text-gray-900">
                       Fare
                     </TableHead>
@@ -299,10 +314,10 @@ export default function GuestBooking() {
                 </TableHeader>
 
                 <TableBody>
-                  {data.map((route, index) => (
+                  {data?.map((route, index) => (
                     <TableRow
                       key={index}
-                      className="border-b p border-gray-100 transition-colors hover:bg-teal-50/50"
+                      className="border-b py-6 border-gray-100 transition-colors hover:bg-teal-50/50"
                     >
                       <TableCell className="py-4 font-medium text-gray-900">
                         {route.operator.operator_name}
@@ -313,15 +328,13 @@ export default function GuestBooking() {
                       <TableCell className="py-4 text-gray-700">
                         {form.route_to}
                       </TableCell>
-                      <TableCell className="py-4 text-gray-700">
-                        {formatTime(route.departure_at)}
-                      </TableCell>
+
                       <TableCell className="py-4 text-right font-semibold text-teal-600">
                         {route.price} Birr
                       </TableCell>
                       <TableCell className="py-4 text-center">
                         <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-                          12 Available
+                          {route.available_seats} Seats
                         </span>
                       </TableCell>
                       <TableCell className="py-4 ">
@@ -374,10 +387,11 @@ export default function GuestBooking() {
         </div>
       </div>
       <div className="hidden">
-        <SeatBookingDialog
+        <GuestSeatBookingDialog
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
           tripId={tripId}
+          onSucess={refetch}
         />
         <TripDetailsModal
           isOpen={isModalOpen}

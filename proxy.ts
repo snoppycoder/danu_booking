@@ -49,7 +49,7 @@ export function proxy(request: NextRequest) {
       return NextResponse.next();
     }
 
-    return NextResponse.redirect(new URL("/login", request.url));
+    return NextResponse.redirect(new URL("/guest", request.url));
   }
 
   if (pathname.startsWith("/superadmin") && userRole !== "super_admin") {

@@ -46,24 +46,9 @@ export default function DashboardLayout({
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
-        {/* <AuthProvider blackListRoles={[]}> */}
-        <GuestNavBar
-          initalPath={[
-            { href: "/passenger", label: "Home" },
-            // { href: "/passenger/bookings", label: "Bookings" },
-            { href: "/about-us", label: "About Us" },
-            { href: "/contact", label: "Contact" },
-          ]}
-          onLoaded={() => setIsNavbarLoaded(true)}
-        />
-        {isNavbarLoaded ? (
-          // <AuthProtector>
-          <main>{children}</main>
-        ) : (
-          // </AuthProtector>
-          <div className="p-4"></div>
-        )}
-        {/* </AuthProvider> */}
+        <GuestNavBar />
+
+        <main>{children}</main>
       </body>
     </html>
   );

@@ -7,6 +7,7 @@ import {
   getRefreshToken,
   getSessionId,
 } from "@/lib/auth";
+import { getClientToken } from "@/lib/common_functions";
 import {
   AddOperatorForm,
   AddUserForm,
@@ -740,6 +741,60 @@ export const passengerApi = {
     });
     console.log(response.data);
     return response.data;
+  },
+
+  guestHoldBooking: async (
+    tripId: string,
+    body: {
+      seat_codes: string[];
+      passenger_details: Passenger[];
+      client_ref: string;
+    },
+  ) => {
+    try {
+      // const uuid = crypto.randomUUID();
+      // console.log({ ...body, client_ref: `client_${uuid}` }, "body here");
+      const response = await api.post(`/guest/holds/${tripId}`, {
+        ...body,
+        passenger_details: body.passenger_details.map((passenger) => ({
+          ...passenger,
+          name: passenger.phone.trim(),
+        })),
+        // client_ref: uuid,
+      });
+
+      getClientToken(response.data.client_ref_token);
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from hold seat");
+      throw error;
+    }
+  },
+  guestConfirmBooking: async (
+    hold_id: string,
+    payment_reference: string,
+    payment_method: string,
+  ) => {
+    try {
+      const response = await api.post(
+        `/guest/holds/${hold_id}/confirm`,
+        {
+          payment_reference,
+          payment_method,
+        },
+        {
+          headers: {
+            "X-Client-Token": getClientToken(),
+          },
+        },
+      );
+      console.log(response.data, "guest confirm here it is");
+
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
 
   autoComplete: async (

@@ -1,12 +1,22 @@
 import { authAPI, passengerApi } from "@/app/api/api";
 import { toast } from "sonner";
 import { SearchRouteResponse } from "./model";
+import { v4 as uuidv4 } from "uuid";
 export const normalizeDate = (d?: Date | null) => {
   if (!d) return d;
   const copy = new Date(d);
   copy.setHours(0, 0, 0, 0);
   return copy;
 };
+
+export function getClientToken(token?: string) {
+  if (token) {
+    localStorage.setItem("x-client-token", token);
+    return;
+  }
+
+  return localStorage.getItem("x-client-token");
+}
 export const formatLocalDate = (date: Date) => {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");

@@ -49,9 +49,7 @@ export default function PassengerInfoForm({
   // Check if all passengers have required fields filled
   const allPassengersComplete =
     passengers.length > 0 &&
-    passengers.every(
-      (p) => p.name.trim() && p.phone.trim() && p.id_number.trim(),
-    );
+    passengers.every((p) => p.name.trim() && p.phone.trim());
 
   return (
     <div className="space-y-6">

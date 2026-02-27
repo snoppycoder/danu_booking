@@ -18,6 +18,7 @@ import {
   OperatorAgent,
   Refund,
   RefundDetail,
+  SearchRouteResponse,
   Session,
   User,
 } from "@/lib/model";
@@ -61,6 +62,34 @@ export const useSuperAdminStat = () => {
     queryFn: async () => {
       const res = await superAdminApi.getStats();
       return res;
+    },
+  });
+};
+export const useSearchRoute = (
+  route_from: string,
+  route_to: string,
+  departure_date: string,
+) => {
+  return useQuery({
+    queryKey: ["search_route", route_from, route_to, departure_date],
+    queryFn: async () => {
+      const res = await passengerApi.searchRoute({
+        route_from,
+        route_to,
+        departure_date,
+      });
+      return res.items as {
+        trip_id: string;
+        operator: {
+          operator_id: string;
+          operator_name: string;
+        };
+        departure_at: string;
+        price: number;
+        available_seats: number;
+        created_at: string;
+        updated_at: string;
+      }[];
     },
   });
 };
