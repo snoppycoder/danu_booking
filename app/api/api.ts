@@ -104,10 +104,6 @@ api.interceptors.response.use(
             console.error("Refresh token invalid");
             window.location.href = "/login";
             break;
-          case "Not authenticated":
-            console.error("Not authenticated — redirecting to login");
-            console.log(window.location.pathname);
-            window.location.href = "/login";
 
             /**
              * Note to fur

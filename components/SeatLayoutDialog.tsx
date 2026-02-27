@@ -123,6 +123,7 @@ export default function SeatLayoutDialog({
       </DialogTrigger>
 
       <DialogContent className="max-w-md h-[80%] overflow-y-scroll">
+        <DialogTitle>Choose your seats</DialogTitle>
         <div className="flex flex-col items-center gap-4 mt-4">
           {multiSelectSeats.length > 0 && (
             <div className="w-full bg-blue-50 p-3 rounded border border-blue-200">
@@ -159,14 +160,21 @@ export default function SeatLayoutDialog({
                         key={seat.id}
                         onClick={() => {
                           setMultiSelectSeats((prev) => {
-                            // check if it is above passenger number or below
+                            const isSelected = prev.includes(seat.seat_code);
 
-                            if (!prev.includes(seat.seat_code)) {
-                              return [...prev, seat.seat_code]; // return a new array with the new seat
-                            } else {
-                              // Remove if already selected
+                            // If already selected → remove
+                            if (isSelected) {
                               return prev.filter((s) => s !== seat.seat_code);
                             }
+
+                            // If not selected AND we reached max → replace last seat
+                            if (prev.length >= passengers.length) {
+                              return [...prev.slice(1), seat.seat_code];
+                              // removes first selected seat and adds new one
+                            }
+
+                            // Otherwise just add
+                            return [...prev, seat.seat_code];
                           });
                         }}
                         disabled={
@@ -211,7 +219,10 @@ export default function SeatLayoutDialog({
 
         <Button
           className="w-full mt-4"
-          disabled={multiSelectSeats.length === 0}
+          disabled={
+            multiSelectSeats.length === 0 ||
+            passengers.length != multiSelectSeats.length
+          }
           onClick={handleConfirm}
         >
           Confirm{" "}

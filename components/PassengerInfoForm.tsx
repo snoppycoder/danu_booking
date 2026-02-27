@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Passenger } from "@/lib/model";
+import { X } from "lucide-react";
 
 type PassengerInfoFormProps = {
   passengers: Passenger[];
@@ -66,7 +67,7 @@ export default function PassengerInfoForm({
                 onClick={() => removePassenger(index)}
                 className="text-red-500 hover:text-red-700 hover:bg-red-50"
               >
-                Remove
+                <X />
               </Button>
             )}
           </div>
@@ -115,10 +116,9 @@ export default function PassengerInfoForm({
             </div>
             <div>
               <Label className="mb-2" htmlFor={`id-${index}`}>
-                ID Number <span className="text-red-500">*</span>
+                ID Number
               </Label>
               <Input
-                required
                 id={`id-${index}`}
                 value={passenger.id_number}
                 onChange={(e) =>

@@ -226,7 +226,6 @@ export default function SeatBookingDialog({
             />
           )}
 
-          {/* STEP 3: Review & Confirm */}
           {step === 2 && (
             <div className="space-y-6">
               <div>
@@ -251,7 +250,11 @@ export default function SeatBookingDialog({
                 <Button variant="outline" onClick={handleBack}>
                   Back
                 </Button>
-                <Button className="flex-1" onClick={handleSubmit}>
+                <Button
+                  className="flex-1"
+                  disabled={selectedSeats.length != passengers.length}
+                  onClick={handleSubmit}
+                >
                   Confirm Booking
                 </Button>
               </div>

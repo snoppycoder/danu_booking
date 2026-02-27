@@ -289,6 +289,7 @@ export default function SignupPage() {
                     )
                   }
                   onChange={handleChange}
+                  disabled
                   className="mt-1 rounded border-gray-300 accent-teal-600"
                   required
                 />
