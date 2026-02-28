@@ -20,9 +20,31 @@ import {
   RefundDetail,
   SearchRouteResponse,
   Session,
+  Trip,
   User,
 } from "@/lib/model";
-
+export interface Trips_s {
+  id: string;
+  trip_id: string;
+  operator_id: string;
+  bus_id: string;
+  driver_id: string;
+  available_seats: number;
+  route_from: string;
+  route_to: string;
+  departure_at: string;
+  price: number;
+  created_at: string;
+  updated_at: string;
+  operator: {
+    operator_id: string;
+    operator_name: string;
+  };
+  driver?: {
+    id: string;
+    name: string;
+  };
+}
 export const useUsers = (page?: number, per_page?: number, noCache = false) => {
   return useQuery({
     queryKey: ["users", page, per_page],
@@ -107,13 +129,29 @@ export const useOperator = (page: number, per_page: number) => {
     staleTime: 1000 * 60 * 5,
   });
 };
-export const useTrips = (operator_id: string) => {
-  return useQuery({
-    queryKey: ["trips", operator_id],
+export const useTrips = (
+  operator_id: string,
+  page: number = 1,
+  per_page: number = 10,
+) => {
+  return useQuery<{
+    items: Trip[];
+    total: number;
+    page: number;
+  }>({
+    queryKey: ["trips", operator_id, page, per_page],
     queryFn: async () => {
-      if (!operator_id) return [];
-      const res = await operatorApi.getAllTrips(operator_id, 10);
-      return res.items;
+      if (!operator_id) {
+        return { items: [], total: 0, page: 1 };
+      }
+
+      const res = await operatorApi.getAllTrips(operator_id, page, per_page);
+
+      return {
+        items: res.items as Trips_s[],
+        total: res.total,
+        page: res.page,
+      };
     },
     staleTime: 1000 * 60 * 5,
     retry: false,

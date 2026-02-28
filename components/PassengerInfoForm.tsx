@@ -8,12 +8,14 @@ import type { Passenger } from "@/lib/model";
 import { X } from "lucide-react";
 
 type PassengerInfoFormProps = {
+  numberOfPassengers: number;
   passengers: Passenger[];
   onPassengersChange: (passengers: Passenger[]) => void;
   onNext: () => void;
 };
 
 export default function PassengerInfoForm({
+  numberOfPassengers,
   passengers,
   onPassengersChange,
   onNext,
@@ -58,16 +60,6 @@ export default function PassengerInfoForm({
         <div key={index} className="border rounded-xl p-4 space-y-4">
           <div className="flex justify-between items-center">
             <h3 className="font-semibold">Passenger {index + 1}</h3>
-            {passengers.length > 1 && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removePassenger(index)}
-                className="text-red-500 hover:text-red-700 hover:bg-red-50"
-              >
-                <X />
-              </Button>
-            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -129,24 +121,13 @@ export default function PassengerInfoForm({
         </div>
       ))}
 
-      {/* Add Passenger Button */}
-      {!showAddPassenger && (
-        <Button
-          variant="outline"
-          className="w-full"
-          onClick={() => addPassenger()}
-        >
-          + Add Another Passenger
-        </Button>
-      )}
-
       <div className="flex gap-2 pt-4">
         <Button
           className="flex-1"
           disabled={!allPassengersComplete}
           onClick={onNext}
         >
-          Next: Select Seats
+          Summary
         </Button>
       </div>
     </div>

@@ -14,7 +14,6 @@ import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import type { Bus, Passenger, Seat } from "@/lib/model";
 import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
-import SeatBookingDialog from "./SeatBookingDialog";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -23,7 +22,7 @@ type SeatLayoutProps = {
   seats: Seat[];
   selectedSeats: string[];
   setSelectedSeats: React.Dispatch<React.SetStateAction<string[]>>;
-  onSucess?: () => void;
+  onSuccess?: () => void;
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
 
   setToggle: (val: boolean) => void;
@@ -33,7 +32,7 @@ export default function GuestSeatLayoutDialog({
   toggle,
   trip_id,
   bus,
-  onSucess,
+  onSuccess,
   seats,
   setSeats,
   selectedSeats,
@@ -49,6 +48,7 @@ export default function GuestSeatLayoutDialog({
   }, [bus]);
 
   useEffect(() => {
+    // Reset multi-select when dialog closes
     if (!toggle) {
       setMultiSelectSeats([]);
     }
@@ -206,10 +206,10 @@ export default function GuestSeatLayoutDialog({
           </Button>
         </DialogContent>
       </Dialog>
-      <SeatBookingDialog
+      <GuestSeatBookingDialog
         toggle={open}
         setToggle={setOpen}
-        onSucess={onSucess}
+        onSucess={onSuccess}
         tripId={trip_id}
         selectedSeats={selectedSeats}
         number_of_passengers={selectedSeats.length}

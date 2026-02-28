@@ -43,6 +43,7 @@ export default function AgentDanuBooking() {
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
@@ -534,8 +535,9 @@ export default function AgentDanuBooking() {
           onSucess={refetch}
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
-          tripId={tripId}
-        />
+          tripId={tripId} 
+          selectedSeats={selectedSeats} 
+          number_of_passengers={selectedSeats.length}        />
         <TripDetailsModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}

@@ -1083,9 +1083,13 @@ export const operatorApi = {
     );
     return response.data;
   },
-  getAllTrips: async (operator_id: string, limit: number) => {
+  getAllTrips: async (
+    operator_id: string,
+    page?: number,
+    per_page?: number,
+  ) => {
     const response = await api.get(`/operator/${operator_id}/trips`, {
-      params: { limit },
+      params: { page, per_page },
     });
     return response.data;
   },

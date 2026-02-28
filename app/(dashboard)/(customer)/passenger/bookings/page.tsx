@@ -20,9 +20,9 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { formatTime, handleSearch } from "@/lib/common_functions";
+import { formatTime } from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
-import { Item, Trip, TripData } from "@/lib/model";
+import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import {
   DropdownMenu,
@@ -35,6 +35,7 @@ import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
 import { useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
+import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 
 export default function DanuBooking() {
   const searchParams = useSearchParams();
@@ -47,19 +48,21 @@ export default function DanuBooking() {
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
+  const [seats, setSeats] = useState<Seat[]>([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
-
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bus, setBus] = useState<Bus | undefined>();
   const [tripId, setTripId] = useState<string>("");
   const { data, isLoading, refetch } = useSearchRoute(
     form.route_from,
     form.route_to,
     form.departure_date,
   );
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   function isTrip(item: Item): item is Trip {
     return "trip_id" in item;
@@ -123,12 +126,11 @@ export default function DanuBooking() {
   async function handleBookNow(trip: Item): Promise<void> {
     if (isTrip(trip)) {
       const response = await passengerApi.getTripDetails(trip.trip_id);
-      console.log(trip);
+      setBus(response.bus);
       setTripId(trip.trip_id);
     }
     setUseInfoToggle(true);
   }
-
   return (
     <div className="">
       <Toaster richColors position="top-right" />
@@ -530,11 +532,16 @@ export default function DanuBooking() {
         </div>
       </div>
       <div className="hidden">
-        <SeatBookingDialog
-          onSucess={refetch}
+        <SeatLayoutDialog
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
-          tripId={tripId}
+          setSelectedSeats={setSelectedSeats}
+          bus={bus!}
+          seats={seats}
+          setSeats={setSeats}
+          trip_id={tripId}
+          selectedSeats={selectedSeats}
+          onSucess={refetch}
         />
         <TripDetailsModal
           isOpen={isModalOpen}

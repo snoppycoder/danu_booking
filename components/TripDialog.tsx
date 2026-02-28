@@ -29,7 +29,7 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
-import { Bus, Driver, Route, User } from "@/lib/model";
+import { Bus, Driver, Route, Trip, User } from "@/lib/model";
 import { useAuth } from "@/lib/authContext";
 
 const tripSchema = z.object({
@@ -49,14 +49,7 @@ interface TripDialogProps {
   onSubmit: (data: TripFormData) => void;
   buses: Bus[];
   drivers: Driver[];
-  trip?: {
-    route_from: string;
-    route_to: string;
-    departure_at: string;
-    price: number;
-    bus_id: string;
-    driver_id: string;
-  };
+  trip?: Trip;
 }
 
 export function TripDialog({

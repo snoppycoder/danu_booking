@@ -4,7 +4,7 @@ import { MapPin, Calendar, MoreVertical, MoreHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { useState } from "react";
+import { SetStateAction, useState } from "react";
 import {
   Table,
   TableBody,
@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/table";
 import { formatTime, handleSearch } from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
-import { Item, Trip, TripData } from "@/lib/model";
+import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import {
   DropdownMenu,
@@ -24,11 +24,13 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TripDetailsModal } from "@/components/TripDetailModal";
-import SeatBookingDialog from "@/components/SeatBookingDialog";
+
 import { Toaster } from "sonner";
-import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
+
 import { useSearchRoute } from "./Query";
 import EtDatePicker from "./eth-calendar/habesha-date-picker/src/EtDatePicker";
+import SeatLayoutDialog from "./GuestSeatLayoutDialog";
+import GuestSeatLayoutDialog from "./GuestSeatLayoutDialog";
 
 export default function GuestBooking() {
   const searchParams = useSearchParams();
@@ -43,8 +45,10 @@ export default function GuestBooking() {
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
-
+  const [bus, setBus] = useState<Bus | undefined>();
+  const [seats, setSeats] = useState<Seat[]>([]);
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -117,7 +121,7 @@ export default function GuestBooking() {
   async function handleBookNow(trip: Item): Promise<void> {
     if (isTrip(trip)) {
       const response = await passengerApi.getTripDetails(trip.trip_id);
-      console.log(trip);
+      setBus(response.bus);
       setTripId(trip.trip_id);
     }
     setUseInfoToggle(true);
@@ -387,11 +391,16 @@ export default function GuestBooking() {
         </div>
       </div>
       <div className="hidden">
-        <GuestSeatBookingDialog
+        <GuestSeatLayoutDialog
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
-          tripId={tripId}
-          onSucess={refetch}
+          setSelectedSeats={setSelectedSeats}
+          bus={bus!}
+          onSuccess={refetch}
+          seats={seats}
+          setSeats={setSeats}
+          trip_id={tripId}
+          selectedSeats={selectedSeats}
         />
         <TripDetailsModal
           isOpen={isModalOpen}

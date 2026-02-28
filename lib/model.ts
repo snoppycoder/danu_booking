@@ -300,12 +300,21 @@ export type Passenger = {
 };
 
 export interface Trip {
+  id?: string;
   trip_id: string;
   available_seats: number;
+  route_from?: string;
+  route_to?: string;
   operator: {
     operator_id: string;
     operator_name: string;
   };
+  driver?: {
+    name: string;
+  };
+  operator_id?: string;
+  bus_id?: string;
+  driver_id?: string;
   departure_at: string;
   price: number;
   created_at: string;

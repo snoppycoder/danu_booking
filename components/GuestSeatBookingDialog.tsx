@@ -10,7 +10,7 @@ import {
 } from "@/components/ui/dialog";
 import { v4 as uuidv4 } from "uuid";
 import { Button } from "@/components/ui/button";
-import SeatLayoutDialog from "./SeatLayoutDialog";
+import SeatLayoutDialog from "./GuestSeatLayoutDialog";
 import PassengerInfoForm from "./PassengerInfoForm";
 import type { Bus, Passenger, Seat } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
@@ -19,13 +19,17 @@ import { isAxiosError } from "axios";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
+  selectedSeats: string[];
   setToggle: (val: boolean) => void;
+  number_of_passengers: number;
   tripId: string;
-  onSucess: () => void;
+  onSucess?: () => void;
 };
 
 export default function GuestSeatBookingDialog({
   tripId,
+  selectedSeats,
+  number_of_passengers,
   toggle,
   onSucess,
   setToggle,
@@ -47,7 +51,7 @@ export default function GuestSeatBookingDialog({
   const [seatToggle, setSeatToggle] = useState(false);
   const [bus, setBus] = useState<Bus>();
   const [seats, setSeats] = useState<Seat[]>([]);
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+
   const [seatDict, setSeatDict] = useState<Record<string, Passenger>>({});
   const [currentPassengerIndex, setCurrentPassengerIndex] = useState<number>(0);
   const [editingPassenger, setEditingPassenger] = useState<
@@ -65,6 +69,18 @@ export default function GuestSeatBookingDialog({
     };
     fetch();
   }, [tripId]);
+  useEffect(() => {
+    if (!number_of_passengers || number_of_passengers <= 0) return;
+
+    setPassengers(
+      Array.from({ length: number_of_passengers }, () => ({
+        name: "",
+        email: "",
+        phone: "",
+        id_number: "",
+      })),
+    );
+  }, [number_of_passengers]);
 
   // Handle moving from passenger info to seat selection
   const handlePassengerInfoNext = () => {
@@ -83,7 +99,7 @@ export default function GuestSeatBookingDialog({
     // Move to next passenger or finish
     if (currentPassengerIndex < passengers.length - 1) {
       setCurrentPassengerIndex((prev) => prev + 1);
-      setSelectedSeats([]);
+
       setEditingPassenger((prev) => ({
         ...prev,
         [currentPassengerIndex + 1]: (prev[currentPassengerIndex + 1] ?? 0) + 1,
@@ -134,8 +150,6 @@ export default function GuestSeatBookingDialog({
       ]);
       setToggle(false);
       setStep(1);
-
-      setSelectedSeats([]);
     } catch (error) {
       if (isAxiosError(error)) {
         console.error("Axios error:", error.response?.data || error.message);
@@ -162,9 +176,7 @@ export default function GuestSeatBookingDialog({
       setStep(1);
       setSeatToggle(false);
       setCurrentPassengerIndex(0);
-      setSeatDict({});
-      setSelectedSeats([]);
-      setEditingPassenger({});
+
       if (bus) {
         setSeats(bus.seat_template.seats);
       }
@@ -188,10 +200,11 @@ export default function GuestSeatBookingDialog({
       },
     ]);
     setSeatDict({});
-    setSelectedSeats([]);
+
     setCurrentPassengerIndex(0);
     setEditingPassenger({});
   };
+  console.log("opening the seat booking");
 
   if (!bus) {
     return <>Loading</>;
@@ -200,17 +213,10 @@ export default function GuestSeatBookingDialog({
   return (
     <div>
       <Toaster richColors position="top-right" />
-      <Dialog
-        open={toggle}
-        onOpenChange={(open) => {
-          if (!open) {
-            handleDialogClose();
-          }
-        }}
-      >
-        <DialogTrigger asChild>
+      <Dialog open={toggle} onOpenChange={setToggle}>
+        {/* <DialogTrigger asChild>
           <Button>Book Seats</Button>
-        </DialogTrigger>
+        </DialogTrigger> */}
 
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -223,6 +229,7 @@ export default function GuestSeatBookingDialog({
           {/* STEP 1: Passenger Information */}
           {step === 1 && (
             <PassengerInfoForm
+              numberOfPassengers={number_of_passengers}
               passengers={passengers}
               onPassengersChange={setPassengers}
               onNext={handlePassengerInfoNext}
@@ -265,21 +272,6 @@ export default function GuestSeatBookingDialog({
           )}
         </DialogContent>
       </Dialog>
-
-      {/* Seat Layout Dialog for seat selection */}
-      <SeatLayoutDialog
-        toggle={seatToggle}
-        setToggle={setSeatToggle}
-        selectedSeats={selectedSeats}
-        setSelectedSeats={setSelectedSeats}
-        editingPassenger={editingPassenger}
-        bus={bus}
-        seats={seats}
-        idx={currentPassengerIndex}
-        setSeats={setSeats}
-        seatDict={seatDict}
-        passengers={passengers}
-      />
     </div>
   );
 }

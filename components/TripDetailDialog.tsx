@@ -19,12 +19,11 @@ import {
   User,
   ArrowRight,
 } from "lucide-react";
-import { Trip_ } from "@/app/(dashboard)/(operator)/operator/trips/page";
-
+import { Trip } from "@/lib/model";
 interface TripDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  trip: Trip_;
+  trip: Trip;
   onEdit: () => void;
   onDelete: () => void;
 }
@@ -63,7 +62,7 @@ export function TripDetailDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">Trip Details</DialogTitle>
           <DialogDescription>
@@ -190,7 +189,7 @@ export function TripDetailDialog({
           </div>
         </div>
 
-        <DialogFooter className="flex-col gap-2 sm:flex-row">
+        {/* <DialogFooter className="flex-col gap-2 sm:flex-row">
           <Button
             variant="destructive"
             onClick={onDelete}
@@ -210,7 +209,7 @@ export function TripDetailDialog({
               Edit Trip
             </Button>
           </div>
-        </DialogFooter>
+        </DialogFooter> */}
       </DialogContent>
     </Dialog>
   );
