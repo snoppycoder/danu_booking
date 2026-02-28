@@ -1,25 +1,19 @@
 "use client";
 
-import { authAPI } from "@/app/api/api";
-import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import VerifyEmailClient from "@/components/VerifyEmailClient";
+
+import { Suspense } from "react";
 
 export default function VerifyEmail() {
-  const searchParam = useSearchParams();
-  const token = searchParam.get("token") ?? "";
-  const router = useRouter();
-  useEffect(() => {
-    const verifyEmail = async () => {
-      try {
-        await authAPI.verifyEmail(token);
-        router.push("/login"); // redirect after success
-      } catch (error) {
-        console.error("Verification failed", error);
-        router.push("/verification-error");
+  return (
+    <Suspense
+      fallback={
+        <div className="w-full min-h-screen flex justify-center items-center">
+          Loading...
+        </div>
       }
-    };
-
-    verifyEmail();
-  }, [token, router]);
-  return <div>Redirecting to login...</div>;
+    >
+      <VerifyEmailClient />
+    </Suspense>
+  );
 }
