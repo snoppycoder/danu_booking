@@ -20,6 +20,7 @@ export function proxy(request: NextRequest) {
     "/unauthorized",
     "/verify-email",
     "/_next",
+    "/forgot-password",
     "/favicon.ico",
     "/api",
   ];
