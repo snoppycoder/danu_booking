@@ -297,7 +297,7 @@ export const authAPI = {
   },
   verifyEmail: async (token: string) => {
     try {
-      const response = await api.post(`/auth/verify/${token}`);
+      const response = await api.post(`/auth/verify-email/${token}`);
       return response.data;
     } catch (error) {
       console.log(error);

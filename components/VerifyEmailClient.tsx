@@ -4,7 +4,7 @@ import { authAPI } from "@/app/api/api";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
-export default function VerifyEmail() {
+export default function VerifyEmailClient() {
   const searchParam = useSearchParams();
   const token = searchParam.get("token") ?? "";
   const router = useRouter();
