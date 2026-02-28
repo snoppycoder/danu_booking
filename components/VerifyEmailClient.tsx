@@ -125,13 +125,16 @@ export default function VerifyEmailClient() {
                   <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
                 </div>
               </div>
-              <CardTitle className="text-2xl">Email Verified!</CardTitle>
+              <CardTitle className="text-2xl">
+                Verification Email Sent
+              </CardTitle>
               <CardDescription>
-                Your email has been successfully verified
+                A new verification link has been sent to your email address.
               </CardDescription>
             </CardHeader>
             <CardContent className="text-center text-sm text-muted-foreground">
-              Redirecting to login in a moment...
+              Please check your inbox and spam folder if you don’t see the
+              email.
             </CardContent>
           </Card>
         )}
