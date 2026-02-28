@@ -40,9 +40,6 @@ export default function VerifyEmailClient() {
       setErrorMessage("");
       setEmail("");
       setState("success");
-      setTimeout(() => {
-        setState("expired");
-      }, 3000);
     } catch (error) {
       if (isAxiosError(error)) {
         setErrorMessage(
