@@ -307,12 +307,9 @@ export const authAPI = {
 
   resendEmailVerification: async (email: string) => {
     try {
-      const response = await api.post(
-        `/api/v1/auth/resend-email-verification`,
-        {
-          email,
-        },
-      );
+      const response = await api.post(`/auth/resend-email-verification`, {
+        email,
+      });
       return response.data;
     } catch (err) {
       console.log(err);
