@@ -16,7 +16,12 @@ import {
 } from "./ui/card";
 import { AlertCircle, CheckCircle2, Mail } from "lucide-react";
 
-type VerificationState = "verifying" | "success" | "expired" | "error";
+type VerificationState =
+  | "verifying"
+  | "success"
+  | "resent"
+  | "expired"
+  | "error";
 
 export default function VerifyEmailClient() {
   const searchParam = useSearchParams();
@@ -39,7 +44,7 @@ export default function VerifyEmailClient() {
       await authAPI.resendEmailVerification(email);
       setErrorMessage("");
       setEmail("");
-      setState("success");
+      setState("resent");
     } catch (error) {
       if (isAxiosError(error)) {
         setErrorMessage(
@@ -66,7 +71,7 @@ export default function VerifyEmailClient() {
         setState("success");
         setTimeout(() => {
           router.push("/login");
-        }, 2000);
+        }, 3000);
       } catch (error) {
         if (isAxiosError(error)) {
           if (
@@ -114,7 +119,7 @@ export default function VerifyEmailClient() {
           </Card>
         )}
 
-        {state === "success" && (
+        {state === "resent" && (
           <Card className="border-0 shadow-lg">
             <CardHeader className="text-center">
               <div className="flex justify-center mb-4">
@@ -133,6 +138,24 @@ export default function VerifyEmailClient() {
               Please check your inbox and spam folder if you don’t see the
               email.
             </CardContent>
+          </Card>
+        )}
+        {state === "success" && (
+          <Card className="border-0 shadow-lg">
+            <CardHeader className="text-center">
+              <div className="flex justify-center mb-4">
+                <div className="w-16 h-16 bg-green-100 dark:bg-green-900/30 rounded-full flex items-center justify-center">
+                  <CheckCircle2 className="w-8 h-8 text-green-600 dark:text-green-400" />
+                </div>
+              </div>
+              <CardTitle className="text-2xl">
+                Email Verified Successfully
+              </CardTitle>
+              <CardDescription>
+                Your email has been successfully verified. Redirecting you to
+                login...
+              </CardDescription>
+            </CardHeader>
           </Card>
         )}
 
