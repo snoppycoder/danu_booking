@@ -18,6 +18,7 @@ export function proxy(request: NextRequest) {
     "/signup",
     "/guest",
     "/unauthorized",
+    "/verify-email",
     "/_next",
     "/favicon.ico",
     "/api",

@@ -68,6 +68,7 @@ export default function SignupPage() {
         router.replace("/login");
       }, 1500);
     } catch (error) {
+      console.log("Error in handle submit", error);
       if (isAxiosError(error)) {
         if (typeof error.response?.data?.error === "string") {
           console.log(error.response.data.error, "signup error message");
@@ -79,6 +80,11 @@ export default function SignupPage() {
           error.response?.data?.error?.message ||
           error.response?.data?.detail?.[0]?.msg;
         console.log(error);
+        if (message && message.includes("one special character")) {
+          let newMessage = `Password must ${message}`;
+          toast.warning(newMessage);
+          return;
+        }
         if (
           (message && message?.includes("String")) ||
           message?.includes("string")

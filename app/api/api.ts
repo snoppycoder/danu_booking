@@ -52,93 +52,94 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     const originalRequest = error.config;
-
+    const publicPath = ["/login", "/signup", "/verify"];
+    console.log(window.location.href);
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
       const code = data.code;
       const detail = data.detail;
-      if (data.error && data.error.includes("role")) {
-        window.location.href = "/unauthorized";
-      }
-      console.log(detail, "error detail from response interceptor");
-      if (detail && detail?.includes("revoked")) {
-        deleteAllCookies().then(() => {
-          console.error("Session revoked — clearing cookies and redirecting");
-          window.location.href = "/login";
-        });
-      }
-      if (status === 401) {
-        switch (detail) {
-          case "CSRF_MISSING":
-          case "CSRF_INVALID":
-            // Retry once if not already retried
-            if (!originalRequest._retry) {
-              originalRequest._retry = true;
-              return api(originalRequest);
-            }
-            // If retry fails, force re-login
-            console.error(`${code}: Forcing re-login`);
+      const path = window.location.href;
+
+      if (!publicPath.includes(path)) {
+        console.log(detail, "error detail from response interceptor");
+        if (detail && detail?.includes("revoked")) {
+          deleteAllCookies().then(() => {
+            console.error("Session revoked — clearing cookies and redirecting");
             window.location.href = "/login";
-            break;
-
-          case "CSRF_EXPIRED":
-            console.error("CSRF Token expired");
-            window.location.href = "/login";
-            break;
-
-          case "REFRESH_REUSED":
-            console.error("Refresh token reuse detected — security warning");
-            // Optionally show an alert to the user
-            alert(
-              "Security alert: Your session was used from another location. Please log in again.",
-            );
-            window.location.href = "/login";
-            break;
-
-          case "REFRESH_EXPIRED":
-            console.error("Refresh token expired");
-            window.location.href = "/login";
-            break;
-
-          case "REFRESH_INVALID":
-            console.error("Refresh token invalid");
-            window.location.href = "/login";
-            break;
-
-            /**
-             * Note to fur
-             */
-
-            break;
-
-          case "SESSION_INVALID":
-            console.error("Session invalid — clearing UI state");
-            // Clear session from UI/local storage
-            localStorage.removeItem("session");
-            sessionStorage.clear();
-            window.location.href = "/login";
-            break;
-
-          case "USER_NOT_FOUND":
-            console.error("User not found — clearing auth state");
-            localStorage.clear();
-            sessionStorage.clear();
-            window.location.href = "/login";
-            break;
-
-          default:
-            console.error("Unhandled 401 error:", data);
-            throw error;
+          });
         }
-      } else if (status === 403) {
-        console.log(error);
-        throw error;
-      }
-    } else {
-      console.error("Network or unknown error:", error.message);
-    }
+        if (status === 401) {
+          switch (detail) {
+            case "CSRF_MISSING":
+            case "CSRF_INVALID":
+              // Retry once if not already retried
+              if (!originalRequest._retry) {
+                originalRequest._retry = true;
+                return api(originalRequest);
+              }
+              // If retry fails, force re-login
+              console.error(`${code}: Forcing re-login`);
+              window.location.href = "/login";
+              break;
 
+            case "CSRF_EXPIRED":
+              console.error("CSRF Token expired");
+              window.location.href = "/login";
+              break;
+
+            case "REFRESH_REUSED":
+              console.error("Refresh token reuse detected — security warning");
+              // Optionally show an alert to the user
+              alert(
+                "Security alert: Your session was used from another location. Please log in again.",
+              );
+              window.location.href = "/login";
+              break;
+
+            case "REFRESH_EXPIRED":
+              console.error("Refresh token expired");
+              window.location.href = "/login";
+              break;
+
+            case "REFRESH_INVALID":
+              console.error("Refresh token invalid");
+              window.location.href = "/login";
+              break;
+
+              /**
+               * Note to fur
+               */
+
+              break;
+
+            case "SESSION_INVALID":
+              console.error("Session invalid — clearing UI state");
+              // Clear session from UI/local storage
+              localStorage.removeItem("session");
+              sessionStorage.clear();
+              window.location.href = "/login";
+              break;
+
+            case "USER_NOT_FOUND":
+              console.error("User not found — clearing auth state");
+              localStorage.clear();
+              sessionStorage.clear();
+              window.location.href = "/login";
+              break;
+
+            default:
+              console.error("Unhandled 401 error:", data);
+              throw error;
+          }
+        } else if (status === 403) {
+          console.log(error);
+          throw error;
+        }
+      } else {
+        console.error("Network or unknown error:", error.message);
+      }
+    }
     return Promise.reject(error);
   },
 );
@@ -264,9 +265,15 @@ export const authAPI = {
     phone: string;
     password: string; // need attention
   }) => {
-    console.log(body, "signup body");
-    const response = await api.post("/auth/register", body);
-    return response.data;
+    try {
+      const response = await api.post("/auth/register", body);
+      console.log(response);
+
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   },
   login: async (
     identifier: string,
@@ -282,6 +289,15 @@ export const authAPI = {
         // portal,
       });
 
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+  verifyEmail: async (token: string) => {
+    try {
+      const response = await api.post(`/auth/verify/${token}`);
       return response.data;
     } catch (error) {
       console.log(error);
