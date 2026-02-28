@@ -304,6 +304,21 @@ export const authAPI = {
       throw error;
     }
   },
+
+  resendEmailVerification: async (email: string) => {
+    try {
+      const response = await api.post(
+        `/api/v1/auth/resend-email-verification`,
+        {
+          email,
+        },
+      );
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   refresh: async () => {
     try {
       const response = await api.post(`/auth/refresh`, {});
