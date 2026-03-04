@@ -105,14 +105,26 @@ export const useSearchRoute = (
   route_to: string,
   departure_date: string,
   org_id?: string,
+  page?: number,
+  per_page?: number,
 ) => {
   return useQuery({
-    queryKey: ["search_route", route_from, route_to, departure_date],
+    queryKey: [
+      "search_route",
+      route_from,
+      route_to,
+      departure_date,
+      org_id,
+      page,
+      per_page,
+    ],
     queryFn: async () => {
       const res = await passengerApi.searchRoute({
         route_from,
         route_to,
         departure_date,
+        page,
+        per_page,
       });
 
       let items: searchResult[] = !org_id

@@ -286,7 +286,7 @@ export default function GuestBooking() {
             </p>
           </div>
 
-          {data?.length === 0 ? (
+          {data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
@@ -318,7 +318,7 @@ export default function GuestBooking() {
                 </TableHeader>
 
                 <TableBody>
-                  {data?.map((route, index) => (
+                  {data?.items?.map((route, index) => (
                     <TableRow
                       key={index}
                       className="border-b py-6 border-gray-100 transition-colors hover:bg-teal-50/50"
