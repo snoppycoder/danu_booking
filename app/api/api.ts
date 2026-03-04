@@ -759,12 +759,16 @@ export const passengerApi = {
     route_from: string;
     route_to: string;
     departure_date: string;
+    page?: number;
+    per_page?: number;
   }) => {
     const response = await api.get("/guest/search", {
       params: {
         route_from: body.route_from,
         route_to: body.route_to,
         departure_date: body.departure_date,
+        page: body.page,
+        per_page: body.per_page,
       },
     });
     console.log(response.data);

@@ -290,7 +290,7 @@ export default function DanuBooking() {
             </p>
           </div>
 
-          {data?.length === 0 ? (
+          {data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
@@ -394,8 +394,8 @@ export default function DanuBooking() {
             <div className="w-full">
               {/* Routes Grid */}
               <div className="grid gap-6 grid-cols-1">
-                {(data || [])?.length > 0 ? (
-                  data?.map((route) => (
+                {(data?.items || [])?.length > 0 ? (
+                  data?.items.map((route) => (
                     <div
                       key={route.trip_id}
                       className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 
