@@ -35,7 +35,7 @@ const menuItems = [
   },
   {
     title: "Refund List",
-    url: "/agent/Refund-List",
+    url: "/agent/refund-list",
     icon: DollarSign,
   },
   {

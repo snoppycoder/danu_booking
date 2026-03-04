@@ -58,13 +58,14 @@ export default function AgentDanuBooking() {
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [tripId, setTripId] = useState<string>("");
+  const { user } = useAuth();
   const { data, isLoading, refetch } = useSearchRoute(
     form.route_from,
     form.route_to,
     form.departure_date,
+    user?.organization_id,
   );
 
-  const { user } = useAuth();
   function isTrip(item: Item): item is Trip {
     return "trip_id" in item;
   }
@@ -297,107 +298,11 @@ export default function AgentDanuBooking() {
               <p className="text-gray-500">No trips found</p>
             </div>
           ) : (
-            // <div className="overflow-hidden rounded-xl bg-white shadow-lg">
-            //   <Table>
-            //     <TableHeader className="">
-            //       <TableRow className="border border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50 hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50">
-            //         <TableHead className="font-semibold text-gray-900">
-            //           Bus Name
-            //         </TableHead>
-            //         <TableHead className="font-semibold text-gray-900">
-            //           Departure
-            //         </TableHead>
-            //         <TableHead className="font-semibold text-gray-900">
-            //           Arrival
-            //         </TableHead>
-
-            //         <TableHead className="text-right font-semibold text-gray-900">
-            //           Fare
-            //         </TableHead>
-            //         <TableHead className="text-center font-semibold text-gray-900">
-            //           Seats
-            //         </TableHead>
-            //         <TableHead className="text-center font-semibold text-gray-900">
-            //           Action
-            //         </TableHead>
-            //       </TableRow>
-            //     </TableHeader>
-
-            //     <TableBody>
-            //       {data?.map((route, index) => (
-            //         <TableRow
-            //           key={index}
-            //           className="border-b py-6 border-gray-100 transition-colors hover:bg-teal-50/50"
-            //         >
-            //           <TableCell className="py-4 font-medium text-gray-900">
-            //             {route.operator.operator_name}
-            //           </TableCell>
-            //           <TableCell className="py-4 text-gray-700">
-            //             {form.route_from}
-            //           </TableCell>
-            //           <TableCell className="py-4 text-gray-700">
-            //             {form.route_to}
-            //           </TableCell>
-
-            //           <TableCell className="py-4 text-right font-semibold text-teal-600">
-            //             {route.price} Birr
-            //           </TableCell>
-            //           <TableCell className="py-4 text-center">
-            //             <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-            //               {route.available_seats} Seats
-            //             </span>
-            //           </TableCell>
-            //           <TableCell className="py-4 ">
-            //             <div className="flex justify-center">
-            //               <Button
-            //                 size="sm"
-            //                 variant="default"
-            //                 className="mr-1.5"
-            //                 onClick={() => handleBookNow(route)}
-            //               >
-            //                 Book Now
-            //               </Button>
-            //               <div className="ml-2">
-            //                 <DropdownMenu>
-            //                   <DropdownMenuTrigger asChild>
-            //                     <Button
-            //                       variant="ghost"
-            //                       size="sm"
-            //                       className="h-8 w-8 p-0 hover:bg-teal-100"
-            //                     >
-            //                       <MoreHorizontal className="h-6 w-6 text-gray-600" />
-            //                       <span className="sr-only">Open menu</span>
-            //                     </Button>
-            //                   </DropdownMenuTrigger>
-            //                   <DropdownMenuContent align="end" className="w-48">
-            //                     <DropdownMenuItem
-            //                       className="cursor-pointer "
-            //                       onClick={() => {
-            //                         if (isTrip(route)) {
-            //                           handleViewDetails(route);
-            //                         }
-            //                       }}
-            //                     >
-            //                       View Details
-            //                     </DropdownMenuItem>
-            //                     <DropdownMenuItem className="cursor-pointer">
-            //                       Check Seats
-            //                     </DropdownMenuItem>
-            //                   </DropdownMenuContent>
-            //                 </DropdownMenu>
-            //               </div>
-            //             </div>
-            //           </TableCell>
-            //         </TableRow>
-            //       ))}
-            //     </TableBody>
-            //   </Table>
-            // </div>
             <div className="w-full">
               {/* Routes Grid */}
               <div className="grid gap-6 grid-cols-1">
-                {(data?.items || [])?.length > 0 ? (
-                  data?.items.map((route) => (
+                {(data?.items || []).length > 0 ? (
+                  data?.items?.map((route) => (
                     <div
                       key={route.trip_id}
                       className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 

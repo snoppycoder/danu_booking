@@ -17,6 +17,7 @@ export function proxy(request: NextRequest) {
     "/login",
     "/signup",
     "/guest",
+    "/preference",
     "/unauthorized",
     "/verify-email",
     "/_next",

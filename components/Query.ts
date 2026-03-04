@@ -45,6 +45,19 @@ export interface Trips_s {
     name: string;
   };
 }
+export interface searchResult {
+  trip_id: string;
+  operator: {
+    operator_id: string;
+    operator_name: string;
+  };
+  departure_at: string;
+  price: number;
+  available_seats: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export const useUsers = (page?: number, per_page?: number, noCache = false) => {
   return useQuery({
     queryKey: ["users", page, per_page],
@@ -91,6 +104,7 @@ export const useSearchRoute = (
   route_from: string,
   route_to: string,
   departure_date: string,
+  org_id?: string,
 ) => {
   return useQuery({
     queryKey: ["search_route", route_from, route_to, departure_date],
@@ -100,18 +114,13 @@ export const useSearchRoute = (
         route_to,
         departure_date,
       });
-      return res.items as {
-        trip_id: string;
-        operator: {
-          operator_id: string;
-          operator_name: string;
-        };
-        departure_at: string;
-        price: number;
-        available_seats: number;
-        created_at: string;
-        updated_at: string;
-      }[];
+
+      let items: searchResult[] = !org_id
+        ? res.items
+        : res.items.filter(
+            (t: searchResult) => t.operator.operator_id == org_id,
+          );
+      return { items, total: res.total, page: res.page };
     },
   });
 };

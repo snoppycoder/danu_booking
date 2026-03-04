@@ -71,16 +71,16 @@ export const AuthProvider = ({
         const decoded = await decodeJWT(response.access_token);
 
         if (decoded.roles.includes("passenger")) {
-          // route.replace("/passenger");
           window.location.replace("/passenger");
         } else if (decoded.roles.includes("super_admin")) {
-          // route.replace("/superadmin");
           window.location.replace("/superadmin");
         } else if (decoded.roles.includes("agent_admin")) {
-          // route.replace("/agent");
-          window.location.replace("/agent/ticket-booking");
+          if (decoded.agent_type == "operator-agent-admin") {
+            window.location.replace("/operator-agent/ticket-booking");
+          } else {
+            window.location.replace("/agent/ticket-booking");
+          }
         } else if (decoded.roles.includes("operator_admin")) {
-          // route.replace("/operator");
           window.location.replace("/operator");
         } else {
           console.log("No role matched");

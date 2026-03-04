@@ -67,7 +67,7 @@ export default function LoginPage() {
                   htmlFor="phone"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Phone Number
+                  Phone Number or Email
                 </label>
                 <input
                   id="phone"
@@ -125,7 +125,7 @@ export default function LoginPage() {
                   </span>
                 </label>
                 <Link
-                  href="/forgot-password"
+                  href="/preference"
                   className="text-sm text-teal-600 hover:text-teal-700 font-medium"
                 >
                   Forgot password?

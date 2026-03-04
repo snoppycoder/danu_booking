@@ -13,7 +13,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Loader2, Plus } from "lucide-react";
+import { Eye, EyeOff, Loader2, Plus } from "lucide-react";
 import { useState } from "react";
 import { toast, Toaster } from "sonner";
 import { useCreateOperatorAgent } from "./Query";
@@ -31,6 +31,8 @@ export function CreateOperatorAgentDialog({
 }: CreateOperatorAgentDialogProps) {
   const [open, setOpen] = useState(false);
   const [isActive, setIsActive] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [form, setForm] = useState({
     first_name: "",
     last_name: "",
@@ -83,6 +85,7 @@ export function CreateOperatorAgentDialog({
         error?.response?.data?.detail ||
         error?.message ||
         "Failed to create operator agent";
+
       toast.error(errorMessage);
     }
   }
@@ -155,7 +158,6 @@ export function CreateOperatorAgentDialog({
                   id="email"
                   required
                   type="email"
-                  placeholder="john@example.com"
                   value={form.email}
                   onChange={(e) => {
                     setForm((prev) => ({
@@ -192,20 +194,39 @@ export function CreateOperatorAgentDialog({
                 <Label htmlFor="password">
                   Password <span className="text-red-500">*</span>
                 </Label>
-                <Input
-                  id="password"
-                  required
-                  type="password"
-                  placeholder="••••••••"
-                  value={form.password}
-                  onChange={(e) => {
-                    setForm((prev) => ({
-                      ...prev,
-                      password: e.target.value,
-                    }));
-                  }}
-                  disabled={createMutation.isPending}
-                />
+
+                <div className="relative">
+                  <Input
+                    id="password"
+                    required
+                    type={showPassword ? "text" : "password"}
+                    placeholder="••••••••"
+                    value={form.password}
+                    onChange={(e) =>
+                      setForm((prev) => ({
+                        ...prev,
+                        password: e.target.value,
+                      }))
+                    }
+                    disabled={createMutation.isPending}
+                    className="pr-10"
+                  />
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    size="icon"
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    disabled={createMutation.isPending}
+                    className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                  >
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4 text-muted-foreground" />
+                    ) : (
+                      <Eye className="h-4 w-4 text-muted-foreground" />
+                    )}
+                  </Button>
+                </div>
               </div>
 
               {/* Active Status */}
