@@ -104,9 +104,9 @@ export const useSearchRoute = (
   route_from: string,
   route_to: string,
   departure_date: string,
-  org_id?: string,
   page?: number,
   per_page?: number,
+  org_id?: string,
 ) => {
   return useQuery({
     queryKey: [

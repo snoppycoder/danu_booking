@@ -39,6 +39,8 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL("/operator", request.url));
       if (userRole === "passenger")
         return NextResponse.redirect(new URL("/passenger", request.url));
+      // if (userRole === "agent")
+      //   return NextResponse.redirect(new URL("/passenger", request.url));
     }
     return NextResponse.next();
   }
@@ -54,15 +56,21 @@ export function proxy(request: NextRequest) {
 
     return NextResponse.redirect(new URL("/guest", request.url));
   }
-
+  console.log(userRole, pathname);
   if (pathname.startsWith("/superadmin") && userRole !== "super_admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-
-  if (pathname.startsWith("/operator") && userRole !== "operator_admin") {
+  if (pathname.startsWith("/operator-agent") && userRole !== "agent_admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
   if (pathname.startsWith("/agent") && userRole !== "agent_admin") {
+    console.log("here");
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  if (pathname.startsWith("/operator/") && userRole !== "operator_admin") {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  if (pathname == "/operator/" && userRole !== "operator_admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
 

@@ -9,7 +9,11 @@ import { useRouter } from "next/navigation";
 import EtDatePicker from "./eth-calendar/habesha-date-picker/src/EtDatePicker";
 import { SidebarProvider, SidebarTrigger } from "./ui/sidebar";
 
-export function SearchTicketForm() {
+type SearchTicketFormProp = {
+  link: string;
+};
+
+export function SearchTicketForm({ link }: SearchTicketFormProp) {
   const [form, setForm] = useState({
     route_from: "",
     route_to: "",
@@ -79,7 +83,7 @@ export function SearchTicketForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     router.push(
-      `/agent/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
+      `/${link}/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
     );
   };
 

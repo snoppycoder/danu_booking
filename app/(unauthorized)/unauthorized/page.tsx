@@ -9,7 +9,7 @@ export default function UnauthorizedPage() {
   const { user } = useAuth();
   const [redirect, setRedirect] = useState("");
   if (user && user.roles.length > 0) {
-    console.log("User roles:", user.roles);
+    console.log("User:", user);
     if (user.roles[0].includes("passenger")) {
       if (redirect !== "/passenger") setRedirect("/passenger");
     } else if (user.roles[0].includes("agent")) {

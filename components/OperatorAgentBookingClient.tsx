@@ -38,7 +38,7 @@ import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDa
 import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
 import { useAuth } from "@/lib/authContext";
 
-export default function AgentDanuBooking() {
+export default function OperatorAgentBookingClient() {
   const searchParams = useSearchParams();
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
@@ -53,7 +53,8 @@ export default function AgentDanuBooking() {
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
-
+  const [currentPage, setCurrentPage] = useState(1);
+  const per_page = 15;
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -63,6 +64,8 @@ export default function AgentDanuBooking() {
     form.route_from,
     form.route_to,
     form.departure_date,
+    currentPage,
+    per_page,
     user?.organization_id,
   );
 
@@ -283,7 +286,7 @@ export default function AgentDanuBooking() {
         </Card>
       </div>
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 p-8">
-        <div className="mx-auto max-w-7xl">
+        <div className="mx-auto max-w-7xl mb-8">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
               Available Trips
@@ -410,6 +413,35 @@ export default function AgentDanuBooking() {
             </div>
           )}
         </div>
+        {(data?.items.length ?? 0) > 0 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {(currentPage - 1) * per_page + 1} to{" "}
+              {(currentPage - 1) * per_page + (data?.items?.length ?? 0)} of{" "}
+              {data?.total} entries
+            </p>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+              <Button className="bg-primary text-primary-foreground">
+                {currentPage}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={(data?.total ?? 0) <= currentPage * Number(per_page)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
       <div className="hidden">
         <AgentSeatBookingDialog

@@ -6,7 +6,7 @@ export default function OperatorAgentPage() {
     <div className="flex  w-full h-full">
       {/* Main Content */}
       <div className="flex flex-col flex-1  w-full">
-        <SearchTicketForm />
+        <SearchTicketForm link={"operator-agent"} />
       </div>
     </div>
   );

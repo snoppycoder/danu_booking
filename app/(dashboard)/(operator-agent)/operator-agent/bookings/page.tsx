@@ -1,4 +1,5 @@
 import AgentClientBooking from "@/components/AgentBookingClient";
+import OperatorAgentBookingClient from "@/components/OperatorAgentBookingClient";
 import { Suspense } from "react";
 
 export default function AgentBooking() {
@@ -10,7 +11,7 @@ export default function AgentBooking() {
         </div>
       }
     >
-      <AgentClientBooking />
+      <OperatorAgentBookingClient />
     </Suspense>
   );
 }

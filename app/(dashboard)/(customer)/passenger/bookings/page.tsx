@@ -44,6 +44,8 @@ export default function DanuBooking() {
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
+  const [currentPage, setCurrentPage] = useState(1);
+  const per_page = 15;
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
@@ -431,7 +433,36 @@ export default function DanuBooking() {
             </div>
           )}
         </div>
+        {(data?.items.length ?? 0) > 0 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {(currentPage - 1) * per_page + 1} to{" "}
+              {(currentPage - 1) * per_page + (data?.items.length ?? 0)} of{" "}
+              {data?.total} entries
+            </p>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+              <Button className="bg-primary text-primary-foreground">
+                {currentPage}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((p) => p + 1)}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
       <div className="hidden">
         <SeatLayoutDialog
           toggle={useInfoToggle}
