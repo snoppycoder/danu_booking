@@ -711,6 +711,22 @@ export const superAdminApi = {
     return response.data;
   },
 };
+export const DanuAgentApi = {
+  getRefundList: async (agent_id: string, page?: number, per_page?: number) => {
+    try {
+      const response = await api.get(`/agent/${agent_id}/reports/refunds`, {
+        params: {
+          page,
+          per_page,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
+};
 
 export const passengerApi = {
   getBookingHistory: async (page?: number, per_page?: number) => {
@@ -885,6 +901,27 @@ export const agentApi = {
   getAllKYCdocuments: async (agent_id: string) => {
     const response = await api.get(`/agent/${agent_id}/kyc-documents`);
     return response.data;
+  },
+  getRefundList: async (
+    organzation_id: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    try {
+      const response = await api.get(
+        `/operator-agents/${organzation_id}/reports/refunds`,
+        {
+          params: {
+            page,
+            per_page,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
   },
   handleBooking: async (
     agent_id: string,

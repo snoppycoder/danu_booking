@@ -43,11 +43,11 @@ const menuItems = [
     url: "/operator-agent/report",
     icon: TrendingUp,
   },
-  {
-    title: "KYC Documents",
-    url: "/operator-agent/kyc",
-    icon: ScanFace,
-  },
+  //   {
+  //     title: "KYC Documents",
+  //     url: "/operator-agent/kyc",
+  //     icon: ScanFace,
+  //   },
 ];
 
 export function OperatorAgentSideBar() {

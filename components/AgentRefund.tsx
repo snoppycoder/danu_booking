@@ -22,40 +22,19 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
 import { Refund } from "@/lib/model";
-
+import { useAgentRefundList } from "./Query";
 import { useAuth } from "@/lib/authContext";
 import { RefundDetailDialog } from "./RefundDetailDialog";
 import RefundForm from "./RefundForm";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
 import { operatorApi } from "@/app/api/api";
-import { useOperatorRefundList } from "./Query";
 
 interface RefundListProps {
-  operator_id: string;
+  organization_id: string;
   onApprove?: (refund: Refund) => void;
   onSuccess?: () => void;
   onReject?: (refund: Refund) => void;
-}
-
-function calculateRefundSuggestion(
-  tripFee: number,
-  // issueAt: string | Date,
-  // departureAt: string | Date
-): number {
-  // const issue = new Date(issueAt).getTime();
-  // const departure = new Date(departureAt).getTime();
-
-  // const diffDays = Math.ceil(
-  //   (departure - issue) / (1000 * 60 * 60 * 24)
-  // );
-
-  // if (diffDays >= 0 && diffDays <= 5) {
-  //   return tripFee * 0.5;
-  // }
-
-  // return 0;
-  return tripFee * 0.5;
 }
 
 const getStatusColor = (status: string) => {
@@ -86,17 +65,7 @@ const getStatusIcon = (status: string) => {
   }
 };
 
-function RefundCard({
-  refund,
-  onViewDetails,
-  onApprove,
-  onReject,
-}: {
-  refund: Refund;
-  onViewDetails?: (refund_id: string, operator_id: string) => void;
-  onApprove?: (refund: Refund) => void;
-  onReject?: (refund: Refund) => void;
-}) {
+function RefundCard({ refund }: { refund: Refund }) {
   const { user } = useAuth();
   return (
     <Card className="p-4 sm:p-6 hover:shadow-lg transition-shadow">
@@ -106,12 +75,6 @@ function RefundCard({
           <h3 className="font-semibold text-sm text-gray-600">Passenger</h3>
           <p className="font-medium text-lg">{refund.passenger_name}</p>
           <p className="text-xs text-gray-500">Ref: {refund.booking_ref}</p>
-          <div className="mt-8">
-            <p className="text-xs text-gray-500">
-              Suggested refund amount is{" "}
-              {calculateRefundSuggestion(refund.total_amount)} Birr
-            </p>
-          </div>
         </div>
 
         {/* Middle Section - Amount Info */}
@@ -157,59 +120,6 @@ function RefundCard({
           <p className="text-xs text-gray-600 italic">{refund.notes}</p>
         </div>
       )}
-
-      {/* Actions */}
-      <div className="flex items-center justify-between pt-4 border-t">
-        <div className="flex gap-2 flex-wrap">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() =>
-              onViewDetails?.(refund.id, user?.organization_id || "")
-            }
-            className="gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            <span className="hidden sm:inline">View</span>
-          </Button>
-          {refund.status === "pending" && (
-            <>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-2 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
-                onClick={() => onApprove?.(refund)}
-              >
-                <CheckCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">Approve</span>
-              </Button>
-              <Button
-                size="sm"
-                variant="outline"
-                className="gap-2 text-red-600 hover:text-red-700 border-red-200 hover:bg-red-50"
-                onClick={() => onReject?.(refund)}
-              >
-                <XCircle className="w-4 h-4" />
-                <span className="hidden sm:inline">Reject</span>
-              </Button>
-            </>
-          )}
-        </div>
-
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="sm">
-              <MoreVertical className="w-4 h-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuItem>
-              <Download className="w-4 h-4 mr-2" />
-              Download Receipt
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </div>
     </Card>
   );
 }
@@ -230,30 +140,25 @@ function RefundListSkeleton() {
   );
 }
 
-export default function OperatorRefundList({
-  operator_id,
-  onSuccess,
-}: RefundListProps) {
+export default function AgentRefundList({ organization_id }: RefundListProps) {
   const [page, setPage] = useState(1);
   const [pageSize] = useState(10);
   const [dateRange, setDateRange] = useState<{ from?: string; to?: string }>(
     {},
   );
-  const { user } = useAuth();
+
   const [open, setOpen] = useState(false);
   const [selectedRefundId, setSelectedRefundId] = useState<string>("");
   const [openRefundForm, setOpenRefundForm] = useState(false);
   const [method, setMethod] = useState<"processed" | "rejected" | "pending">(
     "pending",
   );
-  const { data, isLoading, error, refetch } = useOperatorRefundList(
-    operator_id,
+  const { data, isLoading, error, refetch } = useAgentRefundList(
+    organization_id,
     page,
     pageSize,
-    dateRange.from,
-    dateRange.to,
   );
-  if (operator_id.trim().length === 0) {
+  if (organization_id.trim().length === 0) {
     return <RefundListSkeleton></RefundListSkeleton>;
   }
 
@@ -275,43 +180,22 @@ export default function OperatorRefundList({
   const total = data?.length || 0;
   const totalPages = Math.ceil(total / pageSize);
 
-  if (operator_id.trim().length > 0 && refunds.length === 0) {
+  if (organization_id.trim().length > 0 && refunds.length === 0) {
     return (
       <Card className="p-12 text-center">
-        <p className="text-gray-500 mb-2">No refunds found</p>
-        <p className="text-sm text-gray-400">
+        <p className="text-gray-500">No refunds found</p>
+        {/* <p className="text-sm text-gray-400">
           Try adjusting your filters or date range
-        </p>
+        </p> */}
       </Card>
     );
   }
 
-  function onViewDetails(id: string, operator_id: string) {
+  function onViewDetails(id: string, organzation_id: string) {
     setSelectedRefundId(id);
     setOpen(true);
   }
-  function onApprove(refund: Refund) {
-    setMethod("processed");
-    setSelectedRefundId(refund.id);
-    setOpenRefundForm(true);
-  }
-  async function onReject(refund: Refund) {
-    setMethod("rejected");
 
-    try {
-      await operatorApi.processRefund(operator_id, refund.id, {
-        status: "rejected",
-      });
-      refetch();
-    } catch (error) {
-      console.log(error);
-      if (isAxiosError(error)) {
-        toast.error(error.response?.data.detail);
-      } else {
-        toast.error("Unable to proceed with your request");
-      }
-    }
-  }
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -327,13 +211,7 @@ export default function OperatorRefundList({
       {/* Refund Cards */}
       <div className="space-y-4">
         {refunds.map((refund: Refund) => (
-          <RefundCard
-            key={refund.id}
-            refund={refund}
-            onViewDetails={() => onViewDetails?.(refund.id, operator_id)}
-            onApprove={onApprove}
-            onReject={onReject}
-          />
+          <RefundCard key={refund.id} refund={refund} />
         ))}
       </div>
 
@@ -368,20 +246,12 @@ export default function OperatorRefundList({
           </Button>
         </div>
       )}
-      <RefundDetailDialog
-        operator_id={user?.organization_id || ""}
+      {/* <RefundDetailDialog
+        agent_id={user? || ""}
         isOpen={open}
         onOpenChange={setOpen}
         refund_id={selectedRefundId}
-      />
-      <RefundForm
-        open={openRefundForm}
-        onOpenChange={setOpenRefundForm}
-        refund_id={selectedRefundId}
-        operator_id={user?.organization_id || ""}
-        method={method}
-        OnSucess={refetch}
-      />
+      /> */}
     </div>
   );
 }

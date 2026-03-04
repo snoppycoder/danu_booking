@@ -1,5 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+  agentApi,
+  DanuAgentApi,
   kycApi,
   operatorApi,
   passengerApi,
@@ -402,7 +404,38 @@ export const useOperatorAgentDetail = (
     enabled: !!operator_id && !!agent_id,
   });
 };
-export const useRefundList = (
+
+export const useDanuAgentRefundList = (
+  agent_id: string,
+  page?: number,
+  per_page?: number,
+) => {
+  return useQuery({
+    queryKey: ["danu_agent_refund_list", agent_id, page, per_page],
+    queryFn: async () => {
+      const res = await DanuAgentApi.getRefundList(agent_id, page, per_page);
+      return res.items as Refund[];
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!agent_id,
+  });
+};
+export const useAgentRefundList = (
+  organzation_id: string,
+  page?: number,
+  per_page?: number,
+) => {
+  return useQuery({
+    queryKey: ["danu_agent_refund_list", organzation_id, page, per_page],
+    queryFn: async () => {
+      const res = await agentApi.getRefundList(organzation_id, page, per_page);
+      return res.items as Refund[];
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!organzation_id,
+  });
+};
+export const useOperatorRefundList = (
   operator_id: string,
   page?: number,
   per_page?: number,
