@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import type { Bus, Passenger, Seat } from "@/lib/model";
 import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
+import Image from "next/image";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -93,6 +94,7 @@ export default function GuestSeatLayoutDialog({
     acc[seat.row].push(seat);
     return acc;
   }, {});
+  console.log(grouped, "here");
 
   Object.values(grouped).forEach((row) => row.sort((a, b) => a.col - b.col));
 
@@ -119,11 +121,10 @@ export default function GuestSeatLayoutDialog({
           )} */}
 
             <div className="grid gap-2">
-              <div className="flex justify-start pl-6 mb-2">
-                {/* <div className="w-10 h-10 flex items-center justify-center text-xs font-bold">
-                <SteeringWheel />
-              </div> */}
+              <div className="w-18 h-18 mb-1 flex items-center justify-center text-xs font-bold">
+                <img src="/steering-wheel.png" alt={"steering wheel"} />
               </div>
+
               <div className="flex flex-col gap-2">
                 {Object.entries(grouped).map(([rowNumber, rowSeats]) => (
                   <div
@@ -132,7 +133,6 @@ export default function GuestSeatLayoutDialog({
                   >
                     {rowSeats.map((seat, index) => (
                       <>
-                        {/* aisle gap between col 2 and 3 */}
                         {rowSeats.length === 4 && index === 2 && (
                           <div className="w-9" />
                         )}
@@ -143,14 +143,10 @@ export default function GuestSeatLayoutDialog({
                             setMultiSelectSeats((prev) => {
                               const isSelected = prev.includes(seat.seat_code);
 
-                              // If already selected → remove
                               if (isSelected) {
                                 return prev.filter((s) => s !== seat.seat_code);
                               }
 
-                              // If not selected AND we reached max → replace last seat
-
-                              // Otherwise just add
                               return [...prev, seat.seat_code];
                             });
                           }}
@@ -199,7 +195,7 @@ export default function GuestSeatLayoutDialog({
             disabled={multiSelectSeats.length === 0}
             onClick={handleConfirm}
           >
-            Confirm{" "}
+            Confirm
             {multiSelectSeats.length > 0
               ? `${multiSelectSeats.length} Seat${multiSelectSeats.length !== 1 ? "s" : ""}`
               : "Seats"}

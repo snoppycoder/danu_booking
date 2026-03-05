@@ -95,8 +95,8 @@ export function CreateOperatorAgentDialog({
       <Toaster richColors position="top-right" />
 
       <DialogTrigger asChild>
-        <Button variant="default" className="flex gap-2.5">
-          <Plus className="w-4 h-4" /> Add Operator Agent
+        <Button variant="default" className="flex gap-2.5 mr-4">
+          <Plus className="w-4 h-4" /> Add Agent
         </Button>
       </DialogTrigger>
 

@@ -14,6 +14,7 @@ export function proxy(request: NextRequest) {
   const isNextInternal = pathname.startsWith("/_next");
 
   const public_paths = [
+    "/",
     "/login",
     "/signup",
     "/guest",
@@ -68,8 +69,18 @@ export function proxy(request: NextRequest) {
   if (pathname.startsWith("/operator-agent") && userRole !== "agent_admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
-  if (pathname.startsWith("/agent") && userRole !== "agent_admin") {
-    console.log("here");
+  if (
+    pathname.startsWith("/agent") &&
+    userRole !== "agent_admin" &&
+    decoded.agent_type !== "agent-admin"
+  ) {
+    return NextResponse.redirect(new URL("/unauthorized", request.url));
+  }
+  if (
+    pathname.startsWith("/operator-agent") &&
+    userRole !== "agent_admin" &&
+    decoded.agent_type !== "operator-agent-admin"
+  ) {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
   if (pathname.startsWith("/operator/") && userRole !== "operator_admin") {
