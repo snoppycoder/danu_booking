@@ -60,7 +60,14 @@ export default function Sidebar() {
         { label: "Agent KYC Approval", href: "/superadmin/agent/kyc" },
       ],
     },
-    { icon: TicketCheck, label: "Lottery", href: "/superadmin/lottery" },
+    {
+      icon: TicketCheck,
+      label: "Lottery",
+      subItems: [
+        { label: "Lottery List", href: "/superadmin/lottery" },
+        { label: "Draw Lottery", href: "/superadmin/lottery/draw" },
+      ],
+    },
     { icon: AlertCircle, label: "Settings", href: "/superadmin/settings" },
   ];
 

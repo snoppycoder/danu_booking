@@ -497,6 +497,46 @@ export const superAdminApi = {
     return response.data;
   },
 
+  drawLottery: async (from_date?: string, to_date?: string) => {
+    const response = await api.get(`/admin/lottery/random-ticket`, {
+      params: {
+        from_date,
+        to_date,
+      },
+    });
+    return response.data as {
+      lottery_number: string;
+      ticket_id: string;
+      ticket: {
+        ticket_id: string;
+        status: string;
+        created_at: string;
+      };
+      passenger: {
+        name: string;
+        email: string;
+        phone: string;
+      };
+      trip: {
+        trip_id: string;
+        route_from: string;
+        route_to: string;
+        departure_date: string;
+        departure_time: string;
+      };
+      operator: {
+        operator_id: string;
+        operator_name: string;
+      };
+      booking: {
+        booking_id: string;
+        booking_reference: string;
+        booking_date: string;
+        booked_by: string | null;
+      };
+    };
+  },
+
   /**
    * This is the user operation below
    */
