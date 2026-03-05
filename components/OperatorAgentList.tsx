@@ -55,6 +55,7 @@ import UserDetail from "./UserDetail";
 import { useAuth } from "@/lib/authContext";
 import { CreateOperatorAgentDialog } from "./AddOperatorAgentModal";
 import { OperatorAgentDetailDialog } from "./OperatorAgentDetail";
+import UpdateAgentForm, { UpdateAgentDto } from "./UpdateAgentForm";
 
 export default function OperatorAgentList() {
   const [displayCount, setDisplayCount] = useState("10");
@@ -66,10 +67,19 @@ export default function OperatorAgentList() {
   const [spinning, setSpinning] = useState(false);
   const [_operator, setOperatorId] = useState("");
 
+  const [open, setOpen] = useState(false);
+
   const { user } = useAuth();
 
   const [disableOpen, setDisableOpen] = useState(false);
   const [detail, setDetail] = useState<OperatorAgent | null>(null);
+
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteId, setDeleteId] = useState<string | null>(null);
+
+  const [detailUpdate, setDetailUpdate] = useState<UpdateAgentDto | null>();
+
+  const [updateId, setUpdateId] = useState<string>("");
 
   const { data, isLoading, refetch } = useOperatorAgent(
     user?.organization_id || "",
@@ -133,7 +143,30 @@ export default function OperatorAgentList() {
     await refetch();
     setSpinning(false);
   }
+  async function handleUpdateOperatorAgent(id: string): Promise<void> {
+    try {
+      setUpdateId(id);
+      const res = await operatorApi.getOperatorAgentDetail(
+        user?.organization_id || "",
+        id,
+      );
+      const body: UpdateAgentDto = {
+        first_name: res.first_name,
+        last_name: res.last_name,
+        is_active: res.is_active,
+        email: res.email,
+        password: "",
+        phone: res.phone,
+      };
 
+      setDetailUpdate(body);
+      console.log(body, "here");
+
+      setOpen(true);
+    } catch (err) {
+      console.log(err);
+    }
+  }
   async function handleDeleteOperatorAgent(id: string): Promise<void> {
     try {
       await operatorApi.deleteOperatorAgent(user?.organization_id || "", id);
@@ -281,7 +314,16 @@ export default function OperatorAgentList() {
                               View
                             </DropdownMenuItem>
                             <DropdownMenuItem
-                              onClick={() => handleDeleteOperatorAgent(u.id)}
+                              onClick={() => handleUpdateOperatorAgent(u.id)}
+                              className="text-amber-600"
+                            >
+                              Update
+                            </DropdownMenuItem>
+                            <DropdownMenuItem
+                              onClick={() => {
+                                setDeleteId(u.id);
+                                setDeleteOpen(true);
+                              }}
                               className="text-red-500"
                             >
                               Delete
@@ -358,6 +400,48 @@ export default function OperatorAgentList() {
           agentData={detail}
           open={detailToggle}
           setOpen={setDetailToggle}
+        />
+      )}
+      <Dialog open={deleteOpen} onOpenChange={setDeleteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete Operator Agent</DialogTitle>
+          </DialogHeader>
+
+          <p className="text-sm text-muted-foreground">
+            Are you sure you want to delete this operator agent? This action
+            cannot be undone.
+          </p>
+
+          <DialogFooter className="mt-4">
+            <Button variant="outline" onClick={() => setDeleteOpen(false)}>
+              Cancel
+            </Button>
+
+            <Button
+              variant="destructive"
+              onClick={async () => {
+                if (!deleteId) return;
+
+                await handleDeleteOperatorAgent(deleteId);
+
+                setDeleteOpen(false);
+                setDeleteId(null);
+              }}
+            >
+              Delete
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      {detailUpdate && (
+        <UpdateAgentForm
+          body={detailUpdate}
+          onSubmit={refetch}
+          operator_id={user?.organization_id!}
+          agent_id={updateId}
+          open={open}
+          setOpen={setOpen}
         />
       )}
     </div>

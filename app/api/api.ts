@@ -1,5 +1,6 @@
 // "use server";
 
+import { UpdateAgentDto } from "@/components/UpdateAgentForm";
 import {
   deleteAllCookies,
   getAccessToken,
@@ -1023,6 +1024,22 @@ export const operatorApi = {
     } catch (error) {
       console.log(error, "error from getRefundList func");
       throw error;
+    }
+  },
+  updateAgentInfo: async (
+    operator_id: string,
+    agent_id: string,
+    body: UpdateAgentDto,
+  ) => {
+    try {
+      const response = await api.patch(
+        `/operator/${operator_id}/agents/${agent_id}`,
+        body,
+      );
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
   },
   getRefundDetail: async (operator_id: string, refund_id: string) => {
