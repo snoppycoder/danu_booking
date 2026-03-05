@@ -10,7 +10,7 @@ import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
-import { useDrawLottery } from "@/components/Query";
+
 import { superAdminApi } from "@/app/api/api";
 
 export interface LotteryDTO {

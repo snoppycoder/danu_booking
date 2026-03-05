@@ -29,9 +29,8 @@ export function proxy(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value;
   const decoded = token ? decodeJWT(token) : null;
   const userRole = decoded?.roles?.[0];
-
+  console.log(decoded, "here");
   if (isAuthPage) {
-    console.log(token, "token from proxy");
     if (userRole) {
       if (userRole === "super_admin")
         return NextResponse.redirect(new URL("/superadmin", request.url));
@@ -39,8 +38,14 @@ export function proxy(request: NextRequest) {
         return NextResponse.redirect(new URL("/operator", request.url));
       if (userRole === "passenger")
         return NextResponse.redirect(new URL("/passenger", request.url));
-      // if (userRole === "agent")
-      //   return NextResponse.redirect(new URL("/passenger", request.url));
+      if (userRole === "agent" && decoded.agent_type == "operator-agent-admin")
+        return NextResponse.redirect(
+          new URL("/operator-agent/ticket-booking", request.url),
+        );
+      if (userRole === "agent" && decoded.agent_type == "agent-admin")
+        return NextResponse.redirect(
+          new URL("/agent/ticket-booking", request.url),
+        );
     }
     return NextResponse.next();
   }
@@ -56,7 +61,7 @@ export function proxy(request: NextRequest) {
 
     return NextResponse.redirect(new URL("/guest", request.url));
   }
-  console.log(userRole, pathname);
+
   if (pathname.startsWith("/superadmin") && userRole !== "super_admin") {
     return NextResponse.redirect(new URL("/unauthorized", request.url));
   }
