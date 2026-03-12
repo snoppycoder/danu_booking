@@ -108,12 +108,6 @@ api.interceptors.response.use(
               window.location.href = "/login";
               break;
 
-              /**
-               * Note to fur
-               */
-
-              break;
-
             case "SESSION_INVALID":
               console.error("Session invalid — clearing UI state");
               // Clear session from UI/local storage
@@ -131,6 +125,7 @@ api.interceptors.response.use(
 
             default:
               console.error("Unhandled 401 error:", data);
+              window.location.href = "/login";
               throw error;
           }
         } else if (status === 403) {
