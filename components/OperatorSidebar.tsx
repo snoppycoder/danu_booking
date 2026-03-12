@@ -23,6 +23,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { TrendingUp } from "@mui/icons-material";
 
 const menuItems = [
   {
@@ -46,9 +47,9 @@ const menuItems = [
     icon: Users,
   },
   {
-    title: "Schedules",
-    url: "/schedules",
-    icon: Calendar,
+    title: "Report",
+    url: "/operator/report",
+    icon: TrendingUp,
   },
   {
     title: "Drivers",

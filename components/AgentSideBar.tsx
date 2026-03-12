@@ -11,6 +11,7 @@ import {
   DollarSign,
   ChartBar,
   TrendingUp,
+  TicketCheck,
 } from "lucide-react";
 import {
   Sidebar,
@@ -34,6 +35,11 @@ const menuItems = [
     icon: Ticket,
   },
   {
+    title: "Booked Tickets",
+    url: "/agent/booked",
+    icon: TicketCheck,
+  },
+  {
     title: "Refund List",
     url: "/agent/refund-list",
     icon: DollarSign,
@@ -43,11 +49,6 @@ const menuItems = [
     url: "/agent/report",
     icon: TrendingUp,
   },
-  // {
-  //   title: "KYC Documents",
-  //   url: "/operator/kyc",
-  //   icon: ScanFace,
-  // },
 ];
 
 export function AgentSideBar() {

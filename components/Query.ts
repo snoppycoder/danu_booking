@@ -386,15 +386,36 @@ export const useOperatorAgent = (
   });
 };
 
-// export const useDrawLottery = (from_date?: string, to_date?: string) => {
-//   return useQuery({
-//     queryKey: ["lottery_draw", from_date, to_date],
-//     queryFn: async () => {
-//       const res = await superAdminApi.drawLottery(from_date, to_date);
-//       return res;
-//     },
-//   });
-// };
+export const useOperatorReport = (
+  operator_id: string,
+  page: number,
+  per_page: number,
+  from_date?: string,
+  to_date?: string,
+) => {
+  return useQuery({
+    queryKey: [
+      "operator_report",
+      operator_id,
+      page,
+      per_page,
+      from_date,
+      to_date,
+    ],
+    queryFn: async () => {
+      const res = await operatorApi.getReport(
+        operator_id,
+        page,
+        per_page,
+        from_date,
+        to_date,
+      );
+      return res;
+    },
+    enabled: !!operator_id,
+    staleTime: 1000 * 60 * 5,
+  });
+};
 
 export const useOperatorAgentDetail = (
   operator_id: string,

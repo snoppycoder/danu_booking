@@ -355,6 +355,8 @@ export const authAPI = {
     } catch (error) {
       await deleteAllCookies();
       console.log(error);
+    } finally {
+      window.location.replace("/login");
     }
   },
   whoAmI: async () => {
@@ -995,12 +997,37 @@ export const operatorApi = {
     },
     operator_id: string,
   ) => {
-    console.log("data to send", operator_id, body);
     try {
       const response = await api.post(`/operator/${operator_id}/buses`, body);
       return response.data;
     } catch (error) {
       throw error;
+    }
+  },
+  getReport: async (
+    operator_id: string,
+    page: number,
+    per_page: number,
+    from_date?: string,
+    to_date?: string,
+  ) => {
+    try {
+      const response = await api.get(
+        `/operator/${operator_id}/reports/revenue`,
+        {
+          params: {
+            page,
+            per_page,
+            from_date,
+            to_date,
+          },
+        },
+      );
+      console.log(response.data, "data");
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
   },
 
