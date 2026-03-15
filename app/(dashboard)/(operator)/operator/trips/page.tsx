@@ -126,6 +126,7 @@ export default function TripManagement() {
 
   const filteredTrips = trips.filter(
     (trip) =>
+      !searchQuery ||
       trip.route.route_from == searchQuery ||
       trip.route.route_to == searchQuery ||
       trip.driver.name == searchQuery ||
@@ -143,12 +144,12 @@ export default function TripManagement() {
     (error as { response: { status: number } }).response?.status === 403;
 
   const formatDate = (dateString: string): string => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString("en-US", {
+    const data = new Intl.DateTimeFormat("en-US", {
       month: "short",
       day: "numeric",
       year: "numeric",
-    });
+    }).format(new Date(dateString));
+    return data;
   };
 
   const formatTime = (dateString: string): string => {
@@ -302,7 +303,7 @@ export default function TripManagement() {
 
         {/* Empty State */}
         {!isPageLoading && filteredTrips.length === 0 && (
-          <Card className="p-6">
+          <Card className="p-12">
             <div className="text-center">
               <p className="text-muted-foreground">No trips found</p>
             </div>
@@ -338,11 +339,11 @@ export default function TripManagement() {
                     <div className="flex items-center gap-3 rounded-md border p-3">
                       <Calendar className="size-4 text-muted-foreground" />
                       <div>
-                        {/* <div className="text-sm font-medium">
-                          {formatDate(trip.departure_time)}
-                        </div> */}
+                        <div className="text-sm font-medium">
+                          {formatDate(trip.start_date)}
+                        </div>
                         <div className="text-xs text-muted-foreground">
-                          {formatTime(trip.departure_time)}
+                          {formatDate(trip.end_date)}
                         </div>
                       </div>
                     </div>
