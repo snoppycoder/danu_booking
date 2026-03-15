@@ -1,19 +1,16 @@
 "use client";
 
-import { useEffect } from "react";
-import { Resolver, useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
-import * as z from "zod";
+import { useForm, Controller } from "react-hook-form";
+import { Button } from "@/components/ui/button";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
-  DialogFooter,
   DialogHeader,
   DialogTitle,
+  DialogTrigger,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
 import {
   Select,
   SelectContent,
@@ -21,289 +18,274 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import { Bus, Driver, Route, Trip, User } from "@/lib/model";
+import { Bus, Driver, RouteDTO, Trip } from "@/lib/model";
+import { operatorApi } from "@/app/api/api";
 import { useAuth } from "@/lib/authContext";
+import { toast } from "sonner";
 
-const tripSchema = z.object({
-  route_from: z.string().min(2, "Starting location is required"),
-  route_to: z.string().min(2, "Destination is required"),
-  departure_at: z.string().min(1, "Departure date and time is required"),
-  price: z.coerce.number().min(0, "Price must be a positive number"),
-  bus_id: z.string().min(1, "Please select a bus"),
-  driver_id: z.string().min(1, "Please select a driver"),
-});
+type FormValues = {
+  route_id: string;
+  bus_id: string;
+  driver_id: string;
+  departure_time: string;
+  price: number;
+  freq: string;
+  interval: number;
+  byweekday: string;
+  bymonthday: string;
+  bymonth: string;
+  until: string;
+  count: number;
+  wkst: number;
+  start_date: string;
+  end_date: string;
+};
 
-type TripFormData = z.infer<typeof tripSchema>;
-
-interface TripDialogProps {
+type Props = {
   open: boolean;
-  onOpenChange: (open: boolean) => void;
-  onSubmit: (data: TripFormData) => void;
-  buses: Bus[];
+  setOpen: React.Dispatch<React.SetStateAction<boolean>>;
   drivers: Driver[];
-  trip?: Trip;
-}
+  routes: RouteDTO[];
+  buses: Bus[];
+};
 
-export function TripDialog({
+export function ScheduleDialog({
   open,
-  onOpenChange,
-  onSubmit,
-  buses,
+  setOpen,
   drivers,
-  trip,
-}: TripDialogProps) {
-  const isEdit = !!trip;
-  const { user } = useAuth();
-  const filteredBus = buses.filter(
-    (b) => b.operator_id === user?.organization_id && b.bus_status === "active",
-  );
-
-  const form = useForm<TripFormData>({
-    resolver: zodResolver(tripSchema) as Resolver<TripFormData>,
+  routes,
+  buses,
+}: Props) {
+  const {
+    control,
+    register,
+    handleSubmit,
+    reset,
+    formState: { isSubmitting, isValid, errors },
+  } = useForm<FormValues>({
+    mode: "onChange",
     defaultValues: {
-      route_from: "",
-      route_to: "",
-      departure_at: "",
-      price: 0,
+      route_id: "",
       bus_id: "",
       driver_id: "",
+      freq: "",
     },
   });
 
-  const selectedBusId = form.watch("bus_id");
-  const selectedBus = filteredBus.find((b) => b.id === selectedBusId);
+  const { user } = useAuth();
+  const onSubmit = async (data: FormValues) => {
+    try {
+      await operatorApi.createSchedule(user?.organization_id ?? "", data);
 
-  // Filter drivers by selected bus operator
-  const filteredDrivers = selectedBus
-    ? drivers.filter((d) => d.operator_id === selectedBus.operator_id)
-    : [];
+      toast.success("Schedule created successfully");
 
-  // Reset form when dialog opens/closes or trip changes
-  useEffect(() => {
-    if (open && trip) {
-      // Convert ISO string to datetime-local format
-      const departureDate = new Date(trip.departure_at);
-      const localDateTime = new Date(
-        departureDate.getTime() - departureDate.getTimezoneOffset() * 60000,
-      )
-        .toISOString()
-        .slice(0, 16);
+      setOpen(false);
 
-      form.reset({
-        route_from: trip.route_from,
-        route_to: trip.route_to,
-        departure_at: localDateTime,
-        price: trip.price,
-        bus_id: trip.bus_id,
-        driver_id: trip.driver_id,
-      });
-    } else if (open && !trip) {
-      form.reset({
-        route_from: "",
-        route_to: "",
-        departure_at: "",
-        price: 0,
-        bus_id: "",
-        driver_id: "",
-      });
+      reset();
+    } catch (error) {
+      console.error(error);
+      toast.error("Failed to create schedule");
     }
-  }, [open, trip, form]);
-
-  // Reset driver when bus changes
-  useEffect(() => {
-    if (selectedBusId && !isEdit) {
-      const currentDriverId = form.getValues("driver_id");
-      const isDriverValid = filteredDrivers.some(
-        (d) => d.id === currentDriverId,
-      );
-      if (!isDriverValid) {
-        form.setValue("driver_id", "");
-      }
-    }
-  }, [selectedBusId, filteredDrivers, form, isEdit]);
-
-  const handleSubmit = (data: TripFormData) => {
-    // Convert datetime-local to ISO string
-    const formattedData = {
-      ...data,
-      departure_at: new Date(data.departure_at).toISOString(),
-      operator_id: selectedBus?.operator_id || "",
-    };
-    onSubmit(formattedData);
-    form.reset();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl">
+    <Dialog open={open} onOpenChange={setOpen}>
+      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-scroll scrollbar-hide">
         <DialogHeader>
-          <DialogTitle>{isEdit ? "Edit Trip" : "Create New Trip"}</DialogTitle>
-          <DialogDescription>
-            {isEdit
-              ? "Update the trip information below."
-              : "Fill in the details to create a new trip."}
-          </DialogDescription>
+          <DialogTitle>Create Bus Schedule</DialogTitle>
         </DialogHeader>
 
-        <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(handleSubmit)}
-            className="space-y-4"
-          >
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Route From */}
-              <FormField
-                control={form.control}
-                name="route_from"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>From</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Starting location" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+        <form
+          onSubmit={handleSubmit(onSubmit)}
+          className="grid grid-cols-2 gap-4"
+        >
+          {/* Route Dropdown */}
+          <div className="flex flex-col gap-2">
+            <Label>Route</Label>
+            <Controller
+              name="route_id"
+              defaultValue=""
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a route" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {routes && routes.length > 0 ? (
+                      routes.map((r) => (
+                        <SelectItem key={r.id} value={r.id ?? ""}>
+                          {r.route_from} - {r.route_to}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="Null" disabled>
+                        Not available
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
 
-              {/* Route To */}
-              <FormField
-                control={form.control}
-                name="route_to"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>To</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Destination" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid gap-4 md:grid-cols-2">
-              {/* Departure Date/Time */}
-              <FormField
-                control={form.control}
-                name="departure_at"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Departure Date & Time</FormLabel>
-                    <FormControl>
-                      <Input type="datetime-local" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {/* Price */}
-              <FormField
-                control={form.control}
-                name="price"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Price (ETB)</FormLabel>
-                    <FormControl>
-                      <Input
-                        type="number"
-                        placeholder="0"
-                        min="0"
-                        step="1"
-                        {...field}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            {/* Bus Selection */}
-            <FormField
-              control={form.control}
+          {/* Bus Dropdown */}
+          <div className="flex flex-col gap-2">
+            <Label>Bus</Label>
+            <Controller
               name="bus_id"
+              defaultValue=""
+              control={control}
+              rules={{ required: true }}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Bus</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose a bus" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {filteredBus.map((bus) => (
-                        <SelectItem key={bus.id} value={bus.id}>
-                          {bus.plate_no} | {bus.side_no}
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a bus" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {buses && buses.length > 0 ? (
+                      buses.map((b) => (
+                        <SelectItem key={b.id} value={b.id}>
+                          {b.plate_no}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
+                      ))
+                    ) : (
+                      <SelectItem value="Null" disabled>
+                        Not available
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
               )}
             />
+          </div>
 
-            {/* Driver Selection */}
-            <FormField
-              control={form.control}
+          {/* Driver Dropdown */}
+          <div className="flex flex-col gap-2">
+            <Label>Driver</Label>
+            <Controller
               name="driver_id"
+              defaultValue=""
+              control={control}
+              rules={{ required: true }}
               render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Select Driver</FormLabel>
-                  <Select
-                    onValueChange={field.onChange}
-                    value={field.value}
-                    disabled={!selectedBusId}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue
-                          placeholder={
-                            selectedBusId
-                              ? "Choose a driver"
-                              : "Select a bus first"
-                          }
-                        />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {filteredDrivers.map((driver) => (
-                        <SelectItem key={driver.id} value={driver.id}>
-                          {driver.first_name ?? ""} {driver.last_name ?? ""}
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a driver" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {drivers && drivers.length > 0 ? (
+                      drivers.map((d) => (
+                        <SelectItem key={d.id} value={d.id}>
+                          {d.first_name} {d.last_name}
                         </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
+                      ))
+                    ) : (
+                      <SelectItem value="Null" disabled>
+                        Not available
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
               )}
             />
+          </div>
 
-            <DialogFooter>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => onOpenChange(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">
-                {isEdit ? "Update Trip" : "Create Trip"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </Form>
+          {/* The rest of your inputs */}
+          <div className="flex flex-col gap-2">
+            <Label>Departure Time</Label>
+            <Input
+              required
+              className="text-emerald-600"
+              type="time"
+              {...register("departure_time")}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Price</Label>
+            <Input required type="number" {...register("price")} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Frequency</Label>
+            <Controller
+              defaultValue=""
+              name="freq"
+              control={control}
+              rules={{ required: true }}
+              render={({ field }) => (
+                <Select value={field.value} onValueChange={field.onChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select frequency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="DAILY">Daily</SelectItem>
+                    <SelectItem value="WEEKLY">Weekly</SelectItem>
+                    <SelectItem value="MONTHLY">Monthly</SelectItem>
+                  </SelectContent>
+                </Select>
+              )}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Interval</Label>
+            <Input
+              min={1}
+              required
+              type="number"
+              {...register("wkst", { valueAsNumber: true })}
+            />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>By Weekday</Label>
+            <Input required {...register("byweekday")} placeholder="MO,TU,WE" />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>By Month Day</Label>
+            <Input required {...register("bymonthday")} placeholder="1,15" />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>By Month</Label>
+            <Input required {...register("bymonth")} placeholder="1-12" />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Until</Label>
+            <Input required type="datetime-local" {...register("until")} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Count</Label>
+            <Input required type="number" {...register("count")} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Week Start</Label>
+            <Input required type="number" {...register("wkst")} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>Start Date</Label>
+            <Input required type="date" {...register("start_date")} />
+          </div>
+
+          <div className="flex flex-col gap-2">
+            <Label>End Date</Label>
+            <Input required type="date" {...register("end_date")} />
+          </div>
+
+          <div className="col-span-2 flex justify-end mt-4">
+            <Button type="submit" disabled={!isValid || isSubmitting}>
+              {isSubmitting ? "Saving..." : "Save Schedule"}
+            </Button>
+          </div>
+        </form>
       </DialogContent>
     </Dialog>
   );

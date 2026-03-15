@@ -607,6 +607,61 @@ export const superAdminApi = {
     const response = await api.post(`/admin/users/${id}/enable`);
     return response.data;
   },
+  addRoute: async (body: {
+    route_from: string;
+    route_to: string;
+    distance_km: number;
+    estimated_duration_minutes: number;
+  }) => {
+    try {
+      const response = await api.post(`/admin/routes/`, body);
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  listRoutes: async (page?: number, per_page?: number) => {
+    try {
+      const response = await api.get("/admin/routes", {
+        params: {
+          page,
+          per_page,
+        },
+      });
+      console.log(response.data, "here");
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  getRouteDetail: async (route_id: string) => {
+    try {
+      const response = await api.get(`/admin/routes/${route_id}`);
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  updateRoute: async (
+    route_id: string,
+    body: {
+      route_from?: string;
+      route_to?: string;
+      distance_km?: number;
+      estimated_duration_minutes?: number;
+    },
+  ) => {
+    try {
+      const response = await api.patch(`/admin/routes/${route_id}`, body);
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   /**
    * This is the Agent operation below
    */
@@ -816,17 +871,24 @@ export const passengerApi = {
     page?: number;
     per_page?: number;
   }) => {
-    const response = await api.get("/guest/search", {
-      params: {
-        route_from: body.route_from,
-        route_to: body.route_to,
-        departure_date: body.departure_date,
-        page: body.page,
-        per_page: body.per_page,
-      },
-    });
-    console.log(response.data);
-    return response.data;
+    console.log(body, "body to search");
+    try {
+      const response = await api.get("/guest/routes/search", {
+        params: {
+          from_city: body.route_from,
+          to_city: body.route_to,
+          departure_date: body.departure_date,
+          page: body.page,
+          per_page: body.per_page,
+        },
+      });
+      console.log(response.data);
+
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   },
 
   guestHoldBooking: async (
@@ -983,6 +1045,33 @@ export const agentApi = {
   },
 };
 export const operatorApi = {
+  createSchedule: async (
+    operator_id: string,
+    body: {
+      route_id: string;
+      bus_id: string;
+      driver_id: string;
+      departure_time: string;
+      price: number;
+      freq: string;
+      interval: number;
+      byweekday: string;
+      bymonthday: string;
+      bymonth: string;
+      until: string;
+      count: number;
+      wkst: number;
+      start_date: string;
+      end_date: string;
+    },
+  ) => {
+    try {
+      await api.post(`/operator/${operator_id}/schedules`, body);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   createBus: async (
     body: {
       plate_no: string;
@@ -1231,12 +1320,14 @@ export const operatorApi = {
     );
     return response.data;
   },
+
+  getAllSchedules: async () => {},
   getAllTrips: async (
     operator_id: string,
     page?: number,
     per_page?: number,
   ) => {
-    const response = await api.get(`/operator/${operator_id}/trips`, {
+    const response = await api.get(`/operator/${operator_id}/schedules`, {
       params: { page, per_page },
     });
     return response.data;

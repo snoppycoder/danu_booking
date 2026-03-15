@@ -151,7 +151,7 @@ export default function OperatorList() {
   }
   async function handleAssignOperatorToUser(userId: string) {
     try {
-      const res = await superAdminApi.assignOperatorToUser(operatorId, userId);
+      await superAdminApi.assignOperatorToUser(operatorId, userId);
       toast.success("Successfully assigned the user to the operator");
       setOpen(false);
     } catch (error) {

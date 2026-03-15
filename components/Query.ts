@@ -20,11 +20,13 @@ import {
   OperatorAgent,
   Refund,
   RefundDetail,
+  RouteDTO,
   SearchRouteResponse,
   Session,
   Trip,
   User,
 } from "@/lib/model";
+import { ScheduleDTO } from "@/app/(dashboard)/(operator)/operator/trips/page";
 export interface Trips_s {
   id: string;
   trip_id: string;
@@ -158,7 +160,7 @@ export const useTrips = (
   per_page: number = 10,
 ) => {
   return useQuery<{
-    items: Trip[];
+    items: ScheduleDTO[];
     total: number;
     page: number;
   }>({
@@ -171,7 +173,7 @@ export const useTrips = (
       const res = await operatorApi.getAllTrips(operator_id, page, per_page);
 
       return {
-        items: res.items as Trips_s[],
+        items: res.items as ScheduleDTO[],
         total: res.total,
         page: res.page,
       };
@@ -179,6 +181,21 @@ export const useTrips = (
     staleTime: 1000 * 60 * 5,
     retry: false,
     enabled: !!operator_id,
+  });
+};
+export const useRoutes = (page?: number, per_page?: number) => {
+  return useQuery({
+    queryKey: ["routes", page, per_page],
+    queryFn: async () => {
+      const res = await superAdminApi.listRoutes();
+      console.log(res);
+      return {
+        items: res.items as RouteDTO[],
+        total: res.total,
+        page: res.page,
+      };
+    },
+    staleTime: 5 * 60 * 1000,
   });
 };
 

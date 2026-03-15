@@ -30,7 +30,7 @@ export function proxy(request: NextRequest) {
   const token = request.cookies.get("access_token")?.value;
   const decoded = token ? decodeJWT(token) : null;
   const userRole = decoded?.roles?.[0];
-  console.log(decoded, "here");
+
   if (isAuthPage) {
     if (userRole) {
       if (userRole === "super_admin")

@@ -298,6 +298,13 @@ export type Passenger = {
   phone: string;
   id_number: string;
 };
+export interface RouteDTO {
+  id: string;
+  route_from: string;
+  route_to: string;
+  distance_km: number;
+  estimated_duration_minutes: number;
+}
 
 export interface Trip {
   id?: string;

@@ -279,9 +279,9 @@ export default function OperatorRefundList({
     return (
       <Card className="p-12 text-center">
         <p className="text-gray-500 mb-2">No refunds found</p>
-        <p className="text-sm text-gray-400">
+        {/* <p className="text-sm text-gray-400">
           Try adjusting your filters or date range
-        </p>
+        </p> */}
       </Card>
     );
   }

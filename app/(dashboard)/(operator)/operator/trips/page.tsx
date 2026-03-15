@@ -19,7 +19,7 @@ import {
   Plus,
   ArrowRight,
 } from "lucide-react";
-import { TripDialog } from "@/components/TripDialog";
+
 import { TripDetailDialog } from "@/components/TripDetailDialog";
 import {
   useCreateTrip,
@@ -28,13 +28,58 @@ import {
   useTrips,
 } from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
-import { Bus, CreateTripPayload, Driver, Trip } from "@/lib/model";
-import { operatorApi } from "@/app/api/api";
+import { Bus, CreateTripPayload, Driver, RouteDTO, Trip } from "@/lib/model";
+import { operatorApi, superAdminApi } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
 import AccountNotActiveBanner from "@/components/AccountBanner";
-
+import { ScheduleDialog } from "@/components/TripDialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+
+export type ScheduleDTO = {
+  id: string;
+
+  operator: {
+    id: string;
+    name: string;
+  };
+
+  route: {
+    id: string;
+    route_from: string;
+    route_to: string;
+  };
+
+  bus: {
+    id: string;
+    plate_no: string;
+  };
+
+  driver: {
+    id: string;
+    name: string;
+  };
+
+  departure_time: string;
+  price: number;
+
+  freq: string;
+  interval: number;
+
+  byweekday: string;
+  bymonthday: string;
+  bymonth: string;
+
+  until: string;
+  count: number;
+  wkst: number;
+
+  start_date: string;
+  end_date: string;
+
+  created_at: string;
+  updated_at: string;
+};
 
 export default function TripManagement() {
   const { user } = useAuth();
@@ -48,10 +93,11 @@ export default function TripManagement() {
     refetch,
     error,
   } = useTrips(user?.organization_id!, currentPage, per_page);
+  console.log(trips_);
 
   const { data: driver_ } = useDrivers(user?.organization_id!);
 
-  const [trips, setTrips] = useState<Trip[]>([]);
+  const [trips, setTrips] = useState<ScheduleDTO[]>([]);
   const [buses, setBuses] = useState<Bus[]>([]);
   const [drivers, setDrivers] = useState<Driver[]>([]);
   const [searchQuery, setSearchQuery] = useState("");
@@ -59,21 +105,34 @@ export default function TripManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [routes, setRoutes] = useState<RouteDTO[]>([]);
 
   const { mutate, isPending, isSuccess } = useCreateTrip();
+
+  useEffect(() => {
+    const fetch = async () => {
+      const res = await superAdminApi.listRoutes();
+      setRoutes(res.items);
+    };
+    fetch();
+  }, []);
 
   useEffect(() => {
     if (buses_) setBuses(buses_);
     if (trips_?.items) setTrips(trips_.items);
     if (driver_) setDrivers(driver_);
   }, [buses_, trips_, driver_]);
+  console.log(trips);
 
-  const filteredTrips = trips.filter((trip) => {
-    const matchesSearch =
-      trip.route_from?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      trip.route_to?.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
+  const filteredTrips = trips.filter(
+    (trip) =>
+      trip.route.route_from == searchQuery ||
+      trip.route.route_to == searchQuery ||
+      trip.driver.name == searchQuery ||
+      trip.bus.plate_no == searchQuery,
+  );
+
+  console.log(filteredTrips, "filtered trips");
 
   const isPageLoading = isLoading || !user?.organization_id;
   const showAccountBanner =
@@ -101,30 +160,30 @@ export default function TripManagement() {
     });
   };
 
-  const handleCreateTrip = (tripData: CreateTripPayload) => {
-    mutate({
-      operator_id: user?.organization_id || "",
-      bus_id: tripData.bus_id,
-      driver_id: tripData.driver_id,
-      route_from: tripData.route_from,
-      route_to: tripData.route_to,
-      departure_at: tripData.departure_at,
-      price: tripData.price,
-    });
-    setIsCreateDialogOpen(false);
-  };
+  // const handleCreateTrip = (tripData: CreateTripPayload) => {
+  //   mutate({
+  //     operator_id: user?.organization_id || "",
+  //     bus_id: tripData.bus_id,
+  //     driver_id: tripData.driver_id,
+  //     route_from: tripData.route_from,
+  //     route_to: tripData.route_to,
+  //     departure_at: tripData.departure_at,
+  //     price: tripData.price,
+  //   });
+  //   setIsCreateDialogOpen(false);
+  // };
 
-  const handleUpdateTrip = (tripData: {
-    route_from: string;
-    route_to: string;
-    departure_at: string;
-    price: number;
-    bus_id: string;
-    driver_id: string;
-  }) => {
-    setIsEditDialogOpen(false);
-    setSelectedTrip(null);
-  };
+  // const handleUpdateTrip = (tripData: {
+  //   route_from: string;
+  //   route_to: string;
+  //   departure_at: string;
+  //   price: number;
+  //   bus_id: string;
+  //   driver_id: string;
+  // }) => {
+  //   setIsEditDialogOpen(false);
+  //   setSelectedTrip(null);
+  // };
 
   const handleDeleteTrip = async (tripId: string) => {
     try {
@@ -140,18 +199,18 @@ export default function TripManagement() {
     }
   };
 
-  const handleViewDetails = (trip: Trip) => {
-    setSelectedTrip(trip);
-    setIsDetailDialogOpen(true);
-  };
+  // const handleViewDetails = (trip: Trip) => {
+  //   setSelectedTrip(trip);
+  //   setIsDetailDialogOpen(true);
+  // };
 
-  const handleEditTrip = (trip: Trip) => {
-    setSelectedTrip(trip);
-    setIsEditDialogOpen(true);
-  };
+  // const handleEditTrip = (trip: Trip) => {
+  //   setSelectedTrip(trip);
+  //   setIsEditDialogOpen(true);
+  // };
 
   const todayTripsCount = trips.filter((trip) => {
-    const tripDate = new Date(trip.departure_at).toDateString();
+    const tripDate = new Date(trip.departure_time).toDateString();
     const today = new Date().toDateString();
     return tripDate === today;
   }).length;
@@ -192,7 +251,7 @@ export default function TripManagement() {
         </div>
 
         {/* Stats */}
-        <div className="grid justify-center gap-4 p-4 md:grid-cols-3">
+        <div className="grid justify-center gap-4 p-4 grid-cols-2 md:grid-cols-3">
           <Card className="px-4 py-8">
             <div className="space-y-1">
               <p className="text-sm text-muted-foreground">Total Trips</p>
@@ -243,7 +302,7 @@ export default function TripManagement() {
 
         {/* Empty State */}
         {!isPageLoading && filteredTrips.length === 0 && (
-          <Card className="p-12">
+          <Card className="p-6">
             <div className="text-center">
               <p className="text-muted-foreground">No trips found</p>
             </div>
@@ -264,12 +323,12 @@ export default function TripManagement() {
                   <div className="flex items-center justify-center gap-4 rounded-lg bg-muted/40 py-3">
                     <div className="flex items-center gap-2 text-lg font-semibold">
                       <MapPin className="size-5 text-primary" />
-                      {trip.route_from}
+                      {trip.route.route_from}
                     </div>
                     <ArrowRight className="size-5 text-muted-foreground" />
                     <div className="flex items-center gap-2 text-lg font-semibold">
                       <MapPin className="size-5 text-primary" />
-                      {trip.route_to}
+                      {trip.route.route_to}
                     </div>
                   </div>
 
@@ -279,11 +338,11 @@ export default function TripManagement() {
                     <div className="flex items-center gap-3 rounded-md border p-3">
                       <Calendar className="size-4 text-muted-foreground" />
                       <div>
-                        <div className="text-sm font-medium">
-                          {formatDate(trip.departure_at)}
-                        </div>
+                        {/* <div className="text-sm font-medium">
+                          {formatDate(trip.departure_time)}
+                        </div> */}
                         <div className="text-xs text-muted-foreground">
-                          {formatTime(trip.departure_at)}
+                          {formatTime(trip.departure_time)}
                         </div>
                       </div>
                     </div>
@@ -317,7 +376,7 @@ export default function TripManagement() {
                 <div className="flex gap-2 lg:flex-col lg:items-end">
                   <Button
                     size="sm"
-                    onClick={() => handleViewDetails(trip)}
+                    // onClick={() => handleViewDetails(trip)}
                     className="w-full lg:w-36"
                   >
                     View Details
@@ -334,12 +393,10 @@ export default function TripManagement() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem onClick={() => handleEditTrip(trip)}>
-                        Edit Trip
-                      </DropdownMenuItem>
+                      <DropdownMenuItem>Edit Trip</DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        onClick={() => handleDeleteTrip(trip.id!)}
+                        // onClick={() => handleDeleteTrip(trip.id!)}
                       >
                         Delete Trip
                       </DropdownMenuItem>
@@ -387,21 +444,21 @@ export default function TripManagement() {
       )}
 
       {/* Dialogs */}
-      <TripDialog
+      {/* <TripDialog
         open={isCreateDialogOpen}
         onOpenChange={setIsCreateDialogOpen}
         onSubmit={handleCreateTrip}
         buses={buses}
         drivers={drivers}
-      />
+      /> */}
 
-      <TripDialog
-        open={isEditDialogOpen}
-        onOpenChange={setIsEditDialogOpen}
-        onSubmit={handleUpdateTrip}
+      <ScheduleDialog
+        open={isCreateDialogOpen}
+        setOpen={setIsCreateDialogOpen}
+        // onSubmit={handleUpdateTrip}
         buses={buses}
         drivers={drivers}
-        trip={selectedTrip!}
+        routes={routes}
       />
 
       {selectedTrip && (

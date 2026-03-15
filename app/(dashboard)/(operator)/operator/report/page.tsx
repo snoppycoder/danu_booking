@@ -2,189 +2,325 @@
 
 import { useState } from "react";
 
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Spinner } from "@/components/ui/spinner";
-import { OperatorDetailReport } from "@/components/OperatorDetailReport";
-import { useOperatorReport } from "@/components/Query";
-import { ReportFiltersBar } from "@/components/ReportFilters";
-import { ReportSummaryCards } from "@/components/ReportSummary";
-import { calculateReportSummary, getTopPerformers } from "@/lib/report-utils";
-import { ReportFilters, OperatorReportResponse, Operator } from "@/lib/reports";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import { Label } from "@/components/ui/label";
 
-export default function ReportsPage() {
-  const [filters, setFilters] = useState<ReportFilters>({
-    operator_id: "",
-    page: 1,
-    per_page: 10,
-  });
+export default function OperatorDashboard() {
+  const [date, setDate] = useState("today");
+  const [busPlate, setBusPlate] = useState("all");
+  const [route, setRoute] = useState("all");
+  const [agent, setAgent] = useState("all");
 
-  const { data, isLoading, error } = useOperatorReport(
-    filters.operator_id,
-    filters.page || 1,
-    filters.per_page || 10,
-    filters.from_date,
-    filters.to_date,
-  );
+  const statsData = [
+    { label: "Today Revenue", value: "847,650 ETB" },
+    { label: "Tickets Sold Today", value: "245" },
+    { label: "Tickets by Agents", value: "156" },
+    { label: "Website/App Sales", value: "89" },
+  ];
 
-  const summary =
-    data && filters.operator_id
-      ? calculateReportSummary(data as OperatorReportResponse)
-      : null;
-
-  const topPerformers =
-    data && filters.operator_id
-      ? getTopPerformers(data as OperatorReportResponse)
-      : null;
-
-  const handleFilterChange = (newFilters: ReportFilters) => {
-    setFilters(newFilters);
-  };
+  const ticketsData = [
+    {
+      no: "T001",
+      plate: "HAB-001",
+      from: "Addis Ababa",
+      to: "Dire Dawa",
+      passenger: "Addis Ababa",
+      seat: "12",
+      sale: "Agent Selem",
+      price: "3650 ETB",
+    },
+    {
+      no: "T002",
+      plate: "HAB-001",
+      from: "Addis Ababa",
+      to: "Dire Dawa",
+      passenger: "Alem",
+      seat: "13",
+      sale: "Website",
+      price: "3650 ETB",
+    },
+    {
+      no: "T003",
+      plate: "HAB-002",
+      from: "Addis Ababa",
+      to: "Dire Dawa",
+      passenger: "Bekane",
+      seat: "14",
+      sale: "Agent Selem",
+      price: "3650 ETB",
+    },
+    {
+      no: "T004",
+      plate: "HAB-002",
+      from: "Addis Ababa",
+      to: "Dire Dawa",
+      passenger: "Marta",
+      seat: "15",
+      sale: "App",
+      price: "3650 ETB",
+    },
+    {
+      no: "T005",
+      plate: "HAB-003",
+      from: "Addis Ababa",
+      to: "Dire Dawa",
+      passenger: "David",
+      seat: "16",
+      sale: "Website",
+      price: "3650 ETB",
+    },
+    {
+      no: "T006",
+      plate: "HAB-003",
+      from: "Addis Ababa",
+      to: "Dire Dawa",
+      passenger: "Sara",
+      seat: "17",
+      sale: "Agent Selem",
+      price: "3650 ETB",
+    },
+  ];
 
   return (
-    <main className="min-h-screen bg-gray-50 p-4 md:p-8">
-      <div className="max-w-7xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            Operator Reports
-          </h1>
-          <p className="text-gray-600">
-            Track and analyze operator performance, bus metrics, and sales data
-          </p>
+    <div className="flex min-h-screen bg-background">
+      {/* Main Content */}
+      <div className="flex-1 overflow-auto">
+        {/* Header */}
+        <div className="bg-white border-b border-border p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold text-foreground">
+                Habesha Bus
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Total Tickets: 10 | Total Revenue: 54,800 ETB
+              </p>
+            </div>
+          </div>
         </div>
 
-        <ReportFiltersBar
-          onFilterChange={handleFilterChange}
-          isLoading={isLoading}
-        />
-
-        {error && (
-          <Card className="p-4 mb-6 bg-red-50 border border-red-200">
-            <p className="text-red-800">
-              Error loading report:{" "}
-              {error instanceof Error ? error.message : "Unknown error"}
-            </p>
-          </Card>
-        )}
-
-        {isLoading ? (
-          <div className="flex justify-center items-center py-12">
-            <Spinner />
-          </div>
-        ) : summary && data ? (
-          <>
-            <ReportSummaryCards summary={summary} />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-8">
-              {topPerformers && (
-                <>
-                  <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                      Top 5 by Revenue
-                    </h3>
-                    <div className="space-y-3">
-                      {topPerformers.topByRevenue.map((op, idx) => (
-                        <div
-                          key={idx}
-                          className="flex justify-between items-center pb-3 border-b border-gray-200"
-                        >
-                          <span className="text-gray-700">{op.name}</span>
-                          <span className="font-semibold text-gray-900">
-                            ${op.revenue.toFixed(2)}
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-
-                  <Card className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">
-                      Top 5 by Tickets Sold
-                    </h3>
-                    <div className="space-y-3">
-                      {topPerformers.topByTickets.map((op, idx) => (
-                        <div
-                          key={idx}
-                          className="flex justify-between items-center pb-3 border-b border-gray-200"
-                        >
-                          <span className="text-gray-700">{op.name}</span>
-                          <span className="font-semibold text-gray-900">
-                            {op.tickets} tickets
-                          </span>
-                        </div>
-                      ))}
-                    </div>
-                  </Card>
-                </>
-              )}
-            </div>
-
-            <div className="mt-8">
-              <Card className="p-6">
-                {data.items.length > 0 ? (
-                  <>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-6">
-                      Detailed Operator Information
-                    </h3>
-                    <div className="space-y-8">
-                      {data.items.map((operator: Operator) => (
-                        <OperatorDetailReport
-                          key={operator.operator_id}
-                          operator={operator}
-                        />
-                      ))}
-                    </div>
-                  </>
-                ) : (
-                  <p className="text-center text-gray-600 py-8">
-                    No data available for the selected filters
-                  </p>
-                )}
+        {/* Stats Cards */}
+        <div className="p-6 space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+            {statsData.map((stat, idx) => (
+              <Card key={idx} className="bg-white border border-border p-4">
+                <div className="flex items-start justify-between mb-4">
+                  <div>
+                    <p className="text-xs text-muted-foreground mb-2">
+                      {stat.label}
+                    </p>
+                    <p className="text-2xl font-bold text-foreground">
+                      {stat.value}
+                    </p>
+                  </div>
+                </div>
               </Card>
+            ))}
+          </div>
+
+          {/* Filters Section */}
+          <Card className="bg-white border border-border p-6">
+            <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg font-semibold text-foreground">
+                  Filters
+                </h2>
+
+                <Button variant="outline" size="sm">
+                  Print
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Date
+                  </Label>
+                  <Select value={date} onValueChange={setDate}>
+                    <SelectTrigger className="bg-background h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="today">Today</SelectItem>
+                      <SelectItem value="yesterday">Yesterday</SelectItem>
+                      <SelectItem value="weekly">Weekly</SelectItem>
+                      <SelectItem value="monthly">Monthly</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Bus Plate
+                  </Label>
+                  <Select value={busPlate} onValueChange={setBusPlate}>
+                    <SelectTrigger className="bg-background h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Bus</SelectItem>
+                      <SelectItem value="hab-001">HAB 001</SelectItem>
+                      <SelectItem value="hab-002">HAB 002</SelectItem>
+                      <SelectItem value="hab-003">HAB 003</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Route
+                  </Label>
+                  <Select value={route} onValueChange={setRoute}>
+                    <SelectTrigger className="bg-background h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Routes</SelectItem>
+                      <SelectItem value="addis-dire">
+                        Addis - Dire Dawa
+                      </SelectItem>
+                      <SelectItem value="addis-adama">Addis - Adama</SelectItem>
+                      <SelectItem value="addis-bahir">
+                        Addis - Bahir Dar
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                    Agent
+                  </Label>
+                  <Select value={agent} onValueChange={setAgent}>
+                    <SelectTrigger className="bg-background h-10">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Agents</SelectItem>
+                      <SelectItem value="agents">Agent</SelectItem>
+                      <SelectItem value="website">Website</SelectItem>
+                      <SelectItem value="app">App</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
 
-            {data.total > data.per_page && (
-              <div className="mt-6 flex justify-center gap-2">
-                <button
-                  onClick={() =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      page: Math.max(1, (prev.page || 1) - 1),
-                    }))
-                  }
-                  disabled={filters.page === 1}
-                  className="px-4 py-2 bg-gray-200 text-gray-900 rounded hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Previous
-                </button>
-                <span className="px-4 py-2 text-gray-700">
-                  Page {filters.page} of{" "}
-                  {Math.ceil(data.total / (data.per_page || 10))}
-                </span>
-                <button
-                  onClick={() =>
-                    setFilters((prev) => ({
-                      ...prev,
-                      page: (prev.page || 1) + 1,
-                    }))
-                  }
-                  disabled={
-                    (filters.page || 1) * (filters.per_page || 10) >= data.total
-                  }
-                  className="px-4 py-2 bg-gray-200 text-gray-900 rounded hover:bg-gray-300 disabled:opacity-50"
-                >
-                  Next
-                </button>
+            {/* Tickets Summary */}
+            <div className="flex items-center justify-between p-4 bg-background rounded border border-border mb-6">
+              <div>
+                <p className="text-sm font-semibold text-foreground">
+                  Tickets Sold
+                </p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Complete list of tickets
+                </p>
               </div>
-            )}
-          </>
-        ) : (
-          <Card className="p-8 text-center">
-            <p className="text-gray-600">
-              Select an operator and apply filters to view reports
-            </p>
+              <div className="text-right">
+                <Table className="">
+                  <TableRow>
+                    <TableHead className="p-2">Tickets Sold</TableHead>
+                    <TableHead className="p-2 ">Revenue</TableHead>
+                  </TableRow>
+                  <TableBody>
+                    <TableRow>
+                      <TableCell className="p-2">6</TableCell>
+                      <TableCell className="p-2">21,700 ETB</TableCell>
+                    </TableRow>
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
+
+            {/* Table */}
+            <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+              <div className="overflow-x-auto">
+                <Table>
+                  <TableHeader>
+                    <TableRow className="border-b border-border bg-muted/30">
+                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                        Ticket No
+                      </TableHead>
+
+                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                        Bus Plate
+                      </TableHead>
+
+                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                        From
+                      </TableHead>
+
+                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                        To
+                      </TableHead>
+
+                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                        Passenger
+                      </TableHead>
+
+                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                        Sold By
+                      </TableHead>
+
+                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold text-right">
+                        Price
+                      </TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {ticketsData.map((ticket) => (
+                      <TableRow
+                        key={ticket.no}
+                        className="h-12 border-b border-border odd:bg-muted/20 hover:bg-muted/40 transition-colors"
+                      >
+                        <TableCell className="font-semibold text-primary">
+                          {ticket.no}
+                        </TableCell>
+
+                        <TableCell>{ticket.plate}</TableCell>
+                        <TableCell>{ticket.from}</TableCell>
+                        <TableCell>{ticket.to}</TableCell>
+                        <TableCell>{ticket.passenger}</TableCell>
+
+                        {/* <TableCell className="text-right">
+                          {ticket.seat}
+                        </TableCell> */}
+
+                        <TableCell>
+                          <span className="px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium">
+                            {ticket.sale}
+                          </span>
+                        </TableCell>
+
+                        <TableCell className="text-right font-semibold">
+                          {ticket.price}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </div>
           </Card>
-        )}
+        </div>
       </div>
-    </main>
+    </div>
   );
 }
