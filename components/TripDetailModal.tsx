@@ -8,15 +8,7 @@ import {
 } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  Bus,
-  User,
-  Phone,
-  Mail,
-  Calendar,
-  MapPin,
-  DollarSign,
-} from "lucide-react";
+import { Bus, Phone, Mail, MapPin, DollarSign } from "lucide-react";
 import { TripData } from "@/lib/model";
 
 interface TripDetailsModalProps {

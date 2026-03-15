@@ -1072,6 +1072,25 @@ export const operatorApi = {
       throw err;
     }
   },
+  getDetailSchedule: async (
+    operator_id: string,
+    route_from: string,
+    route_to: string,
+  ) => {
+    const res = await api.get(`/operator/${operator_id}/routes`, {
+      params: {
+        route_to,
+        route_from,
+      },
+    });
+    return res.data as {
+      id: string;
+      route_from: string;
+      route_to: string;
+      distance_km: number;
+      estimated_duration_minutes: number;
+    };
+  },
   createBus: async (
     body: {
       plate_no: string;

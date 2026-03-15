@@ -35,6 +35,7 @@ import { isAxiosError } from "axios";
 import AccountNotActiveBanner from "@/components/AccountBanner";
 import { ScheduleDialog } from "@/components/TripDialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
+import { RouteDetailDialog } from "@/components/ScheduleDetail";
 
 export type ScheduleDTO = {
   id: string;
@@ -105,6 +106,8 @@ export default function TripManagement() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [selectFrom, setSelectFrom] = useState("");
+  const [selectTo, setSelectTo] = useState("");
   const [routes, setRoutes] = useState<RouteDTO[]>([]);
 
   const { mutate, isPending, isSuccess } = useCreateTrip();
@@ -200,10 +203,11 @@ export default function TripManagement() {
     }
   };
 
-  // const handleViewDetails = (trip: Trip) => {
-  //   setSelectedTrip(trip);
-  //   setIsDetailDialogOpen(true);
-  // };
+  const handleViewDetails = (trip: ScheduleDTO) => {
+    setSelectFrom(trip.route.route_from);
+    setSelectTo(trip.route.route_to);
+    setIsDetailDialogOpen(true);
+  };
 
   // const handleEditTrip = (trip: Trip) => {
   //   setSelectedTrip(trip);
@@ -377,7 +381,7 @@ export default function TripManagement() {
                 <div className="flex gap-2 lg:flex-col lg:items-end">
                   <Button
                     size="sm"
-                    // onClick={() => handleViewDetails(trip)}
+                    onClick={() => handleViewDetails(trip)}
                     className="w-full lg:w-36"
                   >
                     View Details
@@ -462,7 +466,7 @@ export default function TripManagement() {
         routes={routes}
       />
 
-      {selectedTrip && (
+      {/* {selectedTrip && (
         <TripDetailDialog
           open={isDetailDialogOpen}
           onOpenChange={setIsDetailDialogOpen}
@@ -473,7 +477,13 @@ export default function TripManagement() {
           }}
           onDelete={() => handleDeleteTrip(selectedTrip.id!)}
         />
-      )}
+      )} */}
+      <RouteDetailDialog
+        open={isDetailDialogOpen}
+        setOpen={setIsDetailDialogOpen}
+        route_to={selectTo}
+        route_from={selectFrom}
+      />
     </div>
   );
 }
