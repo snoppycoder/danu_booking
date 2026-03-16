@@ -82,7 +82,7 @@ export default function OperatorDashboard() {
     {
       label: "Today's Revenue",
       value: statCard?.today_revenue
-        ? statCard.today_revenue.toLocaleString()
+        ? `${statCard.today_revenue.toLocaleString()} ETB`
         : "0",
     },
     {

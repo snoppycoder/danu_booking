@@ -69,12 +69,12 @@ export default function AgentDanuBooking() {
     return "trip_id" in item;
   }
 
-  const handleViewDetails = async (trip: Trip) => {
-    const response = await passengerApi.getTripDetails(trip.trip_id);
-    console.log(response, "trip details");
-    setSelectedTrip(response);
-    setIsModalOpen(true);
-  };
+  // const handleViewDetails = async (trip: Trip) => {
+  //   const response = await passengerApi.getTripDetails(trip.trip_id);
+  //   console.log(response, "trip details");
+  //   setSelectedTrip(response);
+  //   setIsModalOpen(true);
+  // };
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
@@ -399,7 +399,7 @@ export default function AgentDanuBooking() {
                 {(data?.items || [])?.length > 0 ? (
                   data?.items.map((route) => (
                     <div
-                      key={route.trip_id}
+                      key={route.id}
                       className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 
         hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 
         transition-all duration-300 ease-out"
@@ -411,7 +411,7 @@ export default function AgentDanuBooking() {
                             className="text-lg font-semibold tracking-tight text-foreground 
             group-hover:text-primary transition-colors duration-300"
                           >
-                            {route.operator.operator_name}
+                            {route.operator.name}
                           </h3>
                           {/* <p className="text-xs text-muted-foreground mt-1">
                             Premium Travel Operator
@@ -430,7 +430,7 @@ export default function AgentDanuBooking() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
-                              onClick={() => handleViewDetails(route)}
+                            // onClick={() => handleViewDetails(route)}
                             >
                               View Details
                             </DropdownMenuItem>
@@ -454,16 +454,16 @@ export default function AgentDanuBooking() {
                         </div>
 
                         {/* Seats */}
-                        <div className="flex flex-col items-center">
+                        {/* <div className="flex flex-col items-center">
                           <span className="text-xs text-muted-foreground tracking-wide">
                             Seats
                           </span>
                           <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
                             <span className="text-sm font-semibold text-black">
-                              {route.available_seats} Seats
+                              {route.is_available ? "Available" : "Not Available"} 
                             </span>
                           </div>
-                        </div>
+                        </div> */}
 
                         {/* Status */}
                         <div className="flex flex-col items-center">
@@ -475,9 +475,7 @@ export default function AgentDanuBooking() {
             bg-green-500/10 text-green-600"
                           >
                             <span className="text-sm font-semibold">
-                              {route.available_seats > 0
-                                ? "Available"
-                                : "Sold Out"}
+                              {route.is_available ? "Available" : "Sold Out"}
                             </span>
                           </div>
                         </div>
