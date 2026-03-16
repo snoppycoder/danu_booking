@@ -15,17 +15,18 @@ import clsx from "clsx";
 import type { Bus, Passenger, Seat } from "@/lib/model";
 import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
 import Image from "next/image";
+import { operatorApi } from "@/app/api/api";
 
 type SeatLayoutProps = {
   toggle: boolean;
-  bus: Bus;
+  bus: { id: string; plate_no: string };
   trip_id: string;
   seats: Seat[];
   selectedSeats: string[];
   setSelectedSeats: React.Dispatch<React.SetStateAction<string[]>>;
   onSuccess?: () => void;
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
-
+  operator_id: string;
   setToggle: (val: boolean) => void;
 };
 
@@ -33,6 +34,7 @@ export default function GuestSeatLayoutDialog({
   toggle,
   trip_id,
   bus,
+  operator_id,
   onSuccess,
   seats,
   setSeats,
@@ -43,9 +45,13 @@ export default function GuestSeatLayoutDialog({
   const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   useEffect(() => {
-    if (bus) {
-      setSeats(bus.seat_template.seats);
-    }
+    const fetch = async () => {
+      const data = await operatorApi.getAllSeatTemplates(operator_id);
+      if (data) {
+        setSeats(data?.[0].seats);
+      }
+    };
+    fetch();
   }, [bus]);
 
   useEffect(() => {
@@ -78,7 +84,6 @@ export default function GuestSeatLayoutDialog({
         multiSelectSeats.includes(s.seat_code) ? { ...s, status: "booked" } : s,
       ),
     );
-    console.log("openingggggg...");
 
     // Assign seats to passengers in order - first selected seat to first passenger, etc.
     setOpen(true);
@@ -94,7 +99,6 @@ export default function GuestSeatLayoutDialog({
     acc[seat.row].push(seat);
     return acc;
   }, {});
-  console.log(grouped, "here");
 
   Object.values(grouped).forEach((row) => row.sort((a, b) => a.col - b.col));
 
@@ -209,6 +213,7 @@ export default function GuestSeatLayoutDialog({
         tripId={trip_id}
         selectedSeats={selectedSeats}
         number_of_passengers={selectedSeats.length}
+        operator_id={operator_id}
       />
     </div>
   );

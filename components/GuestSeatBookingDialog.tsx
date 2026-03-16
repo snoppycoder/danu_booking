@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import SeatLayoutDialog from "./GuestSeatLayoutDialog";
 import PassengerInfoForm from "./PassengerInfoForm";
 import type { Bus, Passenger, Seat } from "@/lib/model";
-import { passengerApi } from "@/app/api/api";
+import { operatorApi, passengerApi } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
 
@@ -24,6 +24,7 @@ type SeatBookingDialogProps = {
   number_of_passengers: number;
   tripId: string;
   onSucess?: () => void;
+  operator_id: string;
 };
 
 export default function GuestSeatBookingDialog({
@@ -32,6 +33,7 @@ export default function GuestSeatBookingDialog({
   number_of_passengers,
   toggle,
   onSucess,
+  operator_id,
   setToggle,
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
@@ -62,13 +64,13 @@ export default function GuestSeatBookingDialog({
   // Fetch bus details
   useEffect(() => {
     const fetch = async () => {
-      if (tripId.length === 0) return;
-      const response = await passengerApi.getTripDetails(tripId);
-      setBus(response.bus);
-      setSeats(response.bus.seat_template.seats);
+      const data = await operatorApi.getAllSeatTemplates(operator_id);
+      if (data) {
+        setSeats(data?.[0].seats);
+      }
     };
     fetch();
-  }, [tripId]);
+  }, [bus]);
   useEffect(() => {
     if (!number_of_passengers || number_of_passengers <= 0) return;
 
