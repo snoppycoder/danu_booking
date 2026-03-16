@@ -1045,6 +1045,51 @@ export const agentApi = {
   },
 };
 export const operatorApi = {
+  getReportData: async (
+    operator_id: string,
+    trip_date?: string,
+    bus_plate?: string,
+    route_id?: string,
+    agent_id?: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    try {
+      const res = await api.get(`/operator/${operator_id}/reports/tickets`, {
+        params: {
+          trip_date,
+          agent_id,
+          route_id,
+          bus_plate,
+          page,
+          per_page,
+        },
+      });
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  getReportStatCard: async (operator_id: string) => {
+    try {
+      const response = await api.get(
+        `/operator/${operator_id}/reports/summary`,
+      );
+
+      return response.data as {
+        operator_id: string;
+        operator_name: string;
+        date: string;
+        today_revenue: number;
+        tickets_sold_today: number;
+        total_tickets_by_agents: number;
+      };
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   createSchedule: async (
     operator_id: string,
     body: {

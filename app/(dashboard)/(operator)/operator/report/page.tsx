@@ -20,6 +20,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
+import {
+  useOperatorBuses,
+  useOperatorReport2,
+  useOperatorStatCard,
+  useRoutes,
+} from "@/components/Query";
+import { useAuth } from "@/lib/authContext";
+import { Bus } from "@/lib/model";
 
 export default function OperatorDashboard() {
   const [date, setDate] = useState("today");
@@ -27,11 +35,43 @@ export default function OperatorDashboard() {
   const [route, setRoute] = useState("all");
   const [agent, setAgent] = useState("all");
 
+  const [fromDate, setFromDate] = useState(() => {
+    return new Date().toISOString().split("T")[0];
+  });
+  const [toDate, setToDate] = useState(() => {
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    return yesterday.toISOString().split("T")[0];
+  });
+
+  const daySetter = (back_in_days: number) => {
+    const day = new Date();
+    day.setDate(day.getDate() - back_in_days);
+    return day;
+  };
+  const { user } = useAuth();
+  const { data: statCard } = useOperatorStatCard(user?.organization_id || "");
+  const { data } = useOperatorReport2(user?.organization_id || "");
+  const { data: bus } = useOperatorBuses(user?.organization_id || "");
+
+  const { data: routes } = useRoutes();
+
   const statsData = [
-    { label: "Today Revenue", value: "847,650 ETB" },
-    { label: "Tickets Sold Today", value: "245" },
-    { label: "Tickets by Agents", value: "156" },
-    { label: "Website/App Sales", value: "89" },
+    {
+      label: "Today Revenue",
+      value: statCard?.today_revenue
+        ? statCard.today_revenue.toLocaleString()
+        : "0",
+    },
+    {
+      label: "Tickets Sold Today",
+      value: statCard?.tickets_sold_today?.toLocaleString() || "0",
+    },
+    {
+      label: "Tickets by Agents",
+      value: statCard?.total_tickets_by_agents?.toLocaleString() || "0",
+    },
+    // { label: "Website/App Sales", value: "89" },
   ];
 
   const ticketsData = [
@@ -106,18 +146,18 @@ export default function OperatorDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                Habesha Bus
+                {statCard?.operator_name || "Operator"} Report
               </h1>
-              <p className="text-sm text-muted-foreground">
+              {/* <p className="text-sm text-muted-foreground">
                 Total Tickets: 10 | Total Revenue: 54,800 ETB
-              </p>
+              </p> */}
             </div>
           </div>
         </div>
 
         {/* Stats Cards */}
         <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {statsData.map((stat, idx) => (
               <Card key={idx} className="bg-white border border-border p-4">
                 <div className="flex items-start justify-between mb-4">
@@ -133,179 +173,217 @@ export default function OperatorDashboard() {
               </Card>
             ))}
           </div>
+        </div>
 
-          {/* Filters Section */}
-          <Card className="bg-white border border-border p-6">
-            <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-lg font-semibold text-foreground">
-                  Filters
-                </h2>
+        {/* Filters Section */}
+        <Card className="bg-white border border-border p-6">
+          <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-lg font-semibold text-foreground">Filters</h2>
 
-                <Button variant="outline" size="sm">
-                  Print
-                </Button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
-                    Date
-                  </Label>
-                  <Select value={date} onValueChange={setDate}>
-                    <SelectTrigger className="bg-background h-10">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="today">Today</SelectItem>
-                      <SelectItem value="yesterday">Yesterday</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
-                    Bus Plate
-                  </Label>
-                  <Select value={busPlate} onValueChange={setBusPlate}>
-                    <SelectTrigger className="bg-background h-10">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Bus</SelectItem>
-                      <SelectItem value="hab-001">HAB 001</SelectItem>
-                      <SelectItem value="hab-002">HAB 002</SelectItem>
-                      <SelectItem value="hab-003">HAB 003</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
-                    Route
-                  </Label>
-                  <Select value={route} onValueChange={setRoute}>
-                    <SelectTrigger className="bg-background h-10">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Routes</SelectItem>
-                      <SelectItem value="addis-dire">
-                        Addis - Dire Dawa
-                      </SelectItem>
-                      <SelectItem value="addis-adama">Addis - Adama</SelectItem>
-                      <SelectItem value="addis-bahir">
-                        Addis - Bahir Dar
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                <div>
-                  <Label className="text-xs font-medium text-muted-foreground mb-1 block">
-                    Agent
-                  </Label>
-                  <Select value={agent} onValueChange={setAgent}>
-                    <SelectTrigger className="bg-background h-10">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Agents</SelectItem>
-                      <SelectItem value="agents">Agent</SelectItem>
-                      <SelectItem value="website">Website</SelectItem>
-                      <SelectItem value="app">App</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <Button variant="outline" size="sm">
+                Print
+              </Button>
             </div>
 
-            {/* Tickets Summary */}
-            <div className="flex items-center justify-between p-4 bg-background rounded border border-border mb-6">
+            <div className="grid grid-cols-2  lg:grid-cols-4 gap-4">
               <div>
-                <p className="text-sm font-semibold text-foreground">
-                  Tickets Sold
-                </p>
-                <p className="mt-2 text-xs text-muted-foreground">
-                  Complete list of tickets
-                </p>
+                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Date
+                </Label>
+                <Select value={date} onValueChange={setDate}>
+                  <SelectTrigger className="bg-background h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem
+                      value="today"
+                      onClick={() => {
+                        let date = daySetter(1);
+                        setToDate(date.toISOString().split("T")[0]);
+                      }}
+                    >
+                      Today
+                    </SelectItem>
+
+                    <SelectItem
+                      onClick={() => {
+                        let date = daySetter(7);
+                        setToDate(date.toISOString().split("T")[0]);
+                      }}
+                      value="weekly"
+                    >
+                      Weekly
+                    </SelectItem>
+                    <SelectItem
+                      onClick={() => {
+                        let date = daySetter(30);
+                        setToDate(date.toISOString().split("T")[0]);
+                      }}
+                      value="monthly"
+                    >
+                      Monthly
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
-              <div className="text-right">
-                <Table className="">
-                  <TableRow>
-                    <TableHead className="p-2">Tickets Sold</TableHead>
-                    <TableHead className="p-2 ">Revenue</TableHead>
-                  </TableRow>
-                  <TableBody>
-                    <TableRow>
-                      <TableCell className="p-2">6</TableCell>
-                      <TableCell className="p-2">21,700 ETB</TableCell>
-                    </TableRow>
-                  </TableBody>
-                </Table>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Bus Plate
+                </Label>
+                <Select value={busPlate} onValueChange={setBusPlate}>
+                  <SelectTrigger className="bg-background h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Bus</SelectItem>
+                    {bus ? (
+                      bus.map((bus: Bus) => (
+                        <SelectItem value={bus.plate_no}>
+                          {bus.plate_no}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>
+                        No Buses
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Route
+                </Label>
+                <Select value={route} onValueChange={setRoute}>
+                  <SelectTrigger className="bg-background h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Routes</SelectItem>
+                    {routes ? (
+                      routes?.items.map((route) => (
+                        <SelectItem value={route.id}>
+                          {route.route_from} - {route.route_to}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value={"none"} disabled>
+                        No Route Found
+                      </SelectItem>
+                    )}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+                  Agent
+                </Label>
+                <Select value={agent} onValueChange={setAgent}>
+                  <SelectTrigger className="bg-background h-10">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Agents</SelectItem>
+                    <SelectItem value="agents">Agent</SelectItem>
+                    <SelectItem value="website">Website</SelectItem>
+                    <SelectItem value="app">App</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
+          </div>
 
-            {/* Table */}
-            <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow className="border-b border-border bg-muted/30">
-                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                        Ticket No
-                      </TableHead>
+          {/* Tickets Summary */}
+          <div className="flex items-center justify-between p-4 bg-background rounded-xl border border-border mb-4">
+            <div>
+              <p className="text-sm font-semibold text-foreground">
+                Tickets Sold
+              </p>
+              <p className="mt-2 text-xs text-muted-foreground">
+                Complete list of tickets
+              </p>
+            </div>
+            <div className="text-right">
+              <Table className="p-2">
+                <TableRow>
+                  <TableHead className="p-2">Tickets Sold</TableHead>
+                  <TableHead className="p-2 ">Revenue</TableHead>
+                </TableRow>
+                <TableBody>
+                  <TableRow>
+                    <TableCell className="p-2">
+                      {data?.tickets_sold ?? 0}
+                    </TableCell>
+                    <TableCell className="p-2">{data?.revenue ?? 0}</TableCell>
+                  </TableRow>
+                </TableBody>
+              </Table>
+            </div>
+          </div>
 
-                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                        Bus Plate
-                      </TableHead>
+          {/* Table */}
+          <div className="bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-b border-border bg-muted/30">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                      Ticket No
+                    </TableHead>
 
-                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                        From
-                      </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                      Bus Plate
+                    </TableHead>
 
-                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                        To
-                      </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                      From
+                    </TableHead>
 
-                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                        Passenger
-                      </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                      To
+                    </TableHead>
 
-                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
-                        Sold By
-                      </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                      Passenger
+                    </TableHead>
 
-                      <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold text-right">
-                        Price
-                      </TableHead>
-                    </TableRow>
-                  </TableHeader>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                      Sold By
+                    </TableHead>
 
-                  <TableBody>
-                    {ticketsData.map((ticket) => (
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold text-right">
+                      Price
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+
+                <TableBody>
+                  {data?.items && data.items.length > 0 ? (
+                    data.items.map((ticket) => (
                       <TableRow
-                        key={ticket.no}
+                        key={ticket.ticket_id}
                         className="h-12 border-b border-border odd:bg-muted/20 hover:bg-muted/40 transition-colors"
                       >
                         <TableCell className="font-semibold text-primary">
-                          {ticket.no}
+                          {ticket.ticket_id}
                         </TableCell>
 
-                        <TableCell>{ticket.plate}</TableCell>
-                        <TableCell>{ticket.from}</TableCell>
-                        <TableCell>{ticket.to}</TableCell>
-                        <TableCell>{ticket.passenger}</TableCell>
+                        <TableCell>{ticket.bus_plate_number}</TableCell>
+                        <TableCell>{ticket.route_from}</TableCell>
+                        <TableCell>{ticket.route_to}</TableCell>
+                        <TableCell>{ticket.passenger_name}</TableCell>
 
-                        {/* <TableCell className="text-right">
-                          {ticket.seat}
-                        </TableCell> */}
+                        <TableCell className="text-right">
+                          {ticket.seat_no}
+                        </TableCell>
 
                         <TableCell>
                           <span className="px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium">
-                            {ticket.sale}
+                            {ticket.sold_by}
                           </span>
                         </TableCell>
 
@@ -313,13 +391,22 @@ export default function OperatorDashboard() {
                           {ticket.price}
                         </TableCell>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell
+                        colSpan={8}
+                        className="h-24 text-center text-muted-foreground"
+                      >
+                        No tickets found
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
             </div>
-          </Card>
-        </div>
+          </div>
+        </Card>
       </div>
     </div>
   );

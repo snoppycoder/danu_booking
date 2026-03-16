@@ -154,6 +154,26 @@ export const useOperator = (page: number, per_page: number) => {
     staleTime: 1000 * 60 * 5,
   });
 };
+
+export const useOperatorStatCard = (operator_id: string) => {
+  return useQuery({
+    queryKey: ["operator_stat_card", operator_id],
+    queryFn: async () => {
+      const res = await operatorApi.getReportStatCard(operator_id);
+      return res as {
+        operator_id: string;
+        operator_name: string;
+        date: string;
+        today_revenue: number;
+        tickets_sold_today: number;
+        total_tickets_by_agents: number;
+      };
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id,
+  });
+};
+
 export const useTrips = (
   operator_id: string,
   page: number = 1,
@@ -428,6 +448,61 @@ export const useOperatorReport = (
         to_date,
       );
       return res;
+    },
+    enabled: !!operator_id,
+    staleTime: 1000 * 60 * 5,
+  });
+};
+export const useOperatorReport2 = (
+  operator_id: string,
+
+  trip_date?: string,
+  bus_plate?: string,
+  route_id?: string,
+  agent_id?: string,
+  page?: number,
+  per_page?: number,
+) => {
+  return useQuery({
+    queryKey: [
+      "operator_report",
+      operator_id,
+      trip_date,
+      bus_plate,
+      route_id,
+      agent_id,
+      page,
+      per_page,
+    ],
+    queryFn: async () => {
+      const res = await operatorApi.getReportData(
+        operator_id,
+        trip_date,
+        bus_plate,
+        route_id,
+        agent_id,
+        page,
+        per_page,
+      );
+      console.log(operator_id, trip_date, bus_plate, route_id, agent_id);
+      console.log(res, "trips datess");
+      return {
+        items: res.items as {
+          ticket_id: string;
+          bus_plate_number: string;
+          route_from: string;
+          route_to: string;
+          passenger_name: string;
+          seat_no: string;
+          price: number;
+          sold_by: string;
+          agent_type: string;
+        }[],
+        tickets_sold: res.tickets_sold,
+        revenue: res.revenue,
+        total: res.total,
+        page: res.page,
+      };
     },
     enabled: !!operator_id,
     staleTime: 1000 * 60 * 5,
