@@ -209,6 +209,7 @@ export default function SeatLayoutDialog({
         </DialogContent>
       </Dialog>
       <SeatBookingDialog
+        operator_id={operator_id}
         toggle={open}
         setToggle={setOpen}
         onSucess={onSucess}
