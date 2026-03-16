@@ -33,13 +33,14 @@ import {
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
-import { useSearchRoute } from "@/components/Query";
+import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
 import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
 import { useAuth } from "@/lib/authContext";
 
 export default function OperatorAgentBookingClient() {
   const searchParams = useSearchParams();
+  const [operator_id, setOperatorId] = useState("");
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
     route_to: searchParams.get("to") || "",
@@ -73,12 +74,12 @@ export default function OperatorAgentBookingClient() {
     return "trip_id" in item;
   }
 
-  const handleViewDetails = async (trip: Trip) => {
-    const response = await passengerApi.getTripDetails(trip.trip_id);
-    console.log(response, "trip details");
-    setSelectedTrip(response);
-    setIsModalOpen(true);
-  };
+  // const handleViewDetails = async (trip: Trip) => {
+  //   const response = await passengerApi.getTripDetails(trip.trip_id);
+  //   console.log(response, "trip details");
+  //   setSelectedTrip(response);
+  //   setIsModalOpen(true);
+  // };
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
@@ -128,12 +129,12 @@ export default function OperatorAgentBookingClient() {
     }
   }
 
-  async function handleBookNow(trip: Item): Promise<void> {
-    if (isTrip(trip)) {
-      const response = await passengerApi.getTripDetails(trip.trip_id);
-      console.log(trip);
-      setTripId(trip.trip_id);
-    }
+  async function handleBookNow(trip: searchResult): Promise<void> {
+    const response = await passengerApi.getTripDetails(trip.id);
+
+    setTripId(trip.id);
+    setOperatorId(trip.operator.id);
+
     setUseInfoToggle(true);
   }
 
@@ -307,7 +308,7 @@ export default function OperatorAgentBookingClient() {
                 {(data?.items || []).length > 0 ? (
                   data?.items?.map((route) => (
                     <div
-                      key={route.trip_id}
+                      key={route.id}
                       className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 
         hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 
         transition-all duration-300 ease-out"
@@ -319,7 +320,7 @@ export default function OperatorAgentBookingClient() {
                             className="text-lg font-semibold tracking-tight text-foreground 
             group-hover:text-primary transition-colors duration-300"
                           >
-                            {route.operator.operator_name}
+                            {route.operator.name}
                           </h3>
                           {/* <p className="text-xs text-muted-foreground mt-1">
                             Premium Travel Operator
@@ -338,7 +339,7 @@ export default function OperatorAgentBookingClient() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
-                              onClick={() => handleViewDetails(route)}
+                            // onClick={() => handleViewDetails(route)}
                             >
                               View Details
                             </DropdownMenuItem>
@@ -362,7 +363,7 @@ export default function OperatorAgentBookingClient() {
                         </div>
 
                         {/* Seats */}
-                        <div className="flex flex-col items-center">
+                        {/* <div className="flex flex-col items-center">
                           <span className="text-xs text-muted-foreground tracking-wide">
                             Seats
                           </span>
@@ -371,7 +372,7 @@ export default function OperatorAgentBookingClient() {
                               {route.available_seats} Seats
                             </span>
                           </div>
-                        </div>
+                        </div> */}
 
                         {/* Status */}
                         <div className="flex flex-col items-center">
@@ -383,9 +384,7 @@ export default function OperatorAgentBookingClient() {
             bg-green-500/10 text-green-600"
                           >
                             <span className="text-sm font-semibold">
-                              {route.available_seats > 0
-                                ? "Available"
-                                : "Sold Out"}
+                              {route.is_available ? "Available" : "Sold Out"}
                             </span>
                           </div>
                         </div>
@@ -452,6 +451,7 @@ export default function OperatorAgentBookingClient() {
           tripId={tripId}
           selectedSeats={selectedSeats}
           number_of_passengers={selectedSeats.length}
+          operator_id={operator_id}
         />
         <TripDetailsModal
           isOpen={isModalOpen}
