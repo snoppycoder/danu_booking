@@ -33,7 +33,7 @@ import {
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
-import { useSearchRoute } from "@/components/Query";
+import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
 import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
 import { useAuth } from "@/lib/authContext";
@@ -53,6 +53,7 @@ export default function AgentDanuBooking() {
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
+  const [operator_id, setOperatorId] = useState("");
 
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
@@ -124,12 +125,12 @@ export default function AgentDanuBooking() {
     }
   }
 
-  async function handleBookNow(trip: Item): Promise<void> {
-    if (isTrip(trip)) {
-      const response = await passengerApi.getTripDetails(trip.trip_id);
-      console.log(trip);
-      setTripId(trip.trip_id);
-    }
+  async function handleBookNow(trip: searchResult): Promise<void> {
+    const response = await passengerApi.getTripDetails(trip.id);
+    console.log(trip);
+    setTripId(trip.id);
+    setOperatorId(trip.operator.id);
+
     setUseInfoToggle(true);
   }
 
@@ -509,6 +510,7 @@ export default function AgentDanuBooking() {
           agentId={user?.id || ""}
           onSucess={refetch}
           toggle={useInfoToggle}
+          operator_id={operator_id}
           setToggle={setUseInfoToggle}
           tripId={tripId}
           selectedSeats={selectedSeats}
