@@ -50,14 +50,22 @@ export interface Trips_s {
   };
 }
 export interface searchResult {
-  trip_id: string;
+  id: string;
   operator: {
-    operator_id: string;
-    operator_name: string;
+    id: string;
+    name: string;
   };
-  departure_at: string;
+  bus: {
+    plate_no: string;
+    id: string;
+  };
+  driver: {
+    id: string;
+    name: string;
+  };
+  departure_time: string;
   price: number;
-  available_seats: number;
+  is_available: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -133,9 +141,7 @@ export const useSearchRoute = (
 
       let items: searchResult[] = !org_id
         ? res.items
-        : res.items.filter(
-            (t: searchResult) => t.operator.operator_id == org_id,
-          );
+        : res.items.filter((t: searchResult) => t.operator.id == org_id);
       return { items, total: res.total, page: res.page };
     },
   });
@@ -369,7 +375,6 @@ export const OperatorUseUploadKyc = () => {
     },
   });
 };
-
 export const useCreateOperatorAgent = () => {
   const queryClient = useQueryClient();
   return useMutation<

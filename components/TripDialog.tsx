@@ -47,6 +47,7 @@ type Props = {
   drivers: Driver[];
   routes: RouteDTO[];
   buses: Bus[];
+  onSuccess: () => void;
 };
 
 export function ScheduleDialog({
@@ -55,6 +56,7 @@ export function ScheduleDialog({
   drivers,
   routes,
   buses,
+  onSuccess,
 }: Props) {
   const {
     control,
@@ -76,6 +78,7 @@ export function ScheduleDialog({
   const onSubmit = async (data: FormValues) => {
     try {
       await operatorApi.createSchedule(user?.organization_id ?? "", data);
+      onSuccess?.();
 
       toast.success("Schedule created successfully");
 

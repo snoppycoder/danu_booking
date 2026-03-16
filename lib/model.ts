@@ -1,3 +1,5 @@
+import { searchResult } from "@/components/Query";
+
 export interface AddOperatorForm {
   name: string;
   slug: string;
@@ -327,7 +329,7 @@ export interface Trip {
   created_at: string;
   updated_at: string;
 }
-export type Item = Trip | Route;
+export type Item = Trip | Route | searchResult;
 
 export interface SearchRouteResponse {
   route_from: string;

@@ -11,11 +11,16 @@ import {
 import { onLogout } from "@/lib/common_functions";
 import { useAuth } from "@/lib/authContext";
 import { usePathname } from "next/navigation";
+import { Toggle } from "./ui/toggle";
+import { Switch } from "./ui/switch";
 
 export default function AvatarHero() {
   const router = useRouter();
   const { user } = useAuth();
   const path = usePathname();
+  const toggleDark = () => {
+    document.documentElement.classList.toggle("dark");
+  };
 
   return (
     <DropdownMenu>
@@ -62,6 +67,10 @@ export default function AvatarHero() {
         >
           Logout
         </DropdownMenuItem>
+        {/* <div className="w-full flex justify-center p-2">
+          {" "}
+          <Switch className="mt-2" onClick={toggleDark} />
+        </div> */}
       </DropdownMenuContent>
     </DropdownMenu>
   );

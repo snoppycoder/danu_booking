@@ -12,14 +12,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
 import { formatTime } from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
 import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
@@ -33,7 +25,7 @@ import {
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
-import { useSearchRoute } from "@/components/Query";
+import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
 import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 
@@ -57,25 +49,29 @@ export default function DanuBooking() {
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bus, setBus] = useState<Bus | undefined>();
+  const [id, setId] = useState("");
+  const [bus, setBus] = useState<
+    { id: string; plate_no: string } | undefined
+  >();
   const [tripId, setTripId] = useState<string>("");
   const { data, isLoading, refetch } = useSearchRoute(
     form.route_from,
     form.route_to,
     form.departure_date,
   );
+  console.log(data, "logged!");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   function isTrip(item: Item): item is Trip {
     return "trip_id" in item;
   }
 
-  const handleViewDetails = async (trip: Trip) => {
-    const response = await passengerApi.getTripDetails(trip.trip_id);
-    console.log(response, "trip details");
-    setSelectedTrip(response);
-    setIsModalOpen(true);
-  };
+  // const handleViewDetails = async (trip: searchResult) => {
+  //   const response = await passengerApi.getTripDetails(trip.id);
+  //   console.log(response, "trip details");
+  //   setSelectedTrip(response);
+  //   setIsModalOpen(true);
+  // };
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
@@ -125,12 +121,13 @@ export default function DanuBooking() {
     }
   }
 
-  async function handleBookNow(trip: Item): Promise<void> {
-    if (isTrip(trip)) {
-      const response = await passengerApi.getTripDetails(trip.trip_id);
-      setBus(response.bus);
-      setTripId(trip.trip_id);
-    }
+  async function handleBookNow(trip: searchResult): Promise<void> {
+    console.log(trip);
+    const response = await passengerApi.getTripDetails(trip.id);
+    setBus(response.bus);
+    setTripId(trip.id);
+    setId(trip.operator.id);
+
     setUseInfoToggle(true);
   }
   return (
@@ -303,7 +300,7 @@ export default function DanuBooking() {
                 {(data?.items || [])?.length > 0 ? (
                   data?.items.map((route) => (
                     <div
-                      key={route.trip_id}
+                      key={route.id}
                       className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 
         hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 
         transition-all duration-300 ease-out"
@@ -315,7 +312,7 @@ export default function DanuBooking() {
                             className="text-lg font-semibold tracking-tight text-foreground 
             group-hover:text-primary transition-colors duration-300"
                           >
-                            {route.operator.operator_name}
+                            {route.operator.name}
                           </h3>
                         </div>
 
@@ -331,7 +328,7 @@ export default function DanuBooking() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
-                              onClick={() => handleViewDetails(route)}
+                            // onClick={() => handleViewDetails(route)}
                             >
                               View Details
                             </DropdownMenuItem>
@@ -384,11 +381,12 @@ export default function DanuBooking() {
                         {/* Seats */}
                         <div className="flex flex-col items-center">
                           <span className="text-xs text-muted-foreground tracking-wide">
-                            Seats
+                            Departure Time
                           </span>
                           <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
                             <span className="text-sm font-semibold text-black">
-                              {route.available_seats} Seats
+                              {route.departure_time.split(":")[0]} :{" "}
+                              {route.departure_time.split(":")[1]}
                             </span>
                           </div>
                         </div>
@@ -403,9 +401,7 @@ export default function DanuBooking() {
             bg-green-500/10 text-green-600"
                           >
                             <span className="text-sm font-semibold">
-                              {route.available_seats > 0
-                                ? "Available"
-                                : "Sold Out"}
+                              {route.is_available ? "Available" : "Sold Out"}
                             </span>
                           </div>
                         </div>
@@ -474,6 +470,7 @@ export default function DanuBooking() {
           trip_id={tripId}
           selectedSeats={selectedSeats}
           onSucess={refetch}
+          operator_id={id}
         />
         <TripDetailsModal
           isOpen={isModalOpen}

@@ -966,9 +966,37 @@ export const passengerApi = {
     return response.data.routes;
   },
   getTripDetails: async (tripId: string) => {
-    const response = await api.get(`/guest/${tripId}`);
+    const response = await api.get(`/guest/route/${tripId}`);
 
-    return response.data;
+    return response.data as {
+      id: string;
+      trip_date: string;
+      departure_time: string;
+
+      route: {
+        id: string;
+        from_city: string;
+        to_city: string;
+      };
+
+      operator: {
+        id: string;
+        name: string;
+      };
+
+      bus: {
+        id: string;
+        plate_no: string;
+      };
+
+      driver: {
+        id: string;
+        name: string;
+      };
+
+      price: number;
+      is_available: boolean;
+    };
   },
   holdSeat: async (
     tripId: string,
@@ -1402,7 +1430,7 @@ export const operatorApi = {
   },
   getAllSeatTemplates: async (operator_id: string) => {
     try {
-      console.log(operator_id, "operator id here");
+   
       const response = await api.get(`/operator/${operator_id}/seat-templates`);
       console.log(response.data.items, "seat templates response");
       return response.data.items;

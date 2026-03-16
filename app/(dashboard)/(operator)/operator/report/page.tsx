@@ -28,10 +28,25 @@ import {
 } from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
 import { Bus } from "@/lib/model";
+function TicketIdCell({ id }: { id: string }) {
+  const [showFull, setShowFull] = useState(false);
+
+  const displayId = showFull ? id : id.slice(0, 8) + "..."; // truncate first 8 chars
+
+  return (
+    <TableCell
+      className="p-4 font-semibold text-primary cursor-pointer"
+      onClick={() => setShowFull(!showFull)}
+      title={id} // optional: shows full id on hover
+    >
+      {displayId}
+    </TableCell>
+  );
+}
 
 export default function OperatorDashboard() {
   const [date, setDate] = useState("today");
-  const [busPlate, setBusPlate] = useState("all");
+  const [busPlate, setBusPlate] = useState<string>("all");
   const [route, setRoute] = useState("all");
   const [agent, setAgent] = useState("all");
 
@@ -51,14 +66,21 @@ export default function OperatorDashboard() {
   };
   const { user } = useAuth();
   const { data: statCard } = useOperatorStatCard(user?.organization_id || "");
-  const { data } = useOperatorReport2(user?.organization_id || "");
+
+  const { data } = useOperatorReport2(
+    user?.organization_id || "",
+    undefined,
+    busPlate == "all" ? undefined : busPlate,
+    route == "all" ? undefined : route,
+  );
+  console.log(busPlate, "bus plate");
   const { data: bus } = useOperatorBuses(user?.organization_id || "");
 
   const { data: routes } = useRoutes();
 
   const statsData = [
     {
-      label: "Today Revenue",
+      label: "Today's Revenue",
       value: statCard?.today_revenue
         ? statCard.today_revenue.toLocaleString()
         : "0",
@@ -74,68 +96,7 @@ export default function OperatorDashboard() {
     // { label: "Website/App Sales", value: "89" },
   ];
 
-  const ticketsData = [
-    {
-      no: "T001",
-      plate: "HAB-001",
-      from: "Addis Ababa",
-      to: "Dire Dawa",
-      passenger: "Addis Ababa",
-      seat: "12",
-      sale: "Agent Selem",
-      price: "3650 ETB",
-    },
-    {
-      no: "T002",
-      plate: "HAB-001",
-      from: "Addis Ababa",
-      to: "Dire Dawa",
-      passenger: "Alem",
-      seat: "13",
-      sale: "Website",
-      price: "3650 ETB",
-    },
-    {
-      no: "T003",
-      plate: "HAB-002",
-      from: "Addis Ababa",
-      to: "Dire Dawa",
-      passenger: "Bekane",
-      seat: "14",
-      sale: "Agent Selem",
-      price: "3650 ETB",
-    },
-    {
-      no: "T004",
-      plate: "HAB-002",
-      from: "Addis Ababa",
-      to: "Dire Dawa",
-      passenger: "Marta",
-      seat: "15",
-      sale: "App",
-      price: "3650 ETB",
-    },
-    {
-      no: "T005",
-      plate: "HAB-003",
-      from: "Addis Ababa",
-      to: "Dire Dawa",
-      passenger: "David",
-      seat: "16",
-      sale: "Website",
-      price: "3650 ETB",
-    },
-    {
-      no: "T006",
-      plate: "HAB-003",
-      from: "Addis Ababa",
-      to: "Dire Dawa",
-      passenger: "Sara",
-      seat: "17",
-      sale: "Agent Selem",
-      price: "3650 ETB",
-    },
-  ];
+  // we will add loading state
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -331,31 +292,31 @@ export default function OperatorDashboard() {
               <Table>
                 <TableHeader>
                   <TableRow className="border-b border-border bg-muted/30">
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold p-4">
                       Ticket No
                     </TableHead>
 
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold p-4">
                       Bus Plate
                     </TableHead>
 
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold p-4">
                       From
                     </TableHead>
 
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold p-4">
                       To
                     </TableHead>
 
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold p-4">
                       Passenger
                     </TableHead>
 
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold p-4">
                       Sold By
                     </TableHead>
 
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold text-right">
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold ">
                       Price
                     </TableHead>
                   </TableRow>
@@ -366,28 +327,31 @@ export default function OperatorDashboard() {
                     data.items.map((ticket) => (
                       <TableRow
                         key={ticket.ticket_id}
-                        className="h-12 border-b border-border odd:bg-muted/20 hover:bg-muted/40 transition-colors"
+                        className="h-18 border-b border-border odd:bg-muted/20 hover:bg-muted/40 transition-colors"
                       >
-                        <TableCell className="font-semibold text-primary">
+                        {/* <TableCell className="p-4 font-semibold text-primary">
                           {ticket.ticket_id}
+                        </TableCell> */}
+                        <TicketIdCell id={ticket.ticket_id} />
+
+                        <TableCell className="p-4">
+                          {ticket.bus_plate_number}
+                        </TableCell>
+                        <TableCell className="p-4">
+                          {ticket.route_from}
+                        </TableCell>
+                        <TableCell className="p-4">{ticket.route_to}</TableCell>
+                        <TableCell className="p-4">
+                          {ticket.passenger_name} ({ticket.seat_no})
                         </TableCell>
 
-                        <TableCell>{ticket.bus_plate_number}</TableCell>
-                        <TableCell>{ticket.route_from}</TableCell>
-                        <TableCell>{ticket.route_to}</TableCell>
-                        <TableCell>{ticket.passenger_name}</TableCell>
-
-                        <TableCell className="text-right">
-                          {ticket.seat_no}
-                        </TableCell>
-
-                        <TableCell>
+                        <TableCell className="p-4">
                           <span className="px-2 py-1 rounded-md bg-blue-50 text-blue-600 text-xs font-medium">
                             {ticket.sold_by}
                           </span>
                         </TableCell>
 
-                        <TableCell className="text-right font-semibold">
+                        <TableCell className="p-4 text-right font-semibold">
                           {ticket.price}
                         </TableCell>
                       </TableRow>

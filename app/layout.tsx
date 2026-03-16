@@ -3,6 +3,7 @@ import type { Metadata } from "next";
 
 import "@/app/globals.css";
 import QueryProvider from "@/components/QueryProvide";
+import { ThemeProvider } from "next-themes";
 
 export const metadata: Metadata = {
   title: "Danu Booking - Intercity Bus Ticket Management System",
@@ -34,9 +35,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="">
       <body className={`font-sans antialiased`}>
-        <QueryProvider>{children}</QueryProvider>
+        <QueryProvider>
+          <ThemeProvider attribute="class" defaultTheme="light">
+            {children}
+          </ThemeProvider>
+        </QueryProvider>
       </body>
     </html>
   );

@@ -25,6 +25,7 @@ import {
   useCreateTrip,
   useDrivers,
   useOperatorBuses,
+  useRoutes,
   useTrips,
 } from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
@@ -108,17 +109,9 @@ export default function TripManagement() {
   const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
   const [selectFrom, setSelectFrom] = useState("");
   const [selectTo, setSelectTo] = useState("");
-  const [routes, setRoutes] = useState<RouteDTO[]>([]);
+  const { data: routes, refetch: refetchRoutes } = useRoutes();
 
   const { mutate, isPending, isSuccess } = useCreateTrip();
-
-  useEffect(() => {
-    const fetch = async () => {
-      const res = await superAdminApi.listRoutes();
-      setRoutes(res.items);
-    };
-    fetch();
-  }, []);
 
   useEffect(() => {
     if (buses_) setBuses(buses_);
@@ -457,15 +450,16 @@ export default function TripManagement() {
         drivers={drivers}
       /> */}
 
-      <ScheduleDialog
-        open={isCreateDialogOpen}
-        setOpen={setIsCreateDialogOpen}
-        // onSubmit={handleUpdateTrip}
-        buses={buses}
-        drivers={drivers}
-        routes={routes}
-      />
-
+      {routes && (
+        <ScheduleDialog
+          open={isCreateDialogOpen}
+          setOpen={setIsCreateDialogOpen}
+          onSuccess={refetchRoutes}
+          buses={buses}
+          drivers={drivers}
+          routes={routes.items}
+        />
+      )}
       {/* {selectedTrip && (
         <TripDetailDialog
           open={isDetailDialogOpen}

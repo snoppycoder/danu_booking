@@ -15,17 +15,19 @@ import clsx from "clsx";
 import type { Bus, Passenger, Seat } from "@/lib/model";
 import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
 import SeatBookingDialog from "./SeatBookingDialog";
+import { operatorApi } from "@/app/api/api";
+import { useAuth } from "@/lib/authContext";
 
 type SeatLayoutProps = {
   toggle: boolean;
-  bus: Bus;
+  bus: { id: string; plate_no: string };
   trip_id: string;
   seats: Seat[];
   selectedSeats: string[];
   setSelectedSeats: React.Dispatch<React.SetStateAction<string[]>>;
   onSucess?: () => void;
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
-
+  operator_id: string;
   setToggle: (val: boolean) => void;
 };
 
@@ -39,13 +41,19 @@ export default function SeatLayoutDialog({
   selectedSeats,
   setSelectedSeats,
   setToggle,
+  operator_id,
 }: SeatLayoutProps) {
   const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+
   useEffect(() => {
-    if (bus) {
-      setSeats(bus.seat_template.seats);
-    }
+    const fetch = async () => {
+      const data = await operatorApi.getAllSeatTemplates(operator_id);
+      if (data) {
+        setSeats(data?.[0].seats);
+      }
+    };
+    fetch();
   }, [bus]);
 
   useEffect(() => {
