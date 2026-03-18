@@ -1075,7 +1075,8 @@ export const agentApi = {
 export const operatorApi = {
   getReportData: async (
     operator_id: string,
-    trip_date?: string,
+    start_date?: string,
+    end_date?: string,
     bus_plate?: string,
     route_id?: string,
     agent_id?: string,
@@ -1085,7 +1086,8 @@ export const operatorApi = {
     try {
       const res = await api.get(`/operator/${operator_id}/reports/tickets`, {
         params: {
-          trip_date,
+          start_date,
+          end_date,
           agent_id,
           route_id,
           bus_plate,
@@ -1430,7 +1432,6 @@ export const operatorApi = {
   },
   getAllSeatTemplates: async (operator_id: string) => {
     try {
-   
       const response = await api.get(`/operator/${operator_id}/seat-templates`);
       console.log(response.data.items, "seat templates response");
       return response.data.items;

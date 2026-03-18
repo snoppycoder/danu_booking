@@ -49,31 +49,31 @@ export default function OperatorDashboard() {
   const [busPlate, setBusPlate] = useState<string>("all");
   const [route, setRoute] = useState("all");
   const [agent, setAgent] = useState("all");
-
-  const [fromDate, setFromDate] = useState(() => {
-    return new Date().toISOString().split("T")[0];
-  });
-  const [toDate, setToDate] = useState(() => {
-    const yesterday = new Date();
-    yesterday.setDate(yesterday.getDate() - 1);
-    return yesterday.toISOString().split("T")[0];
-  });
+  const ranges: Record<string, number> = {
+    today: 0,
+    weekly: 7,
+    monthly: 30,
+  };
 
   const daySetter = (back_in_days: number) => {
-    const day = new Date();
-    day.setDate(day.getDate() - back_in_days);
-    return day;
+    const today = new Date();
+    today.setDate(today.getDate() - back_in_days);
+    today.setHours(0, 0, 0, 0);
+
+    return today.toLocaleDateString("en-CA");
   };
   const { user } = useAuth();
   const { data: statCard } = useOperatorStatCard(user?.organization_id || "");
 
   const { data } = useOperatorReport2(
     user?.organization_id || "",
+    daySetter(ranges[date] ?? 0),
+    daySetter(0),
     undefined,
     busPlate == "all" ? undefined : busPlate,
     route == "all" ? undefined : route,
   );
-  console.log(busPlate, "bus plate");
+
   const { data: bus } = useOperatorBuses(user?.organization_id || "");
 
   const { data: routes } = useRoutes();
@@ -157,30 +157,14 @@ export default function OperatorDashboard() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem
-                      value="today"
-                      onClick={() => {
-                        let date = daySetter(1);
-                        setToDate(date.toISOString().split("T")[0]);
-                      }}
-                    >
-                      Today
-                    </SelectItem>
+                    <SelectItem value={"today"}>Today</SelectItem>
 
+                    <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem
-                      onClick={() => {
-                        let date = daySetter(7);
-                        setToDate(date.toISOString().split("T")[0]);
-                      }}
-                      value="weekly"
-                    >
-                      Weekly
-                    </SelectItem>
-                    <SelectItem
-                      onClick={() => {
-                        let date = daySetter(30);
-                        setToDate(date.toISOString().split("T")[0]);
-                      }}
+                      // onClick={() => {
+                      //   let date = daySetter(30);
+                      //   setToDate(date.toISOString().split("T")[0]);
+                      // }}
                       value="monthly"
                     >
                       Monthly

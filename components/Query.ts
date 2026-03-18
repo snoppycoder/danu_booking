@@ -461,7 +461,8 @@ export const useOperatorReport = (
 export const useOperatorReport2 = (
   operator_id: string,
 
-  trip_date?: string,
+  start_date?: string,
+  end_date?: string,
   bus_plate?: string,
   route_id?: string,
   agent_id?: string,
@@ -472,7 +473,8 @@ export const useOperatorReport2 = (
     queryKey: [
       "operator_report",
       operator_id,
-      trip_date,
+      start_date,
+      end_date,
       bus_plate,
       route_id,
       agent_id,
@@ -482,15 +484,15 @@ export const useOperatorReport2 = (
     queryFn: async () => {
       const res = await operatorApi.getReportData(
         operator_id,
-        trip_date,
+        start_date,
+        end_date,
         bus_plate,
         route_id,
         agent_id,
         page,
         per_page,
       );
-      console.log(operator_id, trip_date, bus_plate, route_id, agent_id);
-      console.log(res, "trips datess");
+
       return {
         items: res.items as {
           ticket_id: string;
