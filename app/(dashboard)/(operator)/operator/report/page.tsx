@@ -63,6 +63,8 @@ export default function OperatorDashboard() {
 
     return today.toLocaleDateString("en-CA");
   };
+  const startDate = useMemo(() => daySetter(ranges[date] ?? 0), [date]);
+  const endDate = useMemo(() => daySetter(0), []);
   const { user } = useAuth();
   const { data: statCard, isLoading: statCardIsLoading } = useOperatorStatCard(
     user?.organization_id || "",
@@ -70,8 +72,8 @@ export default function OperatorDashboard() {
 
   const { data, isLoading: report2IsLoading } = useOperatorReport2(
     user?.organization_id || "",
-    daySetter(ranges[date] ?? 0),
-    daySetter(0),
+    startDate,
+    endDate,
     busPlate == "all" ? undefined : busPlate,
     route == "all" ? undefined : route,
   );
@@ -114,13 +116,13 @@ export default function OperatorDashboard() {
       }
     }
   }, [statCard]);
-
-  if (
-    routeIsLoading ||
-    user?.organization_id?.trim().length == 0 ||
+  const isLoading =
+    !user?.organization_id ||
+    statCardIsLoading ||
     busIsLoading ||
-    statCardIsLoading
-  ) {
+    routeIsLoading;
+
+  if (isLoading) {
     return (
       <div className="w-full h-screen flex items-center justify-center bg-background">
         <Spinner className="h-8 w-8" />
