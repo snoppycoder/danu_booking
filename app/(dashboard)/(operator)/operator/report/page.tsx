@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -28,16 +28,16 @@ import {
 } from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
 import { Bus } from "@/lib/model";
+import { Spinner } from "@/components/ui/spinner";
 function TicketIdCell({ id }: { id: string }) {
   const [showFull, setShowFull] = useState(false);
-
   const displayId = showFull ? id : id.slice(0, 8) + "..."; // truncate first 8 chars
 
   return (
     <TableCell
       className="p-4 font-semibold text-primary cursor-pointer"
       onClick={() => setShowFull(!showFull)}
-      title={id} // optional: shows full id on hover
+      title={id}
     >
       {displayId}
     </TableCell>
@@ -49,6 +49,7 @@ export default function OperatorDashboard() {
   const [busPlate, setBusPlate] = useState<string>("all");
   const [route, setRoute] = useState("all");
   const [agent, setAgent] = useState("all");
+  const [operator_name, setOperatorName] = useState("");
   const ranges: Record<string, number> = {
     today: 0,
     weekly: 7,
@@ -63,20 +64,23 @@ export default function OperatorDashboard() {
     return today.toLocaleDateString("en-CA");
   };
   const { user } = useAuth();
-  const { data: statCard } = useOperatorStatCard(user?.organization_id || "");
+  const { data: statCard, isLoading: statCardIsLoading } = useOperatorStatCard(
+    user?.organization_id || "",
+  );
 
-  const { data } = useOperatorReport2(
+  const { data, isLoading: report2IsLoading } = useOperatorReport2(
     user?.organization_id || "",
     daySetter(ranges[date] ?? 0),
     daySetter(0),
-    undefined,
     busPlate == "all" ? undefined : busPlate,
     route == "all" ? undefined : route,
   );
 
-  const { data: bus } = useOperatorBuses(user?.organization_id || "");
+  const { data: bus, isLoading: busIsLoading } = useOperatorBuses(
+    user?.organization_id || "",
+  );
 
-  const { data: routes } = useRoutes();
+  const { data: routes, isLoading: routeIsLoading } = useRoutes();
 
   const statsData = [
     {
@@ -95,8 +99,34 @@ export default function OperatorDashboard() {
     },
     // { label: "Website/App Sales", value: "89" },
   ];
+  useEffect(() => {
+    if (statCard?.operator_name?.trim().length) {
+      // If statCard has operator_name, use it
+      setOperatorName(statCard.operator_name);
+      localStorage.setItem("operator_name", statCard.operator_name);
+    } else {
+      // Otherwise, fallback to localStorage if available
+      const savedName = localStorage.getItem("operator_name");
+      if (savedName?.trim().length) {
+        setOperatorName(savedName);
+      } else {
+        setOperatorName("Operator"); // default
+      }
+    }
+  }, [statCard]);
 
-  // we will add loading state
+  if (
+    routeIsLoading ||
+    user?.organization_id?.trim().length == 0 ||
+    busIsLoading ||
+    statCardIsLoading
+  ) {
+    return (
+      <div className="w-full h-screen flex items-center justify-center bg-background">
+        <Spinner className="h-8 w-8" />
+      </div>
+    );
+  }
 
   return (
     <div className="flex min-h-screen bg-background">
@@ -107,7 +137,7 @@ export default function OperatorDashboard() {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                {statCard?.operator_name || "Operator"} Report
+                {operator_name} Report
               </h1>
               {/* <p className="text-sm text-muted-foreground">
                 Total Tickets: 10 | Total Revenue: 54,800 ETB
@@ -160,15 +190,7 @@ export default function OperatorDashboard() {
                     <SelectItem value={"today"}>Today</SelectItem>
 
                     <SelectItem value="weekly">Weekly</SelectItem>
-                    <SelectItem
-                      // onClick={() => {
-                      //   let date = daySetter(30);
-                      //   setToDate(date.toISOString().split("T")[0]);
-                      // }}
-                      value="monthly"
-                    >
-                      Monthly
-                    </SelectItem>
+                    <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -185,7 +207,7 @@ export default function OperatorDashboard() {
                     <SelectItem value="all">All Bus</SelectItem>
                     {bus ? (
                       bus.map((bus: Bus) => (
-                        <SelectItem value={bus.plate_no}>
+                        <SelectItem key={bus.id} value={bus.plate_no}>
                           {bus.plate_no}
                         </SelectItem>
                       ))
@@ -210,7 +232,7 @@ export default function OperatorDashboard() {
                     <SelectItem value="all">All Routes</SelectItem>
                     {routes ? (
                       routes?.items.map((route) => (
-                        <SelectItem value={route.id}>
+                        <SelectItem key={route.id} value={route.id}>
                           {route.route_from} - {route.route_to}
                         </SelectItem>
                       ))
@@ -300,22 +322,31 @@ export default function OperatorDashboard() {
                       Sold By
                     </TableHead>
 
-                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold ">
+                    <TableHead className="text-xs uppercase  tracking-wide text-muted-foreground font-semibold ">
                       Price
                     </TableHead>
                   </TableRow>
                 </TableHeader>
 
                 <TableBody>
-                  {data?.items && data.items.length > 0 ? (
+                  {report2IsLoading ? (
+                    <TableRow>
+                      <TableCell
+                        colSpan={8}
+                        className="h-24 text-center text-muted-foreground"
+                      >
+                        <div className="flex justify-center">
+                          <Spinner />
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ) : data?.items && data.items.length > 0 ? (
+                    // 🟢 Data state
                     data.items.map((ticket) => (
                       <TableRow
                         key={ticket.ticket_id}
                         className="h-18 border-b border-border odd:bg-muted/20 hover:bg-muted/40 transition-colors"
                       >
-                        {/* <TableCell className="p-4 font-semibold text-primary">
-                          {ticket.ticket_id}
-                        </TableCell> */}
                         <TicketIdCell id={ticket.ticket_id} />
 
                         <TableCell className="p-4">
@@ -335,12 +366,13 @@ export default function OperatorDashboard() {
                           </span>
                         </TableCell>
 
-                        <TableCell className="p-4 text-right font-semibold">
+                        <TableCell className="p-4 font-semibold">
                           {ticket.price}
                         </TableCell>
                       </TableRow>
                     ))
                   ) : (
+                    // 🟡 Empty state
                     <TableRow>
                       <TableCell
                         colSpan={8}

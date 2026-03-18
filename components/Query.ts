@@ -460,9 +460,8 @@ export const useOperatorReport = (
 };
 export const useOperatorReport2 = (
   operator_id: string,
-
-  start_date?: string,
-  end_date?: string,
+  start_date: string,
+  end_date: string,
   bus_plate?: string,
   route_id?: string,
   agent_id?: string,

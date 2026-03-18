@@ -1089,8 +1089,8 @@ export const operatorApi = {
           start_date,
           end_date,
           agent_id,
-          route_id,
           bus_plate,
+          route_id,
           page,
           per_page,
         },
@@ -1431,12 +1431,14 @@ export const operatorApi = {
     return response.data;
   },
   getAllSeatTemplates: async (operator_id: string) => {
+    console.log(operator_id);
     try {
       const response = await api.get(`/operator/${operator_id}/seat-templates`);
       console.log(response.data.items, "seat templates response");
       return response.data.items;
     } catch (error) {
       console.log(error, "error from get all seat templates");
+      throw error;
     }
   },
   /**This is the KYC apis */
