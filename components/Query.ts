@@ -112,6 +112,52 @@ export const useSuperAdminStat = () => {
     },
   });
 };
+export const useOperatorAgentReportData = (
+  operator_id: string,
+  from_date: string,
+  to_date: string,
+  page?: number,
+  per_page?: number,
+) => {
+  return useQuery({
+    queryKey: [
+      "operator-agent-report",
+      operator_id,
+      from_date,
+      to_date,
+      page,
+      per_page,
+    ],
+    queryFn: async () => {
+      const res = await agentApi.getReportData(
+        operator_id,
+        from_date,
+        to_date,
+        page,
+        per_page,
+      );
+      console.log(res, "from query");
+      return {
+        items: res.items as {
+          ticket_id: string;
+          bus_plate_number: string;
+          route_from: string;
+          route_to: string;
+          passenger_name: string;
+          seat_no: string;
+          price: 0;
+          sold_by: string;
+          agent_type: string;
+        }[],
+        total: res.total,
+        date: res.date,
+        tickets_sold: res.tickets_sold,
+        revenue: res.revenue,
+        page: res.page,
+      };
+    },
+  });
+};
 export const useSearchRoute = (
   route_from: string,
   route_to: string,

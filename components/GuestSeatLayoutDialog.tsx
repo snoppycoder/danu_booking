@@ -15,11 +15,11 @@ import clsx from "clsx";
 import type { Bus, Passenger, Seat } from "@/lib/model";
 import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
 import Image from "next/image";
-import { operatorApi } from "@/app/api/api";
+import { operatorApi, passengerApi } from "@/app/api/api";
+import { Spinner } from "./ui/spinner";
 
 type SeatLayoutProps = {
   toggle: boolean;
-  bus: { id: string; plate_no: string };
   trip_id: string;
   seats: Seat[];
   selectedSeats: string[];
@@ -33,7 +33,6 @@ type SeatLayoutProps = {
 export default function GuestSeatLayoutDialog({
   toggle,
   trip_id,
-  bus,
   operator_id,
   onSuccess,
   seats,
@@ -45,14 +44,15 @@ export default function GuestSeatLayoutDialog({
   const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   useEffect(() => {
+    if (!trip_id) return;
     const fetch = async () => {
-      const data = await operatorApi.getAllSeatTemplates(operator_id);
+      const data = await passengerApi.getSeatLayout(trip_id);
       if (data) {
-        setSeats(data?.[0].seats);
+        setSeats(data?.seats);
       }
     };
     fetch();
-  }, [bus]);
+  }, [trip_id]);
 
   useEffect(() => {
     // Reset multi-select when dialog closes
@@ -91,9 +91,7 @@ export default function GuestSeatLayoutDialog({
 
     setMultiSelectSeats([]);
   };
-  if (!bus) {
-    return <div>Loading...</div>;
-  }
+
   const grouped = seats.reduce<Record<number, Seat[]>>((acc, seat) => {
     if (!acc[seat.row]) acc[seat.row] = [];
     acc[seat.row].push(seat);
@@ -124,59 +122,69 @@ export default function GuestSeatLayoutDialog({
             </div>
           )} */}
 
-            <div className="grid gap-2">
-              <div className="w-18 h-18 mb-1 flex items-center justify-center text-xs font-bold">
-                <img src="/steering-wheel.png" alt={"steering wheel"} />
+            {seats.length == 0 ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <Spinner />
               </div>
+            ) : (
+              <div className="grid gap-2">
+                <div className="w-18 h-18 mb-1 flex items-center justify-center text-xs font-bold">
+                  <img src="/steering-wheel.png" alt={"steering wheel"} />
+                </div>
 
-              <div className="flex flex-col gap-2">
-                {Object.entries(grouped).map(([rowNumber, rowSeats]) => (
-                  <div
-                    key={rowNumber}
-                    className="flex gap-2 justify-start items-center"
-                  >
-                    {rowSeats.map((seat, index) => (
-                      <>
-                        {rowSeats.length === 4 && index === 2 && (
-                          <div className="w-9" />
-                        )}
-
-                        <button
-                          key={seat.id}
-                          onClick={() => {
-                            setMultiSelectSeats((prev) => {
-                              const isSelected = prev.includes(seat.seat_code);
-
-                              if (isSelected) {
-                                return prev.filter((s) => s !== seat.seat_code);
-                              }
-
-                              return [...prev, seat.seat_code];
-                            });
-                          }}
-                          disabled={
-                            seat.status === "booked" || seat.status === "held"
-                          }
-                          className={clsx(
-                            "w-10 h-10 rounded border text-xs font-semibold",
-                            (seat.status === "booked" ||
-                              seat.status === "held") &&
-                              "bg-gray-300 cursor-not-allowed",
-                            multiSelectSeats.includes(seat.seat_code) &&
-                              "bg-primary hover:bg-primary/90 text-white",
-                            seat.status === "available" &&
-                              !multiSelectSeats.includes(seat.seat_code) &&
-                              "bg-white hover:bg-primary/60 border-gray-400",
+                <div className="flex flex-col gap-2">
+                  {Object.entries(grouped).map(([rowNumber, rowSeats]) => (
+                    <div
+                      key={rowNumber}
+                      className="flex gap-2 justify-start items-center"
+                    >
+                      {rowSeats.map((seat, index) => (
+                        <>
+                          {rowSeats.length === 4 && index === 2 && (
+                            <div className="w-9" />
                           )}
-                        >
-                          {seat.seat_code}
-                        </button>
-                      </>
-                    ))}
-                  </div>
-                ))}
+
+                          <button
+                            key={seat.id}
+                            onClick={() => {
+                              setMultiSelectSeats((prev) => {
+                                const isSelected = prev.includes(
+                                  seat.seat_code,
+                                );
+
+                                if (isSelected) {
+                                  return prev.filter(
+                                    (s) => s !== seat.seat_code,
+                                  );
+                                }
+
+                                return [...prev, seat.seat_code];
+                              });
+                            }}
+                            disabled={
+                              seat.status === "booked" || seat.status === "held"
+                            }
+                            className={clsx(
+                              "w-10 h-10 rounded border text-xs font-semibold",
+                              (seat.status === "booked" ||
+                                seat.status === "held") &&
+                                "bg-gray-300 cursor-not-allowed",
+                              multiSelectSeats.includes(seat.seat_code) &&
+                                "bg-primary hover:bg-primary/90 text-white",
+                              seat.status === "available" &&
+                                !multiSelectSeats.includes(seat.seat_code) &&
+                                "bg-white hover:bg-primary/60 border-gray-400",
+                            )}
+                          >
+                            {seat.seat_code}
+                          </button>
+                        </>
+                      ))}
+                    </div>
+                  ))}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Legend */}
@@ -199,7 +207,7 @@ export default function GuestSeatLayoutDialog({
             disabled={multiSelectSeats.length === 0}
             onClick={handleConfirm}
           >
-            Confirm
+            Confirm{" "}
             {multiSelectSeats.length > 0
               ? `${multiSelectSeats.length} Seat${multiSelectSeats.length !== 1 ? "s" : ""}`
               : "Seats"}

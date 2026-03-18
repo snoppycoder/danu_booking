@@ -38,7 +38,7 @@ export default function GuestSeatBookingDialog({
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
-
+  console.log();
   // Passenger information state
   const [passengers, setPassengers] = useState<Passenger[]>([
     {
@@ -208,18 +208,10 @@ export default function GuestSeatBookingDialog({
   };
   console.log("opening the seat booking");
 
-  if (!bus) {
-    return <>Loading</>;
-  }
-
   return (
     <div>
       <Toaster richColors position="top-right" />
       <Dialog open={toggle} onOpenChange={setToggle}>
-        {/* <DialogTrigger asChild>
-          <Button>Book Seats</Button>
-        </DialogTrigger> */}
-
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>

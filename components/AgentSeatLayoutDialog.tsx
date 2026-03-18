@@ -6,18 +6,18 @@ import { useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
-import type { Bus, Passenger, Seat } from "@/lib/model";
-import GuestSeatBookingDialog from "./GuestSeatBookingDialog";
-import Image from "next/image";
-import { operatorApi, passengerApi } from "@/app/api/api";
+import type { Seat } from "@/lib/model";
+
+import { passengerApi } from "@/app/api/api";
 import { Spinner } from "./ui/spinner";
-import SeatBookingDialog from "./SeatBookingDialog";
+
+import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
+import { useAuth } from "@/lib/authContext";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -31,7 +31,7 @@ type SeatLayoutProps = {
   setToggle: (val: boolean) => void;
 };
 
-export default function SeatLayoutDialog({
+export default function AgentSeatLayoutDialog({
   toggle,
   trip_id,
   operator_id,
@@ -44,6 +44,7 @@ export default function SeatLayoutDialog({
 }: SeatLayoutProps) {
   const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
   useEffect(() => {
     if (!trip_id) return;
     const fetch = async () => {
@@ -61,6 +62,7 @@ export default function SeatLayoutDialog({
       setMultiSelectSeats([]);
     }
   }, [toggle]);
+  console.log(multiSelectSeats);
 
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "booked" || seat.status === "held") return;
@@ -214,7 +216,8 @@ export default function SeatLayoutDialog({
           </Button>
         </DialogContent>
       </Dialog>
-      <SeatBookingDialog
+      (
+      <AgentSeatBookingDialog
         toggle={open}
         setToggle={setOpen}
         onSucess={onSuccess}
@@ -222,7 +225,9 @@ export default function SeatLayoutDialog({
         selectedSeats={selectedSeats}
         number_of_passengers={selectedSeats.length}
         operator_id={operator_id}
+        agentId={user?.id || ""}
       />
+      )
     </div>
   );
 }

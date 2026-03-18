@@ -28,6 +28,8 @@ import { Toaster } from "sonner";
 import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
 import SeatLayoutDialog from "@/components/SeatLayoutDialog";
+import { Spinner } from "@/components/ui/spinner";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function DanuBooking() {
   const searchParams = useSearchParams();
@@ -37,7 +39,7 @@ export default function DanuBooking() {
     departure_date: searchParams.get("date") || new Date().toString(),
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const per_page = 15;
+  const per_page = 10;
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
@@ -54,30 +56,21 @@ export default function DanuBooking() {
     { id: string; plate_no: string } | undefined
   >();
   const [tripId, setTripId] = useState<string>("");
+  const debouncedTo = useDebounce(form.route_to, 300);
+  const deboundedFrom = useDebounce(form.route_from, 300);
   const { data, isLoading, refetch } = useSearchRoute(
-    form.route_from,
-    form.route_to,
+    deboundedFrom,
+    debouncedTo,
     form.departure_date,
+    currentPage,
+    per_page,
   );
-  console.log(data, "logged!");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-
-  function isTrip(item: Item): item is Trip {
-    return "trip_id" in item;
-  }
-
-  // const handleViewDetails = async (trip: searchResult) => {
-  //   const response = await passengerApi.getTripDetails(trip.id);
-  //   console.log(response, "trip details");
-  //   setSelectedTrip(response);
-  //   setIsModalOpen(true);
-  // };
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     e.preventDefault();
-    // Refetch data with updated form values
     refetch();
   }
 
@@ -289,7 +282,11 @@ export default function DanuBooking() {
             </p>
           </div>
 
-          {data?.items.length === 0 ? (
+          {isLoading ? (
+            <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+              <Spinner />
+            </div>
+          ) : data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
@@ -336,33 +333,6 @@ export default function DanuBooking() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-
-                      {/* <div className="flex items-center justify-between mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs  tracking-wider text-muted-foreground">
-                            From
-                          </span>
-                          <span className="text-base font-semibold">
-                            {form.route_from}
-                          </span>
-                        </div>
-
-                        <div className="flex-1 mx-4 border-t border-dashed border-border relative">
-                          <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-card px-2 text-xs text-muted-foreground">
-                            → Direct
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col text-right">
-                          <span className="text-xs  tracking-wider text-muted-foreground">
-                            To
-                          </span>
-                          <span className="text-base font-semibold">
-                            {form.route_to}
-                          </span>
-                        </div>
-                      </div> */}
-
                       {/* Info Section */}
                       <div className="grid grid-cols-3 gap-4 mb-6">
                         {/* Price */}
@@ -429,7 +399,7 @@ export default function DanuBooking() {
             </div>
           )}
         </div>
-        {(data?.items.length ?? 0) > 0 && (
+        {(data?.total ?? 0) > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing {(currentPage - 1) * per_page + 1} to{" "}
@@ -451,6 +421,7 @@ export default function DanuBooking() {
               <Button
                 variant="outline"
                 onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={(data?.total ?? 0) <= currentPage * per_page}
               >
                 Next
               </Button>
@@ -464,12 +435,11 @@ export default function DanuBooking() {
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
           setSelectedSeats={setSelectedSeats}
-          bus={bus!}
           seats={seats}
           setSeats={setSeats}
           trip_id={tripId}
           selectedSeats={selectedSeats}
-          onSucess={refetch}
+          onSuccess={refetch}
           operator_id={id}
         />
         <TripDetailsModal

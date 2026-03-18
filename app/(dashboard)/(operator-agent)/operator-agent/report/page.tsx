@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import {
+  useOperatorAgentReportData,
   useOperatorBuses,
   useOperatorReport2,
   useOperatorStatCard,
@@ -66,20 +67,11 @@ export default function OperatorDashboard() {
   const startDate = useMemo(() => daySetter(ranges[date] ?? 0), [date]);
   const endDate = useMemo(() => daySetter(0), []);
   const { user } = useAuth();
-  const { data: statCard, isLoading: statCardIsLoading } = useOperatorStatCard(
-    user?.organization_id || "",
-  );
 
-  const { data, isLoading: report2IsLoading } = useOperatorReport2(
+  const { data, isLoading: report2IsLoading } = useOperatorAgentReportData(
     user?.organization_id || "",
     startDate,
     endDate,
-    busPlate == "all" ? undefined : busPlate,
-    route == "all" ? undefined : route,
-  );
-
-  const { data: bus, isLoading: busIsLoading } = useOperatorBuses(
-    user?.organization_id || "",
   );
 
   const { data: routes, isLoading: routeIsLoading } = useRoutes();
@@ -87,40 +79,34 @@ export default function OperatorDashboard() {
   const statsData = [
     {
       label: "Today's Revenue",
-      value: statCard?.today_revenue
-        ? `${statCard.today_revenue.toLocaleString()} ETB`
-        : "0",
+      value: 0,
     },
     {
       label: "Tickets Sold Today",
-      value: statCard?.tickets_sold_today?.toLocaleString() || "0",
+      value: 0,
     },
     {
       label: "Tickets by Agents",
-      value: statCard?.total_tickets_by_agents?.toLocaleString() || "0",
+      value: 0,
     },
     // { label: "Website/App Sales", value: "89" },
   ];
-  useEffect(() => {
-    if (statCard?.operator_name?.trim().length) {
-      // If statCard has operator_name, use it
-      setOperatorName(statCard.operator_name);
-      localStorage.setItem("operator_name", statCard.operator_name);
-    } else {
-      // Otherwise, fallback to localStorage if available
-      const savedName = localStorage.getItem("operator_name");
-      if (savedName?.trim().length) {
-        setOperatorName(savedName);
-      } else {
-        setOperatorName("Operator"); // default
-      }
-    }
-  }, [statCard]);
-  const isLoading =
-    !user?.organization_id ||
-    statCardIsLoading ||
-    busIsLoading ||
-    routeIsLoading;
+  //   useEffect(() => {
+  //     if (data?.operator_name?.trim().length) {
+  //       // If statCard has operator_name, use it
+  //       setOperatorName(statCard.operator_name);
+  //       localStorage.setItem("operator_name", statCard.operator_name);
+  //     } else {
+  //       // Otherwise, fallback to localStorage if available
+  //       const savedName = localStorage.getItem("operator_name");
+  //       if (savedName?.trim().length) {
+  //         setOperatorName(savedName);
+  //       } else {
+  //         setOperatorName("Operator"); // default
+  //       }
+  //     }
+  //   }, [statCard]);
+  const isLoading = !user?.organization_id || routeIsLoading;
 
   if (isLoading) {
     return (
@@ -193,31 +179,6 @@ export default function OperatorDashboard() {
 
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
-                  Bus Plate
-                </Label>
-                <Select value={busPlate} onValueChange={setBusPlate}>
-                  <SelectTrigger className="bg-background h-10">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="all">All Bus</SelectItem>
-                    {bus ? (
-                      bus.map((bus: Bus) => (
-                        <SelectItem key={bus.id} value={bus.plate_no}>
-                          {bus.plate_no}
-                        </SelectItem>
-                      ))
-                    ) : (
-                      <SelectItem value="none" disabled>
-                        No Buses
-                      </SelectItem>
-                    )}
                   </SelectContent>
                 </Select>
               </div>

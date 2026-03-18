@@ -35,15 +35,11 @@ const menuItems = [
     icon: Ticket,
   },
   {
-    title: "Booked Tickets",
-    url: "/agent/booked",
-    icon: TicketCheck,
-  },
-  {
     title: "Refund List",
     url: "/agent/refund-list",
     icon: DollarSign,
   },
+
   {
     title: "Report",
     url: "/agent/report",

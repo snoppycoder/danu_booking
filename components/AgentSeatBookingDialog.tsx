@@ -40,6 +40,19 @@ export default function AgentSeatBookingDialog({
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  console.log(
+    {
+      tripId,
+      agentId,
+      operator_id,
+      selectedSeats,
+      number_of_passengers,
+      toggle,
+      onSucess,
+      setToggle,
+    },
+    "data",
+  );
 
   // Passenger information state
   const [passengers, setPassengers] = useState<Passenger[]>([
@@ -63,16 +76,6 @@ export default function AgentSeatBookingDialog({
   >({});
   const [passengerArray, setPassengerArr] = useState<Passenger[]>([]);
 
-  // Fetch bus details
-  useEffect(() => {
-    const fetch = async () => {
-      const data = await operatorApi.getAllSeatTemplates(operator_id);
-      if (data) {
-        setSeats(data?.[0].seats);
-      }
-    };
-    fetch();
-  }, [bus]);
   useEffect(() => {
     if (!number_of_passengers || number_of_passengers <= 0) return;
 
@@ -177,10 +180,6 @@ export default function AgentSeatBookingDialog({
       setStep(1);
       setSeatToggle(false);
       setCurrentPassengerIndex(0);
-
-      if (bus) {
-        setSeats(bus.seat_template.seats);
-      }
     } else if (step === 3) {
       // Going back from confirmation to seat selection
       setStep(2);
@@ -205,20 +204,11 @@ export default function AgentSeatBookingDialog({
     setCurrentPassengerIndex(0);
     setEditingPassenger({});
   };
-  console.log("opening the seat booking");
-
-  if (!bus) {
-    return <>Loading</>;
-  }
 
   return (
     <div>
       <Toaster richColors position="top-right" />
       <Dialog open={toggle} onOpenChange={setToggle}>
-        {/* <DialogTrigger asChild>
-          <Button>Book Seats</Button>
-        </DialogTrigger> */}
-
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>

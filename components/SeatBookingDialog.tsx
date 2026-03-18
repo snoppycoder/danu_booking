@@ -51,7 +51,7 @@ export default function SeatBookingDialog({
 
   // Seat selection state
   const [seatToggle, setSeatToggle] = useState(false);
-  const [bus, setBus] = useState<Bus>();
+
   const [seats, setSeats] = useState<Seat[]>([]);
 
   const [seatDict, setSeatDict] = useState<Record<string, Passenger>>({});
@@ -61,16 +61,6 @@ export default function SeatBookingDialog({
   >({});
   const [passengerArray, setPassengerArr] = useState<Passenger[]>([]);
 
-  // Fetch bus details
-  useEffect(() => {
-    const fetch = async () => {
-      const data = await operatorApi.getAllSeatTemplates(operator_id);
-      if (data) {
-        setSeats(data?.[0].seats);
-      }
-    };
-    fetch();
-  }, [bus]);
   useEffect(() => {
     if (!number_of_passengers || number_of_passengers <= 0) return;
 
@@ -178,10 +168,6 @@ export default function SeatBookingDialog({
       setStep(1);
       setSeatToggle(false);
       setCurrentPassengerIndex(0);
-
-      if (bus) {
-        setSeats(bus.seat_template.seats);
-      }
     } else if (step === 3) {
       // Going back from confirmation to seat selection
       setStep(2);
@@ -207,10 +193,6 @@ export default function SeatBookingDialog({
     setEditingPassenger({});
   };
   console.log("opening the seat booking");
-
-  if (!bus) {
-    return <>Loading</>;
-  }
 
   return (
     <div>

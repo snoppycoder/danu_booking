@@ -890,7 +890,20 @@ export const passengerApi = {
       throw err;
     }
   },
+  getSeatLayout: async (trip_id: string) => {
+    const response = await api.get(`/guest/routes/${trip_id}/seats`);
 
+    return response.data as {
+      seats: {
+        id: string;
+        seat_code: string;
+        status: "available" | "booked" | "held";
+        row: number;
+        col: number;
+        fare: number;
+      }[];
+    };
+  },
   guestHoldBooking: async (
     tripId: string,
     body: {
@@ -1071,7 +1084,31 @@ export const agentApi = {
       throw error;
     }
   },
+  getReportData: async (
+    operator_id: string,
+    from_date: string,
+    to_date: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    try {
+      const response = await api.get(
+        `/operator-agents/${operator_id}/reports/tickets`,
+        {
+          params: {
+            from_date,
+            to_date,
+          },
+        },
+      );
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
 };
+
 export const operatorApi = {
   getReportData: async (
     operator_id: string,

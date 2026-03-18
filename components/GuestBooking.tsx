@@ -29,6 +29,8 @@ import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
 import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 import GuestSeatLayoutDialog from "./GuestSeatLayoutDialog";
+import { Spinner } from "./ui/spinner";
+import { useDebounce } from "@/hooks/useDebounce";
 
 export default function GuestBooking() {
   const searchParams = useSearchParams();
@@ -38,7 +40,7 @@ export default function GuestBooking() {
     departure_date: searchParams.get("date") || new Date().toString(),
   });
   const [currentPage, setCurrentPage] = useState(1);
-  const per_page = 15;
+  const per_page = 10;
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
@@ -55,12 +57,16 @@ export default function GuestBooking() {
     { id: string; plate_no: string } | undefined
   >();
   const [tripId, setTripId] = useState<string>("");
+  const debounced = useDebounce(form.route_to, 300);
   const { data, isLoading, refetch } = useSearchRoute(
     form.route_from,
-    form.route_to,
+    debounced,
     form.departure_date,
+    currentPage,
+    per_page,
+    undefined,
   );
-  console.log(data, "logged!");
+  console.log(data, "logged");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   function isTrip(item: Item): item is Trip {
@@ -116,7 +122,7 @@ export default function GuestBooking() {
         setSuggestionsTo(response);
         setShowDropdownTo(true);
         console.log(response);
-      }, 100);
+      }, 200);
     } catch (error) {
       console.error("Auto complete error:", error);
     }
@@ -290,7 +296,11 @@ export default function GuestBooking() {
             </p>
           </div>
 
-          {data?.items.length === 0 ? (
+          {isLoading ? (
+            <div className="rounded-xl bg-white p-12  flex justify-center text-center shadow-sm">
+              <Spinner />
+            </div>
+          ) : data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
@@ -430,11 +440,11 @@ export default function GuestBooking() {
             </div>
           )}
         </div>
-        {(data?.items.length ?? 0) > 0 && (
-          <div className="flex items-center justify-between">
+        {(data?.total ?? 0) > 0 && (
+          <div className="flex mt-4 items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing {(currentPage - 1) * per_page + 1} to{" "}
-              {(currentPage - 1) * per_page + (data?.items.length ?? 0)} of{" "}
+              {(currentPage - 1) * per_page + (data?.total ?? 0)} of{" "}
               {data?.total} entries
             </p>
 
@@ -452,6 +462,7 @@ export default function GuestBooking() {
               <Button
                 variant="outline"
                 onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={(data?.total ?? 0) <= currentPage * per_page}
               >
                 Next
               </Button>
@@ -471,7 +482,6 @@ export default function GuestBooking() {
             trip_id={tripId}
             selectedSeats={selectedSeats}
             operator_id={id}
-            bus={bus}
           />
         )}
         <TripDetailsModal

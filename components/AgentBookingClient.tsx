@@ -12,17 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatTime, handleSearch } from "@/lib/common_functions";
+import { formatTime } from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
-import { Item, Trip, TripData } from "@/lib/model";
+import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import {
   DropdownMenu,
@@ -35,53 +27,52 @@ import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
 import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
+import SeatLayoutDialog from "@/components/SeatLayoutDialog";
+import { Spinner } from "@/components/ui/spinner";
+import { useDebounce } from "@/hooks/useDebounce";
 import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
-import { useAuth } from "@/lib/authContext";
+import AgentSeatLayoutDialog from "./AgentSeatLayoutDialog";
 
-export default function AgentDanuBooking() {
+export default function AgentBookingClient() {
   const searchParams = useSearchParams();
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const per_page = 10;
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
+  const [seats, setSeats] = useState<Seat[]>([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
-  const [operator_id, setOperatorId] = useState("");
-
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [id, setId] = useState("");
+  const [bus, setBus] = useState<
+    { id: string; plate_no: string } | undefined
+  >();
   const [tripId, setTripId] = useState<string>("");
+  const debouncedTo = useDebounce(form.route_to, 300);
+  const deboundedFrom = useDebounce(form.route_from, 300);
   const { data, isLoading, refetch } = useSearchRoute(
-    form.route_from,
-    form.route_to,
+    deboundedFrom,
+    debouncedTo,
     form.departure_date,
+    currentPage,
+    per_page,
   );
-
-  const { user } = useAuth();
-  function isTrip(item: Item): item is Trip {
-    return "trip_id" in item;
-  }
-
-  // const handleViewDetails = async (trip: Trip) => {
-  //   const response = await passengerApi.getTripDetails(trip.trip_id);
-  //   console.log(response, "trip details");
-  //   setSelectedTrip(response);
-  //   setIsModalOpen(true);
-  // };
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     e.preventDefault();
-
     refetch();
   }
 
@@ -126,18 +117,18 @@ export default function AgentDanuBooking() {
   }
 
   async function handleBookNow(trip: searchResult): Promise<void> {
-    const response = await passengerApi.getTripDetails(trip.id);
     console.log(trip);
+    const response = await passengerApi.getTripDetails(trip.id);
+    setBus(response.bus);
     setTripId(trip.id);
-    setOperatorId(trip.operator.id);
+    setId(trip.operator.id);
 
     setUseInfoToggle(true);
   }
-
   return (
     <div className="">
       <Toaster richColors position="top-right" />
-      <div className="p-8 ">
+      <div className="p-8 bg-primary">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -293,107 +284,15 @@ export default function AgentDanuBooking() {
             </p>
           </div>
 
-          {data?.items.length === 0 ? (
+          {isLoading ? (
+            <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+              <Spinner />
+            </div>
+          ) : data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
           ) : (
-            // <div className="overflow-hidden rounded-xl bg-white shadow-lg">
-            //   <Table>
-            //     <TableHeader className="">
-            //       <TableRow className="border border-gray-200 bg-gradient-to-r from-teal-50 to-blue-50 hover:bg-gradient-to-r hover:from-teal-50 hover:to-blue-50">
-            //         <TableHead className="font-semibold text-gray-900">
-            //           Bus Name
-            //         </TableHead>
-            //         <TableHead className="font-semibold text-gray-900">
-            //           Departure
-            //         </TableHead>
-            //         <TableHead className="font-semibold text-gray-900">
-            //           Arrival
-            //         </TableHead>
-
-            //         <TableHead className="text-right font-semibold text-gray-900">
-            //           Fare
-            //         </TableHead>
-            //         <TableHead className="text-center font-semibold text-gray-900">
-            //           Seats
-            //         </TableHead>
-            //         <TableHead className="text-center font-semibold text-gray-900">
-            //           Action
-            //         </TableHead>
-            //       </TableRow>
-            //     </TableHeader>
-
-            //     <TableBody>
-            //       {data?.map((route, index) => (
-            //         <TableRow
-            //           key={index}
-            //           className="border-b py-6 border-gray-100 transition-colors hover:bg-teal-50/50"
-            //         >
-            //           <TableCell className="py-4 font-medium text-gray-900">
-            //             {route.operator.operator_name}
-            //           </TableCell>
-            //           <TableCell className="py-4 text-gray-700">
-            //             {form.route_from}
-            //           </TableCell>
-            //           <TableCell className="py-4 text-gray-700">
-            //             {form.route_to}
-            //           </TableCell>
-
-            //           <TableCell className="py-4 text-right font-semibold text-teal-600">
-            //             {route.price} Birr
-            //           </TableCell>
-            //           <TableCell className="py-4 text-center">
-            //             <span className="inline-flex items-center rounded-full bg-green-100 px-3 py-1 text-xs font-medium text-green-700">
-            //               {route.available_seats} Seats
-            //             </span>
-            //           </TableCell>
-            //           <TableCell className="py-4 ">
-            //             <div className="flex justify-center">
-            //               <Button
-            //                 size="sm"
-            //                 variant="default"
-            //                 className="mr-1.5"
-            //                 onClick={() => handleBookNow(route)}
-            //               >
-            //                 Book Now
-            //               </Button>
-            //               <div className="ml-2">
-            //                 <DropdownMenu>
-            //                   <DropdownMenuTrigger asChild>
-            //                     <Button
-            //                       variant="ghost"
-            //                       size="sm"
-            //                       className="h-8 w-8 p-0 hover:bg-teal-100"
-            //                     >
-            //                       <MoreHorizontal className="h-6 w-6 text-gray-600" />
-            //                       <span className="sr-only">Open menu</span>
-            //                     </Button>
-            //                   </DropdownMenuTrigger>
-            //                   <DropdownMenuContent align="end" className="w-48">
-            //                     <DropdownMenuItem
-            //                       className="cursor-pointer "
-            //                       onClick={() => {
-            //                         if (isTrip(route)) {
-            //                           handleViewDetails(route);
-            //                         }
-            //                       }}
-            //                     >
-            //                       View Details
-            //                     </DropdownMenuItem>
-            //                     <DropdownMenuItem className="cursor-pointer">
-            //                       Check Seats
-            //                     </DropdownMenuItem>
-            //                   </DropdownMenuContent>
-            //                 </DropdownMenu>
-            //               </div>
-            //             </div>
-            //           </TableCell>
-            //         </TableRow>
-            //       ))}
-            //     </TableBody>
-            //   </Table>
-            // </div>
             <div className="w-full">
               {/* Routes Grid */}
               <div className="grid gap-6 grid-cols-1">
@@ -414,9 +313,6 @@ export default function AgentDanuBooking() {
                           >
                             {route.operator.name}
                           </h3>
-                          {/* <p className="text-xs text-muted-foreground mt-1">
-                            Premium Travel Operator
-                          </p> */}
                         </div>
 
                         <DropdownMenu>
@@ -439,7 +335,7 @@ export default function AgentDanuBooking() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-
+                      {/* Info Section */}
                       <div className="grid grid-cols-3 gap-4 mb-6">
                         {/* Price */}
                         <div className="flex flex-col">
@@ -455,16 +351,17 @@ export default function AgentDanuBooking() {
                         </div>
 
                         {/* Seats */}
-                        {/* <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center">
                           <span className="text-xs text-muted-foreground tracking-wide">
-                            Seats
+                            Departure Time
                           </span>
                           <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
                             <span className="text-sm font-semibold text-black">
-                              {route.is_available ? "Available" : "Not Available"} 
+                              {route.departure_time.split(":")[0]} :{" "}
+                              {route.departure_time.split(":")[1]}
                             </span>
                           </div>
-                        </div> */}
+                        </div>
 
                         {/* Status */}
                         <div className="flex flex-col items-center">
@@ -504,17 +401,48 @@ export default function AgentDanuBooking() {
             </div>
           )}
         </div>
+        {(data?.total ?? 0) > 0 && (
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Showing {(currentPage - 1) * per_page + 1} to{" "}
+              {(currentPage - 1) * per_page + (data?.items.length ?? 0)} of{" "}
+              {data?.total} entries
+            </p>
+
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                disabled={currentPage === 1}
+                onClick={() => setCurrentPage((p) => p - 1)}
+              >
+                Previous
+              </Button>
+              <Button className="bg-primary text-primary-foreground">
+                {currentPage}
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={(data?.total ?? 0) <= currentPage * per_page}
+              >
+                Next
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
+
       <div className="hidden">
-        <AgentSeatBookingDialog
-          agentId={user?.id || ""}
-          onSucess={refetch}
+        <AgentSeatLayoutDialog
           toggle={useInfoToggle}
-          operator_id={operator_id}
           setToggle={setUseInfoToggle}
-          tripId={tripId}
+          setSelectedSeats={setSelectedSeats}
+          seats={seats}
+          setSeats={setSeats}
+          trip_id={tripId}
           selectedSeats={selectedSeats}
-          number_of_passengers={selectedSeats.length}
+          onSuccess={refetch}
+          operator_id={id}
         />
         <TripDetailsModal
           isOpen={isModalOpen}

@@ -227,7 +227,8 @@ export interface Seat {
   status: "available" | "booked" | "held";
   row: number;
   col: number;
-  extra_metadata: SeatExtraMetadata;
+  fare?: number;
+  extra_metadata?: SeatExtraMetadata;
 }
 
 export interface SeatTemplate {

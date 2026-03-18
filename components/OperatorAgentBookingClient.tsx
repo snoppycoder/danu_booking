@@ -12,17 +12,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useState } from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import { formatTime, handleSearch } from "@/lib/common_functions";
+import { formatTime } from "@/lib/common_functions";
 import { useSearchParams } from "next/navigation";
-import { Item, Trip, TripData } from "@/lib/model";
+import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import {
   DropdownMenu,
@@ -35,57 +27,51 @@ import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
 import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
-import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
-import { useAuth } from "@/lib/authContext";
+import SeatLayoutDialog from "@/components/SeatLayoutDialog";
+import { Spinner } from "@/components/ui/spinner";
+import { useDebounce } from "@/hooks/useDebounce";
+import AgentSeatLayoutDialog from "./AgentSeatLayoutDialog";
 
 export default function OperatorAgentBookingClient() {
   const searchParams = useSearchParams();
-  const [operator_id, setOperatorId] = useState("");
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const per_page = 10;
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
+  const [seats, setSeats] = useState<Seat[]>([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
-  const [currentPage, setCurrentPage] = useState(1);
-  const per_page = 15;
   const [useInfoToggle, setUseInfoToggle] = useState(false);
   const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [id, setId] = useState("");
+  const [bus, setBus] = useState<
+    { id: string; plate_no: string } | undefined
+  >();
   const [tripId, setTripId] = useState<string>("");
-  const { user } = useAuth();
+  const debouncedTo = useDebounce(form.route_to, 300);
+  const deboundedFrom = useDebounce(form.route_from, 300);
   const { data, isLoading, refetch } = useSearchRoute(
-    form.route_from,
-    form.route_to,
+    deboundedFrom,
+    debouncedTo,
     form.departure_date,
     currentPage,
     per_page,
-    user?.organization_id,
   );
-
-  function isTrip(item: Item): item is Trip {
-    return "trip_id" in item;
-  }
-
-  // const handleViewDetails = async (trip: Trip) => {
-  //   const response = await passengerApi.getTripDetails(trip.trip_id);
-  //   console.log(response, "trip details");
-  //   setSelectedTrip(response);
-  //   setIsModalOpen(true);
-  // };
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     e.preventDefault();
-
     refetch();
   }
 
@@ -130,18 +116,18 @@ export default function OperatorAgentBookingClient() {
   }
 
   async function handleBookNow(trip: searchResult): Promise<void> {
+    console.log(trip);
     const response = await passengerApi.getTripDetails(trip.id);
-
+    setBus(response.bus);
     setTripId(trip.id);
-    setOperatorId(trip.operator.id);
+    setId(trip.operator.id);
 
     setUseInfoToggle(true);
   }
-
   return (
     <div className="">
       <Toaster richColors position="top-right" />
-      <div className="p-8 ">
+      <div className="p-8 bg-primary">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
@@ -287,7 +273,7 @@ export default function OperatorAgentBookingClient() {
         </Card>
       </div>
       <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 p-8">
-        <div className="mx-auto max-w-7xl mb-8">
+        <div className="mx-auto max-w-7xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
               Available Trips
@@ -297,7 +283,11 @@ export default function OperatorAgentBookingClient() {
             </p>
           </div>
 
-          {data?.items.length === 0 ? (
+          {isLoading ? (
+            <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+              <Spinner />
+            </div>
+          ) : data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
@@ -305,8 +295,8 @@ export default function OperatorAgentBookingClient() {
             <div className="w-full">
               {/* Routes Grid */}
               <div className="grid gap-6 grid-cols-1">
-                {(data?.items || []).length > 0 ? (
-                  data?.items?.map((route) => (
+                {(data?.items || [])?.length > 0 ? (
+                  data?.items.map((route) => (
                     <div
                       key={route.id}
                       className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 
@@ -322,9 +312,6 @@ export default function OperatorAgentBookingClient() {
                           >
                             {route.operator.name}
                           </h3>
-                          {/* <p className="text-xs text-muted-foreground mt-1">
-                            Premium Travel Operator
-                          </p> */}
                         </div>
 
                         <DropdownMenu>
@@ -347,7 +334,7 @@ export default function OperatorAgentBookingClient() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-
+                      {/* Info Section */}
                       <div className="grid grid-cols-3 gap-4 mb-6">
                         {/* Price */}
                         <div className="flex flex-col">
@@ -363,16 +350,17 @@ export default function OperatorAgentBookingClient() {
                         </div>
 
                         {/* Seats */}
-                        {/* <div className="flex flex-col items-center">
+                        <div className="flex flex-col items-center">
                           <span className="text-xs text-muted-foreground tracking-wide">
-                            Seats
+                            Departure Time
                           </span>
                           <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
                             <span className="text-sm font-semibold text-black">
-                              {route.available_seats} Seats
+                              {route.departure_time.split(":")[0]} :{" "}
+                              {route.departure_time.split(":")[1]}
                             </span>
                           </div>
-                        </div> */}
+                        </div>
 
                         {/* Status */}
                         <div className="flex flex-col items-center">
@@ -412,11 +400,11 @@ export default function OperatorAgentBookingClient() {
             </div>
           )}
         </div>
-        {(data?.items.length ?? 0) > 0 && (
+        {(data?.total ?? 0) > 0 && (
           <div className="flex items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing {(currentPage - 1) * per_page + 1} to{" "}
-              {(currentPage - 1) * per_page + (data?.items?.length ?? 0)} of{" "}
+              {(currentPage - 1) * per_page + (data?.items.length ?? 0)} of{" "}
               {data?.total} entries
             </p>
 
@@ -434,7 +422,7 @@ export default function OperatorAgentBookingClient() {
               <Button
                 variant="outline"
                 onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={(data?.total ?? 0) <= currentPage * Number(per_page)}
+                disabled={(data?.total ?? 0) <= currentPage * per_page}
               >
                 Next
               </Button>
@@ -442,16 +430,18 @@ export default function OperatorAgentBookingClient() {
           </div>
         )}
       </div>
+
       <div className="hidden">
-        <AgentSeatBookingDialog
-          agentId={user?.id || ""}
-          onSucess={refetch}
+        <AgentSeatLayoutDialog
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
-          tripId={tripId}
+          setSelectedSeats={setSelectedSeats}
+          seats={seats}
+          setSeats={setSeats}
+          trip_id={tripId}
           selectedSeats={selectedSeats}
-          number_of_passengers={selectedSeats.length}
-          operator_id={operator_id}
+          onSuccess={refetch}
+          operator_id={id}
         />
         <TripDetailsModal
           isOpen={isModalOpen}
