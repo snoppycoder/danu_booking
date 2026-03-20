@@ -122,7 +122,7 @@ export const useDanuAgentReportData = (
 ) => {
   return useQuery({
     queryKey: [
-      "operator-agent-report",
+      "danu-agent-report",
       operator_id,
       from_date,
       to_date,
@@ -137,6 +137,7 @@ export const useDanuAgentReportData = (
         page,
         per_page,
       );
+      console.log(operator_id, "id");
 
       return {
         items: res.items as {

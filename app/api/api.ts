@@ -829,13 +829,14 @@ export const DanuAgentApi = {
     per_page?: number,
   ) => {
     try {
-      const response = await api.get(`/agents/${operator_id}/reports/tickets`, {
+      const response = await api.get(`/agent/${operator_id}/reports/tickets`, {
         params: {
           from_date,
           to_date,
         },
       });
-      return response.data?.[0] ?? response.data;
+
+      return response.data[0] ?? response.data;
     } catch (error) {
       console.log(error);
       throw error;

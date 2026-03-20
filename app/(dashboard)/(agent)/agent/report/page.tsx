@@ -20,16 +20,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
-import {
-  useDanuAgentReportData,
-  useOperatorAgentReportData,
-  useOperatorBuses,
-  useOperatorReport2,
-  useOperatorStatCard,
-  useRoutes,
-} from "@/components/Query";
+import { useDanuAgentReportData, useRoutes } from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
-import { Bus } from "@/lib/model";
+
 import { Spinner } from "@/components/ui/spinner";
 function TicketIdCell({ id }: { id: string }) {
   const [showFull, setShowFull] = useState(false);
@@ -48,7 +41,6 @@ function TicketIdCell({ id }: { id: string }) {
 
 export default function OperatorDashboard() {
   const [date, setDate] = useState("today");
-  const [busPlate, setBusPlate] = useState<string>("all");
   const [route, setRoute] = useState("all");
   const [agent, setAgent] = useState("all");
   const [operator_name, setOperatorName] = useState("");
@@ -80,28 +72,14 @@ export default function OperatorDashboard() {
   const statsData = [
     {
       label: "Today's Revenue",
-      value: data?.revenue,
+      value: data?.revenue ?? 0,
     },
     {
       label: "Tickets Sold Today",
-      value: data?.tickets_sold,
+      value: data?.tickets_sold ?? 0,
     },
   ];
-  //   useEffect(() => {
-  //     if (data?.operator_name?.trim().length) {
-  //       // If statCard has operator_name, use it
-  //       setOperatorName(statCard.operator_name);
-  //       localStorage.setItem("operator_name", statCard.operator_name);
-  //     } else {
-  //       // Otherwise, fallback to localStorage if available
-  //       const savedName = localStorage.getItem("operator_name");
-  //       if (savedName?.trim().length) {
-  //         setOperatorName(savedName);
-  //       } else {
-  //         setOperatorName("Operator"); // default
-  //       }
-  //     }
-  //   }, [statCard]);
+
   const isLoading = !user?.organization_id || routeIsLoading;
 
   if (isLoading) {
