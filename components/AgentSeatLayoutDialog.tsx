@@ -1,6 +1,6 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 
 import { useEffect, useState } from "react";
 import {
@@ -15,9 +15,10 @@ import type { Seat } from "@/lib/model";
 
 import { passengerApi } from "@/app/api/api";
 import { Spinner } from "./ui/spinner";
-
-import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
 import { useAuth } from "@/lib/authContext";
+import OperatorAgentSeatBookingDialog from "./OperatorAgentSeatBookingDialog";
+import { useSeatTemplate } from "./Query";
+import AgentSeatBookingDialog from "./AgentSeatBookingDialog";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -28,7 +29,7 @@ type SeatLayoutProps = {
   onSuccess?: () => void;
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
   operator_id: string;
-  setToggle: (val: boolean) => void;
+  setToggle: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function AgentSeatLayoutDialog({
@@ -38,24 +39,27 @@ export default function AgentSeatLayoutDialog({
   onSuccess,
   seats,
   setSeats,
-
   selectedSeats,
+
   setSelectedSeats,
   setToggle,
 }: SeatLayoutProps) {
   const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const { user } = useAuth();
-  useEffect(() => {
-    if (!trip_id) return;
-    const fetch = async () => {
-      const data = await passengerApi.getSeatLayout(trip_id);
-      if (data) {
-        setSeats(data?.seats);
-      }
-    };
-    fetch();
-  }, [trip_id]);
+  const { data: seats_, isLoading, refetch } = useSeatTemplate(trip_id);
+  console.log(seats_);
+
+  // useEffect(() => {
+  //   if (!trip_id) return;
+  //   const fetch = async () => {
+  //     const data = await passengerApi.getSeatLayout(trip_id);
+  //     if (data) {
+  //       setSeats(data?.seats);
+  //     }
+  //   };
+  //   fetch();
+  // }, [trip_id]);
 
   useEffect(() => {
     // Reset multi-select when dialog closes
@@ -63,43 +67,20 @@ export default function AgentSeatLayoutDialog({
       setMultiSelectSeats([]);
     }
   }, [toggle]);
-  console.log(multiSelectSeats);
-
-  const toggleSeat = (seat: Seat) => {
-    if (seat.status === "booked" || seat.status === "held") return;
-
-    setMultiSelectSeats((prev) => {
-      const isSelected = prev.includes(seat.seat_code);
-      if (isSelected) {
-        return prev.filter((s) => s !== seat.seat_code);
-      } else {
-        return [...prev, seat.seat_code];
-      }
-    });
-  };
 
   const handleConfirm = () => {
-    // if (multiSelectSeats.length === 0) return;
     setSelectedSeats(multiSelectSeats);
-    // Mark selected seats as booked
-    setSeats((prev) =>
-      prev?.map((s) =>
-        multiSelectSeats.includes(s.seat_code) ? { ...s, status: "booked" } : s,
-      ),
-    );
-
-    // Assign seats to passengers in order - first selected seat to first passenger, etc.
     setOpen(true);
-    setToggle(false);
-
-    setMultiSelectSeats([]);
   };
 
-  const grouped = seats.reduce<Record<number, Seat[]>>((acc, seat) => {
-    if (!acc[seat.row]) acc[seat.row] = [];
-    acc[seat.row].push(seat);
-    return acc;
-  }, {});
+  const grouped = (seats_ ?? [])?.reduce<Record<number, Seat[]>>(
+    (acc, seat) => {
+      if (!acc[seat.row]) acc[seat.row] = [];
+      acc[seat.row].push(seat);
+      return acc;
+    },
+    {},
+  );
 
   Object.values(grouped).forEach((row) => row.sort((a, b) => a.col - b.col));
 
@@ -121,7 +102,7 @@ export default function AgentSeatLayoutDialog({
             </div>
           )} */}
 
-            {seats.length == 0 ? (
+            {isLoading ? (
               <div className="w-full h-full flex items-center justify-center">
                 <Spinner />
               </div>
@@ -132,13 +113,13 @@ export default function AgentSeatLayoutDialog({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  {Object.entries(grouped).map(([rowNumber, rowSeats]) => (
+                  {Object.entries(grouped!).map(([rowNumber, rowSeats]) => (
                     <div
                       key={rowNumber}
                       className="flex gap-2 justify-start items-center"
                     >
                       {rowSeats.map((seat, index) => (
-                        <>
+                        <React.Fragment key={index}>
                           {rowSeats.length === 4 && index === 2 && (
                             <div className="w-9" />
                           )}
@@ -177,7 +158,7 @@ export default function AgentSeatLayoutDialog({
                           >
                             {seat.seat_code}
                           </button>
-                        </>
+                        </React.Fragment>
                       ))}
                     </div>
                   ))}
@@ -216,14 +197,15 @@ export default function AgentSeatLayoutDialog({
 
       <AgentSeatBookingDialog
         toggle={open}
+        setMultiSelect={setSelectedSeats}
         setToggle={setOpen}
-        onSucess={onSuccess}
+        onSucess={refetch}
         tripId={trip_id}
         selectedSeats={selectedSeats}
         number_of_passengers={selectedSeats.length}
         operator_id={operator_id}
         agentId={user?.organization_id || ""}
-        setMultiSelect={setMultiSelectSeats}
+        setLayoutToggle={setToggle}
       />
     </div>
   );
