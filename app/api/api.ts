@@ -172,6 +172,16 @@ api.interceptors.request.use(
     return Promise.reject(error);
   },
 );
+export const publicApi = {
+  verifyTicketToken: async (token: string) => {
+    const response = await api.get(`/guest/tickets/verify/${token}`);
+    return response.data as {
+      success: boolean;
+      message: string;
+      data?: any;
+    };
+  },
+};
 
 export const tempAPI = {
   payment: async (body: {
@@ -1087,10 +1097,22 @@ export const agentApi = {
     const response = await api.get(`/agent/${agent_id}/kyc-documents`);
     return response.data;
   },
+  getReportSummary: async (operator_id: string) => {
+    const response = await api.get(`/operator-agents/${operator_id}/reports`);
+    return response.data as {
+      operator_id: string;
+      operator_name: string;
+      seller_id: string;
+      seller_name: string;
+      date: string;
+      today_revenue: number;
+      tickets_sold_today: number;
+    };
+  },
   getReportData: async (
     operator_id: string,
-    from_date: string,
-    to_date: string,
+    from_date?: string,
+    to_date?: string,
     page?: number,
     per_page?: number,
   ) => {

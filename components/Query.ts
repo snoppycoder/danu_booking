@@ -50,6 +50,25 @@ export interface Trips_s {
     name: string;
   };
 }
+export interface operatorAdminReport {
+  date: string;
+  tickets_sold: number;
+  revenue: number;
+  items: {
+    ticket_id: string;
+    bus_plate_number: string;
+    route_from: string;
+    route_to: string;
+    passenger_name: string;
+    seat_no: string;
+    price: number;
+    sold_by: string;
+    agent_type: string;
+  }[];
+  total: number;
+  page: number;
+  per_page: number;
+}
 export interface searchResult {
   id: string;
   operator: {
@@ -160,10 +179,20 @@ export const useDanuAgentReportData = (
     },
   });
 };
+export const useOperatorAgentReportSummary = (operator_id: string) => {
+  return useQuery({
+    queryKey: ["operator-agent-report", operator_id],
+    queryFn: async () => {
+      const res = await agentApi.getReportSummary(operator_id);
+      return res;
+    },
+    enabled: !!operator_id,
+  });
+};
 export const useOperatorAgentReportData = (
   operator_id: string,
-  from_date: string,
-  to_date: string,
+  from_date?: string,
+  to_date?: string,
   page?: number,
   per_page?: number,
 ) => {
@@ -185,24 +214,7 @@ export const useOperatorAgentReportData = (
         per_page,
       );
       console.log(res, "from query");
-      return {
-        items: res.items as {
-          ticket_id: string;
-          bus_plate_number: string;
-          route_from: string;
-          route_to: string;
-          passenger_name: string;
-          seat_no: string;
-          price: 0;
-          sold_by: string;
-          agent_type: string;
-        }[],
-        total: res.total,
-        date: res.date,
-        tickets_sold: res.tickets_sold,
-        revenue: res.revenue,
-        page: res.page,
-      };
+      return res as operatorAdminReport[];
     },
   });
 };

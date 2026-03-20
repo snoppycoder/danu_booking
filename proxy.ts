@@ -25,6 +25,7 @@ export function proxy(request: NextRequest) {
     "/forgot-password",
     "/favicon.ico",
     "/api",
+    "/tickets",
   ];
 
   const token = request.cookies.get("access_token")?.value;
