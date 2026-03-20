@@ -65,7 +65,7 @@ export const AuthProvider = ({
 
       setUser(response.user_info);
 
-      if (response) {
+      if (response.access_token.length > 0) {
         await setAuthCookies(response);
         const decoded = await decodeJWT(response.access_token);
         console.log(response.access_token);
@@ -75,22 +75,23 @@ export const AuthProvider = ({
         } else if (decoded.roles.includes("super_admin")) {
           window.location.replace("/superadmin");
         } else if (decoded.roles.includes("agent_admin")) {
-          // if (!response.organization_id) {
-          //   throw Error(
-          //     "You are not assigned to an agent. Please Contact An Admin",
-          //   );
-          // }
+          if (!response.user_info?.organization_id) {
+            throw Error(
+              "You are not assigned to an agent. Please Contact An Admin",
+            );
+          }
+
           if (response.user_info.agent_type == "operator-agent-admin") {
             window.location.replace("/operator-agent/ticket-booking");
           } else {
             window.location.replace("/agent/ticket-booking");
           }
         } else if (decoded.roles.includes("operator_admin")) {
-          // if (!response.organization_id) {
-          //   throw Error(
-          //     "You are not assigned to an operator. Please Contact An Admin",
-          //   );
-          // }
+          if (!response.user_info?.organization_id) {
+            throw Error(
+              "You are not assigned to an operator. Please Contact An Admin",
+            );
+          }
           window.location.replace("/operator");
         } else {
           console.log("No role matched");
