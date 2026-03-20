@@ -26,7 +26,7 @@ export default function TicketVerification() {
         setResult(data);
       } catch (error) {
         console.error("Verification error:", error);
-        setResult({ success: false, message: "Failed to verify ticket." });
+        setResult({ success: false, message: "Failed to verify ticket. o" });
       } finally {
         setLoading(false);
       }
