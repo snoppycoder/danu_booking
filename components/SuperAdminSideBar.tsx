@@ -38,11 +38,9 @@ export default function Sidebar() {
     {
       icon: Users,
       label: "Users",
-      subItems: [
-        { label: "User List", href: "/superadmin/user" },
-        { label: "Manage User", href: "/superadmin/user/manage" },
-      ],
+      href: "/superadmin/user",
     },
+
     {
       icon: Briefcase,
       label: "Operator",
