@@ -263,6 +263,7 @@ export default function UserList() {
                   <TableHead>#</TableHead>
                   <TableHead>Name</TableHead>
                   <TableHead>Email</TableHead>
+                  <TableHead>Role </TableHead>
                   <TableHead>Mobile</TableHead>
                   <TableHead className="text-center">Action</TableHead>
                 </TableRow>
@@ -277,6 +278,7 @@ export default function UserList() {
                       {(u.first_name ?? "") + " " + (u.last_name ?? "")}
                     </TableCell>
                     <TableCell>{u.email}</TableCell>
+                    <TableCell>{u.roles?.[0]?.name ?? "N/A"}</TableCell>
                     <TableCell>{u.phone ?? "N/A"}</TableCell>
                     <TableCell className="text-center">
                       <div className="flex gap-2 justify-center">

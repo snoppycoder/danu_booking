@@ -185,7 +185,7 @@ export default function AgentList() {
       <Toaster richColors position="top-right" />
       <div className="flex flex-col md:flex-row md:items-center justify-between">
         <h1 className="text-3xl font-bold text-center md:text-left text-foreground mb-5 md:md-auto ">
-          Agent List
+          Danu Agent List
         </h1>
         <AddAgentModal onSuccess={refetch} />
       </div>
