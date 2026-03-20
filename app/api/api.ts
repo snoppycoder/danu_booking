@@ -124,7 +124,9 @@ api.interceptors.response.use(
               break;
 
             default:
-              console.error("Unhandled 401 error:", data);
+              if (window.location.pathname == "/signup") {
+                return;
+              }
               window.location.href = "/login";
               throw error;
           }
@@ -819,6 +821,26 @@ export const DanuAgentApi = {
       throw error;
     }
   },
+  getReportData: async (
+    operator_id: string,
+    from_date: string,
+    to_date: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    try {
+      const response = await api.get(`/agents/${operator_id}/reports/tickets`, {
+        params: {
+          from_date,
+          to_date,
+        },
+      });
+      return response.data?.[0] ?? response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   handleBooking: async (
     agent_id: string,
 
@@ -1064,6 +1086,29 @@ export const agentApi = {
     const response = await api.get(`/agent/${agent_id}/kyc-documents`);
     return response.data;
   },
+  getReportData: async (
+    operator_id: string,
+    from_date: string,
+    to_date: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    try {
+      const response = await api.get(
+        `/operator-agents/${operator_id}/reports/tickets`,
+        {
+          params: {
+            from_date,
+            to_date,
+          },
+        },
+      );
+      return response.data?.[0] ?? response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   getRefundList: async (
     organzation_id: string,
     page?: number,
@@ -1106,29 +1151,6 @@ export const agentApi = {
       return response.data;
     } catch (error) {
       console.log(error, "error from agent handle booking");
-      throw error;
-    }
-  },
-  getReportData: async (
-    operator_id: string,
-    from_date: string,
-    to_date: string,
-    page?: number,
-    per_page?: number,
-  ) => {
-    try {
-      const response = await api.get(
-        `/operator-agents/${operator_id}/reports/tickets`,
-        {
-          params: {
-            from_date,
-            to_date,
-          },
-        },
-      );
-      return response.data;
-    } catch (error) {
-      console.log(error);
       throw error;
     }
   },

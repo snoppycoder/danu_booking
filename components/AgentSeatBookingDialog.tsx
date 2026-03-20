@@ -34,7 +34,7 @@ type SeatBookingDialogProps = {
 export default function AgentSeatBookingDialog({
   tripId,
   agentId,
-  operator_id,
+
   selectedSeats,
   number_of_passengers,
   toggle,

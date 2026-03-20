@@ -75,11 +75,11 @@ export const AuthProvider = ({
         } else if (decoded.roles.includes("super_admin")) {
           window.location.replace("/superadmin");
         } else if (decoded.roles.includes("agent_admin")) {
-          if (response.user_info.agent_type == "operator-agent-admin") {
-            window.location.replace("/operator-agent/ticket-booking");
-          } else {
-            window.location.replace("/agent/ticket-booking");
-          }
+          //if (response.user_info.agent_type == "operator-agent-admin") {
+          window.location.replace("/operator-agent/ticket-booking");
+          // } else {
+          // window.location.replace("/agent/ticket-booking");
+          //  }
           console.log(response, "here is the response");
         } else if (decoded.roles.includes("operator_admin")) {
           window.location.replace("/operator");

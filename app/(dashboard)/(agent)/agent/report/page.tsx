@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import {
+  useDanuAgentReportData,
   useOperatorAgentReportData,
   useOperatorBuses,
   useOperatorReport2,
@@ -68,7 +69,7 @@ export default function OperatorDashboard() {
   const endDate = useMemo(() => daySetter(0), []);
   const { user } = useAuth();
 
-  const { data, isLoading: report2IsLoading } = useOperatorAgentReportData(
+  const { data, isLoading: report2IsLoading } = useDanuAgentReportData(
     user?.organization_id || "",
     startDate,
     endDate,
@@ -131,7 +132,7 @@ export default function OperatorDashboard() {
 
         {/* Stats Cards */}
         <div className="p-6 space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {statsData.map((stat, idx) => (
               <Card key={idx} className="bg-white border border-border p-4">
                 <div className="flex items-start justify-between mb-4">
