@@ -25,6 +25,7 @@ type SeatBookingDialogProps = {
   tripId: string;
   onSucess?: () => void;
   operator_id: string;
+  setLayoutToggle: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function SeatBookingDialog({
@@ -33,6 +34,7 @@ export default function SeatBookingDialog({
   number_of_passengers,
   toggle,
   operator_id,
+  setLayoutToggle,
   onSucess,
   setToggle,
 }: SeatBookingDialogProps) {
@@ -142,6 +144,7 @@ export default function SeatBookingDialog({
       ]);
       setToggle(false);
       setStep(1);
+      setLayoutToggle(false);
     } catch (error) {
       if (isAxiosError(error)) {
         console.error("Axios error:", error.response?.data || error.message);
@@ -164,15 +167,9 @@ export default function SeatBookingDialog({
 
   const handleBack = () => {
     if (step === 2) {
-      // Going back from seat selection to passenger info
       setStep(1);
-      setSeatToggle(false);
-      setCurrentPassengerIndex(0);
-    } else if (step === 3) {
-      // Going back from confirmation to seat selection
-      setStep(2);
-      setCurrentPassengerIndex(passengers.length - 1);
-      setSeatToggle(true);
+    } else if (step === 1) {
+      setToggle(false); // go back to previous dialog
     }
   };
 
@@ -217,6 +214,7 @@ export default function SeatBookingDialog({
               passengers={passengers}
               onPassengersChange={setPassengers}
               onNext={handlePassengerInfoNext}
+              onBack={handleBack}
             />
           )}
 

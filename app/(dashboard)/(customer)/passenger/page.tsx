@@ -12,7 +12,6 @@ import { passengerApi } from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src";
-import { formatLocalDate, normalizeDate } from "@/lib/common_functions";
 
 export default function DanuBooking() {
   const router = useRouter();

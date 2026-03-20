@@ -31,6 +31,7 @@ import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import AgentSeatLayoutDialog from "./AgentSeatLayoutDialog";
+import OperatorAgentSeatLayoutDialog from "./OperatorAgentSeatLayout";
 
 export default function OperatorAgentBookingClient() {
   const searchParams = useSearchParams();
@@ -284,7 +285,7 @@ export default function OperatorAgentBookingClient() {
           </div>
 
           {isLoading ? (
-            <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+            <div className="rounded-xl bg-white p-12  flex justify-center text-center shadow-sm">
               <Spinner />
             </div>
           ) : data?.items.length === 0 ? (
@@ -432,7 +433,7 @@ export default function OperatorAgentBookingClient() {
       </div>
 
       <div className="hidden">
-        <AgentSeatLayoutDialog
+        <OperatorAgentSeatLayoutDialog
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
           setSelectedSeats={setSelectedSeats}

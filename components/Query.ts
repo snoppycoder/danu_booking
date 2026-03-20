@@ -22,6 +22,7 @@ import {
   RefundDetail,
   RouteDTO,
   SearchRouteResponse,
+  Seat,
   Session,
   Trip,
   User,
@@ -192,6 +193,19 @@ export const useSearchRoute = (
     },
   });
 };
+
+export const useSeatTemplate = (trip_id: string) => {
+  return useQuery({
+    queryKey: ["template", trip_id],
+    queryFn: async () => {
+      const res = await passengerApi.getSeatLayout(trip_id);
+      return res.seats as Seat[];
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!trip_id,
+  });
+};
+
 export const useOperator = (page: number, per_page: number) => {
   return useQuery({
     queryKey: ["operator", page, per_page],

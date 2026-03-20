@@ -819,6 +819,27 @@ export const DanuAgentApi = {
       throw error;
     }
   },
+  handleBooking: async (
+    agent_id: string,
+
+    body: {
+      trip_id: string;
+      seat_codes: string[];
+      passenger_details: Passenger[];
+      payment_method: "cash" | "wallet";
+
+      payment_reference: string;
+      external_ref: string;
+    },
+  ) => {
+    try {
+      const response = await api.post(`/agent/${agent_id}/bookings`, body);
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from agent handle booking");
+      throw error;
+    }
+  },
 };
 
 export const passengerApi = {
@@ -1065,19 +1086,23 @@ export const agentApi = {
     }
   },
   handleBooking: async (
-    agent_id: string,
+    operator_id: string,
 
     body: {
       trip_id: string;
       seat_codes: string[];
       passenger_details: Passenger[];
       payment_method: "cash" | "wallet";
+
       payment_reference: string;
       external_ref: string;
     },
   ) => {
     try {
-      const response = await api.post(`/agent/${agent_id}/bookings`, body);
+      const response = await api.post(
+        `/operator-agents/${operator_id}/bookings`,
+        body,
+      );
       return response.data;
     } catch (error) {
       console.log(error, "error from agent handle booking");

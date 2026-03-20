@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { SetStateAction, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -12,6 +12,7 @@ type PassengerInfoFormProps = {
   passengers: Passenger[];
   onPassengersChange: (passengers: Passenger[]) => void;
   onNext: () => void;
+  onBack: () => void;
 };
 
 export default function PassengerInfoForm({
@@ -19,6 +20,7 @@ export default function PassengerInfoForm({
   passengers,
   onPassengersChange,
   onNext,
+  onBack,
 }: PassengerInfoFormProps) {
   const [showAddPassenger, setShowAddPassenger] = useState(false);
 
@@ -122,6 +124,9 @@ export default function PassengerInfoForm({
       ))}
 
       <div className="flex gap-2 pt-4">
+        <Button className="flex-1" variant={"outline"} onClick={onBack}>
+          Back
+        </Button>
         <Button
           className="flex-1"
           disabled={!allPassengersComplete}

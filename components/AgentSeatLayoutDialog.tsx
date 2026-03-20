@@ -38,6 +38,7 @@ export default function AgentSeatLayoutDialog({
   onSuccess,
   seats,
   setSeats,
+
   selectedSeats,
   setSelectedSeats,
   setToggle,
@@ -105,10 +106,6 @@ export default function AgentSeatLayoutDialog({
   return (
     <div>
       <Dialog open={toggle} onOpenChange={setToggle}>
-        <DialogTrigger asChild>
-          <Button>Choose Seats</Button>
-        </DialogTrigger>
-
         <DialogContent className="max-w-md h-[80%] overflow-y-scroll">
           <DialogTitle>Choose your seats</DialogTitle>
           <div className="flex flex-col items-center gap-4 mt-4">
@@ -216,7 +213,7 @@ export default function AgentSeatLayoutDialog({
           </Button>
         </DialogContent>
       </Dialog>
-      (
+
       <AgentSeatBookingDialog
         toggle={open}
         setToggle={setOpen}
@@ -225,9 +222,9 @@ export default function AgentSeatLayoutDialog({
         selectedSeats={selectedSeats}
         number_of_passengers={selectedSeats.length}
         operator_id={operator_id}
-        agentId={user?.id || ""}
+        agentId={user?.organization_id || ""}
+        setMultiSelect={setMultiSelectSeats}
       />
-      )
     </div>
   );
 }

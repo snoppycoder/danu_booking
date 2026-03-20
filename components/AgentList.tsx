@@ -36,7 +36,7 @@ import {
 } from "./ui/dropdown-menu";
 import { AddOperatorModal } from "./AddOperatorModal";
 import { superAdminApi } from "@/app/api/api";
-import { toast } from "sonner";
+import { toast, Toaster } from "sonner";
 import { Operator } from "@/lib/model";
 import {
   Dialog,
@@ -58,6 +58,7 @@ export default function AgentList() {
   const [searchTerm, setSearchTerm] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [open, setOpen] = useState(false);
+  const per_page = 10;
   // const [userId, setUserId] = useState("");
   const [agentId, setAgentId] = useState("");
   const [detailToggle, setDetailToggle] = useState(false);
@@ -68,33 +69,27 @@ export default function AgentList() {
     currentPage,
     Number(displayCount),
   );
-  const { data: users } = useUsers(10, 10); // make default all
+  const { data: users, refetch: userRefetch } = useUsers();
 
   const filteredAgents = data?.items.filter(
     (emp) =>
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+
+  const filteredUsers = users?.items.filter(
+    (user) => !user.organization_id && user?.roles?.[0]?.slug == "agent_admin",
+  );
+  console.log(filteredUsers, "filtered");
   useEffect(() => {
     setCurrentPage(1);
   }, [displayCount]);
 
-  async function handleViewDetail(id: string) {
-    const res = await superAdminApi.viewOperatorDetail(id);
-    if (res) {
-      setDetail(res);
-      setDetailToggle(true);
-    }
-  }
-
   async function handleDelete(id: string) {
     try {
-      const response = await superAdminApi.deleteAgent(id);
-
-      if (response) {
-        await refetch();
-        toast.success("Agent deleted");
-      }
+      await superAdminApi.deleteAgent(id);
+      refetch();
+      toast.success("Agent deleted");
     } catch (error) {
       if (axios.isAxiosError(error)) {
         if (error.status == 404) {
@@ -142,9 +137,10 @@ export default function AgentList() {
   }
   async function handleAssignAgentToUser(userId: string) {
     try {
-      const res = await superAdminApi.assignOperatorToUser(agentId, userId);
+      const res = await superAdminApi.assignUserToAgent(agentId, userId);
       console.log(res);
-      toast.success("Successfully assigned the user to the operator");
+      toast.success(res.detail ?? "Sucessfully Assigned to the Agent!");
+      userRefetch();
     } catch (error) {
       console.log(error);
       if (axios.isAxiosError(error)) {
@@ -186,6 +182,7 @@ export default function AgentList() {
 
   return (
     <div className="relative space-y-6">
+      <Toaster richColors position="top-right" />
       <div className="flex flex-col md:flex-row md:items-center justify-between">
         <h1 className="text-3xl font-bold text-center md:text-left text-foreground mb-5 md:md-auto ">
           Agent List
@@ -193,33 +190,41 @@ export default function AgentList() {
         <AddAgentModal onSuccess={refetch} />
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md">
+        <DialogContent className="max-w-sm max-h-[80%] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>User List</DialogTitle>
           </DialogHeader>
           <div ref={printRef}>
-            <div className="space-y-2 mt-4">
-              {users?.items.map((users) => (
-                <div
-                  key={users.id}
-                  className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {(users.first_name ?? "") + " " + (users.last_name ?? "")}
-                    </p>
-                  </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      handleAssignAgentToUser(users.id);
-                    }}
-                  >
-                    Select
-                  </Button>
+            <div className="space-y-2 mt-4 ">
+              {filteredUsers?.length == 0 ? (
+                <div className="p-6 text-center text-gray-500">
+                  No User to Assign
                 </div>
-              ))}
+              ) : (
+                filteredUsers?.map((users) => (
+                  <div
+                    key={users.id}
+                    className="flex justify-between items-center p-2 rounded hover:bg-gray-100 "
+                  >
+                    <div>
+                      <p className="font-medium">
+                        {(users.first_name ?? "") +
+                          " " +
+                          (users.last_name ?? "")}
+                      </p>
+                    </div>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => {
+                        handleAssignAgentToUser(users.id);
+                      }}
+                    >
+                      Select
+                    </Button>
+                  </div>
+                ))
+              )}
             </div>
           </div>
         </DialogContent>
@@ -449,6 +454,7 @@ export default function AgentList() {
               <Button
                 variant="outline"
                 onClick={() => setCurrentPage((p) => p + 1)}
+                disabled={(data?.total ?? 0) <= currentPage * per_page}
               >
                 Next
               </Button>

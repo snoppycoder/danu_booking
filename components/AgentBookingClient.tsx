@@ -285,7 +285,7 @@ export default function AgentBookingClient() {
           </div>
 
           {isLoading ? (
-            <div className="rounded-xl bg-white p-12 text-center shadow-sm">
+            <div className="rounded-xl bg-white p-12  flex justify-center text-center shadow-sm">
               <Spinner />
             </div>
           ) : data?.items.length === 0 ? (

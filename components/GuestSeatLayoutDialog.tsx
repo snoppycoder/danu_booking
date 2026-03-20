@@ -27,7 +27,7 @@ type SeatLayoutProps = {
   onSuccess?: () => void;
   setSeats: React.Dispatch<React.SetStateAction<Seat[]>>;
   operator_id: string;
-  setToggle: (val: boolean) => void;
+  setToggle: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
 export default function GuestSeatLayoutDialog({
@@ -61,6 +61,7 @@ export default function GuestSeatLayoutDialog({
     }
   }, [toggle]);
   console.log(multiSelectSeats);
+  console.log(selectedSeats);
 
   const toggleSeat = (seat: Seat) => {
     if (seat.status === "booked" || seat.status === "held") return;
@@ -103,25 +104,9 @@ export default function GuestSeatLayoutDialog({
   return (
     <div>
       <Dialog open={toggle} onOpenChange={setToggle}>
-        <DialogTrigger asChild>
-          <Button>Choose Seats</Button>
-        </DialogTrigger>
-
         <DialogContent className="max-w-md h-[80%] overflow-y-scroll">
           <DialogTitle>Choose your seats</DialogTitle>
           <div className="flex flex-col items-center gap-4 mt-4">
-            {/* {multiSelectSeats.length > 0 && (
-            <div className="w-full bg-blue-50 p-3 rounded border border-blue-200">
-              <p className="text-sm font-medium">
-                Selected: {multiSelectSeats.join(", ")}
-              </p>
-              <p className="text-xs text-gray-600 mt-1">
-                {multiSelectSeats.length} of {passengers.length} seat
-                {passengers.length !== 1 ? "s" : ""} selected
-              </p>
-            </div>
-          )} */}
-
             {seats.length == 0 ? (
               <div className="w-full h-full flex items-center justify-center">
                 <Spinner />
@@ -222,6 +207,8 @@ export default function GuestSeatLayoutDialog({
         selectedSeats={selectedSeats}
         number_of_passengers={selectedSeats.length}
         operator_id={operator_id}
+        setLayoutToggle={setToggle}
+        setMultiSelect={setSelectedSeats}
       />
     </div>
   );

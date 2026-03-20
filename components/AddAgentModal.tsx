@@ -38,7 +38,7 @@ export function AddAgentModal({ onSuccess }: AddAgentModalProps) {
   });
 
   async function handleSubmit(
-    e: React.FormEvent<HTMLFormElement>
+    e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     e.preventDefault();
 
@@ -74,11 +74,10 @@ export function AddAgentModal({ onSuccess }: AddAgentModalProps) {
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <Toaster richColors position="top-right"></Toaster>
-
       <DialogTrigger asChild>
         <Button
           variant="default"
+          disabled
           className="flex gap-2.5"
           onClick={() => {
             setOpen(!open);
@@ -91,15 +90,6 @@ export function AddAgentModal({ onSuccess }: AddAgentModalProps) {
         <form onSubmit={handleSubmit}>
           <DialogHeader>
             <DialogTitle>Add Agent</DialogTitle>
-            {/* <DialogDescription>
-              Make changes to your profile here. Click save when you&apos;re
-              done.
-            </DialogDescription> */}
-            {/* <DialogClose asChild>
-              <Button variant="ghost" className="absolute top-3 right-3">
-                <X />
-              </Button>
-            </DialogClose> */}
           </DialogHeader>
           <div className="min-w-full p-4">
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-col-4 gap-3">
@@ -167,9 +157,6 @@ export function AddAgentModal({ onSuccess }: AddAgentModalProps) {
             </div>
           </div>
           <DialogFooter>
-            {/* <DialogClose asChild>
-              <Button variant="outline">Cancel</Button>
-            </DialogClose> */}
             <Button type="submit">Submit</Button>
           </DialogFooter>
         </form>

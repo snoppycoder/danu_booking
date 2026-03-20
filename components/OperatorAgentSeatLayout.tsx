@@ -1,15 +1,22 @@
 "use client";
 
-import type React from "react";
+import React from "react";
 
 import { useEffect, useState } from "react";
-import { Dialog, DialogContent, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import clsx from "clsx";
 import type { Seat } from "@/lib/model";
+
 import { passengerApi } from "@/app/api/api";
 import { Spinner } from "./ui/spinner";
-import SeatBookingDialog from "./SeatBookingDialog";
+import { useAuth } from "@/lib/authContext";
+import OperatorAgentSeatBookingDialog from "./OperatorAgentSeatBookingDialog";
 import { useSeatTemplate } from "./Query";
 
 type SeatLayoutProps = {
@@ -24,7 +31,7 @@ type SeatLayoutProps = {
   setToggle: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-export default function SeatLayoutDialog({
+export default function OperatorAgentSeatLayoutDialog({
   toggle,
   trip_id,
   operator_id,
@@ -32,12 +39,27 @@ export default function SeatLayoutDialog({
   seats,
   setSeats,
   selectedSeats,
+
   setSelectedSeats,
   setToggle,
 }: SeatLayoutProps) {
   const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
+  const { user } = useAuth();
   const { data: seats_, isLoading, refetch } = useSeatTemplate(trip_id);
+  console.log(seats_);
+
+  // useEffect(() => {
+  //   if (!trip_id) return;
+  //   const fetch = async () => {
+  //     const data = await passengerApi.getSeatLayout(trip_id);
+  //     if (data) {
+  //       setSeats(data?.seats);
+  //     }
+  //   };
+  //   fetch();
+  // }, [trip_id]);
+
   useEffect(() => {
     // Reset multi-select when dialog closes
     if (!toggle) {
@@ -46,17 +68,18 @@ export default function SeatLayoutDialog({
   }, [toggle]);
 
   const handleConfirm = () => {
-    // if (multiSelectSeats.length === 0) return;
     setSelectedSeats(multiSelectSeats);
     setOpen(true);
-    // setMultiSelectSeats([]);
   };
 
-  const grouped = (seats_ ?? []).reduce<Record<number, Seat[]>>((acc, seat) => {
-    if (!acc[seat.row]) acc[seat.row] = [];
-    acc[seat.row].push(seat);
-    return acc;
-  }, {});
+  const grouped = (seats_ ?? [])?.reduce<Record<number, Seat[]>>(
+    (acc, seat) => {
+      if (!acc[seat.row]) acc[seat.row] = [];
+      acc[seat.row].push(seat);
+      return acc;
+    },
+    {},
+  );
 
   Object.values(grouped).forEach((row) => row.sort((a, b) => a.col - b.col));
 
@@ -89,13 +112,13 @@ export default function SeatLayoutDialog({
                 </div>
 
                 <div className="flex flex-col gap-2">
-                  {Object.entries(grouped).map(([rowNumber, rowSeats]) => (
+                  {Object.entries(grouped!).map(([rowNumber, rowSeats]) => (
                     <div
                       key={rowNumber}
                       className="flex gap-2 justify-start items-center"
                     >
                       {rowSeats.map((seat, index) => (
-                        <>
+                        <React.Fragment key={index}>
                           {rowSeats.length === 4 && index === 2 && (
                             <div className="w-9" />
                           )}
@@ -134,7 +157,7 @@ export default function SeatLayoutDialog({
                           >
                             {seat.seat_code}
                           </button>
-                        </>
+                        </React.Fragment>
                       ))}
                     </div>
                   ))}
@@ -143,6 +166,7 @@ export default function SeatLayoutDialog({
             )}
           </div>
 
+          {/* Legend */}
           <div className="flex justify-between text-xs mt-4 gap-2">
             <span className="flex items-center gap-1">
               <span className="w-3 h-3 bg-white border border-gray-400 rounded" />{" "}
@@ -169,15 +193,18 @@ export default function SeatLayoutDialog({
           </Button>
         </DialogContent>
       </Dialog>
-      <SeatBookingDialog
+
+      <OperatorAgentSeatBookingDialog
         toggle={open}
+        setMultiSelect={setSelectedSeats}
         setToggle={setOpen}
-        setLayoutToggle={setToggle}
         onSucess={refetch}
         tripId={trip_id}
         selectedSeats={selectedSeats}
         number_of_passengers={selectedSeats.length}
         operator_id={operator_id}
+        agentId={user?.organization_id || ""}
+        setLayoutToggle={setToggle}
       />
     </div>
   );

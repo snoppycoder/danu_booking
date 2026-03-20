@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,8 @@ type SeatBookingDialogProps = {
   tripId: string;
   onSucess?: () => void;
   operator_id: string;
+  setLayoutToggle: React.Dispatch<SetStateAction<boolean>>;
+  setMultiSelect: React.Dispatch<SetStateAction<string[]>>;
 };
 
 export default function GuestSeatBookingDialog({
@@ -34,6 +36,8 @@ export default function GuestSeatBookingDialog({
   toggle,
   onSucess,
   operator_id,
+  setLayoutToggle,
+  setMultiSelect,
   setToggle,
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
@@ -173,21 +177,9 @@ export default function GuestSeatBookingDialog({
   };
 
   const handleBack = () => {
-    if (step === 2) {
-      // Going back from seat selection to passenger info
-      setStep(1);
-      setSeatToggle(false);
-      setCurrentPassengerIndex(0);
-
-      if (bus) {
-        setSeats(bus.seat_template.seats);
-      }
-    } else if (step === 3) {
-      // Going back from confirmation to seat selection
-      setStep(2);
-      setCurrentPassengerIndex(passengers.length - 1);
-      setSeatToggle(true);
-    }
+    setMultiSelect([]);
+    console.log(selectedSeats);
+    setToggle(false);
   };
 
   const handleDialogClose = () => {
@@ -227,6 +219,7 @@ export default function GuestSeatBookingDialog({
               passengers={passengers}
               onPassengersChange={setPassengers}
               onNext={handlePassengerInfoNext}
+              onBack={handleBack}
             />
           )}
 
