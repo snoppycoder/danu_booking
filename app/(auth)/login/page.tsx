@@ -23,6 +23,7 @@ export default function LoginPage() {
     // first format the phone number to E.164 format if needed
     // api call
     e.preventDefault();
+
     if (!phone || !password) {
       toast.warning("Enter every field");
       return;
@@ -41,6 +42,11 @@ export default function LoginPage() {
         toast.warning(
           error.response?.data?.error ||
             "Invalid credentials. Please try again.",
+        );
+      } else if (error instanceof Error) {
+        toast.error(
+          error.message ||
+            "Something went wrong please contact our support team!",
         );
       }
     }

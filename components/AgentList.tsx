@@ -80,7 +80,7 @@ export default function AgentList() {
   const filteredUsers = users?.items.filter(
     (user) => !user.organization_id && user?.roles?.[0]?.slug == "agent_admin",
   );
-  console.log(filteredUsers, "filtered");
+
   useEffect(() => {
     setCurrentPage(1);
   }, [displayCount]);
