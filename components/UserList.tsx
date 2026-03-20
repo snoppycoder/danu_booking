@@ -413,17 +413,6 @@ export default function UserList() {
               variant="outline"
               onClick={() => {
                 if (!selectUserAssign) return;
-                handleAssignRole("super_admin", selectUserAssign);
-                setAssignRoleOpen(false);
-              }}
-            >
-              Super Admin
-            </Button>
-
-            <Button
-              variant="outline"
-              onClick={() => {
-                if (!selectUserAssign) return;
                 handleAssignRole("operator_admin", selectUserAssign);
                 setAssignRoleOpen(false);
               }}
