@@ -87,11 +87,6 @@ export const AuthProvider = ({
             window.location.replace("/agent/ticket-booking");
           }
         } else if (decoded.roles.includes("operator_admin")) {
-          if (!response.user_info?.organization_id) {
-            throw Error(
-              "You are not assigned to an operator. Please Contact An Admin",
-            );
-          }
           window.location.replace("/operator");
         } else {
           console.log("No role matched");

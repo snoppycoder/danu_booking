@@ -127,7 +127,6 @@ export default function GuestSeatBookingDialog({
     let uuid = uuidv4();
 
     try {
-      console.log(selectedSeats, passengers);
       if (selectedSeats.length === 0 || passengers.length === 0) return;
 
       const response = await passengerApi.guestHoldBooking(tripId, {
