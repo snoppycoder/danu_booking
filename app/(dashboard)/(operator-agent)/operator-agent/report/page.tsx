@@ -141,17 +141,17 @@ export default function OperatorAdminReport() {
   const [selectedDay, setSelectedDay] = useState<operatorAdminReport | null>(
     null,
   );
+  const per_page = 10;
+  const [currentPage, setCurrentPage] = useState(1);
+  const [filterDay, setFilterDay] = useState<string>("Weekly");
   const { data: reportData, isLoading: isSummaryLoading } =
     useOperatorAgentReportSummary(user?.organization_id || "");
   const [date, setDate] = useState("today");
-  const [busPlate, setBusPlate] = useState<string>("all");
-  const [route, setRoute] = useState("all");
-  const [agent, setAgent] = useState("all");
-  const [operator_name, setOperatorName] = useState("");
+
   const ranges: Record<string, number> = {
-    today: 0,
-    weekly: 7,
-    monthly: 30,
+    Today: 0,
+    Weekly: 7,
+    Monthly: 30,
   };
 
   const daySetter = (back_in_days: number) => {
@@ -161,14 +161,14 @@ export default function OperatorAdminReport() {
 
     return today.toLocaleDateString("en-CA");
   };
-  const startDate = useMemo(() => daySetter(7), [date]); // correct this
+  const startDate = useMemo(() => daySetter(ranges[filterDay]), [date]); // correct this
   const endDate = useMemo(() => daySetter(0), []);
   console.log(startDate, endDate);
 
   const { data, isLoading: report2IsLoading } = useOperatorAgentReportData(
     user?.organization_id || "",
-    "2026-01-20",
-    "2026-03-21",
+    startDate,
+    endDate,
   );
   console.log(data);
 
@@ -233,11 +233,11 @@ export default function OperatorAdminReport() {
                   key={idx}
                   className="bg-gradient-to-br from-white to-muted/5 border border-border p-6 rounded-lg"
                 >
-                  <div className="flex flex-col">
-                    <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
+                  <div className="flex gap-2.5 flex-col">
+                    <p className="text-center text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-3">
                       {stat.label}
                     </p>
-                    <p className="text-3xl font-bold text-foreground">
+                    <p className="text-center text-3xl font-bold text-foreground">
                       {typeof stat.value === "number" &&
                       stat.label.includes("Revenue")
                         ? formatCurrency(stat.value)
@@ -251,42 +251,27 @@ export default function OperatorAdminReport() {
         )}
 
         {/* Main Content Area */}
-        <div className="px-6 pb-6">
-          {/* {selectedDay && (
+        <div className="px-6 mt-4 pb-6">
+          {!selectedDay && (
             <div className="bg-white border border-border rounded-lg p-6 mb-6 shadow-sm">
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h2 className="text-lg font-semibold text-foreground">
-                    Filters
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">
-                    Refine your report data
-                  </p>
-                </div>
-
-                <Button variant="outline" size="sm">
-                  Print
-                </Button>
-              </div>
-
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div>
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">
                     Date Range
                   </Label>
-                  <Select value={date} onValueChange={setDate}>
+                  <Select value={filterDay} onValueChange={setFilterDay}>
                     <SelectTrigger className="bg-muted/50 h-10 rounded-lg">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value={"today"}>Today</SelectItem>
-                      <SelectItem value="weekly">Weekly</SelectItem>
-                      <SelectItem value="monthly">Monthly</SelectItem>
+                      <SelectItem value="Today">Today</SelectItem>
+                      <SelectItem value="Weekly">Weekly</SelectItem>
+                      <SelectItem value="Monthly">Monthly</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
-                <div>
+                {/* <div>
                   <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">
                     Route
                   </Label>
@@ -309,10 +294,10 @@ export default function OperatorAdminReport() {
                       )}
                     </SelectContent>
                   </Select>
-                </div>
+                </div> */}
               </div>
             </div>
-          )} */}
+          )}
 
           {/* Summary Cards or Detailed View */}
           {!selectedDay ? (
@@ -335,7 +320,7 @@ export default function OperatorAdminReport() {
                 (Array.isArray(data) ? data : [data])?.map((item, index) => (
                   <div
                     key={index}
-                    className="transition-all duration-200 hover:scale-[1.01]"
+                    className="transition-all duration-200 hover:scale-[1.01] my-3.5"
                   >
                     <DayCard
                       date={item?.date}
