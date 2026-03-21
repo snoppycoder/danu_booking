@@ -21,6 +21,7 @@ import {
 } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
 import {
+  useOperatorAgent,
   useOperatorBuses,
   useOperatorReport2,
   useOperatorStatCard,
@@ -66,6 +67,8 @@ export default function OperatorDashboard() {
   const startDate = useMemo(() => daySetter(ranges[date] ?? 0), [date]);
   const endDate = useMemo(() => daySetter(0), []);
   const { user } = useAuth();
+  const { data: operator_agents, isLoading: operator_agent_loading } =
+    useOperatorAgent(user?.organization_id || "", undefined, undefined);
   const { data: statCard, isLoading: statCardIsLoading } = useOperatorStatCard(
     user?.organization_id || "",
   );
@@ -76,6 +79,7 @@ export default function OperatorDashboard() {
     endDate,
     busPlate == "all" ? undefined : busPlate,
     route == "all" ? undefined : route,
+    agent == "all" ? undefined : agent,
   );
 
   const { data: bus, isLoading: busIsLoading } = useOperatorBuses(
@@ -120,6 +124,7 @@ export default function OperatorDashboard() {
     !user?.organization_id ||
     statCardIsLoading ||
     busIsLoading ||
+    operator_agent_loading ||
     routeIsLoading;
 
   if (isLoading) {
@@ -179,9 +184,9 @@ export default function OperatorDashboard() {
               </Button>
             </div>
 
-            <div className="grid grid-cols-2  lg:grid-cols-4 gap-4">
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="flex flex-col gap-y-1">
+                <Label className="ml-3 text-xs font-medium text-muted-foreground mb-1">
                   Date
                 </Label>
                 <Select value={date} onValueChange={setDate}>
@@ -189,16 +194,15 @@ export default function OperatorDashboard() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value={"today"}>Today</SelectItem>
-
+                    <SelectItem value="today">Today</SelectItem>
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+              <div className="flex flex-col gap-y-1">
+                <Label className="ml-3 text-xs font-medium text-muted-foreground mb-1">
                   Bus Plate
                 </Label>
                 <Select value={busPlate} onValueChange={setBusPlate}>
@@ -222,8 +226,8 @@ export default function OperatorDashboard() {
                 </Select>
               </div>
 
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+              <div className="flex flex-col gap-y-1">
+                <Label className="ml-3 text-xs font-medium text-muted-foreground mb-1">
                   Route
                 </Label>
                 <Select value={route} onValueChange={setRoute}>
@@ -247,8 +251,8 @@ export default function OperatorDashboard() {
                 </Select>
               </div>
 
-              <div>
-                <Label className="text-xs font-medium text-muted-foreground mb-1 block">
+              <div className="flex flex-col gap-y-1">
+                <Label className="ml-3 text-xs font-medium text-muted-foreground mb-1">
                   Agent
                 </Label>
                 <Select value={agent} onValueChange={setAgent}>
@@ -257,9 +261,20 @@ export default function OperatorDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Agents</SelectItem>
-                    <SelectItem value="agents">Agent</SelectItem>
-                    <SelectItem value="website">Website</SelectItem>
-                    <SelectItem value="app">App</SelectItem>
+                    {operator_agents ? (
+                      operator_agents.items.map((operator_agent) => (
+                        <SelectItem
+                          key={operator_agent.id}
+                          value={operator_agent.id}
+                        >
+                          {operator_agent.first_name} {operator_agent.last_name}
+                        </SelectItem>
+                      ))
+                    ) : (
+                      <SelectItem value="none" disabled>
+                        No Buses
+                      </SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>

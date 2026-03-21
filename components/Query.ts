@@ -524,8 +524,8 @@ export const useCreateOperatorAgent = () => {
 
 export const useOperatorAgent = (
   operator_id: string,
-  page: number,
-  per_page: number,
+  page?: number,
+  per_page?: number,
 ) => {
   return useQuery({
     queryKey: ["operator_agent", operator_id, page, per_page],
