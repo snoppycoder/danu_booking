@@ -161,13 +161,14 @@ export default function OperatorAdminReport() {
 
     return today.toLocaleDateString("en-CA");
   };
-  const startDate = useMemo(() => daySetter(10), [date]); // correct this
+  const startDate = useMemo(() => daySetter(7), [date]); // correct this
   const endDate = useMemo(() => daySetter(0), []);
+  console.log(startDate, endDate);
 
   const { data, isLoading: report2IsLoading } = useOperatorAgentReportData(
     user?.organization_id || "",
-    startDate,
-    endDate,
+    "2026-01-20",
+    "2026-03-21",
   );
   console.log(data);
 

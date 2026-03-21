@@ -1126,7 +1126,7 @@ export const agentApi = {
           },
         },
       );
-      return response.data?.[0] ?? response.data;
+      return response.data;
     } catch (error) {
       console.log(error);
       throw error;
