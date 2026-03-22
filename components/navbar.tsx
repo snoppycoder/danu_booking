@@ -31,10 +31,10 @@ export default function Navbar(props: NavbarProps) {
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <div className="relative flex-shrink-0">
-            <span className="text-2xl font-bold text-primary ml-0 mr-15">
-              <Link href="/passenger">DANU BOOKING</Link>
-            </span>
+          <div className="relative h-full flex items-center shrink-0 mr-10">
+            <Link href="/passenger">
+              <img src="/logo.png" className="h-25 w-auto" />
+            </Link>
           </div>
 
           {/* Desktop Menu */}
