@@ -317,19 +317,21 @@ export default function OperatorAdminReport() {
                   </p>
                 </div>
               ) : (
-                (Array.isArray(data) ? data : [data])?.map((item, index) => (
-                  <div
-                    key={index}
-                    className="transition-all duration-200 hover:scale-[1.01] my-3.5"
-                  >
-                    <DayCard
-                      date={item?.date}
-                      tickets_sold={item?.tickets_sold}
-                      revenue={item?.revenue}
-                      onClick={() => setSelectedDay(item!)}
-                    />
-                  </div>
-                ))
+                (Array.isArray(data) ? [...data].reverse() : [data]).map(
+                  (item, index) => (
+                    <div
+                      key={index}
+                      className="transition-all duration-200 hover:scale-[1.01] my-3.5"
+                    >
+                      <DayCard
+                        date={item?.date}
+                        tickets_sold={item?.tickets_sold}
+                        revenue={item?.revenue}
+                        onClick={() => setSelectedDay(item!)}
+                      />
+                    </div>
+                  ),
+                )
               )}
             </div>
           ) : (
