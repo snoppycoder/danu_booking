@@ -79,9 +79,10 @@ export default function OperatorDashboard() {
     user?.organization_id || "",
     startDate,
     endDate,
+    agent == "all" ? undefined : agent,
     busPlate == "all" ? undefined : busPlate,
     route == "all" ? undefined : route,
-    agent == "all" ? undefined : agent,
+    // agent == "all" ? undefined : agent,
   );
 
   const { data: bus, isLoading: busIsLoading } = useOperatorBuses(

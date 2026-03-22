@@ -1093,6 +1093,20 @@ export const passengerApi = {
   },
 };
 export const agentApi = {
+  handleTransactionId: async (
+    operator_id: string,
+    body: {
+      transaction_id: string;
+      paid_date?: Date;
+      paid_amount: number;
+    },
+  ) => {
+    const response = await api.post(
+      `/operator-agents/${operator_id}/reports/payments`,
+      body,
+    );
+    return response.data;
+  },
   getAllKYCdocuments: async (agent_id: string) => {
     const response = await api.get(`/agent/${agent_id}/kyc-documents`);
     return response.data;
@@ -1180,10 +1194,29 @@ export const agentApi = {
 };
 
 export const operatorApi = {
+  getTransactionData: async (
+    operator_id: string,
+    paid_by_id?: string,
+    from_date?: string,
+    to_date?: string,
+  ) => {
+    const res = await api.get(
+      `/operator/${operator_id}/reports/agent-payments`,
+      {
+        params: {
+          paid_by_id,
+          from_date,
+          to_date,
+        },
+      },
+    );
+    return res.data;
+  },
   getReportData: async (
     operator_id: string,
     start_date?: string,
     end_date?: string,
+    ticket_sold_by_id?: string,
     bus_plate?: string,
     route_id?: string,
     agent_id?: string,
@@ -1196,6 +1229,7 @@ export const operatorApi = {
           start_date,
           end_date,
           agent_id,
+          ticket_sold_by_id,
           bus_plate,
           route_id,
           page,

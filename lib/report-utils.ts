@@ -45,6 +45,13 @@ export const formatCurrency = (amount: number): string => {
     currency: "ETB",
   }).format(amount);
 };
+export const formatDate = (date: string): string => {
+  return new Intl.DateTimeFormat("en-US", {
+    month: "short",
+    day: "2-digit",
+    year: "numeric",
+  }).format(new Date(date));
+};
 
 export const formatNumber = (num: number): string => {
   return new Intl.NumberFormat("en-US").format(Math.round(num));

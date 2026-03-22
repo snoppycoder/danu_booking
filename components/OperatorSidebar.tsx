@@ -48,6 +48,11 @@ const menuItems = [
   },
 
   {
+    title: "Transaction Management",
+    url: "/operator/transactions",
+    icon: Users,
+  },
+  {
     title: "Report",
     url: "/operator/report",
     icon: TrendingUp,

@@ -52,6 +52,7 @@
     "danu_booking": "link:",
     "date-fns": "^4.1.0",
     "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^12.38.0",
     "fzstd": "^0.1.1",
     "input-otp": "^1.4.2",
     "js-cookie": "^3.0.5",

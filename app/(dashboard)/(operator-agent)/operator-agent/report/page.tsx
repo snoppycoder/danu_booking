@@ -34,10 +34,21 @@ import { Diversity1 } from "@mui/icons-material";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { agentApi } from "@/app/api/api";
+import { toast, Toaster } from "sonner";
+
 function TicketIdCell({ id }: { id: string }) {
   const [showFull, setShowFull] = useState(false);
   const displayId = showFull ? id : id.slice(0, 8) + "..."; // truncate first 8 chars
-
   return (
     <TableCell
       className="p-4 font-semibold text-primary cursor-pointer hover:opacity-75 transition-opacity"
@@ -76,17 +87,23 @@ const DayCard = ({
   tickets_sold,
   revenue,
   onClick,
+  onPayNow,
 }: {
   date?: string;
   tickets_sold?: number;
   revenue?: number;
   onClick?: () => void;
+  onPayNow?: () => void;
 }) => {
   const day = getDayLabel(date ?? new Date().toDateString());
+  const { user } = useAuth();
 
   return (
     <div
-      onClick={onClick}
+      onClick={(e) => {
+        e.stopPropagation();
+        onClick;
+      }}
       className="bg-white border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group"
     >
       <div className="flex justify-between items-start">
@@ -101,12 +118,12 @@ const DayCard = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-6 mt-4">
+          <div className="grid grid-cols-2 gap-3 md:gap-6 mt-4">
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                 Tickets Sold
               </p>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-lg md:text-2xl font-bold text-foreground">
                 {tickets_sold}
               </p>
             </div>
@@ -114,7 +131,7 @@ const DayCard = ({
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                 Total Revenue
               </p>
-              <p className="text-2xl font-bold text-foreground">
+              <p className="text-lg md:text-2xl font-bold text-foreground">
                 {formatCurrency(revenue ?? 0)}
               </p>
             </div>
@@ -122,7 +139,7 @@ const DayCard = ({
         </div>
 
         {/* RIGHT - Action */}
-        <div className="flex flex-col items-end justify-between ml-6">
+        <div className="flex flex-col gap-y-3.5 items-end justify-between ml-6">
           <button
             onClick={onClick}
             className="text-sm font-medium text-primary hover:underline transition-all group-hover:gap-1 flex items-center gap-0.5"
@@ -130,6 +147,12 @@ const DayCard = ({
             View Details
             <span className="text-xs">→</span>
           </button>
+          <Button
+            onClick={onPayNow}
+            className="text-sm cursor-pointer text-white font-medium mt-6 transition-all group-hover:gap-1 flex items-center justify-start gap-0.5"
+          >
+            Pay now
+          </Button>
         </div>
       </div>
     </div>
@@ -141,13 +164,33 @@ export default function OperatorAdminReport() {
   const [selectedDay, setSelectedDay] = useState<operatorAdminReport | null>(
     null,
   );
+  const [toggle, setToggle] = useState(false);
+  const [transactionId, setTransactionId] = useState("");
   const per_page = 10;
   const [currentPage, setCurrentPage] = useState(1);
   const [filterDay, setFilterDay] = useState<string>("Weekly");
   const { data: reportData, isLoading: isSummaryLoading } =
     useOperatorAgentReportSummary(user?.organization_id || "");
   const [date, setDate] = useState("today");
+  const [amount, setAmount] = useState(0);
 
+  const handleSubmit = async () => {
+    try {
+      const today = new Date();
+      await agentApi.handleTransactionId(user?.organization_id || "", {
+        transaction_id: transactionId,
+        paid_date: today,
+        paid_amount: amount,
+      });
+      console.log(transactionId, today, amount);
+      toast.success("Successfully processed your request");
+      setToggle(false);
+      setTransactionId("");
+    } catch (err) {
+      console.log(err);
+      toast.error("Error trying to process your request");
+    }
+  };
   const ranges: Record<string, number> = {
     Today: 0,
     Weekly: 7,
@@ -197,6 +240,7 @@ export default function OperatorAdminReport() {
 
   return (
     <div className="flex min-h-screen bg-background">
+      <Toaster richColors position="top-right"></Toaster>
       {/* Main Content */}
       <div className="flex-1 overflow-auto">
         {/* Header Section */}
@@ -252,53 +296,6 @@ export default function OperatorAdminReport() {
 
         {/* Main Content Area */}
         <div className="px-6 mt-4 pb-6">
-          {!selectedDay && (
-            <div className="bg-white border border-border rounded-lg p-6 mb-6 shadow-sm">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div>
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">
-                    Date Range
-                  </Label>
-                  <Select value={filterDay} onValueChange={setFilterDay}>
-                    <SelectTrigger className="bg-muted/50 h-10 rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="Today">Today</SelectItem>
-                      <SelectItem value="Weekly">Weekly</SelectItem>
-                      <SelectItem value="Monthly">Monthly</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* <div>
-                  <Label className="text-xs font-semibold text-muted-foreground uppercase tracking-wide mb-2 block">
-                    Route
-                  </Label>
-                  <Select value={route} onValueChange={setRoute}>
-                    <SelectTrigger className="bg-muted/50 h-10 rounded-lg">
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">All Routes</SelectItem>
-                      {routes ? (
-                        routes?.items.map((route) => (
-                          <SelectItem key={route.id} value={route.id}>
-                            {route.route_from} - {route.route_to}
-                          </SelectItem>
-                        ))
-                      ) : (
-                        <SelectItem value={"none"} disabled>
-                          No Route Found
-                        </SelectItem>
-                      )}
-                    </SelectContent>
-                  </Select>
-                </div> */}
-              </div>
-            </div>
-          )}
-
           {/* Summary Cards or Detailed View */}
           {!selectedDay ? (
             <div className="mt-4 space-y-4">
@@ -328,6 +325,10 @@ export default function OperatorAdminReport() {
                         tickets_sold={item?.tickets_sold}
                         revenue={item?.revenue}
                         onClick={() => setSelectedDay(item!)}
+                        onPayNow={() => {
+                          setToggle(true);
+                          setAmount(item?.revenue ?? 0);
+                        }}
                       />
                     </div>
                   ),
@@ -473,6 +474,32 @@ export default function OperatorAdminReport() {
           )}
         </div>
       </div>
+      <Dialog open={toggle} onOpenChange={setToggle}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Enter Transaction ID</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4 mt-2">
+            <div className="space-y-2">
+              <Label>Transaction ID</Label>
+              <Input
+                placeholder="Please enter the Transaction ID"
+                value={transactionId}
+                onChange={(e) => setTransactionId(e.target.value)}
+              />
+            </div>
+
+            <Button
+              className="w-full"
+              disabled={transactionId.length <= 5}
+              onClick={handleSubmit}
+            >
+              Submit
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

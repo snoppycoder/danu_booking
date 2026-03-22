@@ -82,6 +82,7 @@ import { isAxiosError } from "axios";
 import { useQueryClient } from "@tanstack/react-query";
 
 import AccountNotActiveBanner from "@/components/AccountBanner";
+import { Spinner } from "@/components/ui/spinner";
 
 type BusStatus = "active" | "inactive";
 
@@ -405,8 +406,10 @@ export default function OperatorPage() {
                   )} */}
                 {!isAuthReady || isDataLoading ? (
                   <TableRow>
-                    <TableCell colSpan={5} className="text-center py-6">
-                      Loading buses...
+                    <TableCell colSpan={5} className="py-6">
+                      <div className="flex justify-center items-center w-full">
+                        <Spinner />
+                      </div>
                     </TableCell>
                   </TableRow>
                 ) : isEmpty ? (

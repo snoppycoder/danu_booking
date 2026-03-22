@@ -195,6 +195,7 @@ export const useOperatorAgentReportSummary = (operator_id: string) => {
 };
 export const useOperatorAgentReportData = (
   operator_id: string,
+
   from_date?: string,
   to_date?: string,
   page?: number,
@@ -585,6 +586,7 @@ export const useOperatorReport2 = (
   operator_id: string,
   start_date: string,
   end_date: string,
+  ticket_sold_by_id?: string,
   bus_plate?: string,
   route_id?: string,
   agent_id?: string,
@@ -595,6 +597,7 @@ export const useOperatorReport2 = (
     queryKey: [
       "operator_report",
       operator_id,
+      ticket_sold_by_id,
       start_date,
       end_date,
       bus_plate,
@@ -608,6 +611,7 @@ export const useOperatorReport2 = (
         operator_id,
         start_date,
         end_date,
+        ticket_sold_by_id,
         bus_plate,
         route_id,
         agent_id,
@@ -635,6 +639,38 @@ export const useOperatorReport2 = (
     },
     enabled: !!operator_id,
     staleTime: 1000 * 60 * 5,
+  });
+};
+
+export const useOperatorTransactions = (
+  operator_id: string,
+  paid_by_id?: string,
+  from_date?: string,
+  to_date?: string,
+) => {
+  return useQuery({
+    queryKey: ["danu_agent_refund_list", paid_by_id, from_date, to_date],
+    queryFn: async () => {
+      const res = await operatorApi.getTransactionData(
+        operator_id,
+        paid_by_id,
+        from_date,
+        to_date,
+      );
+      console.log(res);
+      return res.items as {
+        id: string;
+        agent_id: string;
+        paid_by_id: string;
+        paid_amount: number;
+        paid_date: string;
+        transaction_id: string;
+        created_at: string;
+        updated_at: string;
+      }[];
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!operator_id,
   });
 };
 
