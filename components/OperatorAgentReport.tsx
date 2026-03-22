@@ -27,7 +27,7 @@ export default function OperatorSalesLineChart({ data }: Props) {
   }));
 
   return (
-    <div className="w-full shadow-xl mb-6 h-[400px] bg-card rounded-2xl p-4 hover:shadow-2xl transition-all ease-in-out">
+    <div className="w-full shadow-xl mb-6 md:h-[400px] h-[280px] bg-card rounded-2xl p-4 hover:shadow-2xl transition-all ease-in-out">
       <h2 className="text-lg text-center font-semibold mb-4">Sales Overview</h2>
 
       <ResponsiveContainer className={"gap-2"} width="100%" height="100%">
