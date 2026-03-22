@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { useState } from "react";
 import { formatTime } from "@/lib/common_functions";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import {
@@ -30,19 +30,25 @@ import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDa
 import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useDebounce } from "@/hooks/useDebounce";
+import { formatCurrency } from "@/lib/report-utils";
 
 export default function DanuBooking() {
   const searchParams = useSearchParams();
-  const [form, setForm] = useState({
-    route_from: searchParams.get("from") || "",
-    route_to: searchParams.get("to") || "",
-    departure_date: searchParams.get("date") || new Date().toString(),
-  });
-  const [currentPage, setCurrentPage] = useState(1);
-  const per_page = 10;
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
+  const [searchParamsState, setSearchParamsState] = useState({
+    from: route_from,
+    to: route_to,
+    date: departure_date,
+  });
+  const [form, setForm] = useState({
+    route_from: searchParamsState.from || "",
+    route_to: searchParamsState.to || "",
+    departure_date: searchParamsState.date,
+  });
+  const [currentPage, setCurrentPage] = useState(1);
+  const per_page = 10;
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
   const [seats, setSeats] = useState<Seat[]>([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
@@ -56,22 +62,30 @@ export default function DanuBooking() {
     { id: string; plate_no: string } | undefined
   >();
   const [tripId, setTripId] = useState<string>("");
-  const debouncedTo = useDebounce(form.route_to, 300);
-  const deboundedFrom = useDebounce(form.route_from, 300);
+  // const debouncedTo = useDebounce(form.route_to, 300);
+  // const deboundedFrom = useDebounce(form.route_from, 300);
   const { data, isLoading, refetch } = useSearchRoute(
-    deboundedFrom,
-    debouncedTo,
-    form.departure_date,
+    searchParamsState.from,
+    searchParamsState.to,
+    searchParamsState.date,
     currentPage,
     per_page,
   );
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const router = useRouter();
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,
   ): Promise<void> {
     e.preventDefault();
-    refetch();
+    setSearchParamsState({
+      from: form.route_from,
+      to: form.route_to,
+      date: form.departure_date,
+    });
+    router.replace(
+      `/passenger/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
+    );
   }
 
   const handleSelectFromCity = (city: string) => {
@@ -293,7 +307,7 @@ export default function DanuBooking() {
           ) : (
             <div className="w-full">
               {/* Routes Grid */}
-              <div className="grid gap-6 grid-cols-1">
+              <div className="grid md:m-8 m-2 my-4 gap-6 grid-cols-1">
                 {(data?.items || [])?.length > 0 ? (
                   data?.items.map((route) => (
                     <div
@@ -334,27 +348,25 @@ export default function DanuBooking() {
                         </DropdownMenu>
                       </div>
                       {/* Info Section */}
-                      <div className="grid grid-cols-3 gap-4 mb-6">
-                        {/* Price */}
+                      <div className="grid md:grid-cols-3 grid-cols-1  gap-4 mb-6">
                         <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground  tracking-wide">
+                          <span className="text-xs text-muted-foreground tracking-wide">
                             Price
                           </span>
-                          <span className="text-2xl font-bold text-primary">
-                            {route.price}
-                            <span className="text-sm font-medium ml-1 text-muted-foreground">
-                              Birr
+                          <div className="flex mt-1 ">
+                            <span className="text-sm px-3 py-1 rounded-full font-semibold  bg-green-500/10 text-black">
+                              {formatCurrency(route.price ?? 0)}
                             </span>
-                          </span>
+                          </div>
                         </div>
 
                         {/* Seats */}
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col">
                           <span className="text-xs text-muted-foreground tracking-wide">
                             Departure Time
                           </span>
-                          <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
-                            <span className="text-sm font-semibold text-black">
+                          <div className="flex mt-1">
+                            <span className="text-sm font-semibold text-black px-3 py-1 rounded-full bg-green-500/10">
                               {route.departure_time.split(":")[0]} :{" "}
                               {route.departure_time.split(":")[1]}
                             </span>
@@ -362,15 +374,15 @@ export default function DanuBooking() {
                         </div>
 
                         {/* Status */}
-                        <div className="flex flex-col items-center">
+                        <div className="flex flex-col">
                           <span className="text-xs text-muted-foreground  tracking-wide">
                             Status
                           </span>
                           <div
-                            className="flex items-center gap-2 mt-1 px-3 py-1 rounded-full 
-            bg-green-500/10 text-green-600"
+                            className="flex gap-2 mt-1 
+           "
                           >
-                            <span className="text-sm font-semibold">
+                            <span className="text-sm px-3  bg-green-500/10 text-green-600 py-1 rounded-full  font-semibold">
                               {route.is_available ? "Available" : "Sold Out"}
                             </span>
                           </div>

@@ -72,6 +72,8 @@ export default function OperatorDashboard() {
   const { data: statCard, isLoading: statCardIsLoading } = useOperatorStatCard(
     user?.organization_id || "",
   );
+  console.log(operator_agents);
+  console.log(startDate, endDate);
 
   const { data, isLoading: report2IsLoading } = useOperatorReport2(
     user?.organization_id || "",
@@ -87,6 +89,7 @@ export default function OperatorDashboard() {
   );
 
   const { data: routes, isLoading: routeIsLoading } = useRoutes();
+  console.log(agent, "agent id");
 
   const statsData = [
     {
@@ -173,7 +176,6 @@ export default function OperatorDashboard() {
           </div>
         </div>
 
-        {/* Filters Section */}
         <Card className="bg-white border border-border p-6">
           <div className="bg-card border border-border rounded-xl p-6 shadow-sm mb-6">
             <div className="flex items-center justify-between mb-6">
@@ -272,7 +274,7 @@ export default function OperatorDashboard() {
                       ))
                     ) : (
                       <SelectItem value="none" disabled>
-                        No Buses
+                        No Agents
                       </SelectItem>
                     )}
                   </SelectContent>

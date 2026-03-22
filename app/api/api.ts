@@ -921,7 +921,7 @@ export const passengerApi = {
   searchRoute: async (body: {
     route_from: string;
     route_to: string;
-    departure_date: string;
+    trip_date: string;
     page?: number;
     per_page?: number;
   }) => {
@@ -931,7 +931,7 @@ export const passengerApi = {
         params: {
           from_city: body.route_from,
           to_city: body.route_to,
-          departure_date: body.departure_date,
+          trip_date: body.trip_date,
           page: body.page,
           per_page: body.per_page,
         },

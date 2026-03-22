@@ -114,13 +114,13 @@ export function SearchTicketForm({ link }: SearchTicketFormProp) {
   }
 
   return (
-    <div className="w-full min-h-screen flex flex-col">
-      <div className="w-full flex items-center mb-4 p-4 md:mb-2.5">
+    <div className="w-full flex flex-col">
+      <div className="w-full flex items-center p-4 md:mb-2.5">
         <SidebarTrigger />
       </div>
 
       <h2 className="text-xl md:text-2xl text-center font-bold text-gray-900 mb-6 px-4">
-        Book For A Passenger
+        Book a Ticket for a Passenger
       </h2>
 
       <div className="flex justify-center flex-1 pb-8 mt-8 md:mt-10 px-4">

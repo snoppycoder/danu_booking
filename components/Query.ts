@@ -120,6 +120,7 @@ export const usePassengerHistory = (page: number, per_page: number) => {
         page: res.page,
       };
     },
+    staleTime: 5 * 60 * 1000,
   });
 };
 
@@ -130,6 +131,7 @@ export const useSuperAdminStat = () => {
       const res = await superAdminApi.getStats();
       return res;
     },
+    staleTime: 5 * 60 * 1000,
   });
 };
 export const useDanuAgentReportData = (
@@ -177,6 +179,7 @@ export const useDanuAgentReportData = (
         page: res.page,
       };
     },
+    staleTime: 5 * 60 * 1000,
   });
 };
 export const useOperatorAgentReportSummary = (operator_id: string) => {
@@ -187,6 +190,7 @@ export const useOperatorAgentReportSummary = (operator_id: string) => {
       return res;
     },
     enabled: !!operator_id,
+    staleTime: 5 * 60 * 1000,
   });
 };
 export const useOperatorAgentReportData = (
@@ -221,7 +225,7 @@ export const useOperatorAgentReportData = (
 export const useSearchRoute = (
   route_from: string,
   route_to: string,
-  departure_date: string,
+  trip_date: string,
   page?: number,
   per_page?: number,
   org_id?: string,
@@ -231,7 +235,7 @@ export const useSearchRoute = (
       "search_route",
       route_from,
       route_to,
-      departure_date,
+      trip_date,
       org_id,
       page,
       per_page,
@@ -240,7 +244,7 @@ export const useSearchRoute = (
       const res = await passengerApi.searchRoute({
         route_from,
         route_to,
-        departure_date,
+        trip_date,
         page,
         per_page,
       });

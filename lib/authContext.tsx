@@ -80,13 +80,17 @@ export const AuthProvider = ({
               "You are not assigned to an agent. Please Contact An Admin",
             );
           }
-
           if (response.user_info.agent_type == "operator-agent-admin") {
             window.location.replace("/operator-agent/ticket-booking");
           } else {
             window.location.replace("/agent/ticket-booking");
           }
         } else if (decoded.roles.includes("operator_admin")) {
+          if (!response.user_info?.organization_id) {
+            throw Error(
+              "You are not assigned to an agent. Please Contact An Admin",
+            );
+          }
           window.location.replace("/operator");
         } else {
           console.log("No role matched");
