@@ -54,6 +54,7 @@ export interface operatorAdminReport {
   date: string;
   tickets_sold: number;
   revenue: number;
+  transaction_id?: string;
   items: {
     ticket_id: string;
     bus_plate_number: string;

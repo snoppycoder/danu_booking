@@ -86,17 +86,26 @@ const DayCard = ({
   date,
   tickets_sold,
   revenue,
+  transaction_id,
   onClick,
   onPayNow,
 }: {
   date?: string;
   tickets_sold?: number;
   revenue?: number;
+  transaction_id?: string;
   onClick?: () => void;
   onPayNow?: () => void;
 }) => {
   const day = getDayLabel(date ?? new Date().toDateString());
-  const { user } = useAuth();
+  const [showFull, setShowFull] = useState(false);
+  const displayTx = !transaction_id
+    ? "N/A"
+    : transaction_id.length == 8
+      ? transaction_id
+      : showFull
+        ? transaction_id
+        : transaction_id?.slice(0, 8) + "...";
 
   return (
     <div
@@ -118,7 +127,7 @@ const DayCard = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-3 md:gap-6 mt-4">
+          <div className="grid grid-cols-3 gap-3.5 md:gap-6 mt-4">
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                 Tickets Sold
@@ -133,6 +142,19 @@ const DayCard = ({
               </p>
               <p className="text-lg md:text-2xl font-bold text-foreground">
                 {formatCurrency(revenue ?? 0)}
+              </p>
+            </div>
+            <div className="mt-1">
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                Transaction ID
+              </p>
+              <p
+                className="text-md text-left
+              
+               font-semibold text-foreground"
+                onClick={() => setShowFull(!showFull)}
+              >
+                {displayTx}
               </p>
             </div>
           </div>
@@ -150,6 +172,7 @@ const DayCard = ({
           <Button
             onClick={onPayNow}
             className="text-sm cursor-pointer text-white font-medium mt-6 transition-all group-hover:gap-1 flex items-center justify-start gap-0.5"
+            disabled={(transaction_id ?? "").trim().length > 0}
           >
             Pay now
           </Button>
@@ -160,19 +183,45 @@ const DayCard = ({
 };
 
 export default function OperatorAdminReport() {
+  const daySetter = (back_in_days: number) => {
+    const today = new Date();
+    today.setDate(today.getDate() - back_in_days);
+    today.setHours(0, 0, 0, 0);
+
+    return today.toLocaleDateString("en-CA");
+  };
+  const ranges: Record<string, number> = {
+    Today: 0,
+    Weekly: 7,
+    Monthly: 30,
+  };
   const { user } = useAuth();
   const [selectedDay, setSelectedDay] = useState<operatorAdminReport | null>(
     null,
   );
+  const [date, setDate] = useState("today");
+  const [amount, setAmount] = useState(0);
+  const [filterDay, setFilterDay] = useState<string>("Weekly");
+  const startDate = useMemo(() => daySetter(ranges[filterDay]), [date]); // correct this
+  const endDate = useMemo(() => daySetter(0), []);
+
+  const {
+    data,
+    isLoading: report2IsLoading,
+    refetch,
+  } = useOperatorAgentReportData(
+    user?.organization_id || "",
+    startDate,
+    endDate,
+  );
+
   const [toggle, setToggle] = useState(false);
   const [transactionId, setTransactionId] = useState("");
   const per_page = 10;
   const [currentPage, setCurrentPage] = useState(1);
-  const [filterDay, setFilterDay] = useState<string>("Weekly");
+
   const { data: reportData, isLoading: isSummaryLoading } =
     useOperatorAgentReportSummary(user?.organization_id || "");
-  const [date, setDate] = useState("today");
-  const [amount, setAmount] = useState(0);
 
   const handleSubmit = async () => {
     try {
@@ -186,34 +235,12 @@ export default function OperatorAdminReport() {
       toast.success("Successfully processed your request");
       setToggle(false);
       setTransactionId("");
+      refetch();
     } catch (err) {
       console.log(err);
       toast.error("Error trying to process your request");
     }
   };
-  const ranges: Record<string, number> = {
-    Today: 0,
-    Weekly: 7,
-    Monthly: 30,
-  };
-
-  const daySetter = (back_in_days: number) => {
-    const today = new Date();
-    today.setDate(today.getDate() - back_in_days);
-    today.setHours(0, 0, 0, 0);
-
-    return today.toLocaleDateString("en-CA");
-  };
-  const startDate = useMemo(() => daySetter(ranges[filterDay]), [date]); // correct this
-  const endDate = useMemo(() => daySetter(0), []);
-  console.log(startDate, endDate);
-
-  const { data, isLoading: report2IsLoading } = useOperatorAgentReportData(
-    user?.organization_id || "",
-    startDate,
-    endDate,
-  );
-  console.log(data);
 
   const { data: routes, isLoading: routeIsLoading } = useRoutes();
 
@@ -324,6 +351,7 @@ export default function OperatorAdminReport() {
                         date={item?.date}
                         tickets_sold={item?.tickets_sold}
                         revenue={item?.revenue}
+                        transaction_id={item?.transaction_id}
                         onClick={() => setSelectedDay(item!)}
                         onPayNow={() => {
                           setToggle(true);
