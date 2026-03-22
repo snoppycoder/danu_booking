@@ -55,9 +55,15 @@ export async function handleSearch(form: {
   departure_date: string;
   route_from: string;
   route_to: string;
+  trip_date: string;
 }): Promise<SearchRouteResponse | undefined> {
   try {
-    if (!form.departure_date || !form.route_from || !form.route_to) {
+    if (
+      !form.departure_date ||
+      !form.route_from ||
+      !form.route_to ||
+      !form.trip_date
+    ) {
       toast.error("Please enter all necessary inputs");
       return;
     }
