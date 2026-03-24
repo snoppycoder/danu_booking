@@ -35,9 +35,23 @@ export const AuthProvider = ({
 }) => {
   const path = usePathname();
   const [user, setUser] = useState<UseAuthUser | null>(null);
+  const public_paths = [
+    "/",
+    "/login",
+    "/signup",
+    "/guest",
+    "/preference",
+    "/unauthorized",
+    "/verify-email",
+    "/_next",
+    "/forgot-password",
+    "/favicon.ico",
+    "/api",
+    "/tickets",
+  ];
 
   useEffect(() => {
-    if (!(path == "/login")) {
+    if (!public_paths.includes(path)) {
       const fetchCurrUser = async () => {
         const response = (await authAPI.whoAmI()) as UseAuthUser;
         const hasBlacklistedRole = response.roles.some((role) =>
