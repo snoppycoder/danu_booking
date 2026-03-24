@@ -390,17 +390,22 @@ export const authAPI = {
     return response.data;
   },
   forgotPassword: async (identifier: string) => {
-    let response = null;
-    if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/.test(identifier)) {
-      response = await api.post("/auth/forgot-password", {
-        email: identifier,
-      });
-    } else {
-      response = await api.post("/auth/forgot-password", {
-        phone: identifier,
-      });
+    try {
+      let response = null;
+      if (/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+.[a-zA-Z]{2,}$/.test(identifier)) {
+        response = await api.post("/auth/forgot-password", {
+          email: identifier,
+        });
+      } else {
+        response = await api.post("/auth/forgot-password", {
+          phone: identifier,
+        });
+      }
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
-    return response.data;
   },
 };
 export const sessionMgmt = {

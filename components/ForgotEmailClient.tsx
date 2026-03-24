@@ -8,41 +8,20 @@ import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { authAPI } from "@/app/api/api";
 import Link from "next/link";
+import { Eye, EyeOff } from "lucide-react";
+import { Label } from "./ui/label";
 
 export default function EmailPasswordExtractorClient() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token");
-
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  useEffect(() => {
-    const validateToken = async () => {
-      if (!token) {
-        setError("No reset token provided. Invalid or expired link.");
-        setLoading(false);
-        return;
-      }
-
-      try {
-        // Call the forgot password API with the token
-        const result = await authAPI.forgotPassword(token);
-        console.log("Token validated:", result);
-        setLoading(false);
-      } catch (err) {
-        console.log(err);
-        setError(
-          "Invalid or expired reset token. Please request a new password reset.",
-        );
-        setLoading(false);
-      }
-    };
-
-    validateToken();
-  }, [token]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,11 +45,7 @@ export default function EmailPasswordExtractorClient() {
     setError(null);
 
     try {
-      const result = await authAPI.resetPassword(
-        "email",
-        newPassword,
-        token ?? "",
-      );
+      await authAPI.resetPassword("email", newPassword, token ?? "");
       console.log("Password reset with token:", token);
       setSuccess(true);
     } catch (err) {
@@ -80,38 +55,23 @@ export default function EmailPasswordExtractorClient() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-full max-w-md p-8">
-          <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-center">Loading...</h1>
-            <p className="text-center text-muted-foreground">
-              Validating your reset token...
-            </p>
-          </div>
-        </Card>
-      </div>
-    );
-  }
-
-  if (error && !success) {
-    return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Card className="w-full max-w-md p-8">
-          <div className="space-y-4">
-            <h1 className="text-2xl font-bold text-center">Reset Password</h1>
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-              <p className="text-red-800 text-sm">{error}</p>
-            </div>
-            <Button asChild className="w-full">
-              <Link href="/guest">Go Home</Link>
-            </Button>
-          </div>
-        </Card>
-      </div>
-    );
-  }
+  // if (error && !success) {
+  //   return (
+  //     <div className="flex min-h-screen items-center justify-center bg-background">
+  //       <Card className="w-full max-w-md p-8">
+  //         <div className="space-y-4">
+  //           <h1 className="text-2xl font-bold text-center">Reset Password</h1>
+  //           <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+  //             <p className="text-red-800 text-sm">{error}</p>
+  //           </div>
+  //           <Button asChild className="w-full">
+  //             <Link href="/guest">Go Home</Link>
+  //           </Button>
+  //         </div>
+  //       </Card>
+  //     </div>
+  //   );
+  // }
 
   if (success) {
     return (
@@ -126,7 +86,7 @@ export default function EmailPasswordExtractorClient() {
               </p>
             </div>
             <Button asChild className="w-full">
-              <a href="/login">Go to Login</a>
+              <Link href="/login">Go to Login</Link>
             </Button>
           </div>
         </Card>
@@ -145,33 +105,47 @@ export default function EmailPasswordExtractorClient() {
             </p>
           </div>
 
+          <div className="relative w-full">
+            <Input
+              type={showPassword ? "text" : "password"}
+              placeholder="Set New Password"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              disabled={submitting}
+              className="pr-10" // add some padding for the button
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute top-1/2 right-2 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+
+          <div className="relative w-full">
+            <Input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="Confirm New Password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              disabled={submitting}
+              className="pr-10" // add some padding for the button
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute top-1/2 right-2 border-0 -translate-y-1/2 p-1 text-muted-foreground hover:text-foreground"
+            >
+              {showConfirmPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
+
           {error && (
             <div className="bg-red-50 border border-red-200 rounded-lg p-4">
               <p className="text-red-800 text-sm">{error}</p>
             </div>
           )}
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">New Password</label>
-            <Input
-              type="password"
-              placeholder="Enter new password"
-              value={newPassword}
-              onChange={(e) => setNewPassword(e.target.value)}
-              disabled={submitting}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Confirm Password</label>
-            <Input
-              type="password"
-              placeholder="Confirm new password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              disabled={submitting}
-            />
-          </div>
 
           <Button type="submit" className="w-full" disabled={submitting}>
             {submitting ? "Resetting..." : "Reset Password"}

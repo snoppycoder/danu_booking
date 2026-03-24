@@ -28,7 +28,6 @@ import { RefundDetailDialog } from "./RefundDetailDialog";
 import RefundForm from "./RefundForm";
 import { toast } from "sonner";
 import { isAxiosError } from "axios";
-import { operatorApi } from "@/app/api/api";
 
 interface RefundListProps {
   organization_id: string;
