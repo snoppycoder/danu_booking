@@ -50,8 +50,8 @@ export default function DashboardLayout({
             initalPath={[
               { href: "/passenger", label: "Home" },
               // { href: "/passenger/bookings", label: "Bookings" },
-              { href: "/about-us", label: "About Us" },
-              { href: "/contact", label: "Contact" },
+              { href: "/passenger/about-us", label: "About Us" },
+              { href: "/passenger/contact", label: "Contact" },
             ]}
             onLoaded={() => setIsNavbarLoaded(true)}
           />

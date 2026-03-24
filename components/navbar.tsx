@@ -59,7 +59,6 @@ export default function Navbar(props: NavbarProps) {
             </div>
           </div>
 
-          {/* Mobile Menu Button */}
           <div className="md:hidden">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
@@ -96,13 +95,13 @@ export default function Navbar(props: NavbarProps) {
               Home
             </Link>
             <Link
-              href="/about-us"
+              href="/passenger/about-us"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
               About Us
             </Link>
             <Link
-              href="/contact"
+              href="/passenger/contact"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
               Contact
