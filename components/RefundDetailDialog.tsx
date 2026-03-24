@@ -14,6 +14,7 @@ import { Loader2, X, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { RefundDetail } from "@/lib/model";
 import { useRefundDetail } from "./Query";
+import { formatCurrency } from "@/lib/report-utils";
 
 interface RefundDetailDialogProps {
   isOpen: boolean;
@@ -38,13 +39,6 @@ const getStatusColor = (
     default:
       return "outline";
   }
-};
-
-const formatCurrency = (amount: number) => {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-  }).format(amount);
 };
 
 const formatDate = (date: string) => {

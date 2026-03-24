@@ -87,14 +87,16 @@ const getStatusIcon = (status: string) => {
 };
 
 function RefundCard({
+  refetch,
   refund,
   onViewDetails,
   onApprove,
   onReject,
 }: {
   refund: Refund;
+  refetch: () => void;
   onViewDetails?: (refund_id: string, operator_id: string) => void;
-  onApprove?: (refund: Refund) => void;
+  onApprove?: (refund: Refund, refetch: () => void) => void;
   onReject?: (refund: Refund) => void;
 }) {
   const { user } = useAuth();
@@ -178,7 +180,7 @@ function RefundCard({
                 size="sm"
                 variant="outline"
                 className="gap-2 text-green-600 hover:text-green-700 border-green-200 hover:bg-green-50"
-                onClick={() => onApprove?.(refund)}
+                onClick={() => onApprove?.(refund, refetch)}
               >
                 <CheckCircle className="w-4 h-4" />
                 <span className="hidden sm:inline">Approve</span>
@@ -328,6 +330,7 @@ export default function OperatorRefundList({
       <div className="space-y-4">
         {refunds.map((refund: Refund) => (
           <RefundCard
+            refetch={refetch}
             key={refund.id}
             refund={refund}
             onViewDetails={() => onViewDetails?.(refund.id, operator_id)}

@@ -111,7 +111,7 @@ const DayCard = ({
     <div
       onClick={(e) => {
         e.stopPropagation();
-        onClick;
+        onClick?.();
       }}
       className="bg-white border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group"
     >
@@ -160,7 +160,6 @@ const DayCard = ({
           </div>
         </div>
 
-        {/* RIGHT - Action */}
         <div className="flex flex-col gap-y-3.5 items-end justify-between ml-6">
           <button
             onClick={onClick}
@@ -170,7 +169,10 @@ const DayCard = ({
             <span className="text-xs">→</span>
           </button>
           <Button
-            onClick={onPayNow}
+            onClick={(e) => {
+              e.stopPropagation();
+              onPayNow?.();
+            }}
             className="text-sm cursor-pointer text-white font-medium mt-6 transition-all group-hover:gap-1 flex items-center justify-start gap-0.5"
             disabled={(transaction_id ?? "").trim().length > 0}
           >

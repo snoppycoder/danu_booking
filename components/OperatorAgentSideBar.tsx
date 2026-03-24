@@ -26,8 +26,6 @@ import {
 } from "@/components/ui/sidebar";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useState } from "react";
-import Image from "next/image";
 
 const menuItems = [
   {
@@ -44,6 +42,11 @@ const menuItems = [
     title: "Refund List",
     url: "/operator-agent/refund-list",
     icon: DollarSign,
+  },
+  {
+    title: "Ticket Booked",
+    url: "/operator-agent/ticket-booked",
+    icon: TicketCheck,
   },
   {
     title: "Report",

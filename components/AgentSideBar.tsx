@@ -39,6 +39,11 @@ const menuItems = [
     url: "/agent/refund-list",
     icon: DollarSign,
   },
+  {
+    title: "Ticket Booked",
+    url: "/agent/ticket-booked",
+    icon: TicketCheck,
+  },
 
   {
     title: "Report",

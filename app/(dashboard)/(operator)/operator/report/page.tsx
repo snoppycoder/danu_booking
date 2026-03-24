@@ -30,6 +30,7 @@ import {
 import { useAuth } from "@/lib/authContext";
 import { Bus } from "@/lib/model";
 import { Spinner } from "@/components/ui/spinner";
+import { formatCurrency } from "@/lib/report-utils";
 function TicketIdCell({ id }: { id: string }) {
   const [showFull, setShowFull] = useState(false);
   const displayId = showFull ? id : id.slice(0, 8) + "..."; // truncate first 8 chars
@@ -53,6 +54,7 @@ export default function OperatorDashboard() {
   const [operator_name, setOperatorName] = useState("");
   const ranges: Record<string, number> = {
     today: 0,
+    yesterday: 1,
     weekly: 7,
     monthly: 30,
   };
@@ -198,6 +200,7 @@ export default function OperatorDashboard() {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="today">Today</SelectItem>
+                    <SelectItem value="yesterday">Yesterday</SelectItem>
                     <SelectItem value="weekly">Weekly</SelectItem>
                     <SelectItem value="monthly">Monthly</SelectItem>
                   </SelectContent>
@@ -302,10 +305,12 @@ export default function OperatorDashboard() {
                 </TableRow>
                 <TableBody>
                   <TableRow>
-                    <TableCell className="p-2">
+                    <TableCell className="p-2 font-semibold">
                       {data?.tickets_sold ?? 0}
                     </TableCell>
-                    <TableCell className="p-2">{data?.revenue ?? 0}</TableCell>
+                    <TableCell className="p-2 font-bold">
+                      {formatCurrency(data?.revenue ?? 0)}
+                    </TableCell>
                   </TableRow>
                 </TableBody>
               </Table>

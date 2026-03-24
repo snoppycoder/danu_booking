@@ -37,6 +37,7 @@ import AccountNotActiveBanner from "@/components/AccountBanner";
 import { ScheduleDialog } from "@/components/TripDialog";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { RouteDetailDialog } from "@/components/ScheduleDetail";
+import EditTripForm from "@/components/EditTripDialog";
 
 export type ScheduleDTO = {
   id: string;
@@ -106,10 +107,54 @@ export default function TripManagement() {
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState<Trip | null>(null);
+  const [selectedTrip, setSelectedTrip] = useState<{
+    id: string;
+
+    operator: {
+      id: string;
+      name: string;
+    };
+
+    route: {
+      id: string;
+      route_from: string;
+      route_to: string;
+    };
+
+    bus: {
+      id: string;
+      plate_no: string;
+    };
+
+    driver: {
+      id: string;
+      name: string;
+    };
+
+    departure_time: string;
+    price: number;
+
+    // Recurrence
+    freq: string;
+    interval: number;
+    byweekday: string;
+    bymonthday: string;
+    bymonth: string;
+    until: string;
+    count: number;
+    wkst: number;
+
+    // Dates
+    start_date: string;
+    end_date: string;
+
+    created_at: string;
+    updated_at: string;
+  } | null>(null);
   const [selectFrom, setSelectFrom] = useState("");
   const [selectTo, setSelectTo] = useState("");
   const { data: routes, refetch: refetchRoutes } = useRoutes();
+  const [schedule_id, setScheduleId] = useState("");
 
   const { mutate, isPending, isSuccess } = useCreateTrip();
 
@@ -219,6 +264,16 @@ export default function TripManagement() {
           trips.reduce((sum, trip) => sum + trip.price, 0) / trips.length,
         )
       : 0;
+
+  async function handleEditTrip(id: string): Promise<void> {
+    const detail = await operatorApi.getTripDetail(
+      user?.organization_id ?? "",
+      id,
+    );
+    setIsEditDialogOpen(true);
+    setSelectedTrip(detail);
+    setScheduleId(id);
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -374,7 +429,7 @@ export default function TripManagement() {
                 <div className="flex gap-2 lg:flex-col lg:items-end">
                   <Button
                     size="sm"
-                    onClick={() => handleViewDetails(trip)}
+                    // onClick={() => handleViewDetails(trip)}
                     className="w-full lg:w-36"
                   >
                     View Details
@@ -391,10 +446,15 @@ export default function TripManagement() {
                       </Button>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Edit Trip</DropdownMenuItem>
+                      <DropdownMenuItem
+                        className="text-amber-400"
+                        onClick={() => handleEditTrip(trip.id!)}
+                      >
+                        Edit Trip
+                      </DropdownMenuItem>
                       <DropdownMenuItem
                         className="text-destructive"
-                        // onClick={() => handleDeleteTrip(trip.id!)}
+                        onClick={() => handleDeleteTrip(trip.id!)}
                       >
                         Delete Trip
                       </DropdownMenuItem>
@@ -472,6 +532,17 @@ export default function TripManagement() {
           onDelete={() => handleDeleteTrip(selectedTrip.id!)}
         />
       )} */}
+
+      {selectedTrip && (
+        <EditTripForm
+          refetch={refetch}
+          isOpen={isEditDialogOpen}
+          setIsOpen={setIsEditDialogOpen}
+          infoAddition={selectedTrip}
+          schedule_id={schedule_id}
+        />
+      )}
+
       <RouteDetailDialog
         open={isDetailDialogOpen}
         setOpen={setIsDetailDialogOpen}

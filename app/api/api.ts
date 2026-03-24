@@ -1093,6 +1093,17 @@ export const passengerApi = {
   },
 };
 export const agentApi = {
+  cancelBooking: async (operator_id: string, booking_id: string) => {
+    try {
+      const res = await api.delete(
+        `/operator-agents/${operator_id}/bookings/${booking_id}`,
+      );
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   handleTransactionId: async (
     operator_id: string,
     body: {
@@ -1283,6 +1294,76 @@ export const operatorApi = {
   ) => {
     try {
       await api.post(`/operator/${operator_id}/schedules`, body);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  getTripDetail: async (operator_id: string, schedule_id: string) => {
+    try {
+      const res = await api.get(
+        `/operator/${operator_id}/schedules/${schedule_id}`,
+      );
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  updateOperatorSchedule: async (
+    operator_id: string,
+    schedule_id: string,
+    data: {
+      id?: string;
+
+      operator?: {
+        id: string;
+        name: string;
+      };
+
+      route?: {
+        id: string;
+        route_from: string;
+        route_to: string;
+      };
+
+      bus?: {
+        id: string;
+        plate_no: string;
+      };
+
+      driver?: {
+        id: string;
+        name: string;
+      };
+
+      departure_time?: string;
+      price?: number;
+
+      // Recurrence
+      freq?: string;
+      interval?: number;
+      byweekday?: string;
+      bymonthday?: string;
+      bymonth?: string;
+      until?: string;
+      count?: number;
+      wkst?: number;
+
+      // Dates
+      start_date?: string;
+      end_date?: string;
+
+      created_at?: string;
+      updated_at?: string;
+    },
+  ) => {
+    try {
+      const res = await api.patch(
+        `/operator/${operator_id}/schedules/${schedule_id}`,
+        data,
+      );
+      return res.data;
     } catch (err) {
       console.log(err);
       throw err;
