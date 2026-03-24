@@ -266,6 +266,25 @@ export const kycApi = {
 };
 
 export const authAPI = {
+  resetPassword: async (
+    flow: "email" | "phone",
+    new_password: string,
+    token?: string,
+    phone?: string,
+    code?: string,
+  ) => {
+    let payload = null;
+    if (flow == "email") {
+      payload = {
+        token,
+        new_password,
+      };
+    } else {
+      payload = { phone, code, new_password };
+    }
+    const res = await api.post("/auth/reset-password", payload);
+    return res.data;
+  },
   signup: async (body: {
     first_name: string;
     last_name: string;

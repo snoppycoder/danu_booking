@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { authAPI } from "@/app/api/api";
+import Link from "next/link";
 
 export default function EmailPasswordExtractorClient() {
   const searchParams = useSearchParams();
@@ -18,8 +19,6 @@ export default function EmailPasswordExtractorClient() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [submitting, setSubmitting] = useState(false);
-
-  // Extract token from URL and validate on mount
   useEffect(() => {
     const validateToken = async () => {
       if (!token) {
@@ -34,6 +33,7 @@ export default function EmailPasswordExtractorClient() {
         console.log("Token validated:", result);
         setLoading(false);
       } catch (err) {
+        console.log(err);
         setError(
           "Invalid or expired reset token. Please request a new password reset.",
         );
@@ -66,8 +66,11 @@ export default function EmailPasswordExtractorClient() {
     setError(null);
 
     try {
-      // Here you would typically call an API to reset the password
-      // const result = await authApi.resetPassword(token, newPassword);
+      const result = await authAPI.resetPassword(
+        "email",
+        newPassword,
+        token ?? "",
+      );
       console.log("Password reset with token:", token);
       setSuccess(true);
     } catch (err) {
@@ -102,7 +105,7 @@ export default function EmailPasswordExtractorClient() {
               <p className="text-red-800 text-sm">{error}</p>
             </div>
             <Button asChild className="w-full">
-              <a href="/">Go Home</a>
+              <Link href="/guest">Go Home</Link>
             </Button>
           </div>
         </Card>
