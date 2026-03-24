@@ -22,8 +22,6 @@ export default function PassengerInfoForm({
   onNext,
   onBack,
 }: PassengerInfoFormProps) {
-  const [showAddPassenger, setShowAddPassenger] = useState(false);
-
   const updatePassenger = (
     index: number,
     field: keyof Passenger,
@@ -31,22 +29,6 @@ export default function PassengerInfoForm({
   ) => {
     const updated = [...passengers];
     updated[index][field] = value;
-    onPassengersChange(updated);
-  };
-
-  const addPassenger = () => {
-    const newPassenger: Passenger = {
-      name: "",
-      email: "",
-      phone: "",
-      id_number: "",
-    };
-    onPassengersChange([...passengers, newPassenger]);
-    setShowAddPassenger(false);
-  };
-
-  const removePassenger = (index: number) => {
-    const updated = passengers.filter((_, i) => i !== index);
     onPassengersChange(updated);
   };
 
@@ -84,7 +66,7 @@ export default function PassengerInfoForm({
               <Input
                 type="email"
                 id={`email-${index}`}
-                value={passenger.email}
+                value={passenger.email ?? ""}
                 onChange={(e) =>
                   updatePassenger(index, "email", e.target.value)
                 }
@@ -112,7 +94,7 @@ export default function PassengerInfoForm({
               </Label>
               <Input
                 id={`id-${index}`}
-                value={passenger.id_number}
+                value={passenger.id_number ?? ""}
                 onChange={(e) =>
                   updatePassenger(index, "id_number", e.target.value)
                 }

@@ -120,6 +120,9 @@ export default function AgentSeatBookingDialog({
     try {
       console.log(selectedSeats, passengers);
       if (selectedSeats.length === 0 || passengers.length === 0) return;
+      passengers.forEach(
+        (p) => (p.email = (p.email ?? "").trim().length === 0 ? null : p.email),
+      );
 
       await DanuAgentApi.handleBooking(agentId, {
         trip_id: tripId,

@@ -13,7 +13,7 @@ import { Card, CardContent } from "@/components/ui/card";
 
 import { useState } from "react";
 import { formatTime } from "@/lib/common_functions";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import {
@@ -66,12 +66,9 @@ export default function GuestBooking() {
     per_page,
     undefined,
   );
-  console.log(data, "logged");
-  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const router = useRouter();
 
-  function isTrip(item: Item): item is Trip {
-    return "trip_id" in item;
-  }
+  const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
 
   // const handleViewDetails = async (trip: searchResult) => {
   //   const response = await passengerApi.getTripDetails(trip.id);
@@ -85,7 +82,9 @@ export default function GuestBooking() {
   ): Promise<void> {
     e.preventDefault();
     // Refetch data with updated form values
-    refetch();
+    router.replace(
+      `/guest/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
+    );
   }
 
   const handleSelectFromCity = (city: string) => {

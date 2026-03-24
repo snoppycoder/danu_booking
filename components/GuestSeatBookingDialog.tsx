@@ -96,26 +96,6 @@ export default function GuestSeatBookingDialog({
   };
 
   // Handle seat selection for a passenger
-  const handleSeatSelected = (seatId: string) => {
-    setSeatDict((prev) => ({
-      ...prev,
-      [seatId]: passengers[currentPassengerIndex],
-    }));
-
-    // Move to next passenger or finish
-    if (currentPassengerIndex < passengers.length - 1) {
-      setCurrentPassengerIndex((prev) => prev + 1);
-
-      setEditingPassenger((prev) => ({
-        ...prev,
-        [currentPassengerIndex + 1]: (prev[currentPassengerIndex + 1] ?? 0) + 1,
-      }));
-    } else {
-      // All passengers have seats selected, move to confirmation
-      setSeatToggle(false);
-      setStep(3);
-    }
-  };
 
   // Handle final booking submission
   const handleSubmit = async () => {
@@ -128,6 +108,10 @@ export default function GuestSeatBookingDialog({
 
     try {
       if (selectedSeats.length === 0 || passengers.length === 0) return;
+
+      passengers.forEach(
+        (p) => (p.email = (p.email ?? "").trim().length === 0 ? null : p.email),
+      );
 
       const response = await passengerApi.guestHoldBooking(tripId, {
         seat_codes: selectedSeats,
