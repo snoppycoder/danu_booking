@@ -1317,22 +1317,22 @@ export const operatorApi = {
   },
   createSchedule: async (
     operator_id: string,
-    body: {
+    body?: {
       route_id: string;
       bus_id: string;
       driver_id: string;
       departure_time: string;
       price: number;
       freq: string;
-      interval: number;
-      byweekday: string;
-      bymonthday: string;
-      bymonth: string;
-      until: string;
-      count: number;
-      wkst: number;
-      start_date: string;
-      end_date: string;
+      interval?: number;
+      byweekday?: string;
+      bymonthday?: string;
+      bymonth?: string;
+      until?: string;
+      count?: number;
+      wkst?: number;
+      start_date?: string;
+      end_date?: string;
     },
   ) => {
     try {

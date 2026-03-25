@@ -22,6 +22,7 @@ import { Bus, Driver, RouteDTO, Trip } from "@/lib/model";
 import { operatorApi } from "@/app/api/api";
 import { useAuth } from "@/lib/authContext";
 import { toast } from "sonner";
+import { isAxiosError } from "axios";
 
 type FormValues = {
   route_id: string;
@@ -72,13 +73,27 @@ export function ScheduleDialog({
       bus_id: "",
       driver_id: "",
       freq: "",
+      interval: 0,
+      count: 0,
+      wkst: 0,
+      start_date: "",
+      end_date: "",
     },
   });
+  console.log(errors, isValid);
 
   const { user } = useAuth();
   const onSubmit = async (data: FormValues) => {
     try {
-      await operatorApi.createSchedule(user?.organization_id ?? "", data);
+      const payload = {
+        ...data,
+        until: data.until ? data.until : undefined,
+        price: Number(data.price),
+        interval: data.interval ? data.interval : 1,
+        wkst: Number(data.wkst),
+      };
+
+      await operatorApi.createSchedule(user?.organization_id ?? "", payload);
       onSuccess?.();
 
       toast.success("Schedule created successfully");
@@ -88,10 +103,18 @@ export function ScheduleDialog({
       reset();
     } catch (error) {
       console.error(error);
+      if (isAxiosError(error)) {
+        if (typeof error.response?.data.error === "string") {
+          toast.error(error.response.data.error);
+          return;
+        }
+      }
       toast.error("Failed to create schedule");
     }
   };
   const freq = watch("freq");
+  const until = watch("until");
+  const end_date = watch("end_date");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
@@ -106,7 +129,9 @@ export function ScheduleDialog({
         >
           {/* Route Dropdown */}
           <div className="flex flex-col gap-2">
-            <Label>Route</Label>
+            <Label>
+              Route <span className="text-red-500">*</span>
+            </Label>
             <Controller
               name="route_id"
               defaultValue=""
@@ -137,7 +162,9 @@ export function ScheduleDialog({
 
           {/* Bus Dropdown */}
           <div className="flex flex-col gap-2">
-            <Label>Bus</Label>
+            <Label>
+              Bus <span className="text-red-500">*</span>
+            </Label>
             <Controller
               name="bus_id"
               defaultValue=""
@@ -168,7 +195,9 @@ export function ScheduleDialog({
 
           {/* Driver Dropdown */}
           <div className="flex flex-col gap-2">
-            <Label>Driver</Label>
+            <Label>
+              Driver <span className="text-red-500">*</span>
+            </Label>
             <Controller
               name="driver_id"
               defaultValue=""
@@ -199,7 +228,10 @@ export function ScheduleDialog({
 
           {/* The rest of your inputs */}
           <div className="flex flex-col gap-2">
-            <Label>Departure Time</Label>
+            <Label>
+              {" "}
+              Departure Time <span className="text-red-500">*</span>
+            </Label>
             <Input
               required
               className="text-emerald-600"
@@ -209,12 +241,22 @@ export function ScheduleDialog({
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Price</Label>
-            <Input required type="number" {...register("price")} />
+            <Label>
+              Price <span className="text-red-500">*</span>
+            </Label>
+            <Input
+              required
+              min={100}
+              type="number"
+              {...register("price", { valueAsNumber: true })}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Frequency</Label>
+            <Label>
+              {" "}
+              Frequency<span className="text-red-500">*</span>{" "}
+            </Label>
             <Controller
               defaultValue=""
               name="freq"
@@ -240,9 +282,11 @@ export function ScheduleDialog({
             <Label>Interval</Label>
             <Input
               min={1}
-              required
               type="number"
-              {...register("interval", { valueAsNumber: true })}
+              {...register("interval", {
+                valueAsNumber: true,
+                setValueAs: (v) => (v === "" ? undefined : Number(v)),
+              })}
             />
           </div>
 
@@ -266,7 +310,8 @@ export function ScheduleDialog({
             <Input
               {...register("bymonthday", {
                 validate: (value) => {
-                  if (freq !== "MONTHLY" && !value) {
+                  if (freq === "MONTHLY" && !value) {
+                    // check this
                     return "Monthday is required for monthly schedules";
                   }
                   return true;
@@ -281,7 +326,7 @@ export function ScheduleDialog({
             <Input
               {...register("bymonth", {
                 validate: (value) => {
-                  if (freq !== "MONTHLY" && !value) {
+                  if (freq === "MONTHLY" && !value) {
                     return "Monthday is required for monthly schedules"; // work on this
                   }
                   return true;
@@ -297,15 +342,14 @@ export function ScheduleDialog({
               type="datetime-local"
               {...register("until", {
                 validate: (value) => {
-                  if (freq == "DAILY" && !value) {
-                    return "Until is required with daily frequency schedules"; // work on this
+                  if (!value && !end_date) {
+                    return "Please fill either Until or End Date";
                   }
                   return true;
                 },
               })}
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>Count</Label>
             <Input type="number" {...register("count")} />
@@ -313,17 +357,29 @@ export function ScheduleDialog({
 
           <div className="flex flex-col gap-2">
             <Label>Week Start</Label>
-            <Input type="number" {...register("wkst")} />
+            <Input type="number" min={0} max={6} {...register("wkst")} />
           </div>
 
           <div className="flex flex-col gap-2">
-            <Label>Start Date</Label>
-            <Input type="date" {...register("start_date")} />
+            <Label>
+              Start Date <span className="text-red-500">*</span>
+            </Label>
+            <Input type="date" required {...register("start_date")} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>End Date</Label>
-            <Input type="date" {...register("end_date")} />
+            <Input
+              type="date"
+              {...register("end_date", {
+                validate: (value) => {
+                  if (!value && !until) {
+                    return "Please fill either End Date or Until";
+                  }
+                  return true;
+                },
+              })}
+            />
           </div>
 
           <div className="col-span-2 flex justify-end mt-4">
