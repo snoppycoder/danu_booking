@@ -50,7 +50,7 @@ export default function AvatarHero() {
             }}
             className="text-black cursor-pointer"
           >
-            History
+            My Bookings
           </DropdownMenuItem>
         )}
         <DropdownMenuItem

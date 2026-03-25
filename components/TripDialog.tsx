@@ -131,7 +131,7 @@ export function ScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="lg:max-w-2xl lg:h-[80%] overflow-y-scroll scrollbar-hide ">
+      <DialogContent className="md:max-w-2xl w-xl h-[60%] lg:h-[80%] overflow-y-scroll scrollbar-hide ">
         <DialogHeader>
           <DialogTitle>Create Bus Schedule</DialogTitle>
         </DialogHeader>
@@ -140,7 +140,7 @@ export function ScheduleDialog({
           onSubmit={handleSubmit(onSubmit)}
           className="grid grid-cols-2 gap-4 mt-2.5"
         >
-          {/* Route Dropdown */}
+          {" "}
           <div className="flex flex-col gap-2">
             <Label>
               Route <span className="text-red-500">*</span>
@@ -172,7 +172,6 @@ export function ScheduleDialog({
               )}
             />
           </div>
-
           {/* Bus Dropdown */}
           <div className="flex flex-col gap-2">
             <Label>
@@ -205,7 +204,6 @@ export function ScheduleDialog({
               )}
             />
           </div>
-
           {/* Driver Dropdown */}
           <div className="flex flex-col gap-2">
             <Label>
@@ -238,7 +236,6 @@ export function ScheduleDialog({
               )}
             />
           </div>
-
           {/* The rest of your inputs */}
           <div className="flex flex-col gap-2">
             <Label>
@@ -252,7 +249,6 @@ export function ScheduleDialog({
               {...register("departure_time")}
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>
               Price <span className="text-red-500">*</span>
@@ -264,7 +260,6 @@ export function ScheduleDialog({
               {...register("price", { valueAsNumber: true })}
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>
               {" "}
@@ -290,7 +285,6 @@ export function ScheduleDialog({
               )}
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>Interval</Label>
             <Input
@@ -302,7 +296,6 @@ export function ScheduleDialog({
               })}
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>By Weekday</Label>
             <Input
@@ -317,7 +310,6 @@ export function ScheduleDialog({
               placeholder="MO,TU,WE"
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>By Month Day</Label>
             <Input
@@ -333,7 +325,6 @@ export function ScheduleDialog({
               placeholder="1,15"
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>By Month</Label>
             <Input
@@ -348,7 +339,6 @@ export function ScheduleDialog({
               placeholder="1-12"
             />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>Until</Label>
             <Input
@@ -367,19 +357,16 @@ export function ScheduleDialog({
             <Label>Count</Label>
             <Input type="number" {...register("count")} />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>Week Start</Label>
             <Input type="number" min={0} max={6} {...register("wkst")} />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>
               Start Date <span className="text-red-500">*</span>
             </Label>
             <Input type="date" required {...register("start_date")} />
           </div>
-
           <div className="flex flex-col gap-2">
             <Label>End Date</Label>
             <Input
@@ -394,7 +381,6 @@ export function ScheduleDialog({
               })}
             />
           </div>
-
           <div className="col-span-2 flex justify-end mt-4">
             <Button type="submit" disabled={!isValid || isSubmitting}>
               {isSubmitting ? "Saving..." : "Save Schedule"}
