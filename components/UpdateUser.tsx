@@ -22,6 +22,7 @@ import { isAxiosError } from "axios";
 export function UpdateUserForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
+  console.log(user);
 
   const [formData, setFormData] = useState({
     first_name: "",

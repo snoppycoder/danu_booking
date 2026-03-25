@@ -27,8 +27,7 @@ export default function ProfilePageClient() {
         onClick={() => {
           router.replace(data.get("from") || "/");
         }}
-        variant="secondary"
-        className="absolute top-8 left-8"
+        className="absolute top-0 left-0 md:top-4 md:left-4"
       >
         <ArrowLeft className=" w-5 h-5 " />
       </Button>
