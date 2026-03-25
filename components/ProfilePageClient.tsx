@@ -19,8 +19,6 @@ import { Toaster } from "sonner";
 export default function ProfilePageClient() {
   const router = useRouter();
   const data = useSearchParams();
-  const { user } = useAuth();
-  console.log(user);
 
   return (
     <div className="relative min-h-screen bg-background">

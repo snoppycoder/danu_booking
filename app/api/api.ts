@@ -1722,6 +1722,27 @@ export const operatorApi = {
 };
 
 export const profileApi = {
+  editProfileInfo: async (body: {
+    first_name?: string;
+    last_name?: string;
+    display_name?: string;
+    dob?: string;
+    gender?: string;
+    avatar_file_id?: string;
+    bio?: string;
+    address?: {
+      country?: string;
+      region?: string;
+      city?: string;
+      sub_city?: string;
+      woreda?: string;
+      kebele?: string;
+      house_number?: string;
+    };
+  }) => {
+    const res = await api.patch(`/user/me`, body);
+    return res.data;
+  },
   deleteAccount: async (password: string, anonymize = false) => {
     const response = await api.delete("/user/me", {
       data: { password, anonymize },
