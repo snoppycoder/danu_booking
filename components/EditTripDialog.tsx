@@ -172,7 +172,7 @@ export default function EditTripForm({
       {/* Trigger Button */}
 
       {/* Dialog Content */}
-      <DialogContent className="max-w-md h-[80%] overflow-y-scroll">
+      <DialogContent className="max-w-md h-[80%] lg:h-[90%] overflow-y-scroll">
         <DialogHeader>
           <DialogTitle>Create Trip</DialogTitle>
         </DialogHeader>
@@ -182,7 +182,7 @@ export default function EditTripForm({
             <form onSubmit={handleSubmit} className="space-y-4">
               {/* Bus */}
               <div>
-                <Label>Bus</Label>
+                <Label className="mb-2">Bus</Label>
                 <Select
                   value={formData.bus_id}
                   onValueChange={(val) => handleChange("bus_id", val)}
@@ -206,7 +206,7 @@ export default function EditTripForm({
 
               {/* Driver */}
               <div>
-                <Label>Driver</Label>
+                <Label className="mb-2">Driver</Label>
                 <Select
                   value={formData.driver_id}
                   onValueChange={(val) => handleChange("driver_id", val)}
@@ -232,7 +232,7 @@ export default function EditTripForm({
 
               {/* Departure Time */}
               <div>
-                <Label>Departure Time</Label>
+                <Label className="mb-2">Departure Time</Label>
                 <Input
                   value={formData.departure_time}
                   type="time"
@@ -244,7 +244,7 @@ export default function EditTripForm({
 
               {/* Price */}
               <div>
-                <Label>Price</Label>
+                <Label className="mb-2">Price</Label>
                 <Input
                   value={formData.price}
                   type="number"
@@ -254,7 +254,7 @@ export default function EditTripForm({
 
               {/* Frequency */}
               <div>
-                <Label>Frequency</Label>
+                <Label className="mb-2">Frequency</Label>
                 <Input
                   value={formData.freq}
                   placeholder="e.g. DAILY"
@@ -264,7 +264,7 @@ export default function EditTripForm({
 
               {/* Interval */}
               <div>
-                <Label>Interval</Label>
+                <Label className="mb-2">Interval</Label>
                 <Input
                   value={formData.interval}
                   type="number"
@@ -274,7 +274,7 @@ export default function EditTripForm({
 
               {/* By Weekday */}
               <div>
-                <Label>By Weekday</Label>
+                <Label className="mb-2">By Weekday</Label>
                 <Input
                   value={formData.byweekday}
                   placeholder="MO,TU"
@@ -284,7 +284,7 @@ export default function EditTripForm({
 
               {/* By Month Day */}
               <div>
-                <Label>By Month Day</Label>
+                <Label className="mb-2">By Month Day</Label>
                 <Input
                   value={formData.bymonthday}
                   placeholder="1,15"
@@ -294,7 +294,7 @@ export default function EditTripForm({
 
               {/* By Month */}
               <div>
-                <Label>By Month</Label>
+                <Label className="mb-2">By Month</Label>
                 <Input
                   value={formData.bymonth}
                   placeholder="1,2,3"
@@ -304,7 +304,7 @@ export default function EditTripForm({
 
               {/* Until */}
               <div>
-                <Label>Until</Label>
+                <Label className="mb-2">Until</Label>
                 <Input
                   value={formData.until}
                   type="datetime-local"
@@ -314,7 +314,7 @@ export default function EditTripForm({
 
               {/* Count */}
               <div>
-                <Label>Count</Label>
+                <Label className="mb-2">Count</Label>
                 <Input
                   value={formData.count}
                   type="number"
@@ -324,7 +324,7 @@ export default function EditTripForm({
 
               {/* Week Start */}
               <div>
-                <Label>Week Start</Label>
+                <Label className="mb-2">Week Start</Label>
                 <Input
                   value={formData.wkst}
                   type="number"
@@ -334,7 +334,7 @@ export default function EditTripForm({
 
               {/* Start Date */}
               <div>
-                <Label>Start Date</Label>
+                <Label className="mb-2">Start Date</Label>
                 <Input
                   value={formData.start_date}
                   type="date"
@@ -344,7 +344,7 @@ export default function EditTripForm({
 
               {/* End Date */}
               <div>
-                <Label>End Date</Label>
+                <Label className="mb-2">End Date</Label>
                 <Input
                   value={formData.end_date}
                   type="date"

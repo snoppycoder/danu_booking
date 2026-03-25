@@ -10,6 +10,7 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { UpdateUserForm } from "@/components/UpdateUser";
+import { useAuth } from "@/lib/authContext";
 import { ArrowLeft } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
@@ -18,6 +19,8 @@ import { Toaster } from "sonner";
 export default function ProfilePageClient() {
   const router = useRouter();
   const data = useSearchParams();
+  const { user } = useAuth();
+  console.log(user);
 
   return (
     <div className="relative min-h-screen bg-background">
