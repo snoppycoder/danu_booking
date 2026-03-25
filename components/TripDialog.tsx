@@ -63,6 +63,7 @@ export function ScheduleDialog({
     register,
     handleSubmit,
     reset,
+    watch,
     formState: { isSubmitting, isValid, errors },
   } = useForm<FormValues>({
     mode: "onChange",
@@ -90,10 +91,11 @@ export function ScheduleDialog({
       toast.error("Failed to create schedule");
     }
   };
+  const freq = watch("freq");
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-scroll scrollbar-hide">
+      <DialogContent className="max-w-2xl h-[80vh] lg:h-[90vh] overflow-y-scroll scrollbar-hide">
         <DialogHeader>
           <DialogTitle>Create Bus Schedule</DialogTitle>
         </DialogHeader>
@@ -227,6 +229,7 @@ export function ScheduleDialog({
                     <SelectItem value="DAILY">Daily</SelectItem>
                     <SelectItem value="WEEKLY">Weekly</SelectItem>
                     <SelectItem value="MONTHLY">Monthly</SelectItem>
+                    <SelectItem value="YEARLY">Yearly</SelectItem>
                   </SelectContent>
                 </Select>
               )}
@@ -239,13 +242,24 @@ export function ScheduleDialog({
               min={1}
               required
               type="number"
-              {...register("wkst", { valueAsNumber: true })}
+              {...register("interval", { valueAsNumber: true })}
             />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>By Weekday</Label>
-            <Input required {...register("byweekday")} placeholder="MO,TU,WE" />
+            <Input
+              required
+              {...register("byweekday", {
+                validate: (value) => {
+                  if (freq === "WEEKLY" && !value) {
+                    return "Weekday is required for weekly schedules";
+                  }
+                  return true;
+                },
+              })}
+              placeholder="MO,TU,WE"
+            />
           </div>
 
           <div className="flex flex-col gap-2">
