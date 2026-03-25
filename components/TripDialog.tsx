@@ -95,7 +95,7 @@ export function ScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl overflow-y-scroll scrollbar-hide ">
+      <DialogContent className="lg:max-w-2xl lg:h-[80%] overflow-y-scroll scrollbar-hide ">
         <DialogHeader>
           <DialogTitle>Create Bus Schedule</DialogTitle>
         </DialogHeader>
