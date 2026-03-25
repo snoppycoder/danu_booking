@@ -308,22 +308,22 @@ export function ScheduleDialog({
 
           <div className="flex flex-col gap-2">
             <Label>Count</Label>
-            <Input required type="number" {...register("count")} />
+            <Input type="number" {...register("count")} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>Week Start</Label>
-            <Input required type="number" {...register("wkst")} />
+            <Input type="number" {...register("wkst")} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>Start Date</Label>
-            <Input required type="date" {...register("start_date")} />
+            <Input type="date" {...register("start_date")} />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>End Date</Label>
-            <Input required type="date" {...register("end_date")} />
+            <Input type="date" {...register("end_date")} />
           </div>
 
           <div className="col-span-2 flex justify-end mt-4">
