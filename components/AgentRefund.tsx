@@ -22,12 +22,8 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { formatDistanceToNow } from "date-fns";
 import { Refund } from "@/lib/model";
-import { useAgentRefundList } from "./Query";
+import { useOperatorAgentRefundList } from "./Query";
 import { useAuth } from "@/lib/authContext";
-import { RefundDetailDialog } from "./RefundDetailDialog";
-import RefundForm from "./RefundForm";
-import { toast } from "sonner";
-import { isAxiosError } from "axios";
 
 interface RefundListProps {
   organization_id: string;
@@ -152,7 +148,7 @@ export default function AgentRefundList({ organization_id }: RefundListProps) {
   const [method, setMethod] = useState<"processed" | "rejected" | "pending">(
     "pending",
   );
-  const { data, isLoading, error, refetch } = useAgentRefundList(
+  const { data, isLoading, error, refetch } = useOperatorAgentRefundList(
     organization_id,
     page,
     pageSize,
@@ -183,9 +179,6 @@ export default function AgentRefundList({ organization_id }: RefundListProps) {
     return (
       <Card className="p-12 text-center">
         <p className="text-gray-500">No refunds found</p>
-        {/* <p className="text-sm text-gray-400">
-          Try adjusting your filters or date range
-        </p> */}
       </Card>
     );
   }

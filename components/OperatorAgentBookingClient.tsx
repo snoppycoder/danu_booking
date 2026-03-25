@@ -163,7 +163,7 @@ export default function OperatorAgentBookingClient() {
                           onClick={() => handleSelectFromCity(city)}
                           className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                         >
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <MapPin className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{city}</span>
                         </button>
                       ))}
@@ -339,7 +339,7 @@ export default function OperatorAgentBookingClient() {
                         </DropdownMenu>
                       </div>
                       {/* Info Section */}
-                      <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-6">
                         {/* Price */}
                         <div className="flex flex-col">
                           <span className="text-xs text-muted-foreground  tracking-wide">
@@ -367,8 +367,8 @@ export default function OperatorAgentBookingClient() {
                         </div>
 
                         {/* Status */}
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-muted-foreground  tracking-wide">
+                        <div className=" grid col-span-2 md:col-span-1 md:flex flex-col items-center">
+                          <span className="text-xs text-center text-muted-foreground  tracking-wide">
                             Status
                           </span>
                           <div

@@ -307,7 +307,7 @@ export default function DanuBooking() {
           ) : (
             <div className="w-full">
               {/* Routes Grid */}
-              <div className="grid md:m-8 m-2 my-4 gap-6 grid-cols-1">
+              <div className="grid gap-6 grid-cols-1">
                 {(data?.items || [])?.length > 0 ? (
                   data?.items.map((route) => (
                     <div
@@ -348,25 +348,27 @@ export default function DanuBooking() {
                         </DropdownMenu>
                       </div>
                       {/* Info Section */}
-                      <div className="grid md:grid-cols-3 grid-cols-1  gap-4 mb-6">
+                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-6">
+                        {/* Price */}
                         <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground tracking-wide">
+                          <span className="text-xs text-muted-foreground  tracking-wide">
                             Price
                           </span>
-                          <div className="flex mt-1 ">
-                            <span className="text-sm px-3 py-1 rounded-full font-semibold  bg-green-500/10 text-black">
-                              {formatCurrency(route.price ?? 0)}
+                          <span className="text-2xl font-bold text-primary">
+                            {route.price}
+                            <span className="text-sm font-medium ml-1 text-muted-foreground">
+                              Birr
                             </span>
-                          </div>
+                          </span>
                         </div>
 
                         {/* Seats */}
-                        <div className="flex flex-col">
+                        <div className="flex flex-col items-center">
                           <span className="text-xs text-muted-foreground tracking-wide">
                             Departure Time
                           </span>
-                          <div className="flex mt-1">
-                            <span className="text-sm font-semibold text-black px-3 py-1 rounded-full bg-green-500/10">
+                          <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
+                            <span className="text-sm font-semibold text-black">
                               {route.departure_time.split(":")[0]} :{" "}
                               {route.departure_time.split(":")[1]}
                             </span>
@@ -374,15 +376,15 @@ export default function DanuBooking() {
                         </div>
 
                         {/* Status */}
-                        <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground  tracking-wide">
+                        <div className=" grid col-span-2 md:col-span-1 md:flex flex-col items-center">
+                          <span className="text-xs text-center text-muted-foreground  tracking-wide">
                             Status
                           </span>
                           <div
-                            className="flex gap-2 mt-1 
-           "
+                            className="flex items-center gap-2 mt-1 px-3 py-1 rounded-full 
+            bg-green-500/10 text-green-600"
                           >
-                            <span className="text-sm px-3  bg-green-500/10 text-green-600 py-1 rounded-full  font-semibold">
+                            <span className="text-sm font-semibold">
                               {route.is_available ? "Available" : "Sold Out"}
                             </span>
                           </div>

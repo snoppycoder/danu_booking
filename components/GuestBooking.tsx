@@ -346,35 +346,8 @@ export default function GuestBooking() {
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
-
-                      {/* <div className="flex items-center justify-between mb-6">
-                        <div className="flex flex-col">
-                          <span className="text-xs  tracking-wider text-muted-foreground">
-                            From
-                          </span>
-                          <span className="text-base font-semibold">
-                            {form.route_from}
-                          </span>
-                        </div>
-
-                        <div className="flex-1 mx-4 border-t border-dashed border-border relative">
-                          <span className="absolute left-1/2 -translate-x-1/2 -top-3 bg-card px-2 text-xs text-muted-foreground">
-                            → Direct
-                          </span>
-                        </div>
-
-                        <div className="flex flex-col text-right">
-                          <span className="text-xs  tracking-wider text-muted-foreground">
-                            To
-                          </span>
-                          <span className="text-base font-semibold">
-                            {form.route_to}
-                          </span>
-                        </div>
-                      </div> */}
-
                       {/* Info Section */}
-                      <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-6">
                         {/* Price */}
                         <div className="flex flex-col">
                           <span className="text-xs text-muted-foreground  tracking-wide">
@@ -402,8 +375,8 @@ export default function GuestBooking() {
                         </div>
 
                         {/* Status */}
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-muted-foreground  tracking-wide">
+                        <div className=" grid col-span-2 md:col-span-1 md:flex flex-col items-center">
+                          <span className="text-xs text-center text-muted-foreground  tracking-wide">
                             Status
                           </span>
                           <div

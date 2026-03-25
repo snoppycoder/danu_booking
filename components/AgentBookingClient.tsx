@@ -339,7 +339,7 @@ export default function AgentBookingClient() {
                         </DropdownMenu>
                       </div>
                       {/* Info Section */}
-                      <div className="grid grid-cols-3 gap-4 mb-6">
+                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-6">
                         {/* Price */}
                         <div className="flex flex-col">
                           <span className="text-xs text-muted-foreground  tracking-wide">
@@ -367,8 +367,8 @@ export default function AgentBookingClient() {
                         </div>
 
                         {/* Status */}
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-muted-foreground  tracking-wide">
+                        <div className=" grid col-span-2 md:col-span-1 md:flex flex-col items-center">
+                          <span className="text-xs text-center text-muted-foreground  tracking-wide">
                             Status
                           </span>
                           <div

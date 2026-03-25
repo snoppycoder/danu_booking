@@ -32,6 +32,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { agentApi, passengerApi } from "@/app/api/api";
 import CancelTripDialog from "@/components/CancelBookingConfirm";
 import { useAuth } from "@/lib/authContext";
+import { toast } from "sonner";
 export default function TicketBookedPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const { user } = useAuth();
@@ -45,16 +46,25 @@ export default function TicketBookedPage() {
   } = useBookingHistoryPublic(user?.user_id ?? "", currentPage, numberOfCard);
   const [open, setOpen] = useState(false);
 
+  // const canCancel = (departure_at: string) => {
+  //   const now = new Date().getTime();
+  //   const departure = new Date(departure_at).getTime();
+
+  //   const diffMs = departure - now;
+  //   const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  //   return diffDays >= 0 && diffDays <= 5;
+  // };
   const canCancel = (departure_at: string) => {
     const now = new Date().getTime();
     const departure = new Date(departure_at).getTime();
 
-    const diffMs = departure - now;
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-    return diffDays >= 0 && diffDays <= 5;
+    const fiveDaysAfterDeparture = departure + 5 * 24 * 60 * 60 * 1000;
+
+    return now <= fiveDaysAfterDeparture;
   };
   async function cancelBooking(id: string) {
-    await agentApi.cancelBooking(user?.organization_id || "", id);
+    const res = await agentApi.cancelBooking(user?.organization_id || "", id);
+    toast.success(res.message);
     refetch();
   }
 
@@ -217,9 +227,9 @@ export default function TicketBookedPage() {
                     </div>
 
                     {/* Passengers & Amount */}
-                    <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                    <div className="grid grid-cols-1 gap-y-2.5 md:grid-cols-3 place-items-start md:place-items-center pt-2 border-t border-gray-200">
                       <div className="flex items-center gap-2">
-                        <Users className="w-4 h-4 text-gray-400" />
+                        <Users className="hidden md:flex w-4 h-4 text-gray-400" />
                         <div>
                           <p className="text-gray-600 text-sm">Passengers</p>
                           <p className="font-semibold text-gray-900">
@@ -236,8 +246,24 @@ export default function TicketBookedPage() {
                           </p>
                         </div>
                       </div>
+
+                      <div>
+                        {booking.booking_status === "confirmed" &&
+                          canCancel(booking.departure_at) && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                setBookingId(booking.booking_id);
+                                setOpen(true);
+                              }}
+                            >
+                              Cancel Booking
+                            </Button>
+                          )}
+                      </div>
                     </div>
-                    <div className="w-full pt-4 flex justify-between border-t border-gray-200">
+                    <div className="w-full pt-4 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 gap-4">
                       <div className="">
                         <p className="text-gray-500 text-xs">
                           Booked on{" "}
@@ -247,19 +273,6 @@ export default function TicketBookedPage() {
                           )}
                         </p>
                       </div>
-                      {booking.booking_status === "confirmed" &&
-                        canCancel(booking.departure_at) && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              setBookingId(booking.booking_id);
-                              setOpen(true);
-                            }}
-                          >
-                            Cancel Booking
-                          </Button>
-                        )}
                     </div>
                     {/* Booked At */}
                   </div>

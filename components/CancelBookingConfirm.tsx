@@ -26,7 +26,7 @@ export default function CancelTripDialog({
       {/* Trigger button */}
 
       {/* Dialog content */}
-      <DialogContent className="max-w-sm">
+      <DialogContent className="w-[360px] md:w-[480px] lg:w-[600px]">
         <DialogHeader>
           <DialogTitle>Cancel Trip</DialogTitle>
           <DialogDescription>

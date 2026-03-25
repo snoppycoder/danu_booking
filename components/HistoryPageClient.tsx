@@ -44,13 +44,21 @@ export default function HistoryPageClient() {
   } = usePassengerHistory(currentPage, numberOfCard);
   const [open, setOpen] = useState(false);
 
+  // const canCancel = (departure_at: string) => {
+  //   const now = new Date().getTime();
+  //   const departure = new Date(departure_at).getTime();
+
+  //   const diffMs = departure - now;
+  //   const diffDays = diffMs / (1000 * 60 * 60 * 24);
+  //   return diffDays >= 0 && diffDays <= 5;
+  // };
   const canCancel = (departure_at: string) => {
     const now = new Date().getTime();
     const departure = new Date(departure_at).getTime();
 
-    const diffMs = departure - now;
-    const diffDays = diffMs / (1000 * 60 * 60 * 24);
-    return diffDays >= 0 && diffDays <= 5;
+    const fiveDaysAfterDeparture = departure + 5 * 24 * 60 * 60 * 1000;
+
+    return now <= fiveDaysAfterDeparture;
   };
   async function cancelBooking(id: string) {
     await passengerApi.cancelBooking(id);
@@ -103,7 +111,7 @@ export default function HistoryPageClient() {
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 mt-4">
           <h1 className="text-center text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-            Booking History
+            My Booking
           </h1>
           <p className="text-gray-600 text-center">
             View all your past and upcoming trips
@@ -246,7 +254,7 @@ export default function HistoryPageClient() {
                         </div>
                       </div>
                     </div>
-                    <div className="w-full pt-4 flex justify-between border-t border-gray-200">
+                    <div className="w-full pt-4 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 gap-4">
                       <div className="">
                         <p className="text-gray-500 text-xs">
                           Booked on{" "}
@@ -256,19 +264,21 @@ export default function HistoryPageClient() {
                           )}
                         </p>
                       </div>
-                      {booking.booking_status === "confirmed" &&
-                        canCancel(booking.departure_at) && (
-                          <Button
-                            variant="destructive"
-                            size="sm"
-                            onClick={() => {
-                              setBookingId(booking.booking_id);
-                              setOpen(true);
-                            }}
-                          >
-                            Cancel Booking
-                          </Button>
-                        )}
+                      <div>
+                        {booking.booking_status === "confirmed" &&
+                          canCancel(booking.departure_at) && (
+                            <Button
+                              variant="destructive"
+                              size="sm"
+                              onClick={() => {
+                                setBookingId(booking.booking_id);
+                                setOpen(true);
+                              }}
+                            >
+                              Cancel Booking
+                            </Button>
+                          )}
+                      </div>
                     </div>
                     {/* Booked At */}
                   </div>

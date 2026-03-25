@@ -1141,6 +1141,7 @@ export const agentApi = {
       const res = await api.delete(
         `/operator-agents/${operator_id}/bookings/${booking_id}`,
       );
+      console.log(res.data, "data");
       return res.data;
     } catch (err) {
       console.log(err);

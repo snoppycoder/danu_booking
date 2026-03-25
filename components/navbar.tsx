@@ -111,7 +111,7 @@ export default function Navbar(props: NavbarProps) {
               href="/history"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
-              Booking History
+              My Bookings
             </Link>
             <Link
               href="/manage-sessions"

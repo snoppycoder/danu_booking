@@ -753,7 +753,7 @@ export const useBookingHistoryPublic = (
     enabled: !!user_id,
   });
 };
-export const useAgentRefundList = (
+export const useOperatorAgentRefundList = (
   organzation_id: string,
   page?: number,
   per_page?: number,
