@@ -21,16 +21,16 @@ export default function ProfilePageClient() {
   const data = useSearchParams();
 
   return (
-    <div className="relative min-h-screen bg-background">
+    <div className="relative h-screen bg-background">
       <Toaster richColors position="top-right" />
-      <Button
+      <button
         onClick={() => {
           router.replace(data.get("from") || "/");
         }}
-        className="absolute top-0 left-0 md:top-4 md:left-4"
+        className="absolute top-0 left-0 md:top-2 md:left-2"
       >
-        <ArrowLeft className=" w-5 h-5 " />
-      </Button>
+        <ArrowLeft className="w-5 h-5" />
+      </button>
 
       <div className="mx-auto max-w-4xl p-6 md:p-8">
         <div className="mb-8">

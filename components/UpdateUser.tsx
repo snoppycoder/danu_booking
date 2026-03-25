@@ -23,6 +23,11 @@ export function UpdateUserForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
   console.log(user);
+  const getMaxDOB = () => {
+    const today = new Date();
+    today.setFullYear(today.getFullYear() - 18);
+    return today.toISOString().split("T")[0];
+  };
 
   const [formData, setFormData] = useState({
     first_name: "",
@@ -67,6 +72,14 @@ export function UpdateUserForm() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    if (!isValidDOB(formData.dob)) {
+      toast.error("You must be at least 18 years old.");
+      return;
+    }
+    if (formData.dob === new Date().toISOString().split("T")[0]) {
+      toast.error("Invalid date of birth");
+      return;
+    }
 
     try {
       await profileApi.editProfileInfo(formData);
@@ -84,6 +97,24 @@ export function UpdateUserForm() {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
+  };
+  const isValidDOB = (dob: string) => {
+    if (!dob) return false;
+
+    const birthDate = new Date(dob);
+    const today = new Date();
+
+    let age = today.getFullYear() - birthDate.getFullYear();
+    const monthDiff = today.getMonth() - birthDate.getMonth();
+
+    if (
+      monthDiff < 0 ||
+      (monthDiff === 0 && today.getDate() < birthDate.getDate())
+    ) {
+      age--;
+    }
+
+    return age >= 18;
   };
 
   const handleAddressChange = (field: string, value: string) => {
@@ -129,6 +160,7 @@ export function UpdateUserForm() {
           <Input
             id="dob"
             type="date"
+            max={getMaxDOB()}
             value={formData.dob}
             onChange={(e) => handleInputChange("dob", e.target.value)}
           />

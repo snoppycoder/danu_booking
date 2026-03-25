@@ -17,9 +17,7 @@ export default function ProfileLayout({
 }>) {
   return (
     <AuthProvider blackListRoles={[]}>
-      <main className="min-h-screen relative">
-        <div className="pt-8">{children}</div>
-      </main>
+      <main className="min-h-screen relative p-6">{children}</main>
     </AuthProvider>
   );
 }
