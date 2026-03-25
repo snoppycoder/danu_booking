@@ -709,6 +709,49 @@ export const useDanuAgentRefundList = (
     enabled: !!agent_id,
   });
 };
+export const useBookingHistoryPublic = (
+  user_id: string,
+  page?: number,
+  per_page?: number,
+) => {
+  return useQuery({
+    queryKey: ["public_user_history", user_id, page, per_page],
+    queryFn: async () => {
+      const res = await passengerApi.getBookingHistoryPublic(
+        user_id,
+        page,
+        per_page,
+      );
+
+      return {
+        items: res.items as {
+          booking_id: string;
+          booking_ref: string;
+          booked_at: string; // ISO date string
+          booking_status: string;
+
+          trip_id: string;
+
+          route_from: string;
+          route_to: string;
+
+          departure_at: string; // ISO date string
+
+          operator_id: string;
+          operator_name: string;
+
+          total_amount: number;
+          passenger_count: number;
+        }[],
+        total: res.total,
+        page: res.page,
+        per_page: res.per_page,
+      };
+    },
+    staleTime: 1000 * 60 * 5,
+    enabled: !!user_id,
+  });
+};
 export const useAgentRefundList = (
   organzation_id: string,
   page?: number,

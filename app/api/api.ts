@@ -914,6 +914,25 @@ export const passengerApi = {
       throw error;
     }
   },
+  getBookingHistoryPublic: async (
+    user_id: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    try {
+      const response = await api.get(`/user/trip-bookings`, {
+        params: {
+          user_id,
+          page,
+          per_page,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
 
   cancelBooking: async (booking_id: string) => {
     try {

@@ -95,14 +95,14 @@ export function ScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="max-w-2xl h-[80vh] lg:h-[90vh] overflow-y-scroll scrollbar-hide">
+      <DialogContent className="max-w-2xl overflow-y-scroll scrollbar-hide ">
         <DialogHeader>
           <DialogTitle>Create Bus Schedule</DialogTitle>
         </DialogHeader>
 
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4"
+          className="grid grid-cols-2 gap-4 mt-2.5"
         >
           {/* Route Dropdown */}
           <div className="flex flex-col gap-2">
