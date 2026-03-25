@@ -249,7 +249,6 @@ export function ScheduleDialog({
           <div className="flex flex-col gap-2">
             <Label>By Weekday</Label>
             <Input
-              required
               {...register("byweekday", {
                 validate: (value) => {
                   if (freq === "WEEKLY" && !value) {
@@ -264,17 +263,47 @@ export function ScheduleDialog({
 
           <div className="flex flex-col gap-2">
             <Label>By Month Day</Label>
-            <Input required {...register("bymonthday")} placeholder="1,15" />
+            <Input
+              {...register("bymonthday", {
+                validate: (value) => {
+                  if (freq !== "MONTHLY" && !value) {
+                    return "Monthday is required for monthly schedules";
+                  }
+                  return true;
+                },
+              })}
+              placeholder="1,15"
+            />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>By Month</Label>
-            <Input required {...register("bymonth")} placeholder="1-12" />
+            <Input
+              {...register("bymonth", {
+                validate: (value) => {
+                  if (freq !== "MONTHLY" && !value) {
+                    return "Monthday is required for monthly schedules"; // work on this
+                  }
+                  return true;
+                },
+              })}
+              placeholder="1-12"
+            />
           </div>
 
           <div className="flex flex-col gap-2">
             <Label>Until</Label>
-            <Input required type="datetime-local" {...register("until")} />
+            <Input
+              type="datetime-local"
+              {...register("until", {
+                validate: (value) => {
+                  if (freq == "DAILY" && !value) {
+                    return "Until is required with daily frequency schedules"; // work on this
+                  }
+                  return true;
+                },
+              })}
+            />
           </div>
 
           <div className="flex flex-col gap-2">
