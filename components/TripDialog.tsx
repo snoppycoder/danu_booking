@@ -102,6 +102,7 @@ export function ScheduleDialog({
         ...data,
         until: data.until ? data.until : undefined,
         price: Number(data.price),
+        end_date: data.end_date ? data.end_date : undefined,
         interval: data.interval ? data.interval : 1,
         wkst: Number(data.wkst),
       };
@@ -131,17 +132,17 @@ export function ScheduleDialog({
 
   return (
     <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="md:max-w-2xl w-xl h-[75%] lg:h-[80%] overflow-y-scroll scrollbar-hide ">
+      <DialogContent className="w-full max-w-lg md:max-w-3xl max-h-[90vh] overflow-y-auto">
+        {" "}
         <DialogHeader>
           <DialogTitle>Create Bus Schedule</DialogTitle>
         </DialogHeader>
-
         <form
           onSubmit={handleSubmit(onSubmit)}
-          className="grid grid-cols-2 gap-4 mt-2.5"
+          className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-3 w-full"
         >
           {" "}
-          <div className="flex flex-col gap-2">
+          <div className="w-full flex flex-col gap-2">
             <Label>
               Route <span className="text-red-500">*</span>
             </Label>
@@ -381,8 +382,12 @@ export function ScheduleDialog({
               })}
             />
           </div>
-          <div className="col-span-2 flex justify-end mt-4">
-            <Button type="submit" disabled={!isValid || isSubmitting}>
+          <div className="md:col-span-2 flex justify-end mt-4">
+            <Button
+              type="submit"
+              disabled={!isValid || isSubmitting}
+              className="w-full md:w-auto"
+            >
               {isSubmitting ? "Saving..." : "Save Schedule"}
             </Button>
           </div>
