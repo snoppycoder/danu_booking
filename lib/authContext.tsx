@@ -120,7 +120,6 @@ export const AuthProvider = ({
     }
   };
 
-  // ✅ FIXED: Memoize context value to prevent unnecessary re-renders
   const value = useMemo(() => ({ user, setUser, login }), [user]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

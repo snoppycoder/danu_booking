@@ -12,7 +12,10 @@ import {
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { usePassengerHistory } from "@/components/Query";
+import {
+  useBookingHistoryPublic,
+  usePassengerHistory,
+} from "@/components/Query";
 import {
   Dialog,
   DialogContent,
@@ -39,7 +42,7 @@ export default function TicketBookedPage() {
     isLoading,
     error,
     refetch,
-  } = usePassengerHistory(currentPage, numberOfCard);
+  } = useBookingHistoryPublic(user?.user_id ?? "", currentPage, numberOfCard);
   const [open, setOpen] = useState(false);
 
   const canCancel = (departure_at: string) => {

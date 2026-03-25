@@ -722,6 +722,7 @@ export const useBookingHistoryPublic = (
         page,
         per_page,
       );
+      console.log(res);
 
       return {
         items: res.items as {

@@ -200,6 +200,7 @@ export interface SeatExtraMetadata {
 }
 export interface UseAuthUser {
   sub: string;
+  user_id: string;
   roles: string[];
   portal: string;
   first_name: string;
