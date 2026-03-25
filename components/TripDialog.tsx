@@ -85,6 +85,19 @@ export function ScheduleDialog({
   const { user } = useAuth();
   const onSubmit = async (data: FormValues) => {
     try {
+      const effectiveEndDate = data.end_date || data.until;
+      const startDate = new Date(data.start_date);
+      const endDate = effectiveEndDate ? new Date(effectiveEndDate) : null;
+
+      if (endDate) {
+        const diffInDays =
+          (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24);
+
+        if (diffInDays > 90) {
+          toast.error("Schedule cannot span more than 90 days.");
+          return; // stop submission
+        }
+      }
       const payload = {
         ...data,
         until: data.until ? data.until : undefined,
