@@ -35,7 +35,7 @@ export function UpdateUserForm() {
     display_name: "",
     dob: "",
     gender: "",
-    avatar_file_id: "",
+    // avatar_file_id: "",
     bio: "",
     address: {
       country: "",
@@ -55,7 +55,7 @@ export function UpdateUserForm() {
       display_name: user?.display_name ?? "",
       dob: user?.dob ?? "",
       gender: user?.gender ?? "",
-      avatar_file_id: user?.avatar_file_id ?? "",
+      // avatar_file_id: user?.avatar_file_id ?? "",
       bio: user?.bio ?? "",
       address: {
         country: user?.address?.country ?? "",
@@ -71,22 +71,29 @@ export function UpdateUserForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+
     if (!isValidDOB(formData.dob)) {
       toast.error("You must be at least 18 years old.");
       return;
     }
+
     if (formData.dob === new Date().toISOString().split("T")[0]) {
       toast.error("Invalid date of birth");
       return;
     }
 
+    setIsLoading(true);
     try {
       await profileApi.editProfileInfo(formData);
       toast.success("Your profile information has been successfully updated.");
     } catch (error) {
+      console.log(error);
       if (isAxiosError(error)) {
-        toast.error(error.response?.data.detail);
+        if (error.response?.data.detail) {
+          toast.error(error.response?.data.detail);
+        } else {
+          toast.error("Failed to update your profile. Please try again.");
+        }
         return;
       }
       toast.error("Failed to update your profile. Please try again.");
@@ -186,10 +193,10 @@ export function UpdateUserForm() {
           <Label htmlFor="avatar_file_id">Avatar File ID</Label>
           <Input
             id="avatar_file_id"
-            value={formData.avatar_file_id}
-            onChange={(e) =>
-              handleInputChange("avatar_file_id", e.target.value)
-            }
+            // value={formData.avatar_file_id}
+            // onChange={(e) =>
+            //   handleInputChange("avatar_file_id", e.target.value)
+            // }
             type="file"
           />
         </div>
