@@ -89,18 +89,21 @@ export default function Navbar(props: NavbarProps) {
         {isMenuOpen && (
           <div className="md:hidden w-full pb-4 border-t border-gray-200">
             <Link
+              onClick={() => setIsMenuOpen(false)}
               href="/passenger"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
               Home
             </Link>
             <Link
+              onClick={() => setIsMenuOpen(false)}
               href="/passenger/about-us"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
               About Us
             </Link>
             <Link
+              onClick={() => setIsMenuOpen(false)}
               href="/passenger/contact"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
@@ -108,12 +111,14 @@ export default function Navbar(props: NavbarProps) {
             </Link>
 
             <Link
+              onClick={() => setIsMenuOpen(false)}
               href="/history"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
               My Bookings
             </Link>
             <Link
+              onClick={() => setIsMenuOpen(false)}
               href="/manage-sessions"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >

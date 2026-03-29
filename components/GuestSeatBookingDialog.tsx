@@ -4,6 +4,8 @@ import { SetStateAction, useEffect, useState } from "react";
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -52,6 +54,7 @@ export default function GuestSeatBookingDialog({
       id_number: "",
     },
   ]);
+  const [paymentToggle, setPaymentToggle] = useState(false);
 
   // Seat selection state
   const [seatToggle, setSeatToggle] = useState(false);
@@ -124,6 +127,7 @@ export default function GuestSeatBookingDialog({
         `devpay_${uuid}`,
         "cash",
       );
+      setPaymentToggle(false);
 
       toast.success("Seats successfully booked!", { duration: 3000 });
       onSucess?.();
@@ -233,13 +237,43 @@ export default function GuestSeatBookingDialog({
                 <Button
                   className="flex-1"
                   disabled={selectedSeats.length != passengers.length}
-                  onClick={handleSubmit}
+                  onClick={() => {
+                    setPaymentToggle(true);
+                  }}
                 >
                   Confirm Booking
                 </Button>
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+      <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Payment</DialogTitle>
+            <DialogDescription>
+              This is a placeholder for payment integration.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="rounded-lg border p-4 bg-muted/50">
+              <p className="text-sm">Total Passengers: {passengers.length}</p>
+              <p className="text-sm font-medium">
+                Total Amount: {passengers.length * 1200} ETB
+              </p>
+            </div>
+
+            <div className="text-sm text-muted-foreground">
+              Payment options will appear here (Telebirr, Chapa, Card, etc.)
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button variant="outline">Cancel</Button>
+            <Button onClick={handleSubmit}>Pay & Confirm</Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
