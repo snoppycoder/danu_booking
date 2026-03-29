@@ -5,6 +5,7 @@ import {
   kycApi,
   operatorApi,
   passengerApi,
+  profileApi,
   sessionMgmt,
   superAdminApi,
 } from "@/app/api/api";
@@ -707,6 +708,15 @@ export const useDanuAgentRefundList = (
     },
     staleTime: 1000 * 60 * 5,
     enabled: !!agent_id,
+  });
+};
+export const useAvatar = () => {
+  return useQuery({
+    queryKey: ["avatar"],
+    queryFn: async () => {
+      const res = profileApi.getMyAvatar();
+      return res;
+    },
   });
 };
 export const useBookingHistoryPublic = (

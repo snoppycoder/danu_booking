@@ -13,10 +13,13 @@ import { useAuth } from "@/lib/authContext";
 import { usePathname } from "next/navigation";
 import { Toggle } from "./ui/toggle";
 import { Switch } from "./ui/switch";
+import { useAvatar } from "./Query";
 
 export default function AvatarHero() {
   const router = useRouter();
   const { user } = useAuth();
+  const { data: avatar } = useAvatar();
+  console.log(avatar);
   const path = usePathname();
   const toggleDark = () => {
     document.documentElement.classList.toggle("dark");
@@ -26,7 +29,10 @@ export default function AvatarHero() {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Avatar className="h-9 w-9 cursor-pointer">
-          <AvatarImage src={user?.avatar_file_id} alt={user?.display_name} />
+          <AvatarImage
+            src={avatar?.avatar_url ?? ""}
+            alt={user?.display_name}
+          />
           <AvatarFallback>
             {user?.first_name[0].toUpperCase()}
             {user?.last_name[0].toUpperCase()}

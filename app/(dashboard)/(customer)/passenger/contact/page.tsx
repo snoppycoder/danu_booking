@@ -6,23 +6,26 @@ import {
   Instagram,
   Linkedin,
   Twitter,
+  Link2,
 } from "lucide-react";
+import Link from "next/link";
+import { FaTiktok } from "react-icons/fa";
 
 const contactInfo = [
   {
     label: "Visit Us",
     icon: <MapPin strokeWidth={3} stroke="#1c7690" size={16} />,
-    value: "place_holder for now",
+    value: "Near Jakros, EBM building",
   },
   {
     label: "Call Us",
     icon: <Phone strokeWidth={3} stroke="#1c7690" size={16} />,
-    value: "+(251) 9 345 6789",
+    value: "+(251) 9 118 54 567",
   },
   {
     label: "Email Us",
     icon: <Mail strokeWidth={3} stroke="#1c7690" size={16} />,
-    value: "abcdxyz@gmail.com",
+    value: "Danubooking@gmail.com",
   },
 ];
 
@@ -30,18 +33,22 @@ const socialLinks = [
   {
     name: "facebook",
     Icon: Facebook,
+    link: "https://www.facebook.com/profile.php?id=61582153215076",
   },
   {
-    name: "twitter",
-    Icon: Twitter,
+    name: "TikTok",
+    Icon: FaTiktok,
+    link: "https://www.tiktok.com/@danubooking",
   },
   {
-    name: "instagram",
+    name: "Instagram",
     Icon: Instagram,
+    link: "https://www.instagram.com/danubooking/",
   },
   {
-    name: "linkedin",
+    name: "Linkedin",
     Icon: Linkedin,
+    link: " https://www.linkedin.com/company/danubooking/about/?viewAsMember=true",
   },
 ];
 
@@ -75,7 +82,7 @@ const ContactUs = () => {
         <section className="mt-3 flex flex-col gap-10 md:mt-15 md:flex-row md:gap-12 lg:mt-25 lg:gap-15">
           <div className="w-full md:w-[75%]">
             <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3940.4335081856325!2d38.81740157402512!3d9.02415939103699!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b9b00494cc865%3A0x4f49120935ffe6ab!2sLamberet%20Menaharia!5e0!3m2!1sen!2set!4v1774782285540!5m2!1sen!2set"
+              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3940.646857238919!2d38.81705557402474!3d9.004605191055743!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x164b8534b82a9581%3A0x439702d8af9ed660!2zRWJtIEJ1aWxkaW5nIHwgSmFjcm9zIHwg4YqiIOGJoiDhiqThiJ0g4YiF4YqV4Yy7IHwg4YyD4Yqt4Yiu4Yi1!5e0!3m2!1sen!2set!4v1774788860822!5m2!1sen!2set"
               style={{ border: 0 }}
               loading="lazy"
               aria-hidden="false"
@@ -103,14 +110,20 @@ const ContactUs = () => {
               </div>
             ))}
             <div className="flex gap-3 md:mt-5 lg:mt-2">
-              {socialLinks.map(({ Icon, name }, index) => (
+              {socialLinks.map(({ Icon, name, link }, index) => (
                 <div
-                  className="rounded-full bg-primary p-2 transition-all duration-300 hover:-translate-y-1 hover:bg-[#e08919]"
+                  className="rounded-full bg-primary p-2 transition-all duration-300 hover:-translate-y-1 hover:bg-primary/90"
                   key={index}
                 >
-                  <a href={name} aria-label={name}>
-                    <Icon size={18} color="white" />
-                  </a>
+                  {name !== "TikTok" ? (
+                    <Link target="_blank" href={link} aria-label={name}>
+                      <Icon color="white" />
+                    </Link>
+                  ) : (
+                    <Link target="_blank" href={link} aria-label={name}>
+                      <FaTiktok className="w-6 h-6" color="white" />
+                    </Link>
+                  )}
                 </div>
               ))}
             </div>

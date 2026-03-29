@@ -18,11 +18,13 @@ import { toast } from "sonner";
 import { useAuth } from "@/lib/authContext";
 import { profileApi } from "@/app/api/api";
 import { isAxiosError } from "axios";
+import { useAvatar } from "./Query";
 
 export function UpdateUserForm() {
   const [isLoading, setIsLoading] = useState(false);
   const { user } = useAuth();
-  console.log(user);
+  const [avatarFile, setAvatarFile] = useState<File | null>(null);
+  // const { data: avatar } = useAvatar();
   const getMaxDOB = () => {
     const today = new Date();
     today.setFullYear(today.getFullYear() - 18);
@@ -84,6 +86,9 @@ export function UpdateUserForm() {
 
     setIsLoading(true);
     try {
+      if (avatarFile) {
+        await profileApi.updateAvatar(avatarFile);
+      }
       await profileApi.editProfileInfo(formData);
       toast.success("Your profile information has been successfully updated.");
     } catch (error) {
@@ -193,11 +198,11 @@ export function UpdateUserForm() {
           <Label htmlFor="avatar_file_id">Avatar File ID</Label>
           <Input
             id="avatar_file_id"
-            // value={formData.avatar_file_id}
-            // onChange={(e) =>
-            //   handleInputChange("avatar_file_id", e.target.value)
-            // }
             type="file"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) setAvatarFile(file);
+            }}
           />
         </div>
       </div>

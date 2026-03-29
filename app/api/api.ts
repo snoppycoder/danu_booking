@@ -1723,13 +1723,26 @@ export const operatorApi = {
 };
 
 export const profileApi = {
+  getMyAvatar: async () => {
+    const response = await api.get("/user/me/avatar");
+    return response.data;
+  },
+  updateAvatar: async (file: File) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    const response = await api.post("/user/me/avatar", formData, {
+      headers: {
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return response.data;
+  },
   editProfileInfo: async (body: {
     first_name?: string;
     last_name?: string;
     display_name?: string;
     dob?: string;
     gender?: string;
-    avatar_file_id?: string;
     bio?: string;
     address?: {
       country?: string;

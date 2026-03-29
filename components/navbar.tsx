@@ -112,6 +112,13 @@ export default function Navbar(props: NavbarProps) {
 
             <Link
               onClick={() => setIsMenuOpen(false)}
+              href="/profile"
+              className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
+            >
+              My Profile
+            </Link>
+            <Link
+              onClick={() => setIsMenuOpen(false)}
               href="/history"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
