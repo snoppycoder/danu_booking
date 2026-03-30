@@ -57,14 +57,16 @@ export function AgentSideBar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="border-b border-sidebar-border px-6 py-4">
-        <div className="flex items-center gap-2 text-xl font-bold lg:text-2xl">
-          Danu Booking
+      <SidebarHeader className="border-b border-sidebar-border py-0">
+        <div className="flex w-full  justify-center cursor-pointer">
+          <Link href={"/agent/ticket-booking"}>
+            <img src="/logo.png" className="py-0 h-25 w-auto" alt="Danu logo" />
+          </Link>
         </div>
       </SidebarHeader>
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupContent className="mt-8">
+          <SidebarGroupContent className="">
             <SidebarMenu className="gap-5">
               {menuItems.map((item) => {
                 const isActive = path === item.url;
