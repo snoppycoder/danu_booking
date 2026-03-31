@@ -870,7 +870,7 @@ export const DanuAgentApi = {
         },
       });
 
-      return response.data[0] ?? response.data;
+      return response.data;
     } catch (error) {
       console.log(error);
       throw error;

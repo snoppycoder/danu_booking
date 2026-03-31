@@ -41,7 +41,7 @@ import { Operator } from "@/lib/model";
 import {
   Dialog,
   DialogContent,
-  DialogFooter,
+  
   DialogDescription,
   DialogHeader,
   DialogOverlay,
@@ -80,6 +80,7 @@ export default function AgentList() {
   const filteredUsers = users?.items.filter(
     (user) => !user.organization_id && user?.roles?.[0]?.slug == "agent_admin",
   );
+  console.log(users, "filtered Users");
 
   useEffect(() => {
     setCurrentPage(1);

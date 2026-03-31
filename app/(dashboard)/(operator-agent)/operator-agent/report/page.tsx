@@ -338,9 +338,9 @@ export default function OperatorAdminReport() {
                   <p className="text-base font-medium text-gray-500">
                     No report data available
                   </p>
-                  <p className="text-xs opacity-70 mt-2">
+                  {/* <p className="text-xs opacity-70 mt-2">
                     Try adjusting your filters or check back later
-                  </p>
+                  </p> */}
                 </div>
               ) : (
                 (Array.isArray(data) ? [...data].reverse() : [data]).map(
