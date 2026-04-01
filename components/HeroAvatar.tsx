@@ -19,7 +19,7 @@ export default function AvatarHero() {
   const router = useRouter();
   const { user } = useAuth();
   const { data: avatar } = useAvatar();
-  console.log(avatar);
+
   const path = usePathname();
   const toggleDark = () => {
     document.documentElement.classList.toggle("dark");

@@ -38,11 +38,12 @@ export default function LoginPage() {
       console.log(response);
     } catch (error) {
       if (isAxiosError(error)) {
-        console.log(error.response?.data?.error, "error");
+        console.log(error.response?.data?.error, "errorsssss");
         toast.warning(
           error.response?.data?.error ||
             "Invalid credentials. Please try again.",
         );
+        return;
       } else if (error instanceof Error) {
         toast.error(
           error.message ||

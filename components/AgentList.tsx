@@ -41,7 +41,6 @@ import { Operator } from "@/lib/model";
 import {
   Dialog,
   DialogContent,
-  
   DialogDescription,
   DialogHeader,
   DialogOverlay,
@@ -208,11 +207,14 @@ export default function AgentList() {
                     className="flex justify-between items-center p-2 rounded hover:bg-gray-100 "
                   >
                     <div>
-                      <p className="font-medium">
+                      <span className="font-medium ">
                         {(users.first_name ?? "") +
                           " " +
                           (users.last_name ?? "")}
-                      </p>
+                      </span>
+                      <span className="text-xs text-gray-500 ml-2">
+                        {` (${users.email})`}
+                      </span>
                     </div>
                     <Button
                       size="sm"

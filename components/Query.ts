@@ -649,6 +649,8 @@ export const useOperatorTransactions = (
   paid_by_id?: string,
   from_date?: string,
   to_date?: string,
+  page?: number,
+  per_page?: number,
 ) => {
   return useQuery({
     queryKey: ["danu_agent_refund_list", paid_by_id, from_date, to_date],
@@ -658,12 +660,17 @@ export const useOperatorTransactions = (
         paid_by_id,
         from_date,
         to_date,
+        page,
+        per_page,
       );
-      console.log(res);
+
       return res.items as {
         id: string;
         agent_id: string;
-        paid_by_id: string;
+        paid_by: {
+          id?: string;
+          name?: string;
+        };
         paid_amount: number;
         paid_date: string;
         transaction_id: string;

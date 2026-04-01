@@ -45,15 +45,6 @@ export default function TicketBookedPage() {
     refetch,
   } = useBookingHistoryPublic(user?.user_id ?? "", currentPage, numberOfCard);
   const [open, setOpen] = useState(false);
-
-  // const canCancel = (departure_at: string) => {
-  //   const now = new Date().getTime();
-  //   const departure = new Date(departure_at).getTime();
-
-  //   const diffMs = departure - now;
-  //   const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  //   return diffDays >= 0 && diffDays <= 5;
-  // };
   const canCancel = (departure_at: string) => {
     const now = new Date().getTime();
     const departure = new Date(departure_at).getTime();
@@ -274,7 +265,6 @@ export default function TicketBookedPage() {
                         </p>
                       </div>
                     </div>
-                    {/* Booked At */}
                   </div>
                 </Card>
               );

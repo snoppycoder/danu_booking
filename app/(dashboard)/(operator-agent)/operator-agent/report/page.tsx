@@ -174,7 +174,7 @@ const DayCard = ({
               onPayNow?.();
             }}
             className="text-sm cursor-pointer text-white font-medium mt-6 transition-all group-hover:gap-1 flex items-center justify-start gap-0.5"
-            disabled={(transaction_id ?? "").trim().length > 0}
+            // disabled={(transaction_id ?? "").trim().length > 0}
           >
             Pay now
           </Button>

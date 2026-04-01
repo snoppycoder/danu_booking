@@ -13,6 +13,7 @@ import { LoginResponse, UseAuthUser, User } from "./model";
 import { authAPI } from "@/app/api/api";
 import { usePathname } from "next/navigation";
 import { decodeJWT } from "./jwt";
+import { toast } from "sonner";
 
 interface AuthContextType {
   user: UseAuthUser | null;
@@ -77,9 +78,13 @@ export const AuthProvider = ({
     try {
       const response = await authAPI.login(identifier, password, remember);
 
-      setUser(response.user_info);
+      if (response && response.user_info.roles.length == 0) {
+        toast.error("No roles assigned. Please contact support.");
+        return;
+      }
 
       if (response.access_token.length > 0) {
+        setUser(response.user_info);
         await setAuthCookies(response);
         const decoded = await decodeJWT(response.access_token);
         console.log(response.access_token);

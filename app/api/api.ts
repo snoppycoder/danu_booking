@@ -54,7 +54,7 @@ api.interceptors.response.use(
   (error) => {
     const originalRequest = error.config;
     const publicPath = ["/login", "/signup", "/verify"];
-    console.log(window.location.href);
+
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
@@ -120,14 +120,18 @@ api.interceptors.response.use(
               console.error("User not found — clearing auth state");
               localStorage.clear();
               sessionStorage.clear();
-              window.location.href = "/login";
+
+              window.location.pathname == "/login"
+                ? null
+                : (window.location.href = "/login");
               break;
 
             default:
-              if (window.location.pathname == "/signup") {
-                return;
+              console.log("default");
+              if (!publicPath.includes(window.location.pathname)) {
+                window.location.href = "/login";
               }
-              window.location.href = "/login";
+
               throw error;
           }
         } else if (status === 403) {
@@ -316,7 +320,7 @@ export const authAPI = {
         // portal,
       });
 
-      return response.data;
+      return response?.data;
     } catch (error) {
       console.log(error);
       throw error;
@@ -1254,18 +1258,24 @@ export const operatorApi = {
     paid_by_id?: string,
     from_date?: string,
     to_date?: string,
+    page?: number,
+    per_page?: number,
   ) => {
-    const res = await api.get(
-      `/operator/${operator_id}/reports/agent-payments`,
-      {
+    try {
+      const res = await api.get(`/operator/${operator_id}/agent-payments`, {
         params: {
           paid_by_id,
           from_date,
           to_date,
+          page,
+          per_page,
         },
-      },
-    );
-    return res.data;
+      });
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
   },
   getReportData: async (
     operator_id: string,
