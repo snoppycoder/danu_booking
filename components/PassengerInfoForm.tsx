@@ -6,6 +6,15 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Passenger } from "@/lib/model";
 import { X } from "lucide-react";
+import { Toggle } from "./ui/toggle";
+import { Switch } from "./ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
 
 type PassengerInfoFormProps = {
   numberOfPassengers: number;
@@ -22,17 +31,19 @@ export default function PassengerInfoForm({
   onNext,
   onBack,
 }: PassengerInfoFormProps) {
-  const updatePassenger = (
+  const updatePassenger = <K extends keyof Passenger>(
     index: number,
-    field: keyof Passenger,
-    value: string,
+    field: K,
+    value: Passenger[K],
   ) => {
     const updated = [...passengers];
     updated[index][field] = value;
     onPassengersChange(updated);
   };
+  const [idx, setIdx] = useState(0);
 
   // Check if all passengers have required fields filled
+  const [isOpen, setIsOpen] = useState(false);
   const allPassengersComplete =
     passengers.length > 0 &&
     passengers.every((p) => p.name.trim() && p.phone.trim());
@@ -101,6 +112,29 @@ export default function PassengerInfoForm({
                 placeholder="ID number"
               />
             </div>
+            <div className="ml-1 mt-2.5">
+              <Label className="mb-2" htmlFor={`id-${index}`}>
+                Is this passenger a child?
+              </Label>
+              <Switch
+                id={`id-${index}`}
+                checked={passenger.is_child ?? false}
+                onCheckedChange={(checked: boolean) =>
+                  updatePassenger(index, "is_child", checked)
+                }
+              />
+            </div>
+            <div className="ml-1 mt-2.5">
+              <Button
+                variant={"outline"}
+                onClick={() => {
+                  setIdx(index);
+                  setIsOpen(true);
+                }}
+              >
+                Company Info
+              </Button>
+            </div>
           </div>
         </div>
       ))}
@@ -117,6 +151,50 @@ export default function PassengerInfoForm({
           Summary
         </Button>
       </div>
+      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Company Information</DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            <div className="space-y-2.5">
+              <Label htmlFor="company">Company Name</Label>
+              <Input
+                id="company"
+                value={passengers[idx].company_name ?? ""}
+                onChange={(e) =>
+                  updatePassenger(idx, "company_name", e.target.value)
+                }
+                placeholder="Enter company name"
+              />
+            </div>
+
+            <div className="space-y-2.5">
+              <Label htmlFor="tin">TIN Number</Label>
+              <Input
+                id="tin"
+                value={passengers[idx].tin_number ?? ""}
+                onChange={(e) =>
+                  updatePassenger(idx, "tin_number", e.target.value)
+                }
+                placeholder="Enter TIN number"
+              />
+            </div>
+
+            <Button
+              className="w-full"
+              disabled={
+                passengers[idx].company_name === "" ||
+                passengers[idx].tin_number === ""
+              }
+              onClick={() => setIsOpen(false)}
+            >
+              Save
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

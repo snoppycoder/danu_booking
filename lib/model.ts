@@ -301,6 +301,9 @@ export type Passenger = {
   email: string | null;
   phone: string;
   id_number: string | null;
+  is_child?: boolean;
+  tin_number?: string;
+  company_name?: string;
 };
 export interface RouteDTO {
   id: string;
