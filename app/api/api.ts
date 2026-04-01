@@ -845,6 +845,28 @@ export const superAdminApi = {
   },
 };
 export const DanuAgentApi = {
+  getReportForAllOperator: async (
+    agent_id: string,
+    from_date: string,
+    to_date: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    try {
+      const response = await api.get(`/agent/${agent_id}/reports/revenue`, {
+        params: {
+          page,
+          per_page,
+          from_date,
+          to_date,
+        },
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error);
+      throw error;
+    }
+  },
   getRefundList: async (agent_id: string, page?: number, per_page?: number) => {
     try {
       const response = await api.get(`/agent/${agent_id}/reports/refunds`, {
@@ -873,8 +895,9 @@ export const DanuAgentApi = {
           to_date,
         },
       });
+      console.log(response.data[0], "report data from api");
 
-      return response.data;
+      return response.data[0];
     } catch (error) {
       console.log(error);
       throw error;

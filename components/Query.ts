@@ -160,7 +160,7 @@ export const useDanuAgentReportData = (
         page,
         per_page,
       );
-      console.log(operator_id, "id");
+      console.log(res, "data from report");
 
       return {
         items: res.items as {

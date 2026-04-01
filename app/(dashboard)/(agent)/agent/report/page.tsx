@@ -67,7 +67,7 @@ export default function OperatorDashboard() {
     endDate,
   );
 
-  console.log(user);
+  console.log(data);
 
   const { data: routes, isLoading: routeIsLoading } = useRoutes();
 

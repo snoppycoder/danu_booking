@@ -75,6 +75,7 @@ export default function AgentList() {
       emp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp.contact_email.toLowerCase().includes(searchTerm.toLowerCase()),
   );
+  console.log(filteredAgents);
 
   const filteredUsers = users?.items.filter(
     (user) => !user.organization_id && user?.roles?.[0]?.slug == "agent_admin",
