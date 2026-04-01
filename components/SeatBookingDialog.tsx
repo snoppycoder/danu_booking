@@ -174,10 +174,22 @@ export default function SeatBookingDialog({
   };
 
   const handleBack = () => {
+    setPassengers([
+      {
+        name: "",
+        email: "",
+        phone: "",
+        id_number: "",
+      },
+    ]);
+    // setSeatDict({});
+
+    setCurrentPassengerIndex(0);
+    console.log(selectedSeats);
     if (step === 2) {
       setStep(1);
-    } else if (step === 1) {
-      setToggle(false); // go back to previous dialog
+    } else {
+      setToggle(false);
     }
   };
 

@@ -170,11 +170,24 @@ export default function OperatorAgentSeatBookingDialog({
   };
 
   const handleBack = () => {
-    setMultiSelect([]);
-    console.log(selectedSeats);
-    setToggle(false);
-  };
+    setPassengers([
+      {
+        name: "",
+        email: "",
+        phone: "",
+        id_number: "",
+      },
+    ]);
+    // setSeatDict({});
 
+    setCurrentPassengerIndex(0);
+    console.log(selectedSeats);
+    if (step === 2) {
+      setStep(1);
+    } else {
+      setToggle(false);
+    }
+  };
   const handleDialogClose = () => {
     setToggle(false);
     setStep(1);

@@ -34,7 +34,6 @@ type SeatBookingDialogProps = {
 export default function AgentSeatBookingDialog({
   tripId,
   agentId,
-
   selectedSeats,
   number_of_passengers,
   toggle,
@@ -124,7 +123,7 @@ export default function AgentSeatBookingDialog({
         (p) => (p.email = (p.email ?? "").trim().length === 0 ? null : p.email),
       );
 
-      await DanuAgentApi.handleBooking(agentId, {
+      const data = await DanuAgentApi.handleBooking(agentId, {
         trip_id: tripId,
         seat_codes: selectedSeats,
         passenger_details: passengers,
@@ -132,6 +131,7 @@ export default function AgentSeatBookingDialog({
         payment_reference: `devpay_${uuid}`,
         external_ref: `ex_${uuid}`,
       });
+      console.log(data, "booking response");
 
       toast.success("Seats successfully booked!", { duration: 3000 });
       onSucess?.();
@@ -169,9 +169,23 @@ export default function AgentSeatBookingDialog({
   };
 
   const handleBack = () => {
-    setMultiSelect([]);
+    setPassengers([
+      {
+        name: "",
+        email: "",
+        phone: "",
+        id_number: "",
+      },
+    ]);
+    // setSeatDict({});
+
+    setCurrentPassengerIndex(0);
     console.log(selectedSeats);
-    setToggle(false);
+    if (step === 2) {
+      setStep(1);
+    } else {
+      setToggle(false);
+    }
   };
 
   const handleDialogClose = () => {

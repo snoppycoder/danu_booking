@@ -24,6 +24,7 @@ import { useDanuAgentReportData, useRoutes } from "@/components/Query";
 import { useAuth } from "@/lib/authContext";
 
 import { Spinner } from "@/components/ui/spinner";
+import { formatCurrency } from "@/lib/report-utils";
 function TicketIdCell({ id }: { id: string }) {
   const [showFull, setShowFull] = useState(false);
   const displayId = showFull ? id : id.slice(0, 8) + "..."; // truncate first 8 chars
@@ -74,7 +75,7 @@ export default function OperatorDashboard() {
   const statsData = [
     {
       label: "Today's Revenue",
-      value: data?.revenue ?? 0,
+      value: formatCurrency(data?.revenue ?? 0),
     },
     {
       label: "Tickets Sold Today",
