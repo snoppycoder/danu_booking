@@ -412,7 +412,7 @@ export default function AgentBookingClient() {
               {data?.total} entries
             </p>
 
-            <div className="flex gap-2">
+            <div className="flex mt-4.5 gap-2">
               <Button
                 variant="outline"
                 disabled={currentPage === 1}

@@ -29,6 +29,7 @@ import {
   User,
 } from "@/lib/model";
 import { ScheduleDTO } from "@/app/(dashboard)/(operator)/operator/trips/page";
+import { $ZodNumberInternals } from "zod/v4/core";
 export interface Trips_s {
   id: string;
   trip_id: string;
@@ -132,6 +133,65 @@ export const useSuperAdminStat = () => {
     queryFn: async () => {
       const res = await superAdminApi.getStats();
       return res;
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
+export const useDanuAgentOperatorReport = (
+  agent_id: string,
+  page?: number,
+  per_page?: number,
+  from_date?: string,
+  to_date?: string,
+) => {
+  return useQuery({
+    queryKey: [
+      "danu-agent-report",
+      agent_id,
+
+      page,
+      per_page,
+      from_date,
+      to_date,
+    ],
+    queryFn: async () => {
+      const res = await DanuAgentApi.getReportForAllOperator(
+        agent_id,
+        from_date,
+        to_date,
+        page,
+        per_page,
+      );
+      console.log(res, "data from report");
+
+      return {
+        items: res.items as {
+          operator_name: string;
+          operator_id: string;
+          Total_Ticket_Sales: number;
+          Gross_Revenue: number;
+          Bus: {
+            bus_id: string;
+            capacity: number;
+            plate_no: string;
+            side_no: string;
+            Total_Ticket_Sales: number;
+            Gross_Revenue: number;
+            who_is_selling: {
+              seller_id: string;
+              seller_name: string;
+              seller_type: string;
+              Total_Ticket_Sales: number;
+              Gross_Revenue: number;
+            }[];
+          }[];
+        }[],
+        total: res.total,
+        date: res.date,
+        tickets_sold: res.tickets_sold,
+        revenue: res.revenue,
+        page: res.page,
+      };
     },
     staleTime: 5 * 60 * 1000,
   });

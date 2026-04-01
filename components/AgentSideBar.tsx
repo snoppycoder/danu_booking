@@ -12,6 +12,7 @@ import {
   ChartBar,
   TrendingUp,
   TicketCheck,
+  TrendingUpDown,
 } from "lucide-react";
 import {
   Sidebar,
@@ -27,6 +28,7 @@ import {
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
+import { TrendingDownRounded } from "@mui/icons-material";
 
 const menuItems = [
   {
@@ -44,9 +46,14 @@ const menuItems = [
     url: "/agent/ticket-booked",
     icon: TicketCheck,
   },
+  {
+    title: "Operator Report",
+    url: "/agent/operator-report",
+    icon: TrendingUpDown,
+  },
 
   {
-    title: "Report",
+    title: "Danu's Report",
     url: "/agent/report",
     icon: TrendingUp,
   },

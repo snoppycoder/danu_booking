@@ -847,8 +847,8 @@ export const superAdminApi = {
 export const DanuAgentApi = {
   getReportForAllOperator: async (
     agent_id: string,
-    from_date: string,
-    to_date: string,
+    from_date?: string,
+    to_date?: string,
     page?: number,
     per_page?: number,
   ) => {
@@ -861,6 +861,7 @@ export const DanuAgentApi = {
           to_date,
         },
       });
+      console.log(agent_id, "report for all operator from api");
       return response.data;
     } catch (error) {
       console.log(error);
