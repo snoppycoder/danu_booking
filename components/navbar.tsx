@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/authContext";
 import AvatarHero from "./HeroAvatar";
 import { authAPI } from "@/app/api/api";
 import clsx from "clsx";
+import { usePathname } from "next/navigation";
 
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
@@ -17,6 +18,7 @@ interface NavbarProps {
 export default function Navbar(props: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user } = useAuth();
+  const pathUrl = usePathname();
 
   useEffect(() => {
     if (user) {
@@ -38,13 +40,18 @@ export default function Navbar(props: NavbarProps) {
           </div>
 
           {/* Desktop Menu */}
-          <div className="ml-5 w-full hidden md:block">
-            <div className="w-full flex justify-between items-center space-x-8">
+          <div className="w-full hidden md:block">
+            <div className="w-full flex justify-between items-center">
               {props.initalPath.map((path) => (
                 <Link
                   key={path.href}
                   href={path.href}
-                  className="text-gray-700 hover:text-teal-600 font-medium transition-colors"
+                  className={clsx(
+                    `text-gray-700 hover:text-teal-600 font-medium transition-colors`,
+                    {
+                      "text-teal-600 animate-pulse": pathUrl === path.href,
+                    },
+                  )}
                 >
                   {path.label}
                 </Link>

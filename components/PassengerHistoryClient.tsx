@@ -9,9 +9,11 @@ import {
   Loader2,
   AlertCircle,
   ArrowLeft,
+  Share,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { jsPDF } from "jspdf";
 import { usePassengerHistory } from "@/components/Query";
 import {
   Dialog,
@@ -22,17 +24,197 @@ import {
   DialogFooter,
   DialogTrigger,
 } from "@/components/ui/dialog";
-
-import { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { useRouter, useSearchParams } from "next/navigation";
+import { History } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
-import CancelTripDialog from "./CancelBookingConfirm";
+import { useState } from "react";
 
-export default function HistoryPageClient() {
+import CancelTripDialog from "./CancelBookingConfirm";
+import { Button } from "./ui/button";
+
+function formatEthiopianTime(date: Date): string {
+  let hour = date.getHours();
+  const minutes = date.getMinutes();
+
+  // Convert to Ethiopian hour
+  let ethHour = hour - 6;
+  if (ethHour <= 0) ethHour += 12;
+  if (ethHour > 12) ethHour -= 12;
+
+  // Determine period
+  let period = "";
+
+  if (hour >= 6 && hour < 12) {
+    period = "ጠዋት"; // morning
+  } else if (hour >= 12 && hour < 18) {
+    period = "ከሰዓት"; // afternoon
+  } else {
+    period = "ማታ"; // night
+  }
+
+  return `${ethHour}:${minutes.toString().padStart(2, "0")} ${period}`;
+}
+export function exportTicketIntoPDF(booking: History): void {
+  const doc = new jsPDF({
+    orientation: "landscape",
+    unit: "mm",
+    format: [240, 100],
+  });
+
+  // --- MODERN COLOR PALETTE ---
+  const brandTeal = [13, 148, 136]; // Deep, sophisticated teal (#0d9488)
+  const bgWhite = [255, 255, 255]; // Clean white background
+  const textDark = [31, 41, 55]; // Gray 800 for primary text
+  const textMuted = [107, 114, 128]; // Gray 500 for labels
+  const borderLight = [229, 231, 235]; // Gray 200 for subtle lines
+
+  const depDate = new Date(booking.departure_at);
+
+  // --- 1. BASE BACKGROUND ---
+  doc.setFillColor(bgWhite[0], bgWhite[1], bgWhite[2]);
+  doc.rect(0, 0, 240, 100, "F");
+
+  // --- 2. BRANDING ACCENT (Left Edge Bar) ---
+  doc.setFillColor(brandTeal[0], brandTeal[1], brandTeal[2]);
+  doc.rect(0, 0, 6, 100, "F");
+
+  // --- 3. SEPARATOR LINE (The "Tear-off" Stub) ---
+  const stubX = 170; // Moved slightly right to give the main body more breathing room
+  doc.setLineWidth(0.5);
+  doc.setDrawColor(borderLight[0], borderLight[1], borderLight[2]);
+  doc.setLineDashPattern([2, 2], 0);
+  doc.line(stubX, 5, stubX, 85);
+  doc.setLineDashPattern([], 0); // Reset dash
+
+  // ==========================================
+  //         MAIN TICKET BODY (LEFT)
+  // ==========================================
+
+  // Header
+  doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.text("DANU", 15, 18);
+  doc.setFont("helvetica", "normal");
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(10);
+  doc.text("BOARDING PASS", 38, 18);
+
+  // Subtle Header Divider
+  doc.setDrawColor(borderLight[0], borderLight[1], borderLight[2]);
+  doc.setLineWidth(0.2);
+  doc.line(15, 24, stubX - 10, 24);
+
+  // Helper function to draw label/value pairs to keep code DRY
+  const drawInfoBox = (
+    label: string,
+    value: string,
+    x: number,
+    y: number,
+    valueSize = 10,
+  ) => {
+    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(7);
+    doc.text(label, x, y);
+
+    doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+    doc.setFont("helvetica", "normal");
+    doc.setFontSize(valueSize);
+    doc.text(value, x, y + 5);
+  };
+
+  // Row 1: Key Info
+  drawInfoBox("PASSENGER / OPERATOR", booking.operator_name, 15, 33);
+  drawInfoBox("DATE", format(depDate, "MMM dd, yyyy"), 80, 33);
+  drawInfoBox("TIME", format(depDate, "HH:mm"), 115, 33);
+  //   doc.setFont("ethiopic");
+  //   drawInfoBox("TIME", formatEthiopianTime(depDate), 115, 33);
+
+  // Row 2: Large Routing (From -> To)
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(7);
+  doc.text("FROM", 15, 50);
+  doc.text("TO", 80, 50);
+
+  doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(16);
+  doc.text(booking.route_from.toUpperCase(), 15, 58);
+
+  // Arrow graphic between routes
+  doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
+  doc.setFont("helvetica", "normal");
+  // Draw a clean arrow between FROM and TO
+  const arrowY = 55;
+  const arrowStart = 65;
+  const endX = 75;
+
+  doc.setDrawColor(brandTeal[0], brandTeal[1], brandTeal[2]);
+  doc.setLineWidth(0.8);
+
+  // Main line
+  doc.line(arrowStart, arrowY, endX, arrowY);
+
+  // Arrow head
+  doc.line(endX, arrowY, endX - 3, arrowY - 2);
+  doc.line(endX, arrowY, endX - 3, arrowY + 2);
+
+  doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+  doc.setFont("helvetica", "bold");
+  doc.text(booking.route_to.toUpperCase(), 80, 58);
+
+  // Footer / Reference Info
+  doc.setFillColor(249, 250, 251); // Very light gray background for footer
+  doc.rect(15, 70, stubX - 25, 12, "F");
+
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(8);
+  doc.setFont("helvetica", "normal");
+  doc.text(`REF:`, 18, 77);
+  drawInfoBox("TRIP ID", booking.trip_id, 18, 82);
+
+  doc.setFont("helvetica", "bold");
+  doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+  doc.text(booking.booking_ref, 26, 77);
+
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFont("helvetica", "normal");
+  doc.text(`STATUS:`, 65, 77);
+
+  // Color code the status
+  const isConfirmed = booking.booking_status.toLowerCase() === "confirmed";
+  doc.setTextColor(
+    isConfirmed ? 22 : 200,
+    isConfirmed ? 163 : 0,
+    isConfirmed ? 74 : 0,
+  ); // Green or Red
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(8);
+  doc.text(booking.booking_status.toUpperCase(), 84, 77);
+
+  const startX = stubX + 8;
+
+  doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(14);
+  doc.text("DANU", startX, 18);
+
+  drawInfoBox("OPERATOR", booking.operator_name, startX, 30);
+  drawInfoBox("FROM", booking.route_from.toUpperCase(), startX, 42);
+  drawInfoBox("TO", booking.route_to.toUpperCase(), startX, 54);
+
+  doc.setFont("ethiopic");
+  drawInfoBox("TIME", format(depDate, "HH:mm"), startX, 66);
+  //   drawInfoBox("TIME", formatEthiopianTime(depDate), startX, 66);
+
+  // Faux Barcode generated with rectangles for aesthetic
+
+  // Save the PDF
+  doc.save(`ticket_${booking.booking_ref}.pdf`);
+}
+
+export default function PassengerHistoryPageClient() {
   const [currentPage, setCurrentPage] = useState(1);
-  const data = useSearchParams();
-  const router = useRouter();
 
   const [bookingId, setBookingId] = useState<string>("");
   const numberOfCard = 5;
@@ -44,14 +226,6 @@ export default function HistoryPageClient() {
   } = usePassengerHistory(currentPage, numberOfCard);
   const [open, setOpen] = useState(false);
 
-  // const canCancel = (departure_at: string) => {
-  //   const now = new Date().getTime();
-  //   const departure = new Date(departure_at).getTime();
-
-  //   const diffMs = departure - now;
-  //   const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  //   return diffDays >= 0 && diffDays <= 5;
-  // };
   const canCancel = (departure_at: string) => {
     const now = new Date().getTime();
     const departure = new Date(departure_at).getTime();
@@ -78,10 +252,10 @@ export default function HistoryPageClient() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-6 border-red-200 bg-red-50">
           <div className="flex items-start gap-4">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-1" />
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-1" />
             <div>
               <h3 className="font-semibold text-red-900 mb-1">
                 Error Loading Tickets
@@ -98,20 +272,10 @@ export default function HistoryPageClient() {
 
   return (
     <div className="relative min-h-screen from-blue-50 to-indigo-100 p-6 md:p-8">
-      <Button
-        onClick={() => {
-          router.replace(data.get("from") || "/");
-        }}
-        size={"lg"}
-        variant="secondary"
-        className="absolute cursor-pointer top-4 left-4 p-6 bg-transparent hover:bg-transparent"
-      >
-        <ArrowLeft size={24} className="w-6 h-6 text-gray-700" />
-      </Button>
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 mt-4">
           <h1 className="text-center text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
-            My Booking
+            My Bookings
           </h1>
           <p className="text-gray-600 text-center">
             View all your past and upcoming trips
@@ -206,7 +370,7 @@ export default function HistoryPageClient() {
 
                     {/* Departure Date & Time */}
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <Calendar className="w-5 h-5 text-indigo-600 mt-1" />
                       </div>
                       <div className="flex-1">
@@ -222,7 +386,7 @@ export default function HistoryPageClient() {
 
                     {/* Operator */}
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <div className="w-5 h-5 bg-indigo-600 rounded-full mt-1" />
                       </div>
                       <div className="flex-1">
@@ -254,7 +418,7 @@ export default function HistoryPageClient() {
                         </div>
                       </div>
                     </div>
-                    <div className="w-full pt-4 grid grid-cols-1 md:grid-cols-2 border-t border-gray-200 gap-4">
+                    <div className="w-full pt-4 grid  grid-cols-1 md:grid-cols-2 border-t border-gray-200 gap-4 md:gap-8">
                       <div className="">
                         <p className="text-gray-500 text-xs">
                           Booked on{" "}
@@ -264,12 +428,23 @@ export default function HistoryPageClient() {
                           )}
                         </p>
                       </div>
+                      <div></div>
+                      <div className="">
+                        <Button
+                          className={"w-full"}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => exportTicketIntoPDF(booking)}
+                        >
+                          <Share /> Export
+                        </Button>
+                      </div>
                       <div>
                         {booking.booking_status === "confirmed" &&
                           canCancel(booking.departure_at) && (
                             <Button
                               variant="destructive"
-                              size="sm"
+                              className="w-full"
                               onClick={() => {
                                 setBookingId(booking.booking_id);
                                 setOpen(true);

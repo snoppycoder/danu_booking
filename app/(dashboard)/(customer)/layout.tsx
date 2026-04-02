@@ -49,7 +49,7 @@ export default function DashboardLayout({
           <Navbar
             initalPath={[
               { href: "/passenger", label: "Home" },
-              // { href: "/passenger/bookings", label: "Bookings" },
+              { href: "/passenger/history", label: "My Bookings" },
               { href: "/passenger/about-us", label: "About Us" },
               { href: "/passenger/contact", label: "Contact" },
             ]}
