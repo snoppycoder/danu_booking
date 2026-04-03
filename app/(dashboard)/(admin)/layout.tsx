@@ -38,7 +38,6 @@ export default function DashboardLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  // const { user } = useAuth();
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>

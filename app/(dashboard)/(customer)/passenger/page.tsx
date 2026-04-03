@@ -12,9 +12,11 @@ import { passengerApi } from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src";
+import { useAuth } from "@/lib/authContext";
 
 export default function DanuBooking() {
   const router = useRouter();
+  const { access_token } = useAuth();
   const today = new Date().toISOString().split("T")[0];
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);

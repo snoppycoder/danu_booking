@@ -7,16 +7,19 @@ import {
   useEffect,
   useMemo,
 } from "react";
-import { setAuthCookies } from "./auth";
+import { getAccessToken, setAuthCookies } from "./auth";
 
 import { LoginResponse, UseAuthUser, User } from "./model";
 import { authAPI } from "@/app/api/api";
 import { usePathname } from "next/navigation";
 import { decodeJWT } from "./jwt";
 import { toast } from "sonner";
+import { useRef } from "react";
+import { useRouter } from "next/navigation";
 
 interface AuthContextType {
   user: UseAuthUser | null;
+  access_token: string;
   setUser: React.Dispatch<React.SetStateAction<UseAuthUser | null>>;
   login: (
     identifier: string,
@@ -35,7 +38,10 @@ export const AuthProvider = ({
   blackListRoles: string[];
 }) => {
   const path = usePathname();
+  const router = useRouter();
   const [user, setUser] = useState<UseAuthUser | null>(null);
+  const [access_token, setAccessToken] = useState<string>("");
+  const socketRef = useRef<WebSocket | null>(null);
   const public_paths = [
     "/",
     "/login",
@@ -50,25 +56,87 @@ export const AuthProvider = ({
     "/api",
     "/tickets",
   ];
+  function handleSocketConnections(access_token: string) {
+    if (socketRef.current) {
+      socketRef.current.close(); // prevent duplicates
+    }
+    console.log(access_token);
+    const ws = new WebSocket(
+      `wss://danu.biisho.et/api/v1/ws/notifications/?token=${access_token}`,
+    );
+
+    socketRef.current = ws;
+
+    ws.onopen = () => {
+      console.log("✅ WebSocket connected");
+    };
+
+    ws.onmessage = (event) => {
+      console.log("RAW MESSAGE:", event.data);
+
+      try {
+        const data = JSON.parse(event.data);
+
+        console.log("📩 Parsed Message:", data);
+
+        toast.success(data.title || "Notification", {
+          description: data.message,
+        });
+      } catch (error) {
+        console.error("❌ JSON parse error:", error);
+      }
+    };
+
+    ws.onerror = (error) => {
+      console.error("❌ WebSocket error:", error);
+    };
+
+    ws.onclose = (event) => {
+      console.log("🔌 WebSocket closed:", event.reason);
+    };
+  }
+  useEffect(() => {
+    const initSocket = async () => {
+      const token = await getAccessToken();
+
+      if (token) {
+        setAccessToken(token);
+        handleSocketConnections(token);
+      }
+    };
+
+    initSocket();
+
+    return () => {
+      socketRef.current?.close();
+    };
+  }, []);
 
   useEffect(() => {
     if (!public_paths.includes(path)) {
       const fetchCurrUser = async () => {
-        const response = (await authAPI.whoAmI()) as UseAuthUser;
-        const hasBlacklistedRole = response.roles.some((role) =>
-          blackListRoles.includes(role),
-        );
+        try {
+          const response = (await authAPI.whoAmI()) as UseAuthUser;
 
-        if (hasBlacklistedRole) {
-          setUser(null);
-          window.location.replace("/unauthorized"); // or /login
-          return;
+          const hasBlacklistedRole = response.roles.some((role) =>
+            blackListRoles.includes(role),
+          );
+
+          if (hasBlacklistedRole) {
+            setUser(null);
+            router.push("/unauthorized");
+            return;
+          }
+
+          setUser(response);
+        } catch (error) {
+          console.error("Failed to fetch user on load", error);
         }
-        setUser(response);
       };
       fetchCurrUser();
     }
   }, [path, blackListRoles]);
+  // ⚠️ Note: Be careful not to add 'handleSocketConnections' to the dependency array unless it's wrapped in a useCallback
 
   const login = async (
     identifier: string,
@@ -84,15 +152,17 @@ export const AuthProvider = ({
       }
 
       if (response.access_token.length > 0) {
+        setAccessToken(response.access_token);
+        handleSocketConnections(response.access_token);
+
         setUser(response.user_info);
         await setAuthCookies(response);
         const decoded = await decodeJWT(response.access_token);
-        console.log(response.access_token);
 
         if (decoded.roles.includes("passenger")) {
-          window.location.replace("/passenger");
+          router.push("/passenger");
         } else if (decoded.roles.includes("super_admin")) {
-          window.location.replace("/superadmin");
+          router.push("/superadmin");
         } else if (decoded.roles.includes("agent_admin")) {
           if (!response.user_info?.organization_id) {
             throw Error(
@@ -100,9 +170,9 @@ export const AuthProvider = ({
             );
           }
           if (response.user_info.agent_type == "operator-agent-admin") {
-            window.location.replace("/operator-agent/ticket-booking");
+            router.replace("/operator-agent/ticket-booking");
           } else {
-            window.location.replace("/agent/ticket-booking");
+            router.replace("/agent/ticket-booking");
           }
         } else if (decoded.roles.includes("operator_admin")) {
           if (!response.user_info?.organization_id) {
@@ -110,7 +180,7 @@ export const AuthProvider = ({
               "You are not assigned to an agent. Please Contact An Admin",
             );
           }
-          window.location.replace("/operator");
+          router.replace("/operator");
         } else {
           console.log("No role matched");
         }
@@ -125,8 +195,7 @@ export const AuthProvider = ({
     }
   };
 
-  const value = useMemo(() => ({ user, setUser, login }), [user]);
-
+  const value = useMemo(() => ({ user, setUser, login, access_token }), [user]);
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 

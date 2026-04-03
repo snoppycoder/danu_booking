@@ -159,7 +159,6 @@ api.interceptors.request.use(
         if (csrfToken) {
           config.headers["x-csrf-token"] = csrfToken;
         }
-        console.log("csrf token set in request interceptor:", csrfToken);
       });
     }
 

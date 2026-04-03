@@ -199,7 +199,6 @@ export default function GuestSeatBookingDialog({
     setCurrentPassengerIndex(0);
     setEditingPassenger({});
   };
-  console.log("opening the seat booking");
 
   return (
     <div>

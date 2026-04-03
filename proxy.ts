@@ -1,9 +1,6 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decodeJWT } from "./lib/jwt";
-import { match } from "@formatjs/intl-localematcher";
-import Negotiator from "negotiator";
-
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
