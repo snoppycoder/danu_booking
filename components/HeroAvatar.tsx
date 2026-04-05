@@ -28,7 +28,7 @@ export default function AvatarHero() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Avatar className="h-9 w-9 cursor-pointer">
+        <Avatar className="h-8 w-8 cursor-pointer">
           <AvatarImage
             src={avatar?.avatar_url ?? ""}
             alt={user?.display_name}

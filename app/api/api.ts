@@ -995,7 +995,6 @@ export const passengerApi = {
     page?: number;
     per_page?: number;
   }) => {
-    console.log(body, "body to search");
     try {
       const response = await api.get("/guest/routes/search", {
         params: {
@@ -1006,7 +1005,6 @@ export const passengerApi = {
           per_page: body.per_page,
         },
       });
-      console.log(response.data);
 
       return response.data;
     } catch (err) {

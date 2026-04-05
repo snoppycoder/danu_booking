@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Menu, X } from "lucide-react";
+import { Bell, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
@@ -9,6 +9,7 @@ import AvatarHero from "./HeroAvatar";
 import { authAPI } from "@/app/api/api";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
+import db from "@/lib/dixiedb";
 
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
@@ -17,8 +18,9 @@ interface NavbarProps {
 
 export default function Navbar(props: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { user } = useAuth();
+  const { user, count } = useAuth();
   const pathUrl = usePathname();
+  const [toggleOpen, setToggleOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -56,7 +58,31 @@ export default function Navbar(props: NavbarProps) {
                   {path.label}
                 </Link>
               ))}
-              <AvatarHero />
+              <div className="flex gap-4 items-center">
+                <AvatarHero />
+                <Link
+                  href="/notifications"
+                  onClick={async () => {
+                    await db.settings.put({
+                      key: "unreadCount",
+                      value: "0",
+                    });
+                  }}
+                >
+                  <div
+                    className="relative cursor-pointer"
+                    onClick={() => setToggleOpen(!toggleOpen)}
+                  >
+                    <Bell className="w-6 h-6" />
+
+                    {count > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 rounded-full">
+                        {count > 99 ? "99+" : count}
+                      </span>
+                    )}
+                  </div>
+                </Link>
+              </div>
 
               {!user && (
                 <Button className="bg-primary cursor-pointer hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors">

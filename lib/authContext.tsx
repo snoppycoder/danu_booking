@@ -9,6 +9,8 @@ import {
 } from "react";
 import { getAccessToken, setAuthCookies } from "./auth";
 
+import Dexie from "dexie";
+
 import { LoginResponse, UseAuthUser, User } from "./model";
 import { authAPI } from "@/app/api/api";
 import { usePathname } from "next/navigation";
@@ -16,10 +18,14 @@ import { decodeJWT } from "./jwt";
 import { toast } from "sonner";
 import { useRef } from "react";
 import { useRouter } from "next/navigation";
+import db from "./dixiedb";
 
 interface AuthContextType {
   user: UseAuthUser | null;
   access_token: string;
+  count: number;
+  setCount: React.Dispatch<React.SetStateAction<number>>;
+
   setUser: React.Dispatch<React.SetStateAction<UseAuthUser | null>>;
   login: (
     identifier: string,
@@ -56,50 +62,90 @@ export const AuthProvider = ({
     "/api",
     "/tickets",
   ];
-  function handleSocketConnections(access_token: string) {
+  // Add a ref to handle our reconnection timeouts safely
+  const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    const loadCount = async () => {
+      const record = await db.settings.get("unreadCount");
+      if (record) {
+        setCount(Number(record.value));
+      }
+    };
+
+    loadCount();
+  }, []);
+  useEffect(() => {
+    db.settings.put({ key: "unreadCount", value: count.toString() });
+  }, [count]);
+  function handleSocketConnections(token: string) {
     if (socketRef.current) {
-      socketRef.current.close(); // prevent duplicates
+      // Prevent duplicates by closing any existing connection
+      socketRef.current.close();
     }
-    console.log(access_token);
+
     const ws = new WebSocket(
-      `wss://danu.biisho.et/api/v1/ws/notifications/?token=${access_token}`,
+      `wss://danu.biisho.et/api/v1/ws/notifications/?token=${token}`,
     );
 
     socketRef.current = ws;
 
     ws.onopen = () => {
-      console.log("✅ WebSocket connected");
+      console.log("WebSocket connected");
+      // If we connect successfully, clear any pending reconnection attempts
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
 
-    ws.onmessage = (event) => {
-      console.log("RAW MESSAGE:", event.data);
-
+    ws.onmessage = async (event) => {
       try {
         const data = JSON.parse(event.data);
-
-        console.log("📩 Parsed Message:", data);
-
+        const notification = {
+          ...data,
+          id: crypto.randomUUID(), // generate a new UUID
+          received_at: new Date().toISOString(),
+        };
+        await db.notifications.put({
+          ...notification,
+          received_at: new Date().toISOString(),
+        });
+        console.log(data, "Received WebSocket message");
         toast.success(data.title || "Notification", {
           description: data.message,
         });
+        setCount((prev) => prev + 1);
       } catch (error) {
         console.error("❌ JSON parse error:", error);
       }
     };
 
     ws.onerror = (error) => {
-      console.error("❌ WebSocket error:", error);
+      console.error("WebSocket error:", error);
+      // Do not try to reconnect here; let onclose handle it to avoid duplicate triggers
     };
 
     ws.onclose = (event) => {
-      console.log("🔌 WebSocket closed:", event.reason);
+      console.log("WebSocket closed:", event.reason);
+
+      if (token) {
+        console.log("🔄 Attempting to reconnect in 5 seconds... with", token);
+        reconnectTimeoutRef.current = setTimeout(() => {
+          handleSocketConnections(token);
+        }, 3000);
+      }
     };
   }
+
   useEffect(() => {
+    let isMounted = true; // The crucial flag to prevent Ghost Connections
+
     const initSocket = async () => {
       const token = await getAccessToken();
 
-      if (token) {
+      // ONLY connect if the component hasn't been unmounted during the async await
+      if (token && isMounted) {
         setAccessToken(token);
         handleSocketConnections(token);
       }
@@ -108,7 +154,19 @@ export const AuthProvider = ({
     initSocket();
 
     return () => {
-      socketRef.current?.close();
+      isMounted = false; // Mark component as unmounted
+
+      // Cleanup the socket
+      if (
+        socketRef.current &&
+        socketRef.current.readyState !== WebSocket.CLOSED
+      ) {
+        socketRef.current.close();
+      }
+      // Cleanup the timeout loop so it doesn't run in the background
+      if (reconnectTimeoutRef.current) {
+        clearTimeout(reconnectTimeoutRef.current);
+      }
     };
   }, []);
 
@@ -136,7 +194,6 @@ export const AuthProvider = ({
       fetchCurrUser();
     }
   }, [path, blackListRoles]);
-  // ⚠️ Note: Be careful not to add 'handleSocketConnections' to the dependency array unless it's wrapped in a useCallback
 
   const login = async (
     identifier: string,
@@ -195,7 +252,10 @@ export const AuthProvider = ({
     }
   };
 
-  const value = useMemo(() => ({ user, setUser, login, access_token }), [user]);
+  const value = useMemo(
+    () => ({ user, setUser, login, access_token, count, setCount }),
+    [user, access_token, count, setCount],
+  );
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
 
