@@ -1,6 +1,9 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-const userLang = localStorage.getItem("userLang") || "am";
+const defaultLang =
+  typeof window !== "undefined"
+    ? localStorage.getItem("userLang") || "am"
+    : "am";
 i18n.use(initReactI18next).init({
   resources: {
     en: {
@@ -33,8 +36,14 @@ i18n.use(initReactI18next).init({
         departureCity: "Departure City",
         destinationCity: "Destination City",
         popularRoutes: "Popular Routes",
+        availableTrips: "Available Trips",
+        selectYourPreferedBus: "Select Your Preferred Bus",
+        selectYourSeat: "Select Your Seat",
+        reviewAndConfirm: "Review and Confirm",
+        showing: "Showing",
       },
     },
+
     om: {
       translation: {
         welcomeBack: "Baga Nagaan Deebite",
@@ -96,10 +105,11 @@ i18n.use(initReactI18next).init({
         departureCity: "የመነሻ ከተማ",
         destinationCity: "የመድረሻ ከተማ",
         popularRoutes: "ታዋቂ ጉዞዎች",
+        availableTrips: "ጉዞዎቹ እነኚሁና",
       },
     },
   },
-  lng: userLang,
+  lng: defaultLang,
   fallbackLng: "en",
   interpolation: {
     escapeValue: false,

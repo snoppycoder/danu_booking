@@ -31,6 +31,9 @@ import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 import { Spinner } from "@/components/ui/spinner";
 import { useDebounce } from "@/hooks/useDebounce";
 import { formatCurrency } from "@/lib/report-utils";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
+
 
 export default function DanuBooking() {
   const searchParams = useSearchParams();
@@ -42,6 +45,7 @@ export default function DanuBooking() {
     to: route_to,
     date: departure_date,
   });
+  const { t } = useTranslation();
   const [form, setForm] = useState({
     route_from: searchParamsState.from || "",
     route_to: searchParamsState.to || "",
@@ -146,7 +150,7 @@ export default function DanuBooking() {
             <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                  From
+                  {t("from")}
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
@@ -172,7 +176,7 @@ export default function DanuBooking() {
                           onClick={() => handleSelectFromCity(city)}
                           className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                         >
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <MapPin className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{city}</span>
                         </button>
                       ))}
@@ -183,13 +187,13 @@ export default function DanuBooking() {
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                  To
+                  {t("to")}
                 </label>
                 <div className="relative">
                   <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
                   <input
                     type="text"
-                    placeholder="Destination City"
+                    placeholder={t("destinationCity")}
                     value={form.route_to}
                     onChange={(e) => {
                       handleAutoCompleteTo(e.target.value);
@@ -206,7 +210,7 @@ export default function DanuBooking() {
                           onClick={() => handleSelectToCity(city)}
                           className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                         >
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <MapPin className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{city}</span>
                         </button>
                       ))}
@@ -254,7 +258,7 @@ export default function DanuBooking() {
 
               <div className="flex items-end">
                 <Button className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
-                  Find Tickets
+                  {t("findTickets")}
                 </Button>
               </div>
             </div>
@@ -273,7 +277,7 @@ export default function DanuBooking() {
             </div>
 
             <div className="flex gap-x-8 h-full">
-              <div className="h-full py-2 w-[1px] bg-gray-400 mx-2"></div>
+              <div className="h-full py-2 w-px bg-gray-400 mx-2"></div>
               <div>
                 <h2 className="text-lg font-mono mb-2.5">Return</h2>
                 <div className="text-md font-mono">{route_to}</div>
@@ -285,14 +289,14 @@ export default function DanuBooking() {
           </CardContent>
         </Card>
       </div>
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 p-8">
+      <div className="min-h-screen bg-linear-to-br from-teal-50 to-blue-50 p-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
-              Available Trips
+              {t("availableTrips")}
             </h1>
             <p className="mt-2 text-gray-600">
-              Select your preferred bus for your journey
+              {t("selectYourPreferedBus")}
             </p>
           </div>
 
@@ -414,7 +418,7 @@ export default function DanuBooking() {
           )}
         </div>
         {(data?.total ?? 0) > 0 && (
-          <div className="flex items-center justify-between">
+          <div className="flex mt-4 items-center justify-between">
             <p className="text-sm text-muted-foreground">
               Showing {(currentPage - 1) * per_page + 1} to{" "}
               {(currentPage - 1) * per_page + (data?.items.length ?? 0)} of{" "}
