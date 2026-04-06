@@ -34,7 +34,6 @@ import { formatCurrency } from "@/lib/report-utils";
 import "@/i18n";
 import { useTranslation } from "react-i18next";
 
-
 export default function DanuBooking() {
   const searchParams = useSearchParams();
   const route_from = searchParams.get("from") || "";
@@ -157,7 +156,7 @@ export default function DanuBooking() {
 
                   <input
                     type="text"
-                    placeholder="Departure City"
+                    placeholder={t("departureCity")}
                     value={form.route_from}
                     onChange={(e) => {
                       const value = e.target.value;
@@ -221,7 +220,7 @@ export default function DanuBooking() {
 
               <div>
                 <label className="block text-sm font-medium text-muted-foreground mb-2">
-                  Departure Date
+                  {t("departureDate")}
                 </label>
                 <EtDatePicker
                   minDate={new Date() ?? undefined}
@@ -295,9 +294,7 @@ export default function DanuBooking() {
             <h1 className="text-3xl font-bold text-gray-900">
               {t("availableTrips")}
             </h1>
-            <p className="mt-2 text-gray-600">
-              {t("selectYourPreferedBus")}
-            </p>
+            <p className="mt-2 text-gray-600">{t("selectYourPreferedBus")}</p>
           </div>
 
           {isLoading ? (
