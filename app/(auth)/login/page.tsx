@@ -4,11 +4,11 @@ import type React from "react";
 
 import { useState } from "react";
 import Link from "next/link";
-
+import { useTranslation } from "react-i18next";
 import { Eye, EyeOff, Router } from "lucide-react";
 import { toast, Toaster } from "sonner";
 import axios, { isAxiosError } from "axios";
-
+import "@/i18n";
 import { useAuth } from "@/lib/authContext";
 
 export default function LoginPage() {
@@ -16,6 +16,8 @@ export default function LoginPage() {
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [checked, setChecked] = useState(false);
+
+  const { t } = useTranslation();
 
   const { login } = useAuth();
 
@@ -65,20 +67,18 @@ export default function LoginPage() {
               className="mx-auto w-auto h-28 bg-cover"
             />
             <h1 className="text-3xl font-bold text-teal-600 mb-2">
-              Welcome Back
+              {t("welcomeBack")}
             </h1>
-            <p className="text-gray-600">
-              Sign in to your Danu Booking account
-            </p>
+            <p className="text-gray-600">{t("signIn")}</p>
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label
                 htmlFor="phone"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block font-semibold text-sm text-gray-700 mb-2"
               >
-                Phone Number or Email
+                {t("phoneNumber")}
               </label>
               <input
                 id="phone"
@@ -94,9 +94,9 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="password"
-                className="block text-sm font-medium text-gray-700 mb-2"
+                className="block font-semibold text-sm text-gray-700 mb-2"
               >
-                Password
+                {t("password")}
               </label>
               <div className="relative">
                 <input
@@ -131,13 +131,15 @@ export default function LoginPage() {
                   onChange={(e) => setChecked(e.target.checked)}
                   className="rounded border-gray-300 accent-teal-600"
                 />
-                <span className="ml-2 text-sm text-gray-600">Remember me</span>
+                <span className="ml-2 text-sm text-gray-600">
+                  {t("rememberMe")}
+                </span>
               </label>
               <Link
                 href="/preference"
                 className="text-sm text-teal-600 hover:text-teal-700 font-medium"
               >
-                Forgot password?
+                {t("forgotPassword")}
               </Link>
             </div>
 
@@ -147,13 +149,13 @@ export default function LoginPage() {
               type="submit"
               className="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-3 rounded-lg transition-colors"
             >
-              Sign In
+              {t("login")}
             </button>
 
             {/* Divider */}
             <div className="flex items-center">
               <div className="grow border-t border-gray-200"></div>
-              <span className="px-3 text-sm text-gray-600">OR</span>
+              <span className="px-3 text-sm text-gray-600">{t("or")}</span>
               <div className="grow border-t border-gray-200"></div>
             </div>
 
@@ -161,17 +163,17 @@ export default function LoginPage() {
               href="/guest"
               className="block w-full text-center border border-gray-300 hover:border-teal-500 text-gray-700 font-medium py-3 rounded-lg transition-colors"
             >
-              Continue as Guest
+              {t("continueAsGuest")}
             </Link>
           </form>
 
           <p className="text-center mt-6 text-gray-600">
-            Don't have an account?{" "}
+            {t("dontHaveAccount")}{" "}
             <Link
               href="/signup"
               className="text-teal-600 hover:text-teal-700 font-semibold"
             >
-              Sign up
+              {t("login")}
             </Link>
           </p>
         </div>
