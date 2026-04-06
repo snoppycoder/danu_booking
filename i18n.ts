@@ -1,5 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
+import { no } from "zod/v4/locales";
 const defaultLang =
   typeof window !== "undefined"
     ? localStorage.getItem("userLang") || "am"
@@ -38,9 +39,14 @@ i18n.use(initReactI18next).init({
         popularRoutes: "Popular Routes",
         availableTrips: "Available Trips",
         selectYourPreferedBus: "Select Your Preferred Bus",
-        selectYourSeat: "Select Your Seat",
+        chooseYourSeat: "Choose Your Seat",
         reviewAndConfirm: "Review and Confirm",
         showing: "Showing",
+        bookNow: "Book Now",
+        noTripsFound: "No trips found.",
+        enterPassengerInfo: "Enter Passenger Information",
+        passenger: "Passenger",
+        isPassengerChild: "Is this passenger a child?",
       },
     },
 
@@ -73,6 +79,8 @@ i18n.use(initReactI18next).init({
         dontHaveAccount: "ኣካውንት የብልኩምን?",
         chooseYourDestinationsAndDatesToReserveATicket:
           "Choose Your Destinations And Dates To Reserve A Ticket",
+        nameBookingForm: "Full name",
+        faydaId: "ID Number",
       },
     },
     am: {
@@ -106,6 +114,20 @@ i18n.use(initReactI18next).init({
         destinationCity: "የመድረሻ ከተማ",
         popularRoutes: "ታዋቂ ጉዞዎች",
         availableTrips: "ጉዞዎቹ እነኚሁና",
+        selectYourPreferedBus: "የእርስዎን ተመራጭ አውቶቡስ ይምረጡ",
+        chooseYourSeat: "መቀመጫዎን ይምረጡ",
+        reviewAndConfirm: "ይገምግሙ እና ያረጋግጡ",
+        showing: "Showing",
+        bookNow: "አሁን ይያዙ",
+        noTripsFound: "ጉዞ አልተገኘም",
+        enterPassengerInfo: "የመንገደኞች መረጃ ያስገቡ",
+        passenger: "መንገደኛ",
+        isPassengerChild: "ይህ መንገደኛ ሕፃን ነው?",
+        nameBookingForm: "ሙሉ ስም",
+        faydaId: "መታወቂያ ቁጥር",
+        email: "ኢሜይል",
+        phone: "ስልክ ቁጥር",
+        companyInfo: "የድርጅት መረጃ",
       },
     },
   },

@@ -11,6 +11,8 @@ import { passengerApi } from "@/app/api/api";
 import { Spinner } from "./ui/spinner";
 import SeatBookingDialog from "./SeatBookingDialog";
 import { useSeatTemplate } from "./Query";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 
 type SeatLayoutProps = {
   toggle: boolean;
@@ -38,6 +40,7 @@ export default function SeatLayoutDialog({
   const [multiSelectSeats, setMultiSelectSeats] = useState<string[]>([]);
   const [open, setOpen] = useState(false);
   const { data: seats_, isLoading, refetch } = useSeatTemplate(trip_id);
+  const { t } = useTranslation();
   useEffect(() => {
     // Reset multi-select when dialog closes
     if (!toggle) {
@@ -64,7 +67,7 @@ export default function SeatLayoutDialog({
     <div>
       <Dialog open={toggle} onOpenChange={setToggle}>
         <DialogContent className="max-w-md h-[80%] overflow-y-scroll">
-          <DialogTitle>Choose your seats</DialogTitle>
+          <DialogTitle>{t("chooseYourSeat")}</DialogTitle>
           <div className="flex flex-col items-center gap-4 mt-4">
             {/* {multiSelectSeats.length > 0 && (
             <div className="w-full bg-blue-50 p-3 rounded border border-blue-200">

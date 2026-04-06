@@ -5,8 +5,8 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import type { Passenger } from "@/lib/model";
-import { X } from "lucide-react";
-import { Toggle } from "./ui/toggle";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 import { Switch } from "./ui/switch";
 import {
   Dialog,
@@ -41,7 +41,7 @@ export default function PassengerInfoForm({
     onPassengersChange(updated);
   };
   const [idx, setIdx] = useState(0);
-
+  const { t } = useTranslation();
   // Check if all passengers have required fields filled
   const [isOpen, setIsOpen] = useState(false);
   const allPassengersComplete =
@@ -54,25 +54,27 @@ export default function PassengerInfoForm({
       {passengers.map((passenger, index) => (
         <div key={index} className="border rounded-xl p-4 space-y-4">
           <div className="flex justify-between items-center">
-            <h3 className="font-semibold">Passenger {index + 1}</h3>
+            <h3 className="font-semibold">
+              {t("passenger")} {index + 1}
+            </h3>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
               <Label className="mb-2" htmlFor={`name-${index}`}>
-                Name <span className="text-red-500">*</span>
+                {t("nameBookingForm")} <span className="text-red-500">*</span>
               </Label>
               <Input
                 required
                 id={`name-${index}`}
                 value={passenger.name}
                 onChange={(e) => updatePassenger(index, "name", e.target.value)}
-                placeholder="Full name"
+                placeholder={t("nameBookingForm")}
               />
             </div>
             <div>
               <Label className="mb-2" htmlFor={`email-${index}`}>
-                Email
+                {t("email")}
               </Label>
               <Input
                 type="email"
@@ -81,13 +83,13 @@ export default function PassengerInfoForm({
                 onChange={(e) =>
                   updatePassenger(index, "email", e.target.value)
                 }
-                placeholder="Email address"
+                placeholder={t("email")}
               />
             </div>
 
             <div>
               <Label className="mb-2" htmlFor={`phone-${index}`}>
-                Phone Number <span className="text-red-500">*</span>
+                {t("phone")} <span className="text-red-500">*</span>
               </Label>
               <Input
                 required
@@ -96,12 +98,12 @@ export default function PassengerInfoForm({
                 onChange={(e) =>
                   updatePassenger(index, "phone", e.target.value.trim())
                 }
-                placeholder="Phone number"
+                placeholder={t("phone")}
               />
             </div>
             <div>
               <Label className="mb-2" htmlFor={`id-${index}`}>
-                ID Number
+                {t("faydaId")}
               </Label>
               <Input
                 id={`id-${index}`}
@@ -109,12 +111,12 @@ export default function PassengerInfoForm({
                 onChange={(e) =>
                   updatePassenger(index, "id_number", e.target.value)
                 }
-                placeholder="ID number"
+                // placeholder="ID number"
               />
             </div>
             <div className="ml-1 mt-2.5">
               <Label className="mb-2" htmlFor={`id-${index}`}>
-                Is this passenger a child?
+                {t("isPassengerChild")}
               </Label>
               <Switch
                 id={`id-${index}`}
@@ -132,7 +134,7 @@ export default function PassengerInfoForm({
                   setIsOpen(true);
                 }}
               >
-                Company Info
+                {t("companyInfo")}
               </Button>
             </div>
           </div>

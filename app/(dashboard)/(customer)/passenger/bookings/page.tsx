@@ -303,7 +303,7 @@ export default function DanuBooking() {
             </div>
           ) : data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
-              <p className="text-gray-500">No trips found</p>
+              <p className="text-gray-500">{t("noTripsFound")}</p>
             </div>
           ) : (
             <div className="w-full">
@@ -399,7 +399,7 @@ export default function DanuBooking() {
           bg-primary hover:bg-primary/90 
           shadow-md hover:shadow-lg transition-all duration-300"
                       >
-                        Book Now
+                        {t("bookNow")}
                       </Button>
                     </div>
                   ))

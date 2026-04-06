@@ -18,6 +18,8 @@ import type { Bus, Passenger, Seat } from "@/lib/model";
 import { operatorApi, passengerApi } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -42,7 +44,7 @@ export default function SeatBookingDialog({
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
-
+  const { t } = useTranslation();
   // Passenger information state
   const [passengers, setPassengers] = useState<Passenger[]>([
     {
@@ -221,8 +223,8 @@ export default function SeatBookingDialog({
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {step === 1 && "Enter Passenger Information"}
-              {step === 2 && "Review & Confirm Booking"}
+              {step === 1 && t("enterPassengerInfo")}
+              {step === 2 && t("reviewAndConfirm")}
             </DialogTitle>
           </DialogHeader>
 
