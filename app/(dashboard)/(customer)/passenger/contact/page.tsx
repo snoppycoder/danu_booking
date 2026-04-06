@@ -1,3 +1,4 @@
+"use client";
 import {
   Mail,
   Phone,
@@ -8,6 +9,8 @@ import {
   Twitter,
   Link2,
 } from "lucide-react";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 import Link from "next/link";
 import { FaTiktok } from "react-icons/fa";
 
@@ -53,6 +56,7 @@ const socialLinks = [
 ];
 
 const ContactUs = () => {
+  const { t } = useTranslation();
   return (
     <div className="min-h-screen w-full bg-white">
       <header className="relative flex h-64 w-full items-center justify-center overflow-hidden bg-white md:h-80">
@@ -64,16 +68,15 @@ const ContactUs = () => {
         {/* Header Content */}
         <div className="relative z-10 max-w-2xl px-4 text-center space-y-4">
           <span className="inline-block rounded-full bg-primary/10 px-3 py-1 text-xs font-semibold tracking-wide text-primary uppercase md:text-sm">
-            We'd love to hear from you
+            {t("weWouldLoveToHearFromYou")}
           </span>
 
           <h1 className="text-4xl font-bold md:text-5xl bg-linear-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-            Contact Us
+            {t("contact")}
           </h1>
 
           <p className="mx-auto max-w-lg text-sm leading-relaxed text-muted-foreground md:text-base">
-            Have a question or suggestion? We’re here to help you navigate your
-            journey with ease and confidence.
+            {t("haveAQuestionOrFeedback")}
           </p>
         </div>
       </header>

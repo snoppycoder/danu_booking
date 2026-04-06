@@ -1,6 +1,6 @@
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
-import { no } from "zod/v4/locales";
+
 const defaultLang =
   typeof window !== "undefined"
     ? localStorage.getItem("userLang") || "am"
@@ -47,6 +47,14 @@ i18n.use(initReactI18next).init({
         enterPassengerInfo: "Enter Passenger Information",
         passenger: "Passenger",
         isPassengerChild: "Is this passenger a child?",
+        nameBookingForm: "Full name",
+        faydaId: "ID Number",
+        email: "Email",
+        phone: "Phone",
+        companyInfo: "Company Info",
+        weWouldLoveToHearFromYou: "We'd love to hear from you",
+        haveAQuestionOrFeedback:
+          "Have a question or suggestion? We’re here to help you navigate your journey with ease and confidence.",
       },
     },
 
@@ -128,6 +136,9 @@ i18n.use(initReactI18next).init({
         email: "ኢሜይል",
         phone: "ስልክ ቁጥር",
         companyInfo: "የድርጅት መረጃ",
+        weWouldLoveToHearFromYou: "ከእርስዎ መስማት እንፈልጋለን",
+        haveAQuestionOrFeedback:
+          "ጥያቄ ወይም አስተያየት አለዎት? ጉዞዎን በቀላል እና በራስ መተማመን እንዲሄዱ ለማገዝ እዚህ መጥተናል።",
       },
     },
   },
