@@ -85,7 +85,7 @@ export default function Navbar(props: NavbarProps) {
                   {path.label}
                 </Link>
               ))}
-              <div className="flex gap-4 items-center">
+              <div className="flex gap-6 items-center">
                 <AvatarHero />
                 <Link
                   href="/notifications"
