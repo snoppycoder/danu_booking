@@ -13,6 +13,13 @@ import db from "@/lib/dixiedb";
 import "@/i18n";
 import { useTranslation } from "react-i18next";
 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "./ui/dropdown-menu";
+
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
   onLoaded: () => void;
@@ -22,7 +29,24 @@ export default function Navbar(props: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, count } = useAuth();
   const pathUrl = usePathname();
-  const { t } = useTranslation();
+
+  const { t, i18n } = useTranslation();
+  const changeLanguage = (lang: string) => {
+    i18n.changeLanguage(lang);
+    localStorage.setItem("userLang", lang);
+  };
+  const [val, setVal] = useState(
+    i18n.language === "en"
+      ? "English"
+      : i18n.language === "am"
+        ? "አማርኛ"
+        : i18n.language === "om"
+          ? "Afaan Oromoo"
+          : i18n.language === "ti"
+            ? "ትግርኛ"
+            : "English",
+  );
+
   const [toggleOpen, setToggleOpen] = useState(false);
 
   useEffect(() => {
@@ -85,6 +109,51 @@ export default function Navbar(props: NavbarProps) {
                     )}
                   </div>
                 </Link>
+                <div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline">{val}</Button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuContent align="end" className="w-40">
+                      <DropdownMenuItem
+                        onClick={() => {
+                          changeLanguage("en");
+                          setVal("English");
+                        }}
+                      >
+                        English
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => {
+                          changeLanguage("am");
+                          setVal("Amharic");
+                        }}
+                      >
+                        አማርኛ (Amharic)
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => {
+                          changeLanguage("om");
+                          setVal("Afaan Oromoo");
+                        }}
+                      >
+                        Afaan Oromoo
+                      </DropdownMenuItem>
+
+                      <DropdownMenuItem
+                        onClick={() => {
+                          changeLanguage("ti");
+                          setVal("Tigrinya");
+                        }}
+                      >
+                        ትግርኛ (Tigrinya)
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </div>
 
               {!user && (
