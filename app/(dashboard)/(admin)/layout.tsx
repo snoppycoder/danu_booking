@@ -1,11 +1,7 @@
 "use client";
 import type React from "react";
-import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import "@/app/globals.css";
-import { AuthProtector } from "@/lib/authProtector";
 import { AuthProvider } from "@/lib/authContext";
 import Sidebar from "@/components/SuperAdminSideBar";
-import { useState } from "react";
 import AvatarHero from "@/components/HeroAvatar";
 import QueryProvider from "@/components/QueryProvide";
 

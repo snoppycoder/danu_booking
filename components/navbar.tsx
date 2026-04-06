@@ -10,6 +10,8 @@ import { authAPI } from "@/app/api/api";
 import clsx from "clsx";
 import { usePathname } from "next/navigation";
 import db from "@/lib/dixiedb";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
@@ -20,6 +22,7 @@ export default function Navbar(props: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { user, count } = useAuth();
   const pathUrl = usePathname();
+  const { t } = useTranslation();
   const [toggleOpen, setToggleOpen] = useState(false);
 
   useEffect(() => {
@@ -86,7 +89,7 @@ export default function Navbar(props: NavbarProps) {
 
               {!user && (
                 <Button className="bg-primary cursor-pointer hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors">
-                  <Link href="/login">Log In</Link>
+                  <Link href="/login">{t("login")}</Link>
                 </Button>
               )}
             </div>
@@ -126,21 +129,21 @@ export default function Navbar(props: NavbarProps) {
               href="/passenger"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
-              Home
+              {t("home")}
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger/about-us"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
-              About Us
+              {t("about")}
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger/contact"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
-              Contact
+              {t("contact")}
             </Link>
 
             <Link
@@ -148,21 +151,21 @@ export default function Navbar(props: NavbarProps) {
               href="/profile"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
-              My Profile
+              {t("profile")}
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/history"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
-              My Bookings
+              {t("myBookings")}
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/manage-sessions"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
-              Manage Session
+              {t("manageSessions")}
             </Link>
 
             {/* Logout Button */}
@@ -174,7 +177,7 @@ export default function Navbar(props: NavbarProps) {
                   await authAPI.logout();
                 }}
               >
-                Logout
+                {t("logout")}
               </Button>
             </div>
           </div>

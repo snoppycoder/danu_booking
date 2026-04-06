@@ -2,13 +2,14 @@
 import type React from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import "@/app/globals.css";
+
 import Navbar from "@/components/navbar";
 import { AuthProtector } from "@/lib/authProtector";
 import { AuthProvider, useAuth } from "@/lib/authContext";
 import Sidebar from "@/components/SuperAdminSideBar";
 import { useState } from "react";
-
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 const _geist = Geist({ subsets: ["latin"] });
 const _geistMono = Geist_Mono({ subsets: ["latin"] });
 
@@ -42,16 +43,17 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   const [isNavbarLoaded, setIsNavbarLoaded] = useState(false);
+  const { t } = useTranslation();
   return (
     <html lang="en">
       <body className={`font-sans antialiased`}>
         <AuthProvider blackListRoles={[]}>
           <Navbar
             initalPath={[
-              { href: "/passenger", label: "Home" },
-              { href: "/passenger/history", label: "My Bookings" },
-              { href: "/passenger/about-us", label: "About Us" },
-              { href: "/passenger/contact", label: "Contact" },
+              { href: "/passenger", label: t("home") },
+              { href: "/passenger/history", label: t("myBookings") },
+              { href: "/passenger/about-us", label: t("about") },
+              { href: "/passenger/contact", label: t("contact") },
             ]}
             onLoaded={() => setIsNavbarLoaded(true)}
           />

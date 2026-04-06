@@ -49,16 +49,6 @@ export default function AvatarHero() {
         >
           Profile
         </DropdownMenuItem>
-        {user?.roles[0] == "passenger" && (
-          <DropdownMenuItem
-            onClick={() => {
-              router.replace(`/history?from=${path}`);
-            }}
-            className="text-black cursor-pointer"
-          >
-            My Bookings
-          </DropdownMenuItem>
-        )}
         <DropdownMenuItem
           onClick={() => {
             router.replace("/manage-sessions");
@@ -66,6 +56,14 @@ export default function AvatarHero() {
           className="text-black cursor-pointer"
         >
           Manage Sessions
+        </DropdownMenuItem>
+        <DropdownMenuItem
+          onClick={() => {
+            router.replace("/settings");
+          }}
+          className="text-black cursor-pointer"
+        >
+          Settings
         </DropdownMenuItem>
         <DropdownMenuItem
           onClick={onLogout}

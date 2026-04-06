@@ -5,9 +5,10 @@ import { MapPin, Calendar, ArrowRight, Star, TrendingUp } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { Toaster, toast } from "sonner";
-
+import "@/i18n";
 import { PopularRoute } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
+import { useTranslation } from "react-i18next";
 
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
@@ -25,6 +26,7 @@ export default function DanuBooking() {
   const [loading, setLoading] = useState<boolean>(true);
   const [popularRoutes, setPopularRoutes] = useState<PopularRoute[]>([]);
   const [date, setDate] = useState<Date | null>();
+  const { t } = useTranslation();
 
   const [form, setForm] = useState({
     route_from: "",
@@ -130,10 +132,10 @@ export default function DanuBooking() {
 
         <div className="relative max-w-6xl mx-auto z-10">
           <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">
-            BOOK YOUR BUS TICKET
+            {t("bookYourTickets")}
           </h1>
           <p className="text-lg sm:text-xl text-teal-50 mb-8">
-            Choose Your Destinations And Dates To Reserve A Ticket
+            {t("chooseYourDestinationsAndDatesToReserveATicket")}
           </p>
 
           <form onSubmit={handleSubmit}>
@@ -141,14 +143,14 @@ export default function DanuBooking() {
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    From
+                    {t("from")}
                   </label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
 
                     <input
                       type="text"
-                      placeholder="Departure City"
+                      placeholder={t("departureCity")}
                       value={form.route_from}
                       onChange={(e) => {
                         const value = e.target.value;
@@ -178,13 +180,13 @@ export default function DanuBooking() {
 
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    To
+                    {t("to")}
                   </label>
                   <div className="relative">
                     <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[#00a896]" />
                     <input
                       type="text"
-                      placeholder="Destination City"
+                      placeholder={t("destinationCity")}
                       value={form.route_to}
                       onChange={(e) => {
                         handleAutoCompleteTo(e.target.value);
@@ -201,7 +203,7 @@ export default function DanuBooking() {
                             onClick={() => handleSelectToCity(city)}
                             className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                           >
-                            <MapPin className="w-4 h-4 flex-shrink-0" />
+                            <MapPin className="w-4 h-4 shrink-0" />
                             <span className="text-sm font-medium">{city}</span>
                           </button>
                         ))}
@@ -212,7 +214,7 @@ export default function DanuBooking() {
 
                 <div>
                   <label className="block text-sm font-medium text-muted-foreground mb-2">
-                    Departure Date
+                    {t("departureDate")}
                   </label>
                   <EtDatePicker
                     minDate={new Date() ?? undefined}
@@ -254,7 +256,7 @@ export default function DanuBooking() {
                     }
                     className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold"
                   >
-                    Find Tickets
+                    {t("findTickets")}
                   </Button>
                 </div>
               </div>
@@ -277,7 +279,7 @@ export default function DanuBooking() {
           <div className="flex items-center justify-center gap-3 mb-5">
             <TrendingUp className="w-8 h-8 text-[#00a896]" />
             <h3 className="text-3xl font-bold text-foreground">
-              Popular Routes
+              {t("popularRoutes")}
             </h3>
           </div>
 
