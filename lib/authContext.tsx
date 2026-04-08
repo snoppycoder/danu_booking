@@ -6,6 +6,7 @@ import {
   ReactNode,
   useEffect,
   useMemo,
+  use,
 } from "react";
 import { getAccessToken, setAuthCookies } from "./auth";
 
@@ -77,6 +78,11 @@ export const AuthProvider = ({
     loadCount();
   }, []);
   useEffect(() => {
+    if ((user?.id || "").length > 0) {
+      localStorage.setItem("user_id", user?.id || "");
+    }
+  }, [user]);
+  useEffect(() => {
     db.settings.put({ key: "unreadCount", value: count.toString() });
   }, [count]);
   function handleSocketConnections(token: string) {
@@ -104,6 +110,7 @@ export const AuthProvider = ({
         const data = JSON.parse(event.data);
         const notification = {
           ...data,
+          user_id: user?.id || "unknown", // associate with current user or mark as unknown
           id: crypto.randomUUID(), // generate a new UUID
           received_at: new Date().toISOString(),
         };

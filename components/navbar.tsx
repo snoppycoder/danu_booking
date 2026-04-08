@@ -86,7 +86,6 @@ export default function Navbar(props: NavbarProps) {
                 </Link>
               ))}
               <div className="flex gap-6 items-center">
-                <AvatarHero />
                 <Link
                   href="/notifications"
                   onClick={async () => {
@@ -155,6 +154,7 @@ export default function Navbar(props: NavbarProps) {
                   </DropdownMenu>
                 </div>
               </div>
+              <AvatarHero />
 
               {!user && (
                 <Button className="bg-primary cursor-pointer hover:bg-teal-700 text-white font-semibold px-6 py-2 rounded transition-colors">
@@ -164,7 +164,7 @@ export default function Navbar(props: NavbarProps) {
             </div>
           </div>
 
-          <div className="md:hidden">
+          <div className="md:hidden flex flex-row-reverse items-center gap-4">
             <button
               onClick={() => setIsMenuOpen(!isMenuOpen)}
               className="relative w-6 h-6 text-gray-700 hover:text-primary"
@@ -187,6 +187,30 @@ export default function Navbar(props: NavbarProps) {
                 )}
               />
             </button>
+            <div className="flex gap-6 items-center">
+              <Link
+                href="/notifications"
+                onClick={async () => {
+                  await db.settings.put({
+                    key: "unreadCount",
+                    value: "0",
+                  });
+                }}
+              >
+                <div
+                  className="relative cursor-pointer"
+                  onClick={() => setToggleOpen(!toggleOpen)}
+                >
+                  <Bell className="w-6 h-6" />
+
+                  {count > 0 && (
+                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs px-1.5 rounded-full">
+                      {count > 99 ? "99+" : count}
+                    </span>
+                  )}
+                </div>
+              </Link>
+            </div>
           </div>
         </div>
 
@@ -236,6 +260,51 @@ export default function Navbar(props: NavbarProps) {
             >
               {t("manageSessions")}
             </Link>
+            <div className="px-3 mt-2 w-full py-2 flex justify-center gap-2">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline">{val}</Button>
+                </DropdownMenuTrigger>
+
+                <DropdownMenuContent align="end" className="w-40">
+                  <DropdownMenuItem
+                    onClick={() => {
+                      changeLanguage("en");
+                      setVal("English");
+                    }}
+                  >
+                    English
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => {
+                      changeLanguage("am");
+                      setVal("Amharic");
+                    }}
+                  >
+                    አማርኛ (Amharic)
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => {
+                      changeLanguage("om");
+                      setVal("Afaan Oromoo");
+                    }}
+                  >
+                    Afaan Oromoo
+                  </DropdownMenuItem>
+
+                  <DropdownMenuItem
+                    onClick={() => {
+                      changeLanguage("ti");
+                      setVal("Tigrinya");
+                    }}
+                  >
+                    ትግርኛ (Tigrinya)
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
 
             {/* Logout Button */}
             <div className="px-3 mt-2 w-full py-2 flex justify-center gap-2">

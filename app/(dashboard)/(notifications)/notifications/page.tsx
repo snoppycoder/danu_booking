@@ -49,17 +49,19 @@ const notificationConfig: Record<string, any> = {
 
 function NotificationItem({ notification }: { notification: Notification }) {
   const config = notificationConfig[notification.type];
-  const Icon = config.icon;
+  // const Icon = config?.icon;
   const createdDate = new Date(notification.created_at);
   const timeAgo = formatDistanceToNow(createdDate, { addSuffix: true });
 
   return (
     <div
-      className={`border-l-4 ${config.borderColor} ${config.bgColor} rounded-lg p-4 transition-all hover:shadow-md`}
+      className={`border-l-4 
+       
+         rounded-lg p-4 transition-all hover:shadow-md`}
     >
       <div className="flex gap-4">
-        <div className={`shrink-0 ${config.iconColor} mt-0.5`}>
-          <Icon className="w-6 h-6" />
+        <div className={`shrink-0 mt-0.5`}>
+          {/* <Icon className="w-6 h-6" /> */}
         </div>
 
         <div className="grow min-w-0">
@@ -73,7 +75,8 @@ function NotificationItem({ notification }: { notification: Notification }) {
               </p>
             </div>
             <span
-              className={`shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${config.badgeBg} ${config.badgeText}`}
+              className={`shrink-0 inline-block px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap
+              `}
             >
               {notification.type.charAt(0).toUpperCase() +
                 notification.type.slice(1)}

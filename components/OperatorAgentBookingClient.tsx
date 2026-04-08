@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useState } from "react";
-import { formatTime } from "@/lib/common_functions";
+import { formatAmharicTime, formatTime } from "@/lib/common_functions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
@@ -360,8 +360,7 @@ export default function OperatorAgentBookingClient() {
                           </span>
                           <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
                             <span className="text-sm font-semibold text-black">
-                              {route.departure_time.split(":")[0]} :{" "}
-                              {route.departure_time.split(":")[1]}
+                              {formatAmharicTime(route.departure_time)}
                             </span>
                           </div>
                         </div>

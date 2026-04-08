@@ -2,6 +2,7 @@
 import Dexie, { Table } from "dexie";
 
 export interface Notification {
+  user_id: string;
   id: string;
   type: string;
   title?: string;

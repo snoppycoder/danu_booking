@@ -1,6 +1,6 @@
 "use client";
 
-import { useForm, Controller } from "react-hook-form";
+import { useForm, Controller, Form } from "react-hook-form";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -65,6 +65,7 @@ export function ScheduleDialog({
     handleSubmit,
     reset,
     watch,
+    getValues,
     formState: { isSubmitting, isValid, errors },
   } = useForm<FormValues>({
     mode: "onChange",
@@ -247,6 +248,9 @@ export function ScheduleDialog({
               required
               className="text-emerald-600"
               type="time"
+              onInput={() => {
+                console.log(getValues("departure_time"));
+              }}
               {...register("departure_time")}
             />
           </div>

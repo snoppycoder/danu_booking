@@ -9,6 +9,30 @@ export const normalizeDate = (d?: Date | null) => {
   return copy;
 };
 
+export function formatAmharicTime(timeStr: string): string {
+  const [hourStr, minuteStr] = timeStr.split(":");
+
+  const hour = parseInt(hourStr, 10);
+  const minute = minuteStr;
+
+  // Convert to Ethiopian hour (1–12 system)
+  let hour12 = (hour + 6) % 12 || 12;
+
+  let period: string;
+
+  if (hour >= 0 && hour < 6) {
+    period = "ሌሊት"; // Night
+  } else if (hour < 12) {
+    period = "ጠዋት"; // Morning
+  } else if (hour < 18) {
+    period = "ከሰዓት"; // Afternoon
+  } else {
+    period = "ማታ"; // Evening
+  }
+
+  return `${hour12}:${minute} ${period}`;
+}
+
 export function getClientToken(token?: string) {
   if (token) {
     localStorage.setItem("x-client-token", token);
