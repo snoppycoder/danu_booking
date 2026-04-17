@@ -49,98 +49,135 @@ const api_webhook = axios.create({
   baseURL: "https://chapa-webhook-bisho.onrender.com",
   // baseURL: "http://localhost:8000",
 });
+// --- Refresh Token Concurrency Management ---
+let isRefreshing = false;
+let failedQueue: Array<{
+  resolve: (value?: any) => void;
+  reject: (reason?: any) => void;
+}> = [];
 
+const processQueue = (error: any, token: string | null = null) => {
+  failedQueue.forEach((promise) => {
+    if (error) {
+      promise.reject(error);
+    } else {
+      promise.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
+  async (error) => {
     const originalRequest = error.config;
     const publicPath = ["/login", "/signup", "/verify"];
 
     if (error.response) {
-      const status = error.response.status;
-      const data = error.response.data;
-      const code = data.code;
-      const detail = data.detail;
+      const status = error.response.status ?? "";
+      const data = error.response.data ?? "";
+      const code = data.code ?? "";
+      const detail = data.detail ?? "";
       const path = window.location.href;
 
-      if (!publicPath.includes(path)) {
+      if (!publicPath.includes(window.location.pathname)) {
         console.log(detail, "error detail from response interceptor");
-        if (detail && detail?.includes("revoked")) {
-          deleteAllCookies().then(() => {
-            console.error("Session revoked — clearing cookies and redirecting");
-            window.location.href = "/login";
-          });
+
+        if (
+          detail &&
+          typeof detail === "string" &&
+          detail?.includes("revoked")
+        ) {
+          await deleteAllCookies();
+          console.error("Session revoked — clearing cookies and redirecting");
+          window.location.href = "/login";
+          return Promise.reject(error);
         }
+
         if (status === 401) {
+          console.log("........................\n");
+          console.log(error);
+          console.log("........................\n");
           switch (detail) {
+            case "ACCESS_TOKEN_EXPIRED":
+              if (!originalRequest._retry) {
+                if (isRefreshing) {
+                  // If already refreshing, put this request in a queue
+                  return new Promise(function (resolve, reject) {
+                    failedQueue.push({ resolve, reject });
+                  })
+                    .then((token) => {
+                      // If your token is sent via headers, update it here:
+                      // originalRequest.headers.Authorization = `Bearer ${token}`;
+                      return api(originalRequest);
+                    })
+                    .catch((err) => {
+                      return Promise.reject(err);
+                    });
+                }
+
+                originalRequest._retry = true;
+                isRefreshing = true;
+
+                try {
+                  // Call your refresh endpoint
+                  const refreshResponse = await authAPI.refresh();
+
+                  // Release the queue so all pending requests retry
+                  // If your API returns the new token in the body, pass it here:
+                  processQueue(null, refreshResponse?.token);
+
+                  // Retry the original failed request
+                  return api(originalRequest);
+                } catch (refreshError) {
+                  // If the refresh fails (e.g., refresh token is also dead), clear out
+                  processQueue(refreshError, null);
+                  await deleteAllCookies();
+                  window.location.href = "/login";
+                  return Promise.reject(refreshError);
+                } finally {
+                  // Reset the lock
+                  isRefreshing = false;
+                }
+              }
+              break;
+
+            // ---------------------------------------------------------
+            // Keep your existing cases below
+            // ---------------------------------------------------------
             case "CSRF_MISSING":
             case "CSRF_INVALID":
-              // Retry once if not already retried
               if (!originalRequest._retry) {
                 originalRequest._retry = true;
                 return api(originalRequest);
               }
-              // If retry fails, force re-login
               console.error(`${code}: Forcing re-login`);
               window.location.href = "/login";
               break;
 
             case "CSRF_EXPIRED":
-              console.error("CSRF Token expired");
-              window.location.href = "/login";
-              break;
-
             case "REFRESH_REUSED":
-              console.error("Refresh token reuse detected — security warning");
-              // Optionally show an alert to the user
-              alert(
-                "Security alert: Your session was used from another location. Please log in again.",
-              );
-              window.location.href = "/login";
-              break;
-
             case "REFRESH_EXPIRED":
-              console.error("Refresh token expired");
-              window.location.href = "/login";
-              break;
-
             case "REFRESH_INVALID":
-              console.error("Refresh token invalid");
-              window.location.href = "/login";
-              break;
-
             case "SESSION_INVALID":
-              console.error("Session invalid — clearing UI state");
-              // Clear session from UI/local storage
-              localStorage.removeItem("session");
-              sessionStorage.clear();
-              window.location.href = "/login";
-              break;
-
             case "USER_NOT_FOUND":
-              console.error("User not found — clearing auth state");
+              console.error(
+                `${detail} detected — clearing state and redirecting`,
+              );
               localStorage.clear();
               sessionStorage.clear();
-
-              window.location.pathname == "/login"
-                ? null
-                : (window.location.href = "/login");
+              await deleteAllCookies(); // Good idea to clear cookies on these fatal errors too
+              window.location.href = "/login";
               break;
 
             default:
-              console.log("default");
-              if (!publicPath.includes(window.location.pathname)) {
-                window.location.href = "/login";
-              }
-
-              throw error;
+              console.log("default 401 handler");
+              window.location.href = "/login";
+              break;
           }
         } else if (status === 403) {
-          console.log(error);
+          console.log("403 Forbidden Error", error);
           throw error;
         }
-      } else {
-        console.error("Network or unknown error:", error.message);
       }
     }
     return Promise.reject(error);
@@ -1658,7 +1695,9 @@ export const operatorApi = {
     body: {
       first_name: string;
       last_name: string;
-      license_no: string;
+      email: string;
+      phone: string;
+      password: string;
     },
     operator_id: string,
   ) => {

@@ -31,20 +31,7 @@ import { useAuth } from "@/lib/authContext";
 import { Bus } from "@/lib/model";
 import { Spinner } from "@/components/ui/spinner";
 import { formatCurrency } from "@/lib/report-utils";
-function TicketIdCell({ id }: { id: string }) {
-  const [showFull, setShowFull] = useState(false);
-  const displayId = showFull ? id : id.slice(0, 8) + "..."; // truncate first 8 chars
-
-  return (
-    <TableCell
-      className="p-4 font-semibold text-primary cursor-pointer"
-      onClick={() => setShowFull(!showFull)}
-      title={id}
-    >
-      {displayId}
-    </TableCell>
-  );
-}
+import { TicketIdCell } from "@/components/TruncatedId";
 
 export default function OperatorDashboard() {
   const [date, setDate] = useState("today");

@@ -252,12 +252,20 @@ export interface Bus {
 }
 export interface Driver {
   id: string;
-  operator_id: string;
   first_name: string;
   last_name: string;
-  license_no: string;
-  created_at: string;
-  updated_at: string;
+  email: string;
+  username: string;
+  phone: string;
+  password: string;
+}
+export interface DriverCreateDTO {
+  first_name: string;
+  last_name: string;
+  email: string;
+  username: string;
+  phone: string;
+  password: string;
 }
 export interface Route {
   route_id: string;

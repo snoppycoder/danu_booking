@@ -11,6 +11,7 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { toast } from "sonner";
 
 export default function CancelTripDialog({
   open,
@@ -43,6 +44,7 @@ export default function CancelTripDialog({
             variant="destructive"
             onClick={() => {
               onConfirm();
+              toast.info("Succesfully cancelled, refund will be processed");
               setOpen(false);
             }}
           >

@@ -49,22 +49,22 @@ export default function AvatarHero() {
         >
           Profile
         </DropdownMenuItem>
-        <DropdownMenuItem
+        {/* <DropdownMenuItem
           onClick={() => {
             router.replace("/manage-sessions");
           }}
           className="text-black cursor-pointer"
         >
           Manage Sessions
-        </DropdownMenuItem>
-        <DropdownMenuItem
+        </DropdownMenuItem> */}
+        {/* <DropdownMenuItem
           onClick={() => {
             router.replace("/settings");
           }}
           className="text-black cursor-pointer"
         >
           Settings
-        </DropdownMenuItem>
+        </DropdownMenuItem> */}
         <DropdownMenuItem
           onClick={onLogout}
           className="text-red-600 focus:text-red-600 cursor-pointer"

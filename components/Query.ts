@@ -499,7 +499,10 @@ type CreateDriverPayload = {
   body: {
     first_name: string;
     last_name: string;
-    license_no: string;
+    email: string;
+    username: string;
+    phone: string;
+    password: string;
   };
 };
 
@@ -508,7 +511,11 @@ export const useCreateDriver = () => {
 
   return useMutation<Driver, Error, CreateDriverPayload>({
     mutationFn: async ({ operator_id, body }) => {
-      return operatorApi.createDriver(body, operator_id);
+      try {
+        return operatorApi.createDriver(body, operator_id);
+      } catch (err) {
+        throw err;
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({

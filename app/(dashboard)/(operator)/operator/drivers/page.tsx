@@ -73,14 +73,18 @@ import {
   Award as IdCard,
   Calendar,
   Bus,
+  Eye,
+  EyeOff,
 } from "lucide-react";
 import { useAuth } from "@/lib/authContext";
 import { useCreateDriver, useDrivers } from "@/components/Query";
-import { Driver } from "@/lib/model";
+import { Driver, DriverCreateDTO } from "@/lib/model";
 import { set } from "zod";
 import { operatorApi } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
+import { Spinner } from "@/components/ui/spinner";
+import { TicketIdCell } from "@/components/TruncatedId";
 
 type DriverStatus = "Active" | "On Leave" | "Inactive";
 
@@ -100,6 +104,7 @@ export default function DriversManagement() {
   const [driverToDelete, setDriverToDelete] = useState<string | null>(null);
   const [isAssignBusOpen, setIsAssignBusOpen] = useState(false);
   const [driverToAssign, setDriverToAssign] = useState<string | null>(null);
+  const [showPassword, setShowPassword] = useState<boolean>();
   const { user } = useAuth();
   const { data, isLoading, isError, error } = useDrivers(
     user?.organization_id!,
@@ -111,14 +116,13 @@ export default function DriversManagement() {
   );
 
   // New driver form state
-  const [newDriver, setNewDriver] = useState<Driver>({
-    id: "",
+  const [newDriver, setNewDriver] = useState<DriverCreateDTO>({
     first_name: "",
     last_name: "",
-    license_no: "",
-    created_at: "",
-    updated_at: "",
-    operator_id: user?.organization_id!,
+    email: "",
+    username: "",
+    phone: "",
+    password: "",
   });
 
   const filteredDrivers =
@@ -163,31 +167,26 @@ export default function DriversManagement() {
     }
   };
 
-  const handleAddDriver = () => {
+  const handleAddDriver = async () => {
     try {
-      setDrivers((prev) => [...prev, newDriver]);
-      setIsAddDriverOpen(false);
       console.log(newDriver);
-      mutate({
-        operator_id: user?.organization_id!,
-        body: {
-          first_name: fullName.split(" ")[0] || "",
-          last_name: fullName.split(" ")[1] || "",
-          license_no: newDriver.license_no,
-        },
-      });
+      await operatorApi.createDriver(newDriver, user?.organization_id || "");
 
-      setNewDriver({
-        id: "",
-        first_name: "",
-        last_name: "",
-        license_no: "",
-        created_at: "",
-        updated_at: "",
-        operator_id: user?.organization_id!,
-      });
+      toast.success("Successfully invited the driver");
+      setIsAddDriverOpen(false);
     } catch (error) {
-      console.error("Error adding driver:", error);
+      console.log(error, "error");
+      if (isAxiosError(error)) {
+        const msg =
+          error.response?.data?.detail?.reasons?.[0] ||
+          error.response?.data?.detail?.[0]?.msg ||
+          error.response?.data?.error;
+        if (typeof msg == "string") {
+          toast.error(msg);
+          return;
+        }
+        toast.error("Error occured while trying to process your request");
+      }
     }
   };
 
@@ -226,12 +225,6 @@ export default function DriversManagement() {
     }
   };
 
-  // const activeCount = drivers.filter((d) => d. === "Active").length;
-  // const onLeaveCount = drivers.filter((d) => d.status === "On Leave").length;
-  // const assignedCount = drivers.filter((d) => d.assignedBus !== null).length;
-  // const avgExperience = Math.round(
-  //   drivers.reduce((sum, d) => sum + d.experience, 0) / drivers.length,
-  // );
   const activeCount = 0;
   const onLeaveCount = 0;
   const assignedCount = 0;
@@ -267,7 +260,7 @@ export default function DriversManagement() {
       {/* Main Content */}
       <div className="flex-1 space-y-6 p-6">
         {/* Stats Cards */}
-        <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-4 place-content-center grid-cols-2 lg:grid-cols-3">
           <Card>
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium">
@@ -300,18 +293,6 @@ export default function DriversManagement() {
               <p className="text-xs text-muted-foreground">With vehicles</p>
             </CardContent>
           </Card>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Avg. Experience
-              </CardTitle>
-              <Calendar className="size-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold">{avgExperience} yrs</div>
-              <p className="text-xs text-muted-foreground">Fleet average</p>
-            </CardContent>
-          </Card>
         </div>
 
         {/* Drivers Table */}
@@ -339,19 +320,20 @@ export default function DriversManagement() {
             <Table>
               <TableHeader>
                 <TableRow>
+                  <TableHead>ID</TableHead>
                   <TableHead>Name</TableHead>
-                  <TableHead>License Number</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Experience</TableHead>
-                  {/* <TableHead>Assigned Bus</TableHead> */}
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableHead>Phone</TableHead>
+                  <TableHead>Email</TableHead>
+                  <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {isPageLoading && (
                   <TableRow>
-                    <TableCell colSpan={7} className="h-24 text-center">
-                      Loading drivers...
+                    <TableCell colSpan={5} className="h-24 p-0">
+                      <div className="flex h-full w-full items-center justify-center">
+                        <Spinner />
+                      </div>
                     </TableCell>
                   </TableRow>
                 )}
@@ -359,7 +341,10 @@ export default function DriversManagement() {
                   filteredDrivers &&
                   filteredDrivers.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="h-24 text-center">
+                      <TableCell
+                        colSpan={7}
+                        className="h-24 text-gray-400 text-center"
+                      >
                         No drivers found
                       </TableCell>
                     </TableRow>
@@ -370,18 +355,19 @@ export default function DriversManagement() {
                     className="cursor-pointer hover:bg-muted/50"
                     onClick={() => handleViewDetails(driver)}
                   >
+                    <TicketIdCell id={driver.id} />
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="font-medium">
                           {driver.first_name} {driver.last_name}
                         </span>
-                        {/* <span className="text-xs text-muted-foreground">
-                            
-                          </span> */}
                       </div>
                     </TableCell>
                     <TableCell className="font-mono text-sm">
-                      {driver.license_no}
+                      {driver.phone}
+                    </TableCell>
+                    <TableCell className="font-mono text-sm">
+                      {driver?.email ?? "N/A"}
                     </TableCell>
                     <TableCell>
                       <Badge
@@ -391,20 +377,8 @@ export default function DriversManagement() {
                         Active
                       </Badge>
                     </TableCell>
-                    {/*  this is fixed for now */}
-                    <TableCell>7 years</TableCell>
-                    {/* <TableCell>
-                      {driver.assignedBus ? (
-                        <span className="font-mono text-sm">
-                          {driver.assignedBus}
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground">
-                          Not assigned
-                        </span>
-                      )}
-                    </TableCell> */}
-                    <TableCell className="text-right">
+
+                    <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger
                           asChild
@@ -441,7 +415,7 @@ export default function DriversManagement() {
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleStatusChange(driver.id, "Active");
+                              handleStatusChange(driver?.id ?? "", "Active");
                             }}
                           >
                             Set Active
@@ -504,7 +478,7 @@ export default function DriversManagement() {
                 <TabsContent value="personal" className="space-y-4">
                   <div className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
+                      <Label htmlFor="name">First Name</Label>
                       <Input
                         id="new-name"
                         value={fullName}
@@ -524,145 +498,39 @@ export default function DriversManagement() {
                         placeholder="Enter driver's full name"
                       />
                     </div>
-                    {/* <div className="space-y-2">
-                      <Label htmlFor="email">Email Address</Label>
-                      <div className="relative">
-                        <Mail className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
-                        <Input
-                          id="email"
-                          type="email"
-                          value={selectedDriver.email}
-                          onChange={(e) =>
-                            handleUpdateDriver({
-                              ...selectedDriver,
-                              email: e.target.value,
-                            })
-                          }
-                          className="pl-8"
-                        />
-                      </div> */}
                   </div>
-                  {/* <div className="space-y-2">
-                      <Label htmlFor="phone">Phone Number</Label>
-                      <div className="relative">
-                        <Phone className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
-                        <Input
-                          id="phone"
-                          value={selectedDriver.phone}
-                          onChange={(e) =>
-                            handleUpdateDriver({
-                              ...selectedDriver,
-                              phone: e.target.value,
-                            })
-                          }
-                          className="pl-8"
-                        />
-                      </div> 
-                    </div> */}
                   <div className="space-y-2">
-                    <Label htmlFor="joinDate">Join Date</Label>
+                    <Label htmlFor="phone">
+                      Phone Number <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <Phone className="absolute left-2 top-2.5 size-4 text-muted-foreground" />
+                      <Input
+                        id="phone"
+                        value={selectedDriver.phone}
+                        onChange={(e) =>
+                          handleUpdateDriver({
+                            ...selectedDriver,
+                            phone: e.target.value,
+                          })
+                        }
+                        className="pl-8"
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="joinDate">Emil</Label>
                     <Input
-                      id="joinDate"
-                      type="date"
-                      value={selectedDriver.created_at?.split("T")[0] || ""}
+                      id="email"
+                      type="email"
+                      value={selectedDriver.email?.split("T")[0] || ""}
                       onChange={(e) =>
                         handleUpdateDriver({
                           ...selectedDriver,
-                          created_at: e.target.value,
+                          email: e.target.value,
                         })
                       }
                     />
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="professional" className="space-y-4">
-                  <div className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="license">License Number</Label>
-                      <Input
-                        id="license"
-                        value={newDriver.license_no}
-                        onChange={(e) =>
-                          setNewDriver({
-                            ...newDriver,
-                            license_no: e.target.value,
-                          })
-                        }
-                        className="font-mono"
-                      />
-                    </div>
-                    {/* <div className="space-y-2">
-                      <Label htmlFor="status">Status</Label>
-                      <Select
-                        value={selectedDriver.status}
-                        onValueChange={(value: DriverStatus) =>
-                          handleUpdateDriver({
-                            ...selectedDriver,
-                            status: value,
-                          })
-                        }
-                      >
-                        <SelectTrigger id="status">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Active">Active</SelectItem>
-                          <SelectItem value="On Leave">On Leave</SelectItem>
-                          <SelectItem value="Inactive">Inactive</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div> */}
-                    {/* <div className="space-y-2">
-                      <Label htmlFor="experience">Experience (years)</Label>
-                      <Input
-                        id="experience"
-                        type="number"
-                        value={selectedDriver.experience}
-                        onChange={(e) =>
-                          handleUpdateDriver({
-                            ...selectedDriver,
-                            experience: Number.parseInt(e.target.value),
-                          })
-                        }
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="rating">Rating</Label>
-                      <div className="flex items-center gap-2">
-                        <Input
-                          id="rating"
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="5"
-                          value={selectedDriver.rating}
-                          onChange={(e) =>
-                            handleUpdateDriver({
-                              ...selectedDriver,
-                              rating: Number.parseFloat(e.target.value),
-                            })
-                          }
-                          className="w-24"
-                        />
-                        <span className="text-sm text-muted-foreground">
-                          / 5.0
-                        </span>
-                      </div>
-                    </div>
-                    <div className="space-y-2">
-                      <Label>Assigned Bus</Label>
-                      <div className="flex items-center gap-2">
-                        {selectedDriver.assignedBus ? (
-                          <Badge variant="secondary" className="font-mono">
-                            {selectedDriver.assignedBus}
-                          </Badge>
-                        ) : (
-                          <span className="text-sm text-muted-foreground">
-                            Not assigned
-                          </span>
-                        )}
-                      </div>
-                    </div> */}
                   </div>
                 </TabsContent>
               </Tabs>
@@ -681,87 +549,102 @@ export default function DriversManagement() {
             </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
-            <div className="space-y-2">
-              <Label htmlFor="new-name">Full Name</Label>
-              <Input
-                id="new-name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                onBlur={() => {
-                  const names = fullName.trim().split(" ");
-                  const first = names.shift() || ""; // first word
-                  const last = names.join(" "); // everything else as last name
+            <div className="grid gap-2.5 grid-cols-1 lg:grid-cols-2">
+              <div className="space-y-3">
+                <Label htmlFor="first-name">
+                  First Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="first-name"
+                  required
+                  value={newDriver.first_name}
+                  onChange={(e) =>
+                    setNewDriver({
+                      ...newDriver,
+                      first_name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+              <div className="space-y-3">
+                <Label htmlFor="last-name">
+                  Last Name <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="last-name"
+                  required
+                  value={newDriver.last_name}
+                  onChange={(e) =>
+                    setNewDriver({
+                      ...newDriver,
+                      last_name: e.target.value,
+                    })
+                  }
+                />
+              </div>
+            </div>
 
-                  setNewDriver({
-                    ...newDriver,
-                    first_name: first,
-                    last_name: last,
-                  });
-                }}
-                placeholder="Enter driver's full name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-license">License Number</Label>
+            <div className="space-y-3">
+              <Label htmlFor="phone-number">
+                Phone Number <span className="text-red-500">*</span>
+              </Label>
               <Input
-                id="new-license"
-                value={newDriver.license_no}
-                onChange={(e) =>
-                  setNewDriver({ ...newDriver, license_no: e.target.value })
-                }
-                placeholder="DL-XXXXXXXXXX"
-                className="font-mono"
-              />
-            </div>
-            {/* <div className="space-y-2">
-              <Label htmlFor="new-phone">Phone Number</Label>
-              <Input
-                id="new-phone"
+                id="phone-number"
+                required
                 value={newDriver.phone}
+                type="tel"
                 onChange={(e) =>
                   setNewDriver({ ...newDriver, phone: e.target.value })
                 }
-                placeholder="+91 XXXXX XXXXX"
+                className="font-mono"
               />
             </div>
-            <div className="space-y-2">
-              <Label htmlFor="new-email">Email Address</Label>
+            <div className="space-y-3">
+              <Label htmlFor="email">Email</Label>
               <Input
-                id="new-email"
+                id="email"
                 type="email"
                 value={newDriver.email}
                 onChange={(e) =>
                   setNewDriver({ ...newDriver, email: e.target.value })
                 }
-                placeholder="driver@fleetops.com"
+                // placeholder="DL-XXXXXXXXXX"
+                className="font-mono"
               />
-            </div> */}
-            {/* <div className="space-y-2">
-              <Label htmlFor="new-experience">Experience (years)</Label>
-              <Input
-                id="new-experience"
-                type="number"
-                value={newDriver.experience}
-                onChange={(e) =>
-                  setNewDriver({
-                    ...newDriver,
-                    experience: Number.parseInt(e.target.value) || 0,
-                  })
-                }
-                placeholder="0"
-              />
-            </div> */}
-            {/* <div className="space-y-2">
-              <Label htmlFor="new-joinDate">Join Date</Label>
-              <Input
-                id="new-joinDate"
-                type="date"
-                value={newDriver.created_at?.split("T")[0] || ""}
-                onChange={(e) =>
-                  setNewDriver({ ...newDriver, created_at: e.target.value })
-                }
-              />
-            </div> */}
+            </div>
+            <div className="space-y-3">
+              <Label htmlFor="password">
+                Password <span className="text-red-500">*</span>
+              </Label>
+
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? "text" : "password"}
+                  placeholder="••••••••"
+                  value={newDriver.password}
+                  onChange={(e) =>
+                    setNewDriver({ ...newDriver, password: e.target.value })
+                  }
+                  className="w-full pr-10 px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent transition"
+                  required
+                />
+
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="ghost"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-gray-500 hover:text-gray-700"
+                >
+                  {showPassword ? (
+                    <EyeOff className="w-5 h-5" />
+                  ) : (
+                    <Eye className="w-5 h-5" />
+                  )}
+                </Button>
+              </div>
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsAddDriverOpen(false)}>

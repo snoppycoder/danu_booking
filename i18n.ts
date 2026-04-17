@@ -55,6 +55,77 @@ i18n.use(initReactI18next).init({
         weWouldLoveToHearFromYou: "We'd love to hear from you",
         haveAQuestionOrFeedback:
           "Have a question or suggestion? We’re here to help you navigate your journey with ease and confidence.",
+        aboutHeroTitle1: "Transforming Ethiopia's",
+        aboutHeroTitle2: "Intercity Travel",
+        aboutHeroDesc:
+          "DANU Booking is modernizing the way people travel across Ethiopia through smart, accessible digital solutions.",
+
+        vision: "Our Vision",
+        visionDesc:
+          "To become Ethiopia's most trusted and leading digital platform for intercity bus booking.",
+        visionPoint1: "Trusted by passengers and operators",
+        visionPoint2: "Nationwide coverage and accessibility",
+
+        mission: "Our Mission",
+        missionDesc:
+          "To simplify intercity travel with a reliable digital booking system.",
+        missionPoint1: "Simple, reliable digital solutions",
+        missionPoint2: "Benefits for all stakeholders",
+
+        whyWeExist: "Why We Exist",
+        whyWeExistDesc:
+          "We saw real problems in Ethiopia's intercity transportation.",
+
+        passengerChallenges: "Passenger Challenges",
+        challenge1: "Long ticket office queues",
+        challenge2: "Limited booking hours",
+        challenge3: "Uncertainty about seat availability",
+        challenge4: "Manual and inconvenient processes",
+
+        operatorChallenges: "Operator Challenges",
+        operator1: "Unsold seats and lost revenue",
+        operator2: "Manual paperwork",
+        operator3: "Limited market visibility",
+        operator4: "Lack of reliable sales data",
+
+        whatWeOffer: "What We Offer",
+        whatWeOfferDesc: "Comprehensive solutions for passengers and operators",
+
+        forPassengers: "For Passengers",
+        p1: "Search routes across Ethiopia",
+        p2: "Compare operators",
+        p3: "Select seats",
+        p4: "Secure payments",
+        p5: "Digital tickets",
+        p6: "SMS updates",
+
+        forOperators: "For Operators",
+        o1: "Increase seat occupancy",
+        o2: "Reliable sales channel",
+        o3: "Real-time management",
+        o4: "Reduced workload",
+        o5: "Wider customer base",
+        o6: "Better data insights",
+
+        joinDanu: "Join the DANU Network",
+        joinDanuDesc:
+          "DANU connects passengers, operators, and partners across Ethiopia.",
+
+        quickSupport: "Quick Support",
+        visitUs: "Visit Us",
+        callUs: "Call Us",
+        emailUs: "Email Us",
+
+        getInTouch: "Get in touch",
+
+        sendMessage: "Send Message",
+
+        viewAllPast: "View all your past and upcoming trips",
+        cancelled: "Cancelled",
+        bookedOn: "Booked on",
+        confirmed: "Confirmed",
+        operator: "Operator",
+        passengers: "Passengers",
       },
     },
 
@@ -62,6 +133,8 @@ i18n.use(initReactI18next).init({
       translation: {
         welcomeBack: "Baga Nagaan Deebite",
         login: "Seeni",
+        total: "Kaffaltii Walii-galaa",
+        operator: "Opreeterii",
         signIn: "Akkaawuntii Danu Booking keetti seeni",
         phoneNumber: "Lakkoofsa Bilbilaa ykn Imeelii",
         password: "Jecha Iccitii",
@@ -106,6 +179,76 @@ i18n.use(initReactI18next).init({
         weWouldLoveToHearFromYou: "Isin irraa dhaga'uuf gammanna",
         haveAQuestionOrFeedback:
           "Gaaffii ykn yaada qabduu? Imala keessan salphaa fi amanamaa taasisuuf isin gargaaruuf as jirra.",
+        aboutHeroTitle1: "Jijjiiruu Imala",
+        aboutHeroTitle2: "Gidduu Magaalota Itoophiyaa",
+        aboutHeroDesc:
+          "DANU Booking furmaata dijitaalaa ammayyaa fi salphaa ta'een akkaataa namoonni Itoophiyaa keessa itti imalan ammayyeessaa jira.",
+
+        vision: "Mul'ata Keenya",
+        visionDesc:
+          "Itoophiyaa keessatti waltajjii dijitaalaa tikeetii awtoobisaa amansiisaa fi dursaa ta'uu.",
+        visionPoint1: "Imaltoota fi abbootii qabeenyaatiin kan amaname",
+        visionPoint2: "Biyya guutuutti argamuu fi salphaatti fayyadamuu",
+
+        mission: "Ergaa Keenya",
+        missionDesc:
+          "Sirna tikeetii dijitaalaa amansiisaa ta'een imala gidduu magaalotaa salphisuu.",
+        missionPoint1: "Furmaata dijitaalaa salphaa fi amansiisaa",
+        missionPoint2: "Qaamolee dhimmamoo hundaaf faayidaa",
+
+        whyWeExist: "Maaliif Akka Jirru",
+        whyWeExistDesc:
+          "Rakkoolee qabatamaa geejjiba gidduu magaalota Itoophiyaa keessa jiran agarreerra.",
+
+        passengerChallenges: "Rakkoolee Imaltootaa",
+        challenge1: "Hiriira dheeraa waajjira tikeetii",
+        challenge2: "Sa'aatii tikeetii murtaa'aa",
+        challenge3: "Teessoon jiraachuu isaa mirkaneeffachuu dhabuu",
+        challenge4: "Adeemsa harkaatiifi rakkisaa ta'e",
+
+        operatorChallenges: "Rakkoolee Abbootii Qabeenyaa",
+        operator1: "Teessoo hin gurguramne fi galii dhabame",
+        operator2: "Hojii waraqaa",
+        operator3: "Mul'achuu gabaa murtaa'aa",
+        operator4: "Ragaa gurgurtaa amansiisaa dhabuu",
+
+        whatWeOffer: "Maal Akka Dhiyeessinu",
+        whatWeOfferDesc: "Imaltoota fi abbootii qabeenyaaf furmaata guutuu",
+
+        forPassengers: "Imaltootaaf",
+        p1: "Itoophiyaa keessatti sararoota barbaadi",
+        p2: "Awtoobisoota walbira qabi",
+        p3: "Teessoo filadhu",
+        p4: "Kaffaltii amansiisaa",
+        p5: "Tikeetii dijitaalaa",
+        p6: "Odeeffannoo SMS",
+
+        forOperators: "Abbootii Qabeenyaaf",
+        o1: "Gurgurtaa teessoo dabaluu",
+        o2: "Sarara gurgurtaa amansiisaa",
+        o3: "To'annoo yeroo dhugaa",
+        o4: "Ba'aa hojii hir'isuu",
+        o5: "Maamiltoota bal'aa argachuu",
+        o6: "Hubannoo ragaa fooya'aa",
+
+        joinDanu: "Dhaabbata DANUtti Makamaa",
+        joinDanuDesc:
+          "DANU'n imaltoota, abbootii qabeenyaa, fi michuuwwan Itoophiyaa guutuutti walitti fida.",
+
+        quickSupport: "Deeggarsa Ariifachiisaa",
+        visitUs: "Nu Daawwadhaa",
+        callUs: "Nuuf Bilbilaa",
+        emailUs: "Imeelii Nuuf Barreessaa",
+
+        getInTouch: "Nu Quunnamaa",
+
+        sendMessage: "Ergi",
+        viewAllPast: "Imala kee kan darbeefi kan fuulduraa hunda ilaali",
+        cancelled: "Haqameera",
+        bookedOn: "Kan qabame",
+        confirmed: "Mirkanaa'eera",
+
+        passengers: "Imaltoota",
       },
     },
     ti: {
@@ -147,15 +290,82 @@ i18n.use(initReactI18next).init({
         noTripsFound: "ጉዕዞ ኣይተረኸበን",
         enterPassengerInfo: "ሓበሬታ ተጓዓዚ ኣእትው",
         passenger: "ተጓዓዚ",
+        total: "ጠቕላላ ክፍሊት",
         isPassengerChild: "እዚ ተጓዓዚ ሕፃን ድዩ?",
         nameBookingForm: "ሙሉእ ስም",
         faydaId: "ቁጽሪ መለለዪ",
+        operator: "ኦፕሬተር",
         email: "ኢመይል",
         phone: "ቴሌፎን",
         companyInfo: "ሓበሬታ ኩባንያ",
         weWouldLoveToHearFromYou: "ካብኩም ምስማዕ ንፈቱ",
         haveAQuestionOrFeedback:
           "ጥያቄ ወይ ርእይቶ ኣለኩም? ጉዕዞኹም ቀሊልን እምነት ዝበለ ንምግባር ኣብዚ ኣለና።",
+        aboutHeroTitle1: "ምልዋጥ ጉዕዞ",
+        aboutHeroTitle2: "መንጎ ከተማታት ኢትዮጵያ",
+        aboutHeroDesc:
+          "ዳኑ ቡኪንግ (DANU Booking) ብዘመናዊን ቀሊልን ዲጂታላዊ መፍትሒታት ኣገባብ ጉዕዞ ህዝቢ ኣብ መላእ ኢትዮጵያ የዘምኖ ኣሎ።",
+        passengers: "ተሳፈርቲ",
+        vision: "ራእይና",
+
+        visionDesc: "ኣብ ኢትዮጵያ ዝተኣማመንን ቀዳማይን ዲጂታላዊ መድረኽ መሸጣ ቲኬት ኣውቶቡስ ምዃን።",
+        visionPoint1: "ብተጓዓዝትን ዋንቲ ኣውቶቡስን ዝተኣማመን",
+        visionPoint2: "ሃገር ለኸ ተበጻሕነት",
+
+        mission: "ተልእኾና",
+        missionDesc: "ብዘተኣማምን ዲጂታላዊ ስርዓት መሸጣ ቲኬት ጉዕዞ መንጎ ከተማታት ምቅላል።",
+        missionPoint1: "ቀሊልን ዘተኣማምንን ዲጂታላዊ መፍትሒታት",
+        missionPoint2: "ንኹሎም መዳርግቲ ኣካላት ዝጠቅም",
+
+        whyWeExist: "ስለምንታይ ከም ዘለና",
+        whyWeExistDesc: "ኣብ ትራንስፖርት መንጎ ከተማታት ኢትዮጵያ ዘሎ ጭቡጥ ጸገማት ርኢና ኢና።",
+
+        passengerChallenges: "ጸገማት ተጓዓዝቲ",
+        challenge1: "ነዊሕ መስርዕ መሸጣ ቲኬት",
+        challenge2: "ድሩት ሰዓታት መሸጣ ቲኬት",
+        challenge3: "ብዛዕባ መቐመጢ ርግጸኛ ዘይምዃን",
+        challenge4: "ኣድካሚን ብኢድ ዝስራሕን ኣገባባት",
+
+        operatorChallenges: "ጸገማት ዋንቲ ኣውቶቡስ",
+        operator1: "ዘይተሸጠ መቐመጢን ክሳራ ኣታዊን",
+        operator2: "ናይ ወረቐት ስራሕ",
+        operator3: "ድሩት ናይ ዕዳጋ ተበጻሕነት",
+        operator4: "ዘተኣማምን መረዳእታ መሸጣ ዘይምህላው",
+
+        whatWeOffer: "እንታይ ነቕርብ",
+        whatWeOfferDesc: "ንተጓዓዝትን ዋንቲ ኣውቶቡስን ምሉእ መፍትሒታት",
+
+        forPassengers: "ንተጓዓዝቲ",
+        p1: "ኣብ መላእ ኢትዮጵያ መንገድታት ድለ",
+        p2: "ኣውቶቡሳት ኣወዳድር",
+        p3: "መቐመጢ ምረጽ",
+        p4: "ዘተኣማምን ክፍሊት",
+        p5: "ዲጂታላዊ ቲኬታት",
+        p6: "ሓበሬታ ብ SMS",
+
+        forOperators: "ንዋንቲ ኣውቶቡስ",
+        o1: "መሸጣ መቐመጢ ምውሳኽ",
+        o2: "ዘተኣማምን መሸጣ መገዲ",
+        o3: "ናይ ግዜ-ሓቂ (Real-time) ምምሕዳር",
+        o4: "ጾር ስራሕ ምቕናስ",
+        o5: "ሰፊሕ ተበጻሕነት ዓማዊል",
+        o6: "ዝሓሸ ትንተና መረዳእታ",
+
+        joinDanu: "ኣብ ዳኑ (DANU) ኔትወርክ ተጸንበሩ",
+        joinDanuDesc: "ዳኑ ንተጓዓዝቲ፣ ዋንቲ ኣውቶቡስን መሻርኽትን ኣብ መላእ ኢትዮጵያ የራኽብ።",
+
+        quickSupport: "ቅልጡፍ ደገፍ",
+        visitUs: "በጽሑና",
+        callUs: "ደውሉልና",
+        emailUs: "ኢሜይል ጸሓፉልና",
+
+        getInTouch: "ርክብ ግበሩልና",
+
+        send: "ስደድ",
+        viewAllPast: "ዝሓለፉን ዝመጹን ዑደታትካ ርአ",
+        cancelled: "ተሰሪዙ",
+        bookedOn: "ዝተታሕዘሉ ዕለት",
+        confirmed: "ተረጋጊጹ",
       },
     },
     am: {
@@ -166,8 +376,10 @@ i18n.use(initReactI18next).init({
         password: "የሚስጥር ቁጥር",
         rememberMe: "አስታውሰኝ",
         forgotPassword: "የሚስጥር ቁጥር ረሳዎት?",
+        total: "ጠቅላላ ክፍያ",
         login: "ግቡ",
         or: "ወይም",
+        operator: "ኦፕሬተር",
         continueAsGuest: "እንደ እንግዳ ይቀጥሉ",
         dontHaveAccount: "አካውንት የለህም?",
         bookYourTickets: "የአውቶቡስ ትኬትዎን ይቁረጡ",
@@ -182,6 +394,7 @@ i18n.use(initReactI18next).init({
         logout: "ውጣ",
         from: "ከ",
         to: "ወደ",
+
         departureDate: "የመነሻ ቀን",
         returnDate: "የመመለሻ ቀን",
         findTickets: "ትኬቶችን ይፈልጉ",
@@ -206,6 +419,74 @@ i18n.use(initReactI18next).init({
         weWouldLoveToHearFromYou: "ከእርስዎ መስማት እንፈልጋለን",
         haveAQuestionOrFeedback:
           "ጥያቄ ወይም አስተያየት አለዎት? ጉዞዎን በቀላል እና በራስ መተማመን እንዲሄዱ ለማገዝ እዚህ መጥተናል።",
+        aboutHeroTitle1: "የኢትዮጵያን",
+        aboutHeroTitle2: "የከተማ አቋራጭ ጉዞ ማዘመን",
+        aboutHeroDesc:
+          "ዳኑ ቡኪንግ (DANU Booking) ዘመናዊ እና ተደራሽ በሆኑ ዲጂታል መፍትሄዎች በመላው ኢትዮጵያ የሰዎችን የጉዞ ልምድ እያዘመነ ይገኛል።",
+
+        vision: "ራዕያችን",
+        visionDesc: "ለከተማ አቋራጭ የአውቶቡስ ትኬት ሽያጭ የኢትዮጵያ ታማኝ እና ቀዳሚ ዲጂታል መድረክ መሆን።",
+        visionPoint1: "በመንገደኞች እና በአውቶቡስ ባለንብረቶች ዘንድ ታማኝ",
+        visionPoint2: "ሀገር አቀፍ ተደራሽነት",
+
+        mission: "ተልእኳችን",
+        missionDesc: "አስተማማኝ በሆነ ዲጂታል የትኬት ሽያጭ ስርዓት የከተማ አቋራጭ ጉዞን ማቅለል።",
+        missionPoint1: "ቀላል እና አስተማማኝ ዲጂታል መፍትሄዎች",
+        missionPoint2: "ለሁሉም ባለድርሻ አካላት ጠቃሚ",
+
+        whyWeExist: "የተፈጠርንበት ዓላማ",
+        whyWeExistDesc:
+          "በኢትዮጵያ የከተማ አቋራጭ ትራንስፖርት ውስጥ ያሉትን እውነተኛ ችግሮች ተመልክተናል፤ እነሱን ለመፍታትም እዚህ እንገኛለን።",
+
+        passengerChallenges: "የመንገደኞች ፈተናዎች",
+        challenge1: "ረጅም የትኬት መቁረጫ ሰልፎች",
+        challenge2: "ውስን የትኬት መቁረጫ ሰዓታት",
+        challenge3: "ስለመቀመጫ መኖር እርግጠኛ አለመሆን",
+        challenge4: "አድካሚ እና ጊዜ አጥፊ አሰራሮች",
+
+        operatorChallenges: "የአውቶቡስ ባለንብረቶች ፈተናዎች",
+        operator1: "ያልተሸጡ መቀመጫዎች እና የገቢ ብክነት",
+        operator2: "በወረቀት ላይ የተመሰረተ አሰራር",
+        operator3: "ውስን የገበያ ተደራሽነት",
+        operator4: "አስተማማኝ የሽያጭ መረጃ አለመኖር",
+
+        whatWeOffer: "ምን እናቀርባለን",
+        whatWeOfferDesc: "ለመንገደኞች እና ለአውቶቡስ ባለንብረቶች የተሟላ መፍትሄዎች",
+
+        forPassengers: "ለመንገደኞች",
+        p1: "በመላው ኢትዮጵያ ጉዞዎችን ይፈልጉ",
+        p2: "አውቶቡሶችን ያወዳድሩ",
+        p3: "መቀመጫ ይምረጡ",
+        p4: "አስተማማኝ የክፍያ ስርዓት",
+        p5: "ዲጂታል ትኬቶች",
+        p6: "የአጭር የፅሁፍ መልዕክት (SMS) ማሳወቂያዎች",
+
+        forOperators: "ለአውቶቡስ ባለንብረቶች",
+        o1: "የመቀመጫ ሽያጭን ማሳደግ",
+        o2: "አስተማማኝ የሽያጭ አማራጭ",
+        o3: "የጊዜ-እውነተኛ (Real-time) አስተዳደር",
+        o4: "የስራ ጫናን መቀነስ",
+        o5: "ሰፊ የደንበኛ ተደራሽነት",
+        o6: "የተሻለ የመረጃ ትንተና",
+
+        joinDanu: "የዳኑ ኔትወርክን ይቀላቀሉ",
+        joinDanuDesc:
+          "ዳኑ በመላው ኢትዮጵያ የሚገኙ መንገደኞችን፣ የአውቶቡስ ባለንብረቶችን እና አጋሮችን ያገናኛል።",
+
+        quickSupport: "ፈጣን ድጋፍ",
+        visitUs: "ይጎብኙን",
+        callUs: "ይደውሉልን",
+        emailUs: "ኢሜይል ያድርጉልን",
+
+        getInTouch: "ያግኙን",
+        sendMessage: "ላክ",
+
+        viewAllPast: "ያለፉትን እና የሚመጡ ጉዞዎችን በሙሉ ይመልከቱ",
+        cancelled: "ተሰርዟል",
+        bookedOn: "የተያዘበት ቀን",
+        confirmed: "ተረጋግጧል",
+
+        passengers: "ተሳፋሪዎች",
       },
     },
   },

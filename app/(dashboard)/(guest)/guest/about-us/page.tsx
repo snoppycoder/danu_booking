@@ -1,26 +1,24 @@
 "use client";
 
-import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { ArrowRight, Users, Zap, Globe, Shield } from "lucide-react";
 import Link from "next/link";
 
 export default function AboutPage() {
-  const { t } = useTranslation();
-
   return (
     <main className="min-h-screen bg-linear-to-b from-background via-background to-secondary/10">
       {/* Hero Section */}
       <section className="relative px-4 py-4 sm:px-6 lg:px-8 max-w-6xl mx-auto">
         <div className="text-center mb-16">
           <h1 className="text-5xl sm:text-6xl font-bold text-foreground mb-6 leading-tight">
-            <span className="text-pretty">{t("aboutHeroTitle1")}</span>
+            <span className="text-pretty">Transforming Ethiopia's</span>
             <br />
-            <span className="text-primary">{t("aboutHeroTitle2")}</span>
+            <span className="text-primary">Intercity Travel</span>
           </h1>
           <p className="text-xl text-muted-foreground max-w-2xl mx-auto mb-8 leading-relaxed">
-            {t("aboutHeroDesc")}
+            DANU Booking is modernizing the way people travel across Ethiopia
+            through smart, accessible digital solutions.
           </p>
           {/* <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" className="gap-2 bg-primary hover:bg-primary/90">
@@ -58,37 +56,47 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-2 gap-12">
             {/* Vision */}
             <div className="space-y-4">
-              <h2 className="text-3xl font-bold text-foreground">
-                {t("vision")}
-              </h2>
+              <h2 className="text-3xl font-bold text-foreground">Our Vision</h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                {t("visionDesc")}
+                To become Ethiopia&apos;s most trusted and leading digital
+                platform for intercity bus booking — delivering efficient,
+                accessible, and transparent transportation services nationwide.
               </p>
               <div className="pt-4 flex items-start gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                <p className="text-muted-foreground">{t("visionPoint1")}</p>
+                <p className="text-muted-foreground">
+                  Trusted by passengers and operators
+                </p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
-                <p className="text-muted-foreground">{t("visionPoint2")}</p>
+                <p className="text-muted-foreground">
+                  Nationwide coverage and accessibility
+                </p>
               </div>
             </div>
 
             {/* Mission */}
             <div className="space-y-4">
               <h2 className="text-3xl font-bold text-foreground">
-                {t("mission")}
+                Our Mission
               </h2>
               <p className="text-lg text-muted-foreground leading-relaxed">
-                {t("missionDesc")}
+                To simplify intercity travel by providing a reliable digital
+                booking system that benefits passengers, bus operators, and
+                partners through efficiency, accuracy, and convenience.
               </p>
               <div className="pt-4 flex items-start gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
-                <p className="text-muted-foreground">{t("missionPoint1")}</p>
+                <p className="text-muted-foreground">
+                  Simple, reliable digital solutions
+                </p>
               </div>
               <div className="flex items-start gap-3">
                 <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
-                <p className="text-muted-foreground">{t("missionPoint2")}</p>
+                <p className="text-muted-foreground">
+                  Benefits for all stakeholders
+                </p>
               </div>
             </div>
           </div>
@@ -100,10 +108,11 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
-              {t("whyWeExist")}
+              Why We Exist
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t("whyWeExistDesc")}
+              We saw real problems in Ethiopia&apos;s intercity transportation.
+              We&apos;re here to solve them.
             </p>
           </div>
 
@@ -111,31 +120,31 @@ export default function AboutPage() {
             {/* Passenger Challenges */}
             <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors">
               <h3 className="text-2xl font-bold text-foreground mb-6">
-                {t("passengerChallenges")}
+                Passenger Challenges
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("challenge1")}
+                    Long ticket office queues
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("challenge2")}
+                    Limited booking hours
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("challenge3")}
+                    Uncertainty about seat availability
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("challenge4")}
+                    Manual and inconvenient processes
                   </span>
                 </li>
               </ul>
@@ -144,31 +153,31 @@ export default function AboutPage() {
             {/* Operator Challenges */}
             <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors">
               <h3 className="text-2xl font-bold text-foreground mb-6">
-                {t("operatorChallenges")}
+                Operator Challenges
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("operator1")}
+                    Unsold seats and lost revenue
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("operator2")}
+                    Manual paperwork and administration
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("operator3")}
+                    Limited market visibility
                   </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
                   <span className="text-muted-foreground">
-                    {t("operator4")}
+                    Lack of reliable sales data
                   </span>
                 </li>
               </ul>
@@ -182,10 +191,11 @@ export default function AboutPage() {
         <div className="max-w-6xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-4xl font-bold text-foreground mb-4">
-              {t("whatWeOffer")}
+              What We Offer
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
-              {t("whatWeOfferDesc")}
+              Comprehensive solutions for passengers and bus operators across
+              Ethiopia
             </p>
           </div>
 
@@ -194,32 +204,44 @@ export default function AboutPage() {
             <div>
               <h3 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
                 <Users className="w-6 h-6 text-primary" />
-                {t("forPassengers")}
+                For Passengers
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("p1")}</span>
+                  <span className="text-muted-foreground">
+                    Search routes across Ethiopia
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("p2")}</span>
+                  <span className="text-muted-foreground">
+                    Compare bus operators and services
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("p3")}</span>
+                  <span className="text-muted-foreground">
+                    Select seats interactively
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("p4")}</span>
+                  <span className="text-muted-foreground">
+                    Pay securely using mobile money
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("p5")}</span>
+                  <span className="text-muted-foreground">
+                    Receive instant digital ticket confirmation
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("p6")}</span>
+                  <span className="text-muted-foreground">
+                    Get SMS reminders and updates
+                  </span>
                 </li>
               </ul>
             </div>
@@ -228,32 +250,44 @@ export default function AboutPage() {
             <div>
               <h3 className="text-2xl font-bold text-foreground mb-8 flex items-center gap-3">
                 <Globe className="w-6 h-6 text-primary" />
-                {t("forOperators")}
+                For Bus Operators
               </h3>
               <ul className="space-y-4">
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("o1")}</span>
+                  <span className="text-muted-foreground">
+                    Increased seat occupancy
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("o2")}</span>
+                  <span className="text-muted-foreground">
+                    Structured and reliable sales channel
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("o3")}</span>
+                  <span className="text-muted-foreground">
+                    Real-time booking management
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("o4")}</span>
+                  <span className="text-muted-foreground">
+                    Reduced administrative workload
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("o5")}</span>
+                  <span className="text-muted-foreground">
+                    Access to wider national customer base
+                  </span>
                 </li>
                 <li className="flex items-start gap-3">
                   <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                  <span className="text-muted-foreground">{t("o6")}</span>
+                  <span className="text-muted-foreground">
+                    Better visibility and sales data
+                  </span>
                 </li>
               </ul>
             </div>
@@ -383,10 +417,11 @@ export default function AboutPage() {
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-4xl font-bold text-foreground mb-6">
-            {t("joinDanu")}
+            Join the DANU Network
           </h2>
           <p className="text-xl text-muted-foreground mb-12 max-w-2xl mx-auto leading-relaxed">
-            {t("joinDanuDesc")}
+            DANU is more than a platform — it&apos;s a growing national network
+            connecting passengers, bus operators, and partners across Ethiopia.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center">
@@ -396,7 +431,7 @@ export default function AboutPage() {
               className="gap-2 bg-primary hover:bg-primary/90 px-8"
             >
               <Link href="/login" className="flex items-center gap-2">
-                {t("forPassengers")} <ArrowRight className="mt-1 w-4 h-4" />
+                For Passengers <ArrowRight className="mt-1 w-4 h-4" />
               </Link>
             </Button>
             <Button
@@ -406,7 +441,7 @@ export default function AboutPage() {
               className="gap-2 bg-accent hover:bg-accent/90 px-8"
             >
               <Link href="/login" className="flex items-center gap-2">
-                {t("forOperators")} <ArrowRight className="mt-1 w-4 h-4" />
+                For Operators <ArrowRight className="mt-1 w-4 h-4" />
               </Link>
             </Button>
             <Button

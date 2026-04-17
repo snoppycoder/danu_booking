@@ -16,17 +16,17 @@ import { FaTiktok } from "react-icons/fa";
 
 const contactInfo = [
   {
-    label: "visitUs",
+    label: "Visit Us",
     icon: <MapPin strokeWidth={3} stroke="#1c7690" size={16} />,
     value: "Near Jakros, EBM building",
   },
   {
-    label: "callUs",
+    label: "Call Us",
     icon: <Phone strokeWidth={3} stroke="#1c7690" size={16} />,
     value: "+(251) 9 118 54 567",
   },
   {
-    label: "emailUs",
+    label: "Email Us",
     icon: <Mail strokeWidth={3} stroke="#1c7690" size={16} />,
     value: "Danubooking@gmail.com",
   },
@@ -95,7 +95,7 @@ const ContactUs = () => {
 
           <div className="flex flex-1 flex-col items-center md:items-baseline">
             <h2 className="relative mb-6 inline-block text-xl font-semibold text-[#022539] after:mt-4 after:block after:w-20 after:border after:border-primary sm:text-2xl md:mb-7 md:text-3xl after:md:mt-6 lg:mb-9 after:lg:mt-9">
-              {t("quickSupport")}
+              Quick Support
             </h2>
             {contactInfo.map(({ icon, label, value }, index) => (
               <div className="mb-7 md:mb-3 lg:mb-7" key={index}>
@@ -104,7 +104,7 @@ const ContactUs = () => {
                     {icon}
                   </div>
                   <h4 className="text-base font-semibold text-[#022539]">
-                    {t(label)}
+                    {label}
                   </h4>
                 </div>
                 <div className="md:mb-3 md:ml-8">
@@ -136,7 +136,7 @@ const ContactUs = () => {
         <section className="my-10 md:my-15 lg:my-25">
           <div>
             <h2 className="relative mb-6 inline-block text-xl font-semibold text-[#022539] after:mt-4 after:block after:w-20 after:border after:border-primary sm:text-2xl md:mb-7 md:text-3xl after:md:mt-6 lg:mb-9 after:lg:mt-9">
-              {t("getInTouch")}
+              Get in touch
             </h2>
             <div className="flex flex-col gap-y-4">
               <input
@@ -161,7 +161,7 @@ const ContactUs = () => {
               type="submit"
               className="mt-6 cursor-pointer rounded bg-primary p-2 text-sm font-medium text-white shadow-md transition-all hover:-translate-y-px hover:bg-primary/90 hover:shadow-lg md:text-base lg:mt-5 lg:px-6 lg:py-3"
             >
-              {t("sendMessage")}
+              Send message
             </button>
           </div>
         </section>

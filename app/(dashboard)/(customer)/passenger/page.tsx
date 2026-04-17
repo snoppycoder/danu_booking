@@ -266,22 +266,22 @@ export default function DanuBooking() {
       </section>
       <section className="py-16 px-4 bg-background">
         <div className="container mx-auto max-w-6xl">
-          {loading && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => (
-                <Card key={i} className="p-6 animate-pulse">
-                  <div className="h-4 bg-muted rounded w-3/4 mb-4"></div>
-                  <div className="h-3 bg-muted rounded w-1/2"></div>
-                </Card>
-              ))}
-            </div>
-          )}
           <div className="flex items-center justify-center gap-3 mb-5">
             <TrendingUp className="w-8 h-8 text-[#00a896]" />
             <h3 className="text-3xl font-bold text-foreground">
               {t("popularRoutes")}
             </h3>
           </div>
+          {loading && (
+            <div className="my-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(3)].map((_, i) => (
+                <Card key={i} className="p-6 animate-pulse">
+                  <div className="h-10 bg-muted rounded w-3/4 mb-4"></div>
+                  <div className="h-8 bg-muted rounded w-1/2"></div>
+                </Card>
+              ))}
+            </div>
+          )}
 
           {/* Has data */}
           {!loading && popularRoutes?.length > 0 && (
