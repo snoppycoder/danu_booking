@@ -7,12 +7,12 @@ import { useAuth } from "./authContext";
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const user_id = localStorage.getItem("user_id") ?? ""; // or get it from your auth context
+  const { user } = useAuth();
 
   useEffect(() => {
     const fetchNotifications = async () => {
       const all = (await db.notifications.toArray()).filter(
-        (notification) => notification.user_id === user_id,
+        (notification) => notification.user_id === user?.id,
       );
       setNotifications(all);
     };
