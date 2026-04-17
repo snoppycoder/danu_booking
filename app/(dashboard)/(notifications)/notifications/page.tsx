@@ -12,6 +12,7 @@ import { formatDistanceToNow } from "date-fns";
 import { Notification } from "@/lib/dixiedb";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/lib/authContext";
 const notificationConfig: Record<string, any> = {
   delay: {
     icon: Clock,
@@ -129,7 +130,8 @@ function NotificationItem({ notification }: { notification: Notification }) {
 }
 
 export default function NotificationsPage() {
-  const notifications = useNotifications();
+  const { user } = useAuth();
+  const notifications = useNotifications(user?.id ?? " ");
   const router = useRouter();
   return (
     <div className="min-h-screen relative bg-background">

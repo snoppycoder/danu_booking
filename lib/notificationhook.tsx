@@ -2,17 +2,16 @@
 import { useEffect, useState } from "react";
 import db from "./dixiedb";
 import { Notification } from "./dixiedb";
-import { useAuth } from "./authContext";
+
 // your typed Dexie DB
 
-export const useNotifications = () => {
+export const useNotifications = (id: string) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const { user } = useAuth();
 
   useEffect(() => {
     const fetchNotifications = async () => {
       const all = (await db.notifications.toArray()).filter(
-        (notification) => notification.user_id === user?.id,
+        (notification) => notification.user_id === id,
       );
       setNotifications(all);
     };
