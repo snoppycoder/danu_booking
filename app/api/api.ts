@@ -32,6 +32,20 @@ const api = axios.create({
   decompress: true,
   withCredentials: true,
 });
+const refreshApi = axios.create({
+  // baseURL: "/api/proxy",
+  baseURL: `https://danu.biisho.et/api/v1`,
+
+  headers: {
+    "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
+    // "Content-Type": "application/json",
+    Accept: "application/json",
+  },
+
+  responseType: "json",
+  decompress: true,
+  withCredentials: true,
+});
 
 const getCookie = (name: string) => {
   if (typeof document === "undefined") return null;
@@ -73,11 +87,12 @@ api.interceptors.response.use(
     const publicPath = ["/login", "/signup", "/verify"];
 
     if (error.response) {
+     
       const status = error.response.status ?? "";
       const data = error.response.data ?? "";
       const code = data.code ?? "";
       const detail = data.detail ?? "";
-      const path = window.location.href;
+      
 
       if (!publicPath.includes(window.location.pathname)) {
         console.log(detail, "error detail from response interceptor");
@@ -95,9 +110,13 @@ api.interceptors.response.use(
 
         if (status === 401) {
           console.log("........................\n");
-          console.log(error);
+          console.log(detail);
           console.log("........................\n");
           switch (detail) {
+            case "Not authenticated":
+              window.location.href = "/login"
+              break;
+
             case "ACCESS_TOKEN_EXPIRED":
               if (!originalRequest._retry) {
                 if (isRefreshing) {
@@ -106,8 +125,8 @@ api.interceptors.response.use(
                     failedQueue.push({ resolve, reject });
                   })
                     .then((token) => {
-                      // If your token is sent via headers, update it here:
-                      // originalRequest.headers.Authorization = `Bearer ${token}`;
+                      
+                      originalRequest.headers.Authorization = `Bearer ${token}`;
                       return api(originalRequest);
                     })
                     .catch((err) => {
@@ -119,17 +138,16 @@ api.interceptors.response.use(
                 isRefreshing = true;
 
                 try {
+                  console.log("\n\nTRYING TO REFRESH\n\n")
                   // Call your refresh endpoint
                   const refreshResponse = await authAPI.refresh();
-
-                  // Release the queue so all pending requests retry
-                  // If your API returns the new token in the body, pass it here:
+                  console.log("REFRESH RESPONSE", refreshResponse)
                   processQueue(null, refreshResponse?.token);
 
                   // Retry the original failed request
                   return api(originalRequest);
                 } catch (refreshError) {
-                  // If the refresh fails (e.g., refresh token is also dead), clear out
+                 console.log("Error occured while trying to refresh")
                   processQueue(refreshError, null);
                   await deleteAllCookies();
                   window.location.href = "/login";
@@ -171,7 +189,7 @@ api.interceptors.response.use(
 
             default:
               console.log("default 401 handler");
-              window.location.href = "/login";
+              // window.location.href = "/login";
               break;
           }
         } else if (status === 403) {
@@ -223,6 +241,8 @@ export const publicApi = {
     };
   },
 };
+
+
 
 export const tempAPI = {
   payment: async (body: {
@@ -386,7 +406,7 @@ export const authAPI = {
   },
   refresh: async () => {
     try {
-      const response = await api.post(`/auth/refresh`, {});
+      const response = await refreshApi.post(`/auth/refresh`, {});
       return response.data;
     } catch (error) {
       console.log(error);
