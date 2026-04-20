@@ -336,14 +336,14 @@ export default function GuestBooking() {
                               <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
+                          {/* <DropdownMenuContent align="end" className="w-44">
                             <DropdownMenuItem
                             // onClick={() => handleViewDetails(route)}
                             >
                               View Details
                             </DropdownMenuItem>
                             <DropdownMenuItem>Check Seats</DropdownMenuItem>
-                          </DropdownMenuContent>
+                          </DropdownMenuContent> */}
                         </DropdownMenu>
                       </div>
                       {/* Info Section */}
@@ -456,11 +456,11 @@ export default function GuestBooking() {
             operator_id={id}
           />
         )}
-        <TripDetailsModal
+        {/* <TripDetailsModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           tripData={selectedTrip}
-        />
+        /> */}
       </div>
     </div>
   );

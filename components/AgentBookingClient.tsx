@@ -447,11 +447,11 @@ export default function AgentBookingClient() {
           onSuccess={refetch}
           operator_id={id}
         />
-        <TripDetailsModal
+        {/* <TripDetailsModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           tripData={selectedTrip}
-        />
+        /> */}
       </div>
     </div>
   );
