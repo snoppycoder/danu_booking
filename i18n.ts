@@ -11,6 +11,7 @@ i18n.use(initReactI18next).init({
       translation: {
         welcomeBack: "Welcome Back",
         login: "Login",
+        viewDetails: "View Details",
         signIn: "Sign in to your Danu Booking account",
         phoneNumber: "Phone Number or Email",
         password: "Password",

@@ -23,7 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { TripDetailsModal } from "@/components/TripDetailModal";
-import SeatBookingDialog from "@/components/SeatBookingDialog";
+
 import { Toaster } from "sonner";
 import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
@@ -35,6 +35,35 @@ import "@/i18n";
 import { useTranslation } from "react-i18next";
 
 export default function DanuBooking() {
+  type TripDTO = {
+    id: string;
+    trip_date: string;
+    departure_time: string;
+
+    route: {
+      id: string;
+      from_city: string;
+      to_city: string;
+    };
+
+    operator: {
+      id: string;
+      name: string;
+    };
+
+    bus: {
+      id: string;
+      plate_no: string;
+    };
+
+    driver: {
+      id: string;
+      name: string;
+    };
+
+    price: number;
+    is_available: boolean;
+  };
   const searchParams = useSearchParams();
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
@@ -58,7 +87,7 @@ export default function DanuBooking() {
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
   const [useInfoToggle, setUseInfoToggle] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
+  const [selectedTrip, setSelectedTrip] = useState<TripDTO>(); //TripData
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [id, setId] = useState("");
   const [bus, setBus] = useState<
@@ -140,6 +169,13 @@ export default function DanuBooking() {
 
     setUseInfoToggle(true);
   }
+  async function handleViewDetails(route_id: string): Promise<void> {
+    const detail = await passengerApi.getTripDetails(route_id);
+    console.log(detail);
+    setSelectedTrip(detail);
+    setIsModalOpen(true);
+  }
+
   return (
     <div className="">
       <Toaster richColors position="top-right" />
@@ -302,8 +338,21 @@ export default function DanuBooking() {
               <Spinner />
             </div>
           ) : data?.items.length === 0 ? (
-            <div className="rounded-xl bg-white p-12 text-center shadow-sm">
-              <p className="text-gray-500">{t("noTripsFound")}</p>
+            <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm sm:p-16">
+              {/* Bus Icon Container */}
+              <div className="mb-4 rounded-full bg-blue-50 p-4 text-primary">
+                <svg
+                  className="h-8 w-8"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path d="M4 16c0 .88.39 1.67 1 2.22V20a1 1 0 001 1h1a1 1 0 001-1v-1h8v1a1 1 0 001 1h1a1 1 0 001-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm9 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM6 10V7h12v3H6z" />
+                </svg>
+              </div>
+
+              <h3 className="mb-1 text-lg font-semibold text-gray-900">
+                {t("noTripsFound")}
+              </h3>
             </div>
           ) : (
             <div className="w-full">
@@ -339,17 +388,13 @@ export default function DanuBooking() {
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
-                            // onClick={() => handleViewDetails(route)}
-                            >
-                              View Details
-                            </DropdownMenuItem>
+                            <DropdownMenuItem>View Details</DropdownMenuItem>
                             <DropdownMenuItem>Check Seats</DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
                       {/* Info Section */}
-                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-6">
+                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-5">
                         {/* Price */}
                         <div className="flex flex-col">
                           <span className="text-xs text-muted-foreground  tracking-wide">
@@ -394,14 +439,23 @@ export default function DanuBooking() {
                       </div>
 
                       {/* CTA */}
-                      <Button
-                        onClick={() => handleBookNow(route)}
-                        className="w-full h-11 rounded-xl font-semibold 
-          bg-primary hover:bg-primary/90 
-          shadow-md hover:shadow-lg transition-all duration-300"
-                      >
-                        {t("bookNow")}
-                      </Button>
+
+                      <div className="flex gap-4 flex-col md:flex-row">
+                        <Button
+                          onClick={() => handleBookNow(route)}
+                          className="w-full md:w-[50%] h-11 rounded-xl font-semibold bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all duration-300"
+                        >
+                          {t("bookNow")}
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          onClick={() => handleViewDetails(route.id)}
+                          className="w-full md:w-[50%]  h-11 rounded-xl font-semibold shadow-sm hover:shadow-md transition-all duration-300"
+                        >
+                          {t("viewDetails")}
+                        </Button>
+                      </div>
                     </div>
                   ))
                 ) : (
@@ -446,7 +500,7 @@ export default function DanuBooking() {
         )}
       </div>
 
-      <div className="hidden">
+      {useInfoToggle && (
         <SeatLayoutDialog
           toggle={useInfoToggle}
           setToggle={setUseInfoToggle}
@@ -458,12 +512,14 @@ export default function DanuBooking() {
           onSuccess={refetch}
           operator_id={id}
         />
+      )}
+      {isModalOpen && selectedTrip && (
         <TripDetailsModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
           tripData={selectedTrip}
         />
-      </div>
+      )}
     </div>
   );
 }

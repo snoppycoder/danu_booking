@@ -20,6 +20,7 @@ import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
 import "@/i18n";
 import { useTranslation } from "react-i18next";
+import { useQueryClient } from "@tanstack/react-query";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -44,6 +45,7 @@ export default function SeatBookingDialog({
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
+  const queryClient = useQueryClient();
   const { t } = useTranslation();
   // Passenger information state
   const [passengers, setPassengers] = useState<Passenger[]>([
@@ -140,6 +142,7 @@ export default function SeatBookingDialog({
       );
 
       toast.success("Seats successfully booked!", { duration: 3000 });
+      queryClient.invalidateQueries({ queryKey: ["history"] });
       onSucess?.();
 
       // Reset state
