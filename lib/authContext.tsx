@@ -11,7 +11,7 @@ import {
 import { getAccessToken, setAuthCookies } from "./auth";
 
 import Dexie from "dexie";
-
+import { Constants } from "@/lib/constant";
 import { LoginResponse, UseAuthUser, User } from "./model";
 import { authAPI } from "@/app/api/api";
 import { usePathname } from "next/navigation";
@@ -49,23 +49,10 @@ export const AuthProvider = ({
   const [user, setUser] = useState<UseAuthUser | null>(null);
   const [access_token, setAccessToken] = useState<string>("");
   const socketRef = useRef<WebSocket | null>(null);
-  const public_paths = [
-    "/",
-    "/login",
-    "/signup",
-    "/guest",
-    "/preference",
-    "/unauthorized",
-    "/verify-email",
-    "/_next",
-    "/forgot-password",
-    "/favicon.ico",
-    "/api",
-    "/tickets",
-  ];
   // Add a ref to handle our reconnection timeouts safely
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [count, setCount] = useState(0);
+  const public_paths = Constants.public_paths;
 
   useEffect(() => {
     const loadCount = async () => {

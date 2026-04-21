@@ -1,7 +1,6 @@
 "use client";
 
 import type React from "react";
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +8,8 @@ import { Mail, Phone, ArrowRight } from "lucide-react";
 import Link from "next/link";
 
 interface ForgotPasswordFormProps {
-  onSubmit: (contact: string) => void;
+  // FIXED: Now passes the type back to the parent
+  onSubmit: (contact: string, type: "email" | "phone") => void;
 }
 
 export default function ForgotPasswordForm({
@@ -44,10 +44,11 @@ export default function ForgotPasswordForm({
     }
 
     setIsLoading(true);
-    // Simulate API call
+
     setTimeout(() => {
       setIsLoading(false);
-      onSubmit(contact);
+      // FIXED: Pass both values
+      onSubmit(contact, contactType);
     }, 1000);
   };
 
@@ -93,7 +94,7 @@ export default function ForgotPasswordForm({
             }`}
           >
             <Phone size={20} />
-            Phone
+            Phone Number
           </button>
         </div>
 

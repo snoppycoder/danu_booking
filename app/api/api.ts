@@ -87,12 +87,10 @@ api.interceptors.response.use(
     const publicPath = ["/login", "/signup", "/verify"];
 
     if (error.response) {
-     
       const status = error.response.status ?? "";
       const data = error.response.data ?? "";
       const code = data.code ?? "";
       const detail = data.detail ?? "";
-      
 
       if (!publicPath.includes(window.location.pathname)) {
         console.log(detail, "error detail from response interceptor");
@@ -114,7 +112,7 @@ api.interceptors.response.use(
           console.log("........................\n");
           switch (detail) {
             case "Not authenticated":
-              window.location.href = "/login"
+              window.location.href = "/login";
               break;
 
             case "ACCESS_TOKEN_EXPIRED":
@@ -125,7 +123,6 @@ api.interceptors.response.use(
                     failedQueue.push({ resolve, reject });
                   })
                     .then((token) => {
-                      
                       originalRequest.headers.Authorization = `Bearer ${token}`;
                       return api(originalRequest);
                     })
@@ -138,16 +135,16 @@ api.interceptors.response.use(
                 isRefreshing = true;
 
                 try {
-                  console.log("\n\nTRYING TO REFRESH\n\n")
+                  console.log("\n\nTRYING TO REFRESH\n\n");
                   // Call your refresh endpoint
                   const refreshResponse = await authAPI.refresh();
-                  console.log("REFRESH RESPONSE", refreshResponse)
+                  console.log("REFRESH RESPONSE", refreshResponse);
                   processQueue(null, refreshResponse?.token);
 
                   // Retry the original failed request
                   return api(originalRequest);
                 } catch (refreshError) {
-                 console.log("Error occured while trying to refresh")
+                  console.log("Error occured while trying to refresh");
                   processQueue(refreshError, null);
                   await deleteAllCookies();
                   window.location.href = "/login";
@@ -241,8 +238,6 @@ export const publicApi = {
     };
   },
 };
-
-
 
 export const tempAPI = {
   payment: async (body: {
@@ -349,13 +344,16 @@ export const authAPI = {
   signup: async (body: {
     first_name: string;
     last_name: string;
-    email: string;
+    email?: string | null;
     phone: string;
     password: string; // need attention
   }) => {
     try {
-      const response = await api.post("/auth/register", body);
-      console.log(response);
+      const payload = { ...body };
+      if (!payload.email || payload.email.trim().length === 0) {
+        delete payload.email;
+      }
+      const response = await api.post("/auth/register", payload);
 
       return response.data;
     } catch (err) {
@@ -390,6 +388,18 @@ export const authAPI = {
     } catch (error) {
       console.log(error);
       throw error;
+    }
+  },
+  verifyPhone: async (phone: string, code: string) => {
+    try {
+      const response = await api.post(`/auth/verify-phone`, {
+        phone,
+        code,
+      });
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
   },
 

@@ -1,3 +1,4 @@
+import { sign } from "crypto";
 import i18n from "i18next";
 import { initReactI18next } from "react-i18next";
 
@@ -127,6 +128,30 @@ i18n.use(initReactI18next).init({
         confirmed: "Confirmed",
         operator: "Operator",
         passengers: "Passengers",
+
+        //
+        create_account: "Create Account",
+        join_danu_booking_and_start_booking_today:
+          "Join Danu Booking and start booking today",
+        first_name: "First Name",
+        last_name: "Last Name",
+        email_address_optional: "Email Address (Optional)",
+        phone_number: "Phone Number",
+
+        confirm_password: "Confirm Password",
+        i_read_and_agree_to_the: "I read and agree to the",
+        terms_and_conditions: "Terms & Conditions",
+        already_have_an_account: "Already have an account?",
+
+        passwords_do_not_match: "Passwords do not match",
+        you_must_accept_the_terms_and_conditions: "You must accept the ",
+        account_created_successfully_please_verify_your_account:
+          "Account created successfully, please verify your account",
+        failed_to_create_account: "Failed to create account",
+        you_have_to_read_and_review_the_terms_and_conditions_to_proceed:
+          "You have to read and review the terms and conditions to proceed",
+
+        signUp: "Sign Up",
       },
     },
 
@@ -248,8 +273,31 @@ i18n.use(initReactI18next).init({
         cancelled: "Haqameera",
         bookedOn: "Kan qabame",
         confirmed: "Mirkanaa'eera",
-
         passengers: "Imaltoota",
+
+        create_account: "Akkaawuntii Uumi",
+        join_danu_booking_and_start_booking_today:
+          "Danu Booking keessatti hirmaadhu fi har’a booking jalqabi",
+        first_name: "Maqaa Duraa",
+        last_name: "Maqaa Abbaa",
+        email_address_optional: "Teessoo Imeelii (Filannoo)",
+        phone_number: "Lakkoofsa Bilbilaa",
+
+        confirm_password: "Jecha Iccitii Mirkaneessi",
+        i_read_and_agree_to_the: "Ani dubbisee walii galeera",
+        terms_and_conditions: "Seerotaa fi Haalota",
+        already_have_an_account: "Akkaawuntii qabdaa?",
+
+        passwords_do_not_match: "Jechoonni iccitii wal hin siman",
+        you_must_accept_the_terms_and_conditions:
+          "Seerotaa fi haalota fudhachuu qabda",
+        account_created_successfully_please_verify_your_account:
+          "Akkaawuntiin milkaa’inaan uumameera, maaloo mirkaneessi",
+        failed_to_create_account: "Akkaawuntii uumuu hin milkoofne",
+        you_have_to_read_and_review_the_terms_and_conditions_to_proceed:
+          "Itti fufuuf seerotaa fi haalota dubbisuu fi ilaaluu qabda",
+
+        signUp: "Galmaa'i",
       },
     },
     ti: {
@@ -367,6 +415,28 @@ i18n.use(initReactI18next).init({
         cancelled: "ተሰሪዙ",
         bookedOn: "ዝተታሕዘሉ ዕለት",
         confirmed: "ተረጋጊጹ",
+
+        create_account: "ሕሳብ ፍጠር",
+        join_danu_booking_and_start_booking_today:
+          "ዳኑ ቡኪንግ ተቐላቐሉ እና ሎሚ ምዝገባ ጀምሩ",
+        first_name: "ሽም ቀዳማይ",
+        last_name: "ሽም ኣቦ",
+        email_address_optional: "ኢሜይል ኣድራሻ (ኣማራጺ)",
+        phone_number: "ቁጽሪ ስልኪ",
+
+        confirm_password: "መሕለፊ ቃል ኣረጋግጽ",
+        i_read_and_agree_to_the: "ኣንቢበ እና ተስማሚየ ኣለኹ ን",
+        terms_and_conditions: "ውዕላትን ኩነታትን",
+        already_have_an_account: "ቀድሞ ሕሳብ ኣለካ?",
+
+        passwords_do_not_match: "መሕለፊ ቃላት ኣይሰማምዑን",
+        you_must_accept_the_terms_and_conditions: "ውዕላትን ኩነታትን ክትቅበል ኣለካ",
+        account_created_successfully_please_verify_your_account:
+          "ሕሳብካ ብትኽክል ተፈጢሩ፣ በጃኻ ኣረጋግጾ",
+        failed_to_create_account: "ሕሳብ ምፍጣር ኣይተሳኸለን",
+        you_have_to_read_and_review_the_terms_and_conditions_to_proceed:
+          "ንምቕጻል ውዕላትን ኩነታትን ክትንብብን ክትምርምርን ኣለካ",
+        signUp: "ተመዝገብ",
       },
     },
     am: {
@@ -488,6 +558,28 @@ i18n.use(initReactI18next).init({
         confirmed: "ተረጋግጧል",
 
         passengers: "ተሳፋሪዎች",
+
+        create_account: "መለያ ፍጠር",
+        join_danu_booking_and_start_booking_today:
+          "ዳኑ ቡኪንግን ይቀላቀሉ እና ዛሬ መያዝ ይጀምሩ",
+        first_name: "የመጀመሪያ ስም",
+        last_name: "የአባት ስም",
+        email_address_optional: "የኢሜይል አድራሻ (አማራጭ)",
+        phone_number: "ስልክ ቁጥር",
+
+        confirm_password: "የይለፍ ቃልን ያረጋግጡ",
+        i_read_and_agree_to_the: "አንብቤ እና ተስማምቻለሁ ከ",
+        terms_and_conditions: "ውሎች እና ሁኔታዎች",
+        already_have_an_account: "መለያ አለዎት?",
+
+        passwords_do_not_match: "የይለፍ ቃላት አይዛመዱም",
+        you_must_accept_the_terms_and_conditions: "ውሎችን እና ሁኔታዎችን መቀበል አለብዎት",
+        account_created_successfully_please_verify_your_account:
+          "መለያው በተሳካ ሁኔታ ተፈጥሯል፣ እባክዎ ያረጋግጡት",
+        failed_to_create_account: "መለያ መፍጠር አልተሳካም",
+        you_have_to_read_and_review_the_terms_and_conditions_to_proceed:
+          "ለመቀጠል ውሎችን እና ሁኔታዎችን ማንበብ እና ማረጋገጥ አለብዎት",
+        signUp: "ይመዝገቡ",
       },
     },
   },

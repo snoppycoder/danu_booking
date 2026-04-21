@@ -173,7 +173,7 @@ export default function LoginPage() {
               href="/signup"
               className="text-teal-600 hover:text-teal-700 font-semibold"
             >
-              {t("login")}
+              {t("signUp")}
             </Link>
           </p>
         </div>

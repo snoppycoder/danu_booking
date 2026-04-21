@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { decodeJWT } from "./lib/jwt";
+import { Constants } from "./lib/constant";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -11,21 +12,6 @@ export function proxy(request: NextRequest) {
 
   const isUnauthorizedPage = pathname.startsWith("/unauthorized");
   const isNextInternal = pathname.startsWith("/_next");
-
-  const public_paths = [
-    "/",
-    "/login",
-    "/signup",
-    "/guest",
-    "/preference",
-    "/unauthorized",
-    "/verify-email",
-    "/_next",
-    "/forgot-password",
-    "/favicon.ico",
-    "/api",
-    "/tickets",
-  ];
 
   const token = request.cookies.get("access_token")?.value;
   const decoded = token ? decodeJWT(token) : null;
@@ -56,7 +42,7 @@ export function proxy(request: NextRequest) {
   }
 
   if (!userRole) {
-    if (public_paths.some((path) => pathname.startsWith(path))) {
+    if (Constants.public_paths.some((path) => pathname.startsWith(path))) {
       return NextResponse.next();
     }
 

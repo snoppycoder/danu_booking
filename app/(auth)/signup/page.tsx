@@ -14,11 +14,14 @@ import { isAxiosError } from "axios";
 import { TermsConditionsModal } from "@/components/TermsAndConditionModal";
 import { normalize } from "path";
 import { normalizeEthiopianPhone } from "@/lib/common_functions";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 
 export default function SignupPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [showTermsModal, setShowTermsModal] = useState(false);
+  const { t } = useTranslation();
   const router = useRouter();
   const [onRead, setOnRead] = useState(false);
   const [formData, setFormData] = useState({
@@ -41,7 +44,7 @@ export default function SignupPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Signup attempt:", formData);
+    localStorage.setItem("phone_number", formData.phone);
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match");
       return;
@@ -65,8 +68,8 @@ export default function SignupPage() {
 
       toast.success("Account created successfully, please verify your account");
       setTimeout(() => {
-        router.replace("/login");
-      }, 1500);
+        router.replace(`/verify-mobile?phone=${formData.phone}`);
+      }, 1000);
     } catch (error) {
       console.log("Error in handle submit", error);
       if (isAxiosError(error)) {
@@ -126,17 +129,17 @@ export default function SignupPage() {
         isOpen={showTermsModal}
         onClose={() => setShowTermsModal(false)}
       />
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 flex items-center justify-center px-4 py-12">
+      <div className="min-h-screen bg-linear-to-br from-teal-50 to-blue-50 flex items-center justify-center px-4 py-12">
         <div className="w-full max-w-md">
           {/* Card Container */}
           <div className="bg-white rounded-lg shadow-lg p-8">
             {/* Header */}
             <div className="text-center mb-8">
               <h1 className="text-3xl font-bold text-teal-600 mb-2">
-                Create Account
+                {t("create_account")}
               </h1>
               <p className="text-gray-600">
-                Join Danu Booking and start booking today
+                {t("join_danu_booking_and_start_booking_today")}
               </p>
             </div>
 
@@ -149,7 +152,7 @@ export default function SignupPage() {
                     htmlFor="first_name"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
-                    First Name
+                    {t("first_name")}
                   </label>
                   <input
                     id="first_name"
@@ -167,7 +170,7 @@ export default function SignupPage() {
                     htmlFor="last_name"
                     className="block text-sm font-medium text-gray-700 mb-2"
                   >
-                    Last Name
+                    {t("last_name")}
                   </label>
                   <input
                     id="last_name"
@@ -186,7 +189,7 @@ export default function SignupPage() {
                   htmlFor="email"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Email Address (Optional)
+                  {t("email_address_optional")}
                 </label>
                 <input
                   id="email"
@@ -204,7 +207,7 @@ export default function SignupPage() {
                   htmlFor="phone"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Phone Number <span className="text-red-500"> *</span>
+                  {t("phone_number")} <span className="text-red-500"> *</span>
                 </label>
                 <input
                   id="phone"
@@ -223,7 +226,7 @@ export default function SignupPage() {
                   htmlFor="password"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Password <span className="text-red-500"> *</span>
+                  {t("password")} <span className="text-red-500"> *</span>
                 </label>
                 <div className="relative">
                   <input
@@ -256,7 +259,8 @@ export default function SignupPage() {
                   htmlFor="confirmPassword"
                   className="block text-sm font-medium text-gray-700 mb-2"
                 >
-                  Confirm Password <span className="text-red-500"> *</span>
+                  {t("confirm_password")}{" "}
+                  <span className="text-red-500"> *</span>
                 </label>
                 <div className="relative">
                   <input
@@ -299,7 +303,7 @@ export default function SignupPage() {
                   required
                 />
                 <span className="ml-2 text-sm text-gray-600">
-                  I read and agree to the{" "}
+                  {t("you_must_accept_the_terms_and_conditions")}{" "}
                   <button
                     type="button"
                     onClick={() => setShowTermsModal(true)}
@@ -314,17 +318,17 @@ export default function SignupPage() {
                 type="submit"
                 className="mb-2.5 cursor-pointer bg-primary w-full hover:bg-coral-700 text-white font-semibold py-3 rounded-lg transition-colors mt-6"
               >
-                Create Account
+                {t("create_account")}
               </Button>
             </form>
 
             <p className="text-center mt-2.5 text-gray-600">
-              Already have an account?{" "}
+              {t("already_have_an_account")}{" "}
               <Link
-                href="/login"
+                href={`/login`}
                 className="text-teal-600 hover:text-teal-700 font-semibold"
               >
-                Sign in
+                {t("login")}
               </Link>
             </p>
           </div>
