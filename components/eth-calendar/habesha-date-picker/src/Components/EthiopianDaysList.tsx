@@ -45,7 +45,7 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
   } = useContext(EtDatePickerContext);
 
   const [selectedDate, setSelectedDate] = useState<EthiopianDate.EtDate | null>(
-    value ? EthiopianDate.toEth(value) : null
+    value ? EthiopianDate.toEth(value) : null,
   );
 
   const getEtDate = (day: number): EthiopianDate.EtDate => {
@@ -65,9 +65,9 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
       (minDate instanceof Date || Boolean(new Date(minDate as string))) &&
       EthiopianDate.compareDates(
         EthiopianDate.toEth(
-          minDate instanceof Date ? minDate : new Date(minDate as string)
+          minDate instanceof Date ? minDate : new Date(minDate as string),
         ),
-        date
+        date,
       ) === 1
     ) {
       return true;
@@ -77,9 +77,9 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
       (maxDate instanceof Date || Boolean(new Date(maxDate as string))) &&
       EthiopianDate.compareDates(
         EthiopianDate.toEth(
-          maxDate instanceof Date ? maxDate : new Date(maxDate as string)
+          maxDate instanceof Date ? maxDate : new Date(maxDate as string),
         ),
-        date
+        date,
       ) === -1
     ) {
       return true;
@@ -102,12 +102,20 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
 
   const isDayRangeStart = (day: number): boolean => {
     const currentDayGregorian = EthiopianDate.toGreg(getEtDate(day));
-    return !!(isRange && startDate && currentDayGregorian.getTime() === startDate.getTime());
+    return !!(
+      isRange &&
+      startDate &&
+      currentDayGregorian.getTime() === startDate.getTime()
+    );
   };
 
   const isDayRangeEnd = (day: number): boolean => {
     const currentDayGregorian = EthiopianDate.toGreg(getEtDate(day));
-    return !!(isRange && endDate && currentDayGregorian.getTime() === endDate.getTime());
+    return !!(
+      isRange &&
+      endDate &&
+      currentDayGregorian.getTime() === endDate.getTime()
+    );
   };
 
   const isDayInRange = (day: number): boolean => {
@@ -118,13 +126,27 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
 
     if (endDate) {
       const endMs = endDate.getTime();
-      return currentDayGregorian.getTime() > Math.min(startMs, endMs) && currentDayGregorian.getTime() < Math.max(startMs, endMs);
+      return (
+        currentDayGregorian.getTime() > Math.min(startMs, endMs) &&
+        currentDayGregorian.getTime() < Math.max(startMs, endMs)
+      );
     } else if (hoveredEtDate) {
       const hoveredMs = EthiopianDate.toGreg(hoveredEtDate).getTime();
-      return currentDayGregorian.getTime() > Math.min(startMs, hoveredMs) && currentDayGregorian.getTime() < Math.max(startMs, hoveredMs);
+      return (
+        currentDayGregorian.getTime() > Math.min(startMs, hoveredMs) &&
+        currentDayGregorian.getTime() < Math.max(startMs, hoveredMs)
+      );
     }
     return false;
   };
+
+  // --- THE FIX: Calculate what day of the week the 1st of the month is ---
+  const firstDayOfMonthGregorian = EthiopianDate.toGreg(getEtDate(1));
+
+  // getDay() returns 0 for Sunday, 1 for Monday, etc.
+  // If your EthiopianDate.shortDays array starts on Sunday (Ehud), this works perfectly.
+  // If it starts on Monday (Segno), you would change this to: const startDayOfWeek = (firstDayOfMonthGregorian.getDay() + 6) % 7;
+  const startDayOfWeek = firstDayOfMonthGregorian.getDay();
 
   return (
     <>
@@ -160,6 +182,14 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
           gap: gap,
         }}
       >
+        {/* THE FIX: Add empty placeholders before the 1st of the month */}
+        {Array.from({ length: startDayOfWeek }).map((_, index) => (
+          <Box
+            key={`empty-${index}`}
+            sx={{ width: cellSize, height: cellSize }}
+          />
+        ))}
+
         {Array.from(
           {
             length: EthiopianDate.ethiopianMonthLength(month, year),
@@ -176,7 +206,9 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
                   if (isRange) {
                     if (!startDate || (startDate && endDate)) {
                       onDateChange([currentDayGregorian, null]);
-                    } else if (currentDayGregorian.getTime() < startDate.getTime()) {
+                    } else if (
+                      currentDayGregorian.getTime() < startDate.getTime()
+                    ) {
                       onDateChange([currentDayGregorian, startDate]);
                     } else {
                       onDateChange([startDate, currentDayGregorian]);
@@ -201,26 +233,28 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
                 sx={{
                   width: cellSize,
                   height: cellSize,
-                  backgroundColor:
-                    isDayRangeStart(day)
-                      ? "primary.main"
-                      : isDayRangeEnd(day)
+                  backgroundColor: isDayRangeStart(day)
+                    ? "primary.main"
+                    : isDayRangeEnd(day)
                       ? "primary.main"
                       : isDayInRange(day)
-                      ? "action.selected"
-                      : isSelectedDate(day)
-                      ? "primary.dark"
-                      : "transparent",
-                  borderRadius:
-                    isDayRangeStart(day)
-                      ? "50% 0 0 50%"
-                      : isDayRangeEnd(day)
+                        ? "action.selected"
+                        : isSelectedDate(day)
+                          ? "primary.dark"
+                          : "transparent",
+                  borderRadius: isDayRangeStart(day)
+                    ? "50% 0 0 50%"
+                    : isDayRangeEnd(day)
                       ? "0 50% 50% 0"
                       : isDayInRange(day)
-                      ? "0"
-                      : "50%",
+                        ? "0"
+                        : "50%",
                   color:
-                    isDayRangeStart(day) || isDayRangeEnd(day) ? "white" : isSelectedDate(day) ? "white" : "black",
+                    isDayRangeStart(day) || isDayRangeEnd(day)
+                      ? "white"
+                      : isSelectedDate(day)
+                        ? "white"
+                        : "black",
                   border:
                     day === today.Day &&
                     month === today.Month &&
@@ -229,24 +263,28 @@ const EthiopianDaysList: React.FC<EthiopianDaysListProps> = ({
                     !isDayRangeStart(day) &&
                     !isDayRangeEnd(day) &&
                     !isDayInRange(day)
-                      ? `1px solid ${today.Month === month && today.Year === year ? 'primary.main' : 'transparent'}`
+                      ? `1px solid ${today.Month === month && today.Year === year ? "primary.main" : "transparent"}`
                       : "none",
                   "&:hover": {
                     backgroundColor:
-                      (isDayRangeStart(day) || isDayRangeEnd(day))
+                      isDayRangeStart(day) || isDayRangeEnd(day)
                         ? "primary.dark"
                         : isDayInRange(day)
-                        ? "action.hover"
-                        : undefined,
+                          ? "action.hover"
+                          : undefined,
                     color:
-                      isDayRangeStart(day) || isDayRangeEnd(day) ? "white" : isSelectedDate(day) ? "white" : "black",
+                      isDayRangeStart(day) || isDayRangeEnd(day)
+                        ? "white"
+                        : isSelectedDate(day)
+                          ? "white"
+                          : "black",
                   },
                 }}
               >
                 <Typography variant="body2">{day}</Typography>
               </IconButton>
             );
-          }
+          },
         )}
       </Box>
     </>
