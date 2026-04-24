@@ -123,7 +123,7 @@ export default function VerifyMobilePage() {
         </div>
       }
     >
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-slate-100 p-4 font-sans">
+      <div className="min-h-screen flex items-center justify-center bg-linear-to-br from-slate-50 to-slate-100 p-4 font-sans">
         <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
           {/* Header Section */}
           <div className="text-center mb-8">
