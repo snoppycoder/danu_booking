@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Bell, Menu, X } from "lucide-react";
+import { Bell, Check, Menu, X } from "lucide-react";
 import { Button } from "./ui/button";
 import Link from "next/link";
 import { useAuth } from "@/lib/authContext";
@@ -129,6 +129,9 @@ export default function Navbar(props: NavbarProps) {
                           setVal("English");
                         }}
                       >
+                        {val == "English" && (
+                          <Check className="text-green-500" size={12} />
+                        )}
                         English
                       </DropdownMenuItem>
 
@@ -138,6 +141,9 @@ export default function Navbar(props: NavbarProps) {
                           setVal("Amharic");
                         }}
                       >
+                        {val == "Amharic" && (
+                          <Check className="text-green-500" size={12} />
+                        )}
                         አማርኛ (Amharic)
                       </DropdownMenuItem>
 
@@ -147,6 +153,9 @@ export default function Navbar(props: NavbarProps) {
                           setVal("Afaan Oromoo");
                         }}
                       >
+                        {val == "Afaan Oromoo" && (
+                          <Check className="text-green-500" size={12} />
+                        )}
                         Afaan Oromoo
                       </DropdownMenuItem>
 
@@ -156,6 +165,9 @@ export default function Navbar(props: NavbarProps) {
                           setVal("Tigrinya");
                         }}
                       >
+                        {val == "Tigrinya" && (
+                          <Check className="text-green-500" size={12} />
+                        )}
                         ትግርኛ (Tigrinya)
                       </DropdownMenuItem>
                     </DropdownMenuContent>
@@ -256,7 +268,7 @@ export default function Navbar(props: NavbarProps) {
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
-              href="/history"
+              href="/passenger/history"
               className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
             >
               {t("myBookings")}

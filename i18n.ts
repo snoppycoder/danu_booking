@@ -443,7 +443,7 @@ i18n.use(initReactI18next).init({
       translation: {
         welcomeBack: "እንኳን ደህና መጡ",
         signIn: "ወደ ዳኑ ቡኪንግ አካውንት ይግቡ",
-        phoneNumber: "ስልክ ቁጥር",
+        phoneNumber: "ስልክ ቁጥር ወይም ኢሜይል",
         password: "የሚስጥር ቁጥር",
         rememberMe: "አስታውሰኝ",
         forgotPassword: "የሚስጥር ቁጥር ረሳዎት?",

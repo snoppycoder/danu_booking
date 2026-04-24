@@ -203,7 +203,7 @@ export const AuthProvider = ({
       }
 
       if (response.access_token.length > 0) {
-        setAccessToken(response.access_token);
+        // setAccessToken(response.access_token);
         handleSocketConnections(response.access_token);
 
         setUser(response.user_info);

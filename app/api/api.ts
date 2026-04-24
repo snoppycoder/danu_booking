@@ -7,6 +7,7 @@ import {
   getCSRFToken,
   getRefreshToken,
   getSessionId,
+  setAccessToken,
 } from "@/lib/auth";
 import { getClientToken } from "@/lib/common_functions";
 import {
@@ -38,7 +39,7 @@ const refreshApi = axios.create({
 
   headers: {
     "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
-    // "Content-Type": "application/json",
+    "Content-Type": "application/json",
     Accept: "application/json",
   },
 
@@ -61,9 +62,8 @@ const api_webhook = axios.create({
     Accept: "application/json",
   },
   baseURL: "https://chapa-webhook-bisho.onrender.com",
-  // baseURL: "http://localhost:8000",
 });
-// --- Refresh Token Concurrency Management ---
+
 let isRefreshing = false;
 let failedQueue: Array<{
   resolve: (value?: any) => void;
@@ -80,6 +80,31 @@ const processQueue = (error: any, token: string | null = null) => {
   });
   failedQueue = [];
 };
+// 1. Request Interceptor (Runs before every call)
+api.interceptors.request.use(
+  async (config) => {
+    // This will log on every single call
+    const refresh_token = (await getRefreshToken()) ?? "No token found";
+
+    console.log(`🚀 API Call to: ${config.url}`);
+    console.log("Current Refresh Token:", refresh_token);
+
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  },
+);
+
+// 2. Response Interceptor (Keep this to handle errors)
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    // Log only if the call fails
+    console.error("❌ API Error:", error.response?.status, error.config.url);
+    return Promise.reject(error);
+  },
+);
 api.interceptors.response.use(
   (response) => response,
   async (error) => {
@@ -108,13 +133,11 @@ api.interceptors.response.use(
 
         if (status === 401) {
           console.log("........................\n");
+          console.log(error);
           console.log(detail);
           console.log("........................\n");
           switch (detail) {
             case "Not authenticated":
-              window.location.href = "/login";
-              break;
-
             case "ACCESS_TOKEN_EXPIRED":
               if (!originalRequest._retry) {
                 if (isRefreshing) {
@@ -137,7 +160,15 @@ api.interceptors.response.use(
                 try {
                   console.log("\n\nTRYING TO REFRESH\n\n");
                   // Call your refresh endpoint
-                  const refreshResponse = await authAPI.refresh();
+                  const refresh_token = (await getRefreshToken()) ?? "";
+
+                  const refreshResponse = await authAPI.refresh(refresh_token);
+                  console.log("REFRESH RESPONSE", refreshResponse);
+                  setAccessToken(
+                    refreshResponse.token,
+                    refreshResponse.refresh_expiry,
+                  );
+
                   console.log("REFRESH RESPONSE", refreshResponse);
                   processQueue(null, refreshResponse?.token);
 
@@ -414,9 +445,11 @@ export const authAPI = {
       throw err;
     }
   },
-  refresh: async () => {
+  refresh: async (refresh_token: string) => {
     try {
-      const response = await refreshApi.post(`/auth/refresh`, {});
+      const response = await refreshApi.post(`/auth/refresh`, {
+        refresh_token,
+      });
       return response.data;
     } catch (error) {
       console.log(error);
@@ -995,6 +1028,24 @@ export const DanuAgentApi = {
 };
 
 export const passengerApi = {
+  transferBooking: async (
+    booking_id: string,
+    passenger: Passenger,
+    ticket_id: string,
+  ) => {
+    try {
+      const response = await api.post(`/user/bookings/${booking_id}/transfer`, {
+        new_passenger: passenger,
+        ticket_ids: [ticket_id],
+        transfer_key: crypto.randomUUID(),
+      });
+      return response.data;
+    } catch (error) {
+      console.log(error, "error from transfer booking");
+      throw error;
+    }
+  },
+
   getBookingHistory: async (page?: number, per_page?: number) => {
     try {
       const response = await api.get(`/user/bookings`, {

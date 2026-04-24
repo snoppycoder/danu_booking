@@ -14,7 +14,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { jsPDF } from "jspdf";
 import { usePassengerHistory } from "@/components/Query";
-import { History } from "@/lib/model";
+import { History, Passenger } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import { useState } from "react";
 
@@ -22,6 +22,7 @@ import CancelTripDialog from "./CancelBookingConfirm";
 import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
 import { useTranslation } from "react-i18next";
+import TransferTicketDialog from "./TransferTicketDialog";
 
 function formatEthiopianTime(date: Date): string {
   let hour = date.getHours();
@@ -210,13 +211,22 @@ export default function PassengerHistoryPageClient() {
     refetch,
   } = usePassengerHistory(currentPage, numberOfCard);
   const [open, setOpen] = useState(false);
-
+  const [openTransfer, setOpenTransfer] = useState(false);
   const canCancel = (departure_at: string) => {
     const now = new Date().getTime();
     const departure = new Date(departure_at).getTime();
     const fiveDaysAfterDeparture = departure + 5 * 24 * 60 * 60 * 1000;
     return now <= fiveDaysAfterDeparture;
   };
+  const [passenger, setPassenger] = useState<Passenger>({
+    name: "",
+    email: "",
+    phone: "",
+    id_number: "",
+    is_child: false,
+    tin_number: "",
+    company_name: "",
+  });
 
   async function cancelBooking(id: string) {
     await passengerApi.cancelBooking(id);
@@ -438,7 +448,7 @@ export default function PassengerHistoryPageClient() {
                       )}
                     </p>
 
-                    <div className="flex w-full sm:w-auto items-center gap-3">
+                    <div className="w-full grid grid-cols-1 md:grid-cols-3 gap-3">
                       {booking.booking_status === "confirmed" && (
                         <Button
                           className="w-full sm:w-auto bg-white hover:bg-gray-50 text-gray-700 border border-gray-200"
@@ -462,6 +472,19 @@ export default function PassengerHistoryPageClient() {
                             }}
                           >
                             Cancel Booking
+                          </Button>
+                        )}
+                      {booking.booking_status === "confirmed" &&
+                        canCancel(booking.departure_at) && (
+                          <Button
+                            size="sm"
+                            className="w-full sm:w-auto"
+                            onClick={() => {
+                              setBookingId(booking.booking_id);
+                              setOpenTransfer(true);
+                            }}
+                          >
+                            Transfer Seats
                           </Button>
                         )}
                     </div>
@@ -509,13 +532,28 @@ export default function PassengerHistoryPageClient() {
         )}
       </div>
 
-      <CancelTripDialog
-        open={open}
-        setOpen={setOpen}
-        onConfirm={() => {
-          cancelBooking(bookingId);
-        }}
-      />
+      {open && (
+        <CancelTripDialog
+          open={open}
+          setOpen={setOpen}
+          onConfirm={() => {
+            cancelBooking(bookingId);
+          }}
+        />
+      )}
+      {openTransfer && (
+        <TransferTicketDialog
+          open={openTransfer}
+          onOpenChange={setOpenTransfer}
+          passenger={passenger}
+          onPassengerChange={setPassenger}
+          onSubmit={async () => {
+            await passengerApi.transferBooking(bookingId, passenger, "");
+            setOpenTransfer(false);
+            refetch();
+          }}
+        />
+      )}
     </div>
   );
 }
