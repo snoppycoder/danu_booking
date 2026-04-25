@@ -60,10 +60,10 @@ export default function LoginPage() {
       <Toaster richColors position="top-right"></Toaster>
       <div className="w-full max-w-md">
         {/* Animated Border Container */}
-        <div className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all ease-in-out p-[2px] group">
+        <div className="relative rounded-2xl overflow-hidden shadow-lg hover:shadow-2xl transition-all ease-in-out p-0.5 group">
           {/* Spinning Light Background */}
           {/* We use text-primary and currentColor to safely map to your Tailwind primary color */}
-          <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 animate-[spin_3s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_75%,currentColor)] text-primary opacity-80" />
+          <div className="absolute top-1/2 left-1/2 w-[200%] h-[200%] -translate-x-1/2 -translate-y-1/2 animate-[spin_5s_linear_infinite] bg-[conic-gradient(from_0deg,transparent_75%,currentColor)] text-primary opacity-80" />
 
           {/* Inner Form Card */}
           <div className="relative bg-white rounded-[14px] p-8 w-full z-10">
@@ -158,7 +158,7 @@ export default function LoginPage() {
                 {isLoading ? (
                   <>
                     <Loader2 className="w-5 h-5 animate-spin mr-2" />
-                    {t("loading") || "Loading..."}
+                    {/* {t("loading") || "Loading..."} */}
                   </>
                 ) : (
                   t("login")
