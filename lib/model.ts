@@ -11,6 +11,7 @@ export interface AddOperatorForm {
 export interface History {
   booking_id: string;
   booking_ref: string;
+  ticket_ids: string[];
   booked_at: string;
   booking_status: string;
   trip_id: string;

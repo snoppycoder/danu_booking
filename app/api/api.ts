@@ -175,10 +175,14 @@ api.interceptors.response.use(
                   // Retry the original failed request
                   return api(originalRequest);
                 } catch (refreshError) {
-                  console.log("Error occured while trying to refresh");
+                  console.log(
+                    "Error occured while trying to refresh taking you to the login page",
+                    refreshError,
+                  );
                   processQueue(refreshError, null);
                   await deleteAllCookies();
-                  window.location.href = "/login";
+
+                  // window.location.href = "/login";
                   return Promise.reject(refreshError);
                 } finally {
                   // Reset the lock
@@ -1031,12 +1035,12 @@ export const passengerApi = {
   transferBooking: async (
     booking_id: string,
     passenger: Passenger,
-    ticket_id: string,
+    ticket_ids: string[],
   ) => {
     try {
       const response = await api.post(`/user/bookings/${booking_id}/transfer`, {
         new_passenger: passenger,
-        ticket_ids: [ticket_id],
+        ticket_ids: ticket_ids,
         transfer_key: crypto.randomUUID(),
       });
       return response.data;

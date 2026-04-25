@@ -24,6 +24,7 @@ import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src";
 import { useAuth } from "@/lib/authContext";
+import Link from "next/link";
 
 export default function DanuBooking() {
   const router = useRouter();
@@ -38,33 +39,29 @@ export default function DanuBooking() {
   const [date, setDate] = useState<Date | null>();
   const { t } = useTranslation();
 
-  // --- PARTNER SLIDESHOW LOGIC ---
+  // --- PARTNER LOGOS ---
   const PARTNER_LOGOS = [
-    "/images/partner1.png",
-    "/images/partner2.png",
-    "/images/partner3.png",
-    "/images/partner4.png",
-    "/images/partner5.png",
-    // You can add more image paths here to increase the slideshow length!
+    "/images/ABAY.png",
+    "/images/Airbus.png",
+    "/images/Alifa.png",
+    "/images/Buna.jfif",
+    "/images/Africa.png",
+    "/images/Dearm.png",
+    "/images/Ghion.png",
+    "/images/GoldenBus.jfif",
+    "/images/NoahBus.jfif",
+    "/images/HabeshaBus.jfif",
+    "/images/Odaa_Bus.png",
+    "/images/selamBus.png",
+    "/images/uegnaBus.png",
+    "/images/WaliyaBus.jfif",
   ];
 
-  const [partnerIndex, setPartnerIndex] = useState(0);
-
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setPartnerIndex((prevIndex) => (prevIndex + 1) % PARTNER_LOGOS.length);
-    }, 3000); // Cycles every 3 seconds
-    return () => clearInterval(interval);
-  }, []);
-
-  const arcClasses = [
-    "w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full shadow-lg bg-white flex items-center justify-center overflow-hidden transform translate-y-12 sm:translate-y-16 -mr-4 sm:-mr-8 z-0 transition-all duration-500",
-    "w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full shadow-2xl bg-white flex items-center justify-center overflow-hidden transform -translate-y-4 sm:-translate-y-6 z-10 transition-all duration-500",
-    "w-24 h-24 sm:w-32 sm:h-32 md:w-36 md:h-36 rounded-full shadow-2xl bg-white flex items-center justify-center overflow-hidden transform -translate-y-8 sm:-translate-y-12 mx-4 sm:mx-8 z-20 transition-all duration-500",
-    "w-20 h-20 sm:w-28 sm:h-28 md:w-32 md:h-32 rounded-full shadow-2xl bg-white flex items-center justify-center overflow-hidden transform -translate-y-4 sm:-translate-y-6 z-10 transition-all duration-500",
-    "w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-full shadow-lg bg-white flex items-center justify-center overflow-hidden transform translate-y-12 sm:translate-y-16 -ml-4 sm:-ml-8 z-0 transition-all duration-500",
+  const SCROLLING_LOGOS = [
+    ...PARTNER_LOGOS,
+    ...PARTNER_LOGOS,
+    ...PARTNER_LOGOS,
   ];
-  // -------------------------------
 
   const [form, setForm] = useState({
     route_from: "",
@@ -77,7 +74,6 @@ export default function DanuBooking() {
     const fetchPopularRoutes = async () => {
       try {
         const response = await passengerApi.getPopularRoutes();
-
         setPopularRoutes(response.slice(0, 6)); // Show top 6 routes
       } catch (error) {
         console.error(error);
@@ -129,10 +125,8 @@ export default function DanuBooking() {
     try {
       setTimeout(async () => {
         const response = await passengerApi.autoComplete(value, "origin");
-
         setSuggestionsFrom(response);
         setShowDropdownFrom(true);
-        console.log(response);
       }, 300);
     } catch (error) {
       console.error("Auto complete error:", error);
@@ -143,10 +137,8 @@ export default function DanuBooking() {
     try {
       setTimeout(async () => {
         const response = await passengerApi.autoComplete(value, "destination");
-
         setSuggestionsTo(response);
         setShowDropdownTo(true);
-        console.log(response);
       }, 200);
     } catch (error) {
       console.error("Auto complete error:", error);
@@ -154,13 +146,28 @@ export default function DanuBooking() {
   }
 
   const handleSelect = (newSelected: Date | undefined) => {
-    // Update the selected dates
     setDate(newSelected);
   };
 
   return (
     <div className="w-full">
       <Toaster richColors position="top-right"></Toaster>
+
+      {/* --- Inline CSS for Marquee Animation --- */}
+      <style>{`
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-100% / 3)); }
+        }
+        .animate-scroll {
+          display: flex;
+          width: max-content;
+          animation: scroll 30s linear infinite;
+        }
+        .animate-scroll:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
 
       <section className="relative py-20 px-4 sm:py-32 text-center text-white overflow-hidden">
         <video
@@ -185,7 +192,7 @@ export default function DanuBooking() {
             <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
               <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-left">
                     {t("from")}
                   </label>
                   <div className="relative">
@@ -200,7 +207,7 @@ export default function DanuBooking() {
                         setForm({ ...form, route_from: value });
                         handleAutoCompleteFrom(value);
                       }}
-                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896] text-black"
                     />
 
                     {showDropdownFrom && suggestionsFrom.length > 0 && (
@@ -210,7 +217,7 @@ export default function DanuBooking() {
                             key={idx}
                             type="button"
                             onClick={() => handleSelectFromCity(city)}
-                            className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                            className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0 text-black"
                           >
                             <MapPin className="w-4 h-4 shrink-0" />
                             <span className="text-sm font-medium">{city}</span>
@@ -222,7 +229,7 @@ export default function DanuBooking() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-left">
                     {t("to")}
                   </label>
                   <div className="relative">
@@ -235,7 +242,7 @@ export default function DanuBooking() {
                         handleAutoCompleteTo(e.target.value);
                         setForm({ ...form, route_to: e.target.value });
                       }}
-                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                      className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896] text-black"
                     />
                     {showDropdownTo && suggestionsTo.length > 0 && (
                       <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
@@ -244,7 +251,7 @@ export default function DanuBooking() {
                             key={idx}
                             type="button"
                             onClick={() => handleSelectToCity(city)}
-                            className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                            className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0 text-black"
                           >
                             <MapPin className="w-4 h-4 shrink-0" />
                             <span className="text-sm font-medium">{city}</span>
@@ -256,7 +263,7 @@ export default function DanuBooking() {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-muted-foreground mb-2">
+                  <label className="block text-sm font-medium text-muted-foreground mb-2 text-left">
                     {t("departureDate")}
                   </label>
                   <EtDatePicker
@@ -288,7 +295,7 @@ export default function DanuBooking() {
                           : "",
                       });
                     }}
-                    className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                    className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896] text-black"
                   />
                 </div>
 
@@ -376,58 +383,56 @@ export default function DanuBooking() {
         </div>
       </section>
 
-      {/* Our Partners Section */}
-      <section className="relative overflow-hidden bg-background pt-16 pb-12">
-        <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[250px] px-4">
-          <h2 className="text-xl sm:text-2xl font-bold text-black mt-12 mb-4">
-            Our Partners
-          </h2>
-        </div>
+      {/* NEW PROFESSIONAL PARTNERS SECTION */}
+      <section className="bg-[#f4f5f6] py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Our Trusted Partners
+            </h2>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
+              Working together to bring you the best journey possible.
+            </p>
+          </div>
 
-        {/* Curved Grey Background */}
-        <div
-          className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[180%] sm:w-[130%] md:w-[110%] h-[80%] bg-[#f4f5f6]"
-          style={{
-            borderTopLeftRadius: "50% 100%",
-            borderTopRightRadius: "50% 100%",
-          }}
-        ></div>
+          {/* Scrolling Marquee Container */}
+          <div className="relative flex overflow-hidden group">
+            {/* Left and Right Fade Gradients */}
+            <div className="absolute top-0 left-0 w-24 h-full bg-linear-to-r from-[#f4f5f6] to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-24 h-full bg-linear-to-l from-[#f4f5f6] to-transparent z-10 pointer-events-none"></div>
 
-        <div className="relative z-10 max-w-6xl mx-auto flex flex-col items-center justify-center min-h-[250px] px-4">
-          {/* Logos Arc Dynamic Rendering */}
-          <div className="flex justify-center items-center w-full relative h-32 md:h-40 mb-8 sm:mb-4 px-2 sm:px-10 max-w-4xl mx-auto">
-            {arcClasses.map((className, idx) => {
-              // Get the proper image index based on the interval offset
-              const imageIndex = (partnerIndex + idx) % PARTNER_LOGOS.length;
-
-              return (
-                <div key={idx} className={className}>
+            {/* The Animated Scrolling Track */}
+            <div className="animate-scroll flex items-center space-x-12 sm:space-x-20 px-10">
+              {SCROLLING_LOGOS.map((logo, idx) => (
+                <div
+                  key={idx}
+                  className="shrink-0 flex items-center justify-center w-32 h-20 sm:w-40 sm:h-24 p-2 rounded-xl shadow-xs transition-all duration-300 opacity-70 grayscale  hover:grayscale-0 hover:opacity-100 hover:scale-105 cursor-pointer"
+                >
                   <img
-                    src={PARTNER_LOGOS[imageIndex]}
-                    alt={`Partner ${imageIndex + 1}`}
-                    className="w-full h-full object-cover"
+                    src={logo}
+                    alt={`Partner ${idx + 1}`}
+                    className="max-w-full max-h-full object-contain"
                     onError={(e) => {
                       e.currentTarget.src =
-                        "https://via.placeholder.com/150?text=Bus";
+                        "https://via.placeholder.com/150?text=Partner";
                     }}
                   />
                 </div>
-              );
-            })}
+              ))}
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Footer Section */}
       <footer className="bg-[#098274] text-white pt-12 pb-8 px-6 sm:px-12 w-full border-t border-[#098274]">
         <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
           <div className="flex flex-col gap-1.5 text-sm text-gray-100">
             <p>danubooking@gmail.com</p>
             <p>0911854567</p>
-            <p>XYZ Building Third Floor, Bole, Addis Ababa</p>
+            <p>Near Jakros, EBM building</p>
 
             <div className="flex gap-3 mt-6">
-              <button className="flex items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-900 transition-colors h-11 shadow-sm">
+              <button className="flex cursor-pointer items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-900 transition-colors h-11 shadow-sm">
                 <svg
                   viewBox="0 0 512 512"
                   className="w-5 h-5"
@@ -444,7 +449,7 @@ export default function DanuBooking() {
                   </div>
                 </div>
               </button>
-              <button className="flex items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-900 transition-colors h-11 shadow-sm">
+              <button className=" flex cursor-pointer items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-900 transition-colors h-11 shadow-sm">
                 <svg
                   viewBox="0 0 384 512"
                   className="w-5 h-5"
@@ -465,21 +470,33 @@ export default function DanuBooking() {
           </div>
 
           <div className="flex flex-col items-start md:items-end gap-1 text-sm text-gray-100">
-            <a href="#" className="hover:text-white transition-colors">
+            <Link
+              href="/passenger/terms"
+              className="hover:text-white transition-colors"
+            >
               Terms and Conditions
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            </Link>
+            <Link
+              href="/passenger/contact"
+              className="hover:text-white transition-colors"
+            >
               Contact Us
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            </Link>
+            <Link
+              href="/passenger/about-us"
+              className="hover:text-white transition-colors"
+            >
               About Us
-            </a>
-            <a href="#" className="hover:text-white transition-colors">
+            </Link>
+            <Link
+              href="/passenger/faq"
+              className="hover:text-white transition-colors"
+            >
               FAQ
-            </a>
+            </Link>
 
             <div className="flex items-center gap-2 mt-6">
-              <a
+              <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
@@ -488,20 +505,20 @@ export default function DanuBooking() {
                   fill="currentColor"
                   className="text-gray-200"
                 />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
                 <Instagram size={16} className="text-gray-200" />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
                 <Youtube size={16} className="text-gray-200" />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
@@ -510,8 +527,8 @@ export default function DanuBooking() {
                   fill="currentColor"
                   className="text-gray-200"
                 />
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
@@ -522,8 +539,8 @@ export default function DanuBooking() {
                 >
                   <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
                 </svg>
-              </a>
-              <a
+              </Link>
+              <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
@@ -534,7 +551,7 @@ export default function DanuBooking() {
                 >
                   <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
                 </svg>
-              </a>
+              </Link>
             </div>
           </div>
         </div>

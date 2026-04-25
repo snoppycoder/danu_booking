@@ -48,6 +48,7 @@ function formatEthiopianTime(date: Date): string {
 }
 
 export function exportTicketIntoPDF(booking: History): void {
+  console.log("Exporting booking to PDF:", booking);
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
@@ -201,6 +202,7 @@ export function exportTicketIntoPDF(booking: History): void {
 export default function PassengerHistoryPageClient() {
   const [currentPage, setCurrentPage] = useState(1);
   const [bookingId, setBookingId] = useState<string>("");
+  const [ticketIds, setTicketIds] = useState<string[]>([]);
 
   const { t } = useTranslation();
   const numberOfCard = 5;
@@ -482,6 +484,7 @@ export default function PassengerHistoryPageClient() {
                             onClick={() => {
                               setBookingId(booking.booking_id);
                               setOpenTransfer(true);
+                              setTicketIds(booking.ticket_ids);
                             }}
                           >
                             Transfer Seats
@@ -548,7 +551,7 @@ export default function PassengerHistoryPageClient() {
           passenger={passenger}
           onPassengerChange={setPassenger}
           onSubmit={async () => {
-            await passengerApi.transferBooking(bookingId, passenger, "");
+            await passengerApi.transferBooking(bookingId, passenger, ticketIds);
             setOpenTransfer(false);
             refetch();
           }}

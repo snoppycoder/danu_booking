@@ -123,7 +123,7 @@ export default function LoginPage() {
             </div>
 
             {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col gap-2 md:flex-row items-start md:items-center justify-between">
               <label className="flex items-center">
                 <input
                   type="checkbox"
