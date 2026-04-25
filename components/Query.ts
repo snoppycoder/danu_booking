@@ -3,6 +3,7 @@ import {
   agentApi,
   DanuAgentApi,
   kycApi,
+  notificationAPI,
   operatorApi,
   passengerApi,
   profileApi,
@@ -30,6 +31,7 @@ import {
 } from "@/lib/model";
 import { ScheduleDTO } from "@/app/(dashboard)/(operator)/operator/trips/page";
 import { $ZodNumberInternals } from "zod/v4/core";
+import { Notification } from "@/lib/dixiedb";
 export interface Trips_s {
   id: string;
   trip_id: string;
@@ -110,6 +112,20 @@ export const useUsers = (page?: number, per_page?: number, noCache = false) => {
 
     refetchOnMount: noCache ? true : false,
     refetchOnWindowFocus: noCache ? true : false,
+  });
+};
+export const useMyNotifications = (from_date?: string) => {
+  return useQuery({
+    queryKey: ["my-notifications", from_date],
+    queryFn: async () => {
+      const res = await notificationAPI.getMyNotifications(from_date);
+      return {
+        items: res.items as Notification[],
+        total: res.total,
+        page: res.page,
+      };
+    },
+    staleTime: 1000 * 60 * 5,
   });
 };
 export const usePassengerHistory = (page: number, per_page: number) => {

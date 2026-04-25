@@ -58,6 +58,15 @@ export default function Navbar(props: NavbarProps) {
 
   if (!user) return null;
 
+  // Helper function to style mobile links based on active state
+  const getMobileLinkClass = (href: string) =>
+    clsx(
+      "block text-center px-4 py-2 mx-4 my-1 rounded-md transition-all duration-200",
+      pathUrl === href
+        ? "bg-teal-50 text-teal-700 font-bold"
+        : "text-gray-700 hover:text-teal-600 hover:bg-gray-50 font-medium",
+    );
+
   return (
     <nav className="bg-white shadow-md sticky top-0 z-50">
       <div className="max-w-6xl mx-auto px-4 sm:px-6">
@@ -65,7 +74,7 @@ export default function Navbar(props: NavbarProps) {
           {/* Logo */}
           <div className="relative h-full flex items-center shrink-0 mr-10">
             <Link href="/passenger">
-              <img src="/logo.png" className="h-25 w-auto" />
+              <img src="/logo.png" className="h-25 w-auto" alt="Logo" />
             </Link>
           </div>
 
@@ -236,57 +245,56 @@ export default function Navbar(props: NavbarProps) {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden w-full pb-4 border-t border-gray-200">
+          <div className="md:hidden w-full pb-4 pt-2 border-t border-gray-200 flex flex-col">
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger"
-              className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
+              className={getMobileLinkClass("/passenger")}
             >
               {t("home")}
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger/about-us"
-              className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
+              className={getMobileLinkClass("/passenger/about-us")}
             >
               {t("about")}
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger/contact"
-              className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
+              className={getMobileLinkClass("/passenger/contact")}
             >
               {t("contact")}
             </Link>
-
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/profile"
-              className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
+              className={getMobileLinkClass("/profile")}
             >
               {t("profile")}
             </Link>
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger/history"
-              className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
+              className={getMobileLinkClass("/passenger/history")}
             >
               {t("myBookings")}
             </Link>
-            {/* <Link
-              onClick={() => setIsMenuOpen(false)}
-              href="/manage-sessions"
-              className="block text-center px-3 py-2 text-gray-700 hover:text-teal-600 font-medium transition-colors"
-            >
-              {t("manageSessions")}
-            </Link> */}
-            <div className="px-3 mt-2 w-full py-2 flex justify-center gap-2">
+
+            <div className="px-3 mt-4 w-full flex justify-center gap-2">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline">{val}</Button>
+                  <Button
+                    variant="outline"
+                    className="w-full max-w-[200px] flex gap-2"
+                  >
+                    <Globe size={16} />
+                    {val}
+                  </Button>
                 </DropdownMenuTrigger>
 
-                <DropdownMenuContent align="end" className="w-40">
+                <DropdownMenuContent align="center" className="w-40">
                   <DropdownMenuItem
                     onClick={() => {
                       changeLanguage("en");
@@ -295,7 +303,6 @@ export default function Navbar(props: NavbarProps) {
                   >
                     English
                   </DropdownMenuItem>
-
                   <DropdownMenuItem
                     onClick={() => {
                       changeLanguage("am");
@@ -304,7 +311,6 @@ export default function Navbar(props: NavbarProps) {
                   >
                     አማርኛ (Amharic)
                   </DropdownMenuItem>
-
                   <DropdownMenuItem
                     onClick={() => {
                       changeLanguage("om");
@@ -313,7 +319,6 @@ export default function Navbar(props: NavbarProps) {
                   >
                     Afaan Oromoo
                   </DropdownMenuItem>
-
                   <DropdownMenuItem
                     onClick={() => {
                       changeLanguage("ti");
@@ -327,10 +332,10 @@ export default function Navbar(props: NavbarProps) {
             </div>
 
             {/* Logout Button */}
-            <div className="px-3 mt-2 w-full py-2 flex justify-center gap-2">
+            <div className="px-3 mt-2 w-full flex justify-center gap-2">
               <Button
                 variant="destructive"
-                className="cursor-pointer"
+                className="cursor-pointer w-full max-w-[200px]"
                 onClick={async () => {
                   await authAPI.logout();
                 }}

@@ -23,6 +23,8 @@ import { Button } from "./ui/button";
 import { Toaster } from "./ui/sonner";
 import { useTranslation } from "react-i18next";
 import TransferTicketDialog from "./TransferTicketDialog";
+import { isAxiosError } from "axios";
+import { toast } from "sonner";
 
 function formatEthiopianTime(date: Date): string {
   let hour = date.getHours();
@@ -268,6 +270,7 @@ export default function PassengerHistoryPageClient() {
 
   return (
     <div className="relative min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 p-6 md:p-8">
+      <Toaster richColors position="top-right" />
       <div className="max-w-4xl mx-auto">
         <div className="mb-8 mt-4">
           <h1 className="text-center text-2xl md:text-3xl lg:text-4xl font-bold text-gray-900 mb-2">
@@ -551,9 +554,24 @@ export default function PassengerHistoryPageClient() {
           passenger={passenger}
           onPassengerChange={setPassenger}
           onSubmit={async () => {
-            await passengerApi.transferBooking(bookingId, passenger, ticketIds);
-            setOpenTransfer(false);
-            refetch();
+            try {
+              await passengerApi.transferBooking(
+                bookingId,
+                passenger,
+                ticketIds,
+              );
+              setOpenTransfer(false);
+              refetch();
+              toast.success("Booking transfer successful!");
+            } catch (error) {
+              if (isAxiosError(error)) {
+                const message =
+                  error.response?.data.error ||
+                  "An error occured while transferring the booking.";
+                console.log(message);
+                toast.error(message);
+              }
+            }
           }}
         />
       )}

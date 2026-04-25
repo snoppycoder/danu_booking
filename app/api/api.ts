@@ -17,6 +17,7 @@ import {
   Bus,
   Passenger,
 } from "@/lib/model";
+import { CodeOffRounded } from "@mui/icons-material";
 import axios from "axios";
 
 const api = axios.create({
@@ -141,12 +142,18 @@ api.interceptors.response.use(
             case "ACCESS_TOKEN_EXPIRED":
               if (!originalRequest._retry) {
                 if (isRefreshing) {
+                  console.log(
+                    "isAlready refereshing so no need to do it again",
+                  );
                   // If already refreshing, put this request in a queue
                   return new Promise(function (resolve, reject) {
                     failedQueue.push({ resolve, reject });
                   })
                     .then((token) => {
-                      originalRequest.headers.Authorization = `Bearer ${token}`;
+                      console.log("setting the bearer");
+                      if (typeof token === "string" && token.length > 0) {
+                        originalRequest.headers.Authorization = `Bearer ${token}`;
+                      }
                       return api(originalRequest);
                     })
                     .catch((err) => {
@@ -161,7 +168,10 @@ api.interceptors.response.use(
                   console.log("\n\nTRYING TO REFRESH\n\n");
                   // Call your refresh endpoint
                   const refresh_token = (await getRefreshToken()) ?? "";
-
+                  console.log(
+                    "Current Refresh Token before refresh call:",
+                    refresh_token,
+                  );
                   const refreshResponse = await authAPI.refresh(refresh_token);
                   console.log("REFRESH RESPONSE", refreshResponse);
                   setAccessToken(
@@ -182,7 +192,7 @@ api.interceptors.response.use(
                   processQueue(refreshError, null);
                   await deleteAllCookies();
 
-                  // window.location.href = "/login";
+                  window.location.href = "/login";
                   return Promise.reject(refreshError);
                 } finally {
                   // Reset the lock
@@ -357,6 +367,17 @@ export const kycApi = {
 };
 
 export const authAPI = {
+  resendPhoneOTP: async (phone: string) => {
+    try {
+      const response = await api.post("/auth/resend-phone-otp", {
+        phone,
+      });
+      return response.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   resetPassword: async (
     flow: "email" | "phone",
     new_password: string,
@@ -1396,6 +1417,29 @@ export const agentApi = {
   },
 };
 
+export const notificationAPI = {
+  getMyNotifications: async (from_date?: string) => {
+    try {
+      const res = await api.get("/user/me/notifications", {
+        params: { from_date },
+      });
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+  readAllNotifications: async () => {
+    try {
+      const res = await api.post("/user/me/notifications/read-all");
+      console.log(res.data);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
+};
 export const operatorApi = {
   getTransactionData: async (
     operator_id: string,

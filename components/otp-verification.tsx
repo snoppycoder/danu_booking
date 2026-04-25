@@ -147,6 +147,19 @@ export default function OTPVerification({
     }
   };
 
+  async function handleResendOtp(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ): Promise<void> {
+    event.preventDefault();
+    try {
+      await authAPI.resendPhoneOTP(contact);
+      toast.success("OTP resent successfully.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Failed to resend OTP. Please try again.");
+    }
+  }
+
   return (
     <>
       <Toaster richColors position="top-right" />
@@ -218,7 +231,10 @@ export default function OTPVerification({
             <p className="text-muted-foreground text-sm">
               Didn&apos;t receive the code?
             </p>
-            <button className="text-primary hover:underline font-semibold text-sm">
+            <button
+              onClick={handleResendOtp}
+              className="text-primary hover:underline font-semibold text-sm"
+            >
               Resend Code
             </button>
           </div>

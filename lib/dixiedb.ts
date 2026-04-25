@@ -10,6 +10,7 @@ export interface Notification {
   message?: string;
   created_at: string;
   received_at: string;
+  is_read: boolean;
 }
 
 export interface Setting {

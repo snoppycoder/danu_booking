@@ -7,11 +7,18 @@ import {
   MoreHorizontal,
   Users,
   Zap,
+  Bus as BusIcon,
+  CheckCircle2,
+  Clock,
+  Wallet,
+  XCircle,
+  ArrowRight,
 } from "lucide-react";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { formatAmharicTime, formatTime } from "@/lib/common_functions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
@@ -81,6 +88,8 @@ export default function DanuBooking() {
   });
   const [currentPage, setCurrentPage] = useState(1);
   const per_page = 10;
+
+  const resultsRef = useRef<HTMLDivElement>(null);
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
   const [seats, setSeats] = useState<Seat[]>([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
@@ -117,7 +126,14 @@ export default function DanuBooking() {
     });
     router.replace(
       `/passenger/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
+      { scroll: false },
     );
+    setTimeout(() => {
+      resultsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 100);
   }
 
   const handleSelectFromCity = (city: string) => {
@@ -130,6 +146,36 @@ export default function DanuBooking() {
     setForm({ ...form, route_to: city });
     setShowDropdownTo(false);
     setSuggestionsTo([]);
+  };
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1, // Delay between each card appearing
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: {
+      opacity: 0,
+      y: 20,
+    },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+  };
+  const fadeVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
   };
 
   function handleAutoCompleteFrom(value: string) {
@@ -301,22 +347,43 @@ export default function DanuBooking() {
         </form>
       </div>
       <div className="w-full hidden md:flex justify-center mt-8 mb-8">
-        <Card className="hover:shadow-lg w-[70%] p-4 rounded-md border border-gray-300">
-          <CardContent className="px-4 py-2 flex space-x-[40%] items-center">
-            <div>
-              <h2 className="text-lg font-mono mb-2.5">Departure</h2>
-              <div className="text-md font-mono">{route_from}</div>
-              <div className="text-md font-mono">
-                {formatTime(departure_date)}
+        <Card className="w-full max-w-2xl overflow-hidden rounded-2xl border border-gray-200/60 bg-white/60 backdrop-blur-sm shadow-sm hover:shadow-md transition-all duration-300">
+          <CardContent className="p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 sm:gap-4">
+              {/* Departure Section */}
+              <div className="flex flex-col items-center sm:items-start flex-1 w-full">
+                <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-3 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" /> Departure
+                </span>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+                  {route_from}
+                </div>
+                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600 bg-gray-100/80 px-3 py-1.5 rounded-lg border border-gray-200/50">
+                  <Clock className="w-4 h-4 text-primary" />
+                  {formatTime(departure_date)}
+                </div>
               </div>
-            </div>
 
-            <div className="flex gap-x-8 h-full">
-              <div className="h-full py-2 w-px bg-gray-400 mx-2"></div>
-              <div>
-                <h2 className="text-lg font-mono mb-2.5">Return</h2>
-                <div className="text-md font-mono">{route_to}</div>
-                <div className="text-md font-mono">
+              {/* Central Visual Divider */}
+              <div className="flex flex-col items-center justify-center shrink-0 px-2 sm:px-6 relative">
+                {/* Optional connecting line behind the icon */}
+                <div className="hidden sm:block absolute top-1/2 left-0 right-0 h-px bg-gray-200 -z-10 -translate-y-1/2"></div>
+                <div className="w-12 h-12 rounded-full bg-primary/10 border-4 border-white flex items-center justify-center text-primary shadow-sm z-10">
+                  <ArrowRight className="w-5 h-5 rotate-90 sm:rotate-0 transition-transform" />
+                </div>
+              </div>
+
+              {/* Return/Arrival Section */}
+              <div className="flex flex-col items-center sm:items-end flex-1 w-full">
+                <span className="text-[11px] font-bold tracking-widest text-gray-400 uppercase mb-3 flex items-center gap-1.5">
+                  <MapPin className="w-3.5 h-3.5" /> Return
+                </span>
+                <div className="text-2xl sm:text-3xl font-bold text-gray-900 mb-2 tracking-tight">
+                  {route_to}
+                </div>
+                <div className="flex items-center gap-1.5 text-sm font-medium text-gray-600 bg-gray-100/80 px-3 py-1.5 rounded-lg border border-gray-200/50">
+                  <Clock className="w-4 h-4 text-primary" />
+                  {/* Note: Check if this should be return_date instead of departure_date */}
                   {formatTime(departure_date)}
                 </div>
               </div>
@@ -324,180 +391,254 @@ export default function DanuBooking() {
           </CardContent>
         </Card>
       </div>
-      <div className="min-h-screen bg-linear-to-br from-teal-50 to-blue-50 p-8">
-        <div className="mx-auto max-w-7xl">
-          <div className="mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">
+      <div
+        ref={resultsRef}
+        className="min-h-screen bg-linear-to-br from-teal-50 to-blue-50/50 p-4 sm:p-8"
+      >
+        <div className="mx-auto max-w-5xl">
+          {/* Header */}
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mb-8"
+          >
+            <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
               {t("availableTrips")}
             </h1>
-            <p className="mt-2 text-gray-600">{t("selectYourPreferedBus")}</p>
-          </div>
-
-          {isLoading ? (
-            <div className="rounded-xl bg-white p-12  flex justify-center text-center shadow-sm">
-              <Spinner />
-            </div>
-          ) : data?.items.length === 0 ? (
-            <div className="flex flex-col items-center justify-center rounded-2xl border border-gray-100 bg-white p-12 text-center shadow-sm sm:p-16">
-              {/* Bus Icon Container */}
-              <div className="mb-4 rounded-full bg-blue-50 p-4 text-primary">
-                <svg
-                  className="h-8 w-8"
-                  fill="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path d="M4 16c0 .88.39 1.67 1 2.22V20a1 1 0 001 1h1a1 1 0 001-1v-1h8v1a1 1 0 001 1h1a1 1 0 001-1v-1.78c.61-.55 1-1.34 1-2.22V6c0-3.5-3.58-4-8-4s-8 .5-8 4v10zm3.5 1.5a1.5 1.5 0 110-3 1.5 1.5 0 010 3zm9 0a1.5 1.5 0 110-3 1.5 1.5 0 010 3zM6 10V7h12v3H6z" />
-                </svg>
-              </div>
-
-              <h3 className="mb-1 text-lg font-semibold text-gray-900">
-                {t("noTripsFound")}
-              </h3>
-            </div>
-          ) : (
-            <div className="w-full">
-              {/* Routes Grid */}
-              <div className="grid gap-6 grid-cols-1">
-                {(data?.items || [])?.length > 0 ? (
-                  data?.items.map((route) => (
-                    <div
-                      key={route.id}
-                      className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 
-        hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 
-        transition-all duration-300 ease-out"
-                    >
-                      {/* Top Section */}
-                      <div className="flex items-start justify-between mb-5">
-                        <div>
-                          <h3
-                            className="text-lg font-semibold tracking-tight text-foreground 
-            group-hover:text-primary transition-colors duration-300"
-                          >
-                            {route.operator.name}
-                          </h3>
-                        </div>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="rounded-full hover:bg-muted/60"
-                            >
-                              <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem>View Details</DropdownMenuItem>
-                            <DropdownMenuItem>Check Seats</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                      {/* Info Section */}
-                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-5">
-                        {/* Price */}
-                        <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground  tracking-wide">
-                            Price
-                          </span>
-                          <span className="text-2xl font-bold text-primary">
-                            {route.price}
-                            <span className="text-sm font-medium ml-1 text-muted-foreground">
-                              Birr
-                            </span>
-                          </span>
-                        </div>
-
-                        {/* Seats */}
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-muted-foreground tracking-wide">
-                            Departure Time
-                          </span>
-                          <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
-                            <span className="text-sm font-semibold text-black">
-                              {/* {route.departure_time.split(":")[0]} :{" "}
-                              {route.departure_time.split(":")[1]} */}
-                              {formatAmharicTime(route.departure_time)}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Status */}
-                        <div className=" grid col-span-2 md:col-span-1 md:flex flex-col items-center">
-                          <span className="text-xs text-center text-muted-foreground  tracking-wide">
-                            Status
-                          </span>
-                          <div
-                            className="flex items-center gap-2 mt-1 px-3 py-1 rounded-full 
-            bg-green-500/10 text-green-600"
-                          >
-                            <span className="text-sm font-semibold">
-                              {route.is_available ? "Available" : "Sold Out"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* CTA */}
-
-                      <div className="flex gap-4 flex-col md:flex-row">
-                        <Button
-                          onClick={() => handleBookNow(route)}
-                          className="w-full md:w-[50%] h-11 rounded-xl font-semibold bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all duration-300"
-                        >
-                          {t("bookNow")}
-                        </Button>
-
-                        <Button
-                          variant="outline"
-                          onClick={() => handleViewDetails(route.id)}
-                          className="w-full md:w-[50%]  h-11 rounded-xl font-semibold shadow-sm hover:shadow-md transition-all duration-300"
-                        >
-                          {t("viewDetails")}
-                        </Button>
-                      </div>
-                    </div>
-                  ))
-                ) : (
-                  <div className="col-span-full py-16 text-center">
-                    <p className="text-muted-foreground text-sm">
-                      No routes available for your search
-                    </p>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-        {(data?.total ?? 0) > 0 && (
-          <div className="flex mt-4 items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing {(currentPage - 1) * per_page + 1} to{" "}
-              {(currentPage - 1) * per_page + (data?.items.length ?? 0)} of{" "}
-              {data?.total} entries
+            <p className="mt-2 text-gray-600 text-lg">
+              {t("selectYourPreferedBus")}
             </p>
+          </motion.div>
 
-            <div className="flex gap-2">
-              <Button
-                variant="outline"
-                disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => p - 1)}
+          <AnimatePresence mode="wait">
+            {isLoading ? (
+              <motion.div
+                key="loading"
+                variants={fadeVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="rounded-2xl bg-white/80 backdrop-blur-sm p-16 flex justify-center items-center shadow-sm border border-gray-100"
               >
-                Previous
-              </Button>
-              <Button className="bg-primary text-primary-foreground">
-                {currentPage}
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={(data?.total ?? 0) <= currentPage * per_page}
+                <Spinner />
+              </motion.div>
+            ) : data?.items.length === 0 ? (
+              <motion.div
+                key="empty"
+                variants={fadeVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="flex flex-col items-center justify-center rounded-3xl border border-gray-100 bg-white/80 backdrop-blur-sm p-12 text-center shadow-sm sm:p-20"
               >
-                Next
-              </Button>
-            </div>
-          </div>
-        )}
+                <div className="mb-6 rounded-full bg-blue-50 p-5 text-primary ring-8 ring-blue-50/50">
+                  <BusIcon className="h-10 w-10" />
+                </div>
+                <h3 className="mb-2 text-xl font-bold text-gray-900">
+                  {t("noTripsFound")}
+                </h3>
+                <p className="text-gray-500 max-w-sm">
+                  We couldn't find any available buses for this route. Try
+                  adjusting your search criteria or date.
+                </p>
+              </motion.div>
+            ) : (
+              <motion.div
+                key="results"
+                variants={fadeVariants}
+                initial="hidden"
+                animate="show"
+                exit="exit"
+                className="w-full space-y-6"
+              >
+                {/* Routes Grid */}
+                <motion.div
+                  variants={containerVariants}
+                  initial="hidden"
+                  animate="show"
+                  className="grid gap-5 grid-cols-1"
+                >
+                  {(data?.items || [])?.length > 0 ? (
+                    data?.items.map((route) => (
+                      <motion.div
+                        variants={itemVariants}
+                        key={route.id}
+                        className="group relative flex flex-col md:flex-row bg-white/90 backdrop-blur-md border border-gray-200/60 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 ease-out"
+                      >
+                        <div className="relative w-full md:w-72 h-48 md:h-auto shrink-0 overflow-hidden bg-gray-100">
+                          <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_2s_infinite]" />
+
+                          {/* Availability Badge superimposed on image */}
+                          <div className="absolute top-4 left-4">
+                            <div
+                              className={`px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-sm
+                        ${
+                          route.is_available
+                            ? "bg-green-500/90 text-white"
+                            : "bg-red-500/90 text-white"
+                        }`}
+                            >
+                              {route.is_available ? (
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                              ) : (
+                                <XCircle className="w-3.5 h-3.5" />
+                              )}
+                              {route.is_available ? "Available" : "Sold Out"}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* Content Section */}
+                        <div className="flex flex-col grow p-6 sm:p-8">
+                          {/* Top Row: Operator & Menu */}
+                          <div className="flex items-start justify-between mb-6">
+                            <div>
+                              <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
+                                {route.operator.name}
+                              </h3>
+                            </div>
+
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="rounded-full hover:bg-gray-100 -mt-2 -mr-2"
+                                >
+                                  <MoreHorizontal className="h-5 w-5 text-gray-500" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="w-44 rounded-xl"
+                              >
+                                <DropdownMenuItem
+                                  onClick={() => handleViewDetails(route.id)}
+                                  className="cursor-pointer"
+                                >
+                                  {t("viewDetails")}
+                                </DropdownMenuItem>
+                                <DropdownMenuItem className="cursor-pointer">
+                                  Check Seats
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+
+                          {/* Details Grid */}
+                          <div className="grid grid-cols-2 gap-6 mb-8">
+                            {/* Departure Time */}
+                            <div className="flex items-start gap-3">
+                              <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 shrink-0 mt-0.5">
+                                <Clock className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                  Departure
+                                </p>
+                                <p className="text-lg font-semibold text-gray-900">
+                                  {formatAmharicTime(route.departure_time)}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Price */}
+                            <div className="flex items-start gap-3">
+                              <div className="p-2.5 rounded-xl bg-green-50 text-green-600 shrink-0 mt-0.5">
+                                <Wallet className="w-5 h-5" />
+                              </div>
+                              <div>
+                                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                  Price
+                                </p>
+                                <p className="text-lg font-bold text-gray-900">
+                                  {route.price}
+                                  <span className="text-sm font-medium ml-1 text-gray-500">
+                                    Birr
+                                  </span>
+                                </p>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* CTA Buttons */}
+                          <div className="flex gap-3 flex-col sm:flex-row mt-auto pt-6 border-t border-gray-100">
+                            <Button
+                              onClick={() => handleBookNow(route)}
+                              disabled={!route.is_available}
+                              className="w-full text-lg font-semibold h-12 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:hover:shadow-none"
+                            >
+                              {t("bookNow")}
+                            </Button>
+                          </div>
+                        </div>
+                      </motion.div>
+                    ))
+                  ) : (
+                    <div className="col-span-full py-16 text-center">
+                      <p className="text-gray-500 text-sm">
+                        No routes available for your search
+                      </p>
+                    </div>
+                  )}
+                </motion.div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Pagination */}
+          <AnimatePresence>
+            {(data?.total ?? 0) > 0 && !isLoading && (
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }} // Appears slightly after the list renders
+                className="flex flex-col sm:flex-row mt-8 items-center justify-between gap-4 bg-white/60 backdrop-blur-sm p-4 rounded-2xl border border-gray-200/60"
+              >
+                <p className="text-sm font-medium text-gray-500">
+                  Showing{" "}
+                  <span className="text-gray-900">
+                    {(currentPage - 1) * per_page + 1}
+                  </span>{" "}
+                  to{" "}
+                  <span className="text-gray-900">
+                    {(currentPage - 1) * per_page + (data?.items.length ?? 0)}
+                  </span>{" "}
+                  of <span className="text-gray-900">{data?.total}</span>{" "}
+                  entries
+                </p>
+
+                <div className="flex gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg h-9 px-4 border-gray-200"
+                    disabled={currentPage === 1}
+                    onClick={() => setCurrentPage((p) => p - 1)}
+                  >
+                    Previous
+                  </Button>
+                  <Button
+                    size="sm"
+                    className="bg-primary text-primary-foreground rounded-lg h-9 w-9 p-0"
+                  >
+                    {currentPage}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    className="rounded-lg h-9 px-4 border-gray-200"
+                    onClick={() => setCurrentPage((p) => p + 1)}
+                    disabled={(data?.total ?? 0) <= currentPage * per_page}
+                  >
+                    Next
+                  </Button>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
       </div>
 
       {useInfoToggle && (
