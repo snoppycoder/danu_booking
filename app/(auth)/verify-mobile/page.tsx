@@ -1,20 +1,9 @@
 "use client";
 
-import {
-  useState,
-  useEffect,
-  useRef,
-  FormEvent,
-  KeyboardEvent,
-  ClipboardEvent,
-  Suspense,
-} from "react";
-import { useSearchParams, useRouter } from "next/navigation";
+import { Suspense } from "react";
+
 import { Spinner } from "@/components/ui/spinner";
 import VerifyMobileClient from "@/components/VerifyMobileClient";
-// Import your API here. Example:
-// import { authAPI } from "@/lib/api";
-
 export default function VerifyMobilePage() {
   return (
     <Suspense

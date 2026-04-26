@@ -242,7 +242,7 @@ export default function GuestBooking() {
                           onClick={() => handleSelectFromCity(city)}
                           className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                         >
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <MapPin className="w-4 h-4 shrink--0" />
                           <span className="text-sm font-medium">{city}</span>
                         </button>
                       ))}
@@ -276,7 +276,7 @@ export default function GuestBooking() {
                           onClick={() => handleSelectToCity(city)}
                           className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
                         >
-                          <MapPin className="w-4 h-4 flex-shrink-0" />
+                          <MapPin className="w-4 h-4 shrink--0" />
                           <span className="text-sm font-medium">{city}</span>
                         </button>
                       ))}
@@ -343,7 +343,7 @@ export default function GuestBooking() {
             </div>
 
             <div className="flex gap-x-8 h-full">
-              <div className="h-full py-2 w-[1px] bg-gray-400 mx-2"></div>
+              <div className="h-full py-2 w-px bg-gray-400 mx-2"></div>
               <div>
                 <h2 className="text-lg font-mono mb-2.5">Return</h2>
                 <div className="text-md font-mono">{route_to}</div>
@@ -355,7 +355,7 @@ export default function GuestBooking() {
           </CardContent>
         </Card>
       </div>
-      <div className="min-h-screen bg-gradient-to-br from-teal-50 to-blue-50 p-8">
+      <div className="min-h-screen bg-linear-to-br from-teal-50 to-blue-50 p-8">
         <div className="mx-auto max-w-7xl">
           <div className="mb-8">
             <h1 className="text-3xl font-bold text-gray-900">
@@ -403,7 +403,7 @@ export default function GuestBooking() {
                               className="group relative flex flex-col md:flex-row bg-white/90 backdrop-blur-md border border-gray-200/60 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 ease-out"
                             >
                               <div className="relative w-full md:w-72 h-48 md:h-auto shrink-0 overflow-hidden bg-gray-100">
-                                <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_2s_infinite]" />
+                                <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-size-[200%_100%] animate-[shimmer_2s_infinite]" />
 
                                 {/* Availability Badge superimposed on image */}
                                 <div className="absolute top-4 left-4">
