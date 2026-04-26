@@ -96,7 +96,7 @@ export default function DanuBooking() {
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
   const [useInfoToggle, setUseInfoToggle] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState<TripDTO>(); //TripData
+  const [selectedTrip, setSelectedTrip] = useState<TripDTO>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [id, setId] = useState("");
   const [bus, setBus] = useState<

@@ -1,7 +1,16 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MapPin, Calendar, ArrowRight, Star, TrendingUp } from "lucide-react";
+import {
+  MapPin,
+  Calendar,
+  ArrowRight,
+  Star,
+  TrendingUp,
+  Linkedin,
+  Instagram,
+  Facebook,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 import { Toaster, toast } from "sonner";
@@ -12,6 +21,7 @@ import { passengerApi } from "@/app/api/api";
 import { useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src";
+import Link from "next/link";
 
 export default function GuestDanuBooking() {
   const router = useRouter();
@@ -24,11 +34,56 @@ export default function GuestDanuBooking() {
   const [popularRoutes, setPopularRoutes] = useState<PopularRoute[]>([]);
   const [date, setDate] = useState<Date | null>();
 
+  const socialLinks = {
+    fa: {
+      name: "facebook",
+
+      link: "https://www.facebook.com/profile.php?id=61582153215076",
+    },
+    tiktok: {
+      name: "TikTok",
+
+      link: "https://www.tiktok.com/@danubooking",
+    },
+    instagram: {
+      name: "Instagram",
+
+      link: "https://www.instagram.com/danubooking/",
+    },
+    linkedin: {
+      name: "Linkedin",
+
+      link: " https://www.linkedin.com/company/danubooking/about/?viewAsMember=true",
+    },
+  };
+
   const [form, setForm] = useState({
     route_from: "",
     route_to: "",
     departure_date: today,
   });
+  const PARTNER_LOGOS = [
+    "/images/ABAY.png",
+    "/images/Airbus.png",
+    "/images/Alifa.png",
+    "/images/Buna.png",
+    "/images/Africa.png",
+    "/images/Dearm.png",
+    "/images/Ghion.png",
+    "/images/GoldenBus.jfif",
+    "/images/NoahBus.png",
+    "/images/HabeshaBus.png",
+    "/images/Odaa_Bus.png",
+    "/images/selamBus.png",
+    "/images/uegnaBus.png",
+    "/images/WaliyaBus.png",
+  ];
+
+  const SCROLLING_LOGOS = [
+    ...PARTNER_LOGOS,
+    ...PARTNER_LOGOS,
+    ...PARTNER_LOGOS,
+  ];
   useEffect(() => {
     // Fetch popular routes from your backend
     const fetchPopularRoutes = async () => {
@@ -332,21 +387,182 @@ export default function GuestDanuBooking() {
         </div>
       </section>
 
-      <section className="py-16 px-4 sm:py-20 bg-gradient-to-r from-teal-600 to-teal-700 text-white">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-3xl sm:text-4xl font-bold mb-4">
-            Get More Out of Danu Booking with our Mobile App
-          </h2>
-          <p className="text-lg text-teal-50 mb-8 max-w-2xl mx-auto">
-            Download our mobile app for exclusive deals, real-time updates, and
-            seamless booking on the go.
-          </p>
-          <button className="bg-coral-500 hover:bg-coral-600 text-white font-semibold px-8 py-3 rounded inline-flex items-center gap-2 transition-colors">
-            Download App
-            <ArrowRight className="w-5 h-5" />
-          </button>
+      <section className="bg-[#f4f5f6] py-16">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              Our Trusted Partners
+            </h2>
+            <p className="mt-2 text-sm sm:text-base text-gray-600">
+              Working together to bring you the best journey possible.
+            </p>
+          </div>
+
+          {/* Scrolling Marquee Container */}
+          <div className="relative flex overflow-hidden group">
+            {/* Left and Right Fade Gradients */}
+            <div className="absolute top-0 left-0 w-24 h-full bg-linear-to-r from-[#f4f5f6] to-transparent z-10 pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-24 h-full bg-linear-to-l from-[#f4f5f6] to-transparent z-10 pointer-events-none"></div>
+
+            {/* The Animated Scrolling Track */}
+            <div className="animate-scroll flex items-center space-x-12 sm:space-x-20 px-10">
+              {SCROLLING_LOGOS.map((logo, idx) => (
+                <div
+                  key={idx}
+                  className="shrink-0 flex items-center justify-center w-32 h-20 sm:w-40 sm:h-24 p-2 rounded-xl shadow-xs transition-all duration-300 opacity-70 lg:grayscale  hover:grayscale-0 hover:opacity-100 hover:scale-105 cursor-pointer"
+                >
+                  <img
+                    src={logo}
+                    alt={`Partner ${idx + 1}`}
+                    className="max-w-full max-h-full object-contain"
+                    onError={(e) => {
+                      e.currentTarget.src =
+                        "https://via.placeholder.com/150?text=Partner";
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
+
+      <footer className="bg-[#098274] text-white pt-12 pb-8 px-6 sm:px-12 w-full border-t border-[#098274]">
+        <div className="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-start md:items-end gap-10">
+          <div className="flex flex-col gap-1.5 text-sm text-gray-100">
+            <p>danubooking@gmail.com</p>
+            <p>0911854567</p>
+            <p>Near Jakros, EBM building</p>
+
+            <div className="flex gap-3 mt-6">
+              <button className="flex cursor-pointer items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-900 transition-colors h-11 shadow-sm">
+                <svg
+                  viewBox="0 0 512 512"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                >
+                  <path d="M325.3 234.3L104.6 13l280.8 161.2-60.1 60.1zM47 0C34 6.8 25.3 19.2 25.3 35.3v441.3c0 16.1 8.7 28.5 21.7 35.3l256.6-256L47 0zm425.2 225.6l-58.9-34.1-65.7 64.5 65.7 64.5 60.1-34.1c18-14.3 18-46.5-1.2-60.8zM104.6 499l280.8-161.2-60.1-60.1L104.6 499z" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-[9px] leading-none uppercase mb-0.5 tracking-wide">
+                    GET IT ON
+                  </div>
+                  <div className="text-sm font-semibold leading-tight">
+                    Google Play
+                  </div>
+                </div>
+              </button>
+              <button className=" flex cursor-pointer items-center gap-2 bg-black text-white px-3 py-1.5 rounded-lg border border-gray-700 hover:bg-gray-900 transition-colors h-11 shadow-sm">
+                <svg
+                  viewBox="0 0 384 512"
+                  className="w-5 h-5"
+                  fill="currentColor"
+                >
+                  <path d="M318.7 268.7c-.2-36.7 16.4-64.4 50-84.8-18.8-26.9-47.2-41.7-84.7-44.6-35.5-2.8-74.3 20.7-88.5 20.7-15 0-49.4-19.7-76.4-19.7C63.3 141.2 4 184.8 4 273.5q0 39.3 14.4 81.2c12.8 36.7 59 126.7 107.2 125.2 25.2-.6 43-17.9 75.8-17.9 31.8 0 48.3 17.9 76.4 17.9 48.6-.7 90.4-82.5 102.6-119.3-65.2-30.7-61.7-90-61.7-91.9zm-56.6-164.2c27.3-32.4 24.8-61.9 24-72.5-24.1 1.4-52 16.4-67.9 34.9-17.5 19.8-27.8 44.3-25.6 71.9 26.1 2 49.9-11.4 69.5-34.3z" />
+                </svg>
+                <div className="text-left">
+                  <div className="text-[9px] leading-none mb-0.5 tracking-wide">
+                    Download on the
+                  </div>
+                  <div className="text-sm font-semibold leading-tight">
+                    App Store
+                  </div>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col items-start md:items-end gap-1 text-sm text-gray-100">
+            <Link
+              href="/passenger/terms"
+              className="hover:text-white transition-colors"
+            >
+              Terms and Conditions
+            </Link>
+            <Link
+              href="/passenger/contact"
+              className="hover:text-white transition-colors"
+            >
+              Contact Us
+            </Link>
+            <Link
+              href="/passenger/about-us"
+              className="hover:text-white transition-colors"
+            >
+              About Us
+            </Link>
+            <Link
+              href="/passenger/faq"
+              className="hover:text-white transition-colors"
+            >
+              FAQ
+            </Link>
+
+            <div className="flex items-center gap-2 mt-6">
+              <Link
+                href={socialLinks.fa.link}
+                className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
+              >
+                <Facebook
+                  size={16}
+                  fill="currentColor"
+                  className="text-gray-200"
+                />
+              </Link>
+              <Link
+                href={socialLinks.instagram.link}
+                target="_blank"
+                className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
+              >
+                <Instagram size={16} className="text-gray-200" />
+              </Link>
+              {/* <Link
+                href="#"
+                className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
+              >
+                <Youtube size={16} className="text-gray-200" />
+              </Link> */}
+              <Link
+                href={socialLinks.linkedin.link}
+                target="_blank"
+                className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
+              >
+                <Linkedin
+                  size={16}
+                  fill="currentColor"
+                  className="text-gray-200"
+                />
+              </Link>
+              {/* this is twitter    */}
+              <Link
+                href="#"
+                className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
+              >
+                <svg
+                  className="w-3.5 h-3.5 text-gray-200"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                </svg>
+              </Link>
+              <Link
+                href={socialLinks.tiktok.link}
+                target="_blank"
+                className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
+              >
+                <svg
+                  className="w-4 h-4 text-gray-200"
+                  viewBox="0 0 24 24"
+                  fill="currentColor"
+                >
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1.04-.1z" />
+                </svg>
+              </Link>
+            </div>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 }

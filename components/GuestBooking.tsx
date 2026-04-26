@@ -7,12 +7,16 @@ import {
   MoreHorizontal,
   Users,
   Zap,
+  CheckCircle2,
+  Clock,
+  Wallet,
+  XCircle,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 
 import { useState } from "react";
-import { formatTime } from "@/lib/common_functions";
+import { formatAmharicTime, formatTime } from "@/lib/common_functions";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
@@ -22,6 +26,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { motion, Variants } from "framer-motion";
 import { TripDetailsModal } from "@/components/TripDetailModal";
 import SeatBookingDialog from "@/components/SeatBookingDialog";
 import { Toaster } from "sonner";
@@ -31,8 +36,68 @@ import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 import GuestSeatLayoutDialog from "./GuestSeatLayoutDialog";
 import { Spinner } from "./ui/spinner";
 import { useDebounce } from "@/hooks/useDebounce";
+import { t } from "i18next";
 
 export default function GuestBooking() {
+  type TripDTO = {
+    id: string;
+    trip_date: string;
+    departure_time: string;
+
+    route: {
+      id: string;
+      from_city: string;
+      to_city: string;
+    };
+
+    operator: {
+      id: string;
+      name: string;
+    };
+
+    bus: {
+      id: string;
+      plate_no: string;
+    };
+
+    driver: {
+      id: string;
+      name: string;
+    };
+
+    price: number;
+    is_available: boolean;
+  };
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    show: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.1, // Delay between each card appearing
+      },
+    },
+  };
+
+  const itemVariants: Variants = {
+    hidden: {
+      opacity: 0,
+      y: 20,
+    },
+    show: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        type: "spring",
+        stiffness: 300,
+        damping: 24,
+      },
+    },
+  };
+  const fadeVariants = {
+    hidden: { opacity: 0, scale: 0.95 },
+    show: { opacity: 1, scale: 1, transition: { duration: 0.3 } },
+    exit: { opacity: 0, scale: 0.95, transition: { duration: 0.2 } },
+  };
   const searchParams = useSearchParams();
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
@@ -50,7 +115,7 @@ export default function GuestBooking() {
   const [showDropdownFrom, setShowDropdownFrom] = useState(false);
   const [showDropdownTo, setShowDropdownTo] = useState(false);
   const [useInfoToggle, setUseInfoToggle] = useState(false);
-  const [selectedTrip, setSelectedTrip] = useState<TripData | null>(null);
+  const [selectedTrip, setSelectedTrip] = useState<TripDTO>();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [id, setId] = useState("");
   const [bus, setBus] = useState<
@@ -125,6 +190,12 @@ export default function GuestBooking() {
     } catch (error) {
       console.error("Auto complete error:", error);
     }
+  }
+  async function handleViewDetails(route_id: string): Promise<void> {
+    const detail = await passengerApi.getTripDetails(route_id);
+    console.log(detail);
+    setSelectedTrip(detail);
+    setIsModalOpen(true);
   }
 
   async function handleBookNow(trip: searchResult): Promise<void> {
@@ -309,97 +380,152 @@ export default function GuestBooking() {
               <div className="grid gap-6 grid-cols-1">
                 {(data?.items || [])?.length > 0 ? (
                   data?.items.map((route) => (
-                    <div
-                      key={route.id}
-                      className="group relative bg-card/70 backdrop-blur-sm border border-border/60 rounded-2xl p-6 
-        hover:shadow-xl hover:shadow-primary/5 hover:border-primary/40 
-        transition-all duration-300 ease-out"
+                    <motion.div
+                      key="results"
+                      variants={fadeVariants}
+                      initial="hidden"
+                      animate="show"
+                      exit="exit"
+                      className="w-full space-y-6"
                     >
-                      {/* Top Section */}
-                      <div className="flex items-start justify-between mb-5">
-                        <div>
-                          <h3
-                            className="text-lg font-semibold tracking-tight text-foreground 
-            group-hover:text-primary transition-colors duration-300"
-                          >
-                            {route.operator.name}
-                          </h3>
-                        </div>
-
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="rounded-full hover:bg-muted/60"
-                            >
-                              <MoreHorizontal className="h-5 w-5 text-muted-foreground" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          {/* <DropdownMenuContent align="end" className="w-44">
-                            <DropdownMenuItem
-                            // onClick={() => handleViewDetails(route)}
-                            >
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>Check Seats</DropdownMenuItem>
-                          </DropdownMenuContent> */}
-                        </DropdownMenu>
-                      </div>
-                      {/* Info Section */}
-                      <div className="grid grid-cols-2 place-items-center md:grid-cols-3 gap-4 mb-6">
-                        {/* Price */}
-                        <div className="flex flex-col">
-                          <span className="text-xs text-muted-foreground  tracking-wide">
-                            Price
-                          </span>
-                          <span className="text-2xl font-bold text-primary">
-                            {route.price}
-                            <span className="text-sm font-medium ml-1 text-muted-foreground">
-                              Birr
-                            </span>
-                          </span>
-                        </div>
-
-                        {/* Seats */}
-                        <div className="flex flex-col items-center">
-                          <span className="text-xs text-muted-foreground tracking-wide">
-                            Departure Time
-                          </span>
-                          <div className="flex items-center justify-center mt-1 px-3 py-1 rounded-full bg-green-500/10">
-                            <span className="text-sm font-semibold text-black">
-                              {route.departure_time.split(":")[0]} :{" "}
-                              {route.departure_time.split(":")[1]}
-                            </span>
-                          </div>
-                        </div>
-
-                        {/* Status */}
-                        <div className=" grid col-span-2 md:col-span-1 md:flex flex-col items-center">
-                          <span className="text-xs text-center text-muted-foreground  tracking-wide">
-                            Status
-                          </span>
-                          <div
-                            className="flex items-center gap-2 mt-1 px-3 py-1 rounded-full 
-            bg-green-500/10 text-green-600"
-                          >
-                            <span className="text-sm font-semibold">
-                              {route.is_available ? "Available" : "Sold Out"}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* CTA */}
-                      <Button
-                        onClick={() => handleBookNow(route)}
-                        className="w-full h-11 rounded-xl font-semibold 
-          bg-primary hover:bg-primary/90 
-          shadow-md hover:shadow-lg transition-all duration-300"
+                      {/* Routes Grid */}
+                      <motion.div
+                        variants={containerVariants}
+                        initial="hidden"
+                        animate="show"
+                        className="grid gap-5 grid-cols-1"
                       >
-                        Book Now
-                      </Button>
-                    </div>
+                        {(data?.items || [])?.length > 0 ? (
+                          data?.items.map((route) => (
+                            <motion.div
+                              variants={itemVariants}
+                              key={route.id}
+                              className="group relative flex flex-col md:flex-row bg-white/90 backdrop-blur-md border border-gray-200/60 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 ease-out"
+                            >
+                              <div className="relative w-full md:w-72 h-48 md:h-auto shrink-0 overflow-hidden bg-gray-100">
+                                <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_2s_infinite]" />
+
+                                {/* Availability Badge superimposed on image */}
+                                <div className="absolute top-4 left-4">
+                                  <div
+                                    className={`px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-sm
+                                          ${
+                                            route.is_available
+                                              ? "bg-green-500/90 text-white"
+                                              : "bg-red-500/90 text-white"
+                                          }`}
+                                  >
+                                    {route.is_available ? (
+                                      <CheckCircle2 className="w-3.5 h-3.5" />
+                                    ) : (
+                                      <XCircle className="w-3.5 h-3.5" />
+                                    )}
+                                    {route.is_available
+                                      ? "Available"
+                                      : "Sold Out"}
+                                  </div>
+                                </div>
+                              </div>
+
+                              {/* Content Section */}
+                              <div className="flex flex-col grow p-6 sm:p-8">
+                                {/* Top Row: Operator & Menu */}
+                                <div className="flex items-start justify-between mb-6">
+                                  <div>
+                                    <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
+                                      {route.operator.name}
+                                    </h3>
+                                  </div>
+
+                                  <DropdownMenu>
+                                    <DropdownMenuTrigger asChild>
+                                      <Button
+                                        variant="ghost"
+                                        size="icon"
+                                        className="rounded-full hover:bg-gray-100 -mt-2 -mr-2"
+                                      >
+                                        <MoreHorizontal className="h-5 w-5 text-gray-500" />
+                                      </Button>
+                                    </DropdownMenuTrigger>
+                                    <DropdownMenuContent
+                                      align="end"
+                                      className="w-44 rounded-xl"
+                                    >
+                                      <DropdownMenuItem
+                                        onClick={() =>
+                                          handleViewDetails(route.id)
+                                        }
+                                        className="cursor-pointer"
+                                      >
+                                        {t("viewDetails")}
+                                      </DropdownMenuItem>
+                                      <DropdownMenuItem className="cursor-pointer">
+                                        Check Seats
+                                      </DropdownMenuItem>
+                                    </DropdownMenuContent>
+                                  </DropdownMenu>
+                                </div>
+
+                                {/* Details Grid */}
+                                <div className="grid grid-cols-2 gap-6 mb-8">
+                                  {/* Departure Time */}
+                                  <div className="flex items-start gap-3">
+                                    <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 shrink-0 mt-0.5">
+                                      <Clock className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                        Departure
+                                      </p>
+                                      <p className="text-lg font-semibold text-gray-900">
+                                        {formatAmharicTime(
+                                          route.departure_time,
+                                        )}
+                                      </p>
+                                    </div>
+                                  </div>
+
+                                  {/* Price */}
+                                  <div className="flex items-start gap-3">
+                                    <div className="p-2.5 rounded-xl bg-green-50 text-green-600 shrink-0 mt-0.5">
+                                      <Wallet className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                                        Price
+                                      </p>
+                                      <p className="text-lg font-bold text-gray-900">
+                                        {route.price}
+                                        <span className="text-sm font-medium ml-1 text-gray-500">
+                                          Birr
+                                        </span>
+                                      </p>
+                                    </div>
+                                  </div>
+                                </div>
+
+                                {/* CTA Buttons */}
+                                <div className="flex gap-3 flex-col sm:flex-row mt-auto pt-6 border-t border-gray-100">
+                                  <Button
+                                    onClick={() => handleBookNow(route)}
+                                    disabled={!route.is_available}
+                                    className="w-full text-lg font-semibold h-12 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:hover:shadow-none"
+                                  >
+                                    {t("bookNow")}
+                                  </Button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          ))
+                        ) : (
+                          <div className="col-span-full py-16 text-center">
+                            <p className="text-gray-500 text-sm">
+                              No routes available for your search
+                            </p>
+                          </div>
+                        )}
+                      </motion.div>
+                    </motion.div>
                   ))
                 ) : (
                   <div className="col-span-full py-16 text-center">
