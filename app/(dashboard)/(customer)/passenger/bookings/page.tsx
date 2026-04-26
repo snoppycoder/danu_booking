@@ -469,7 +469,7 @@ export default function DanuBooking() {
                         className="group relative flex flex-col md:flex-row bg-white/90 backdrop-blur-md border border-gray-200/60 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 ease-out"
                       >
                         <div className="relative w-full md:w-72 h-48 md:h-auto shrink-0 overflow-hidden bg-gray-100">
-                          <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-[length:200%_100%] animate-[shimmer_2s_infinite]" />
+                          <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-size-[200%_100%] animate-[shimmer_2s_infinite]" />
 
                           {/* Availability Badge superimposed on image */}
                           <div className="absolute top-4 left-4">

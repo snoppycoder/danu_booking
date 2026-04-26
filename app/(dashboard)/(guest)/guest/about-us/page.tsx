@@ -156,11 +156,11 @@ export default function AboutPage() {
                 {t("missionDesc")}
               </p>
               <div className="pt-4 flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
                 <p className="text-muted-foreground">{t("missionPoint1")}</p>
               </div>
               <div className="flex items-start gap-3">
-                <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
+                <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
                 <p className="text-muted-foreground">{t("missionPoint2")}</p>
               </div>
             </motion.div>
@@ -194,31 +194,31 @@ export default function AboutPage() {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
             >
-              <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors h-full">
+              <Card className="p-8 bg-linear-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors h-full">
                 <h3 className="text-2xl font-bold text-foreground mb-6">
                   {t("passengerChallenges")}
                 </h3>
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("challenge1")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("challenge2")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("challenge3")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("challenge4")}
                     </span>
@@ -234,31 +234,31 @@ export default function AboutPage() {
               viewport={{ once: true, margin: "-100px" }}
               transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
             >
-              <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors h-full">
+              <Card className="p-8 bg-linear-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors h-full">
                 <h3 className="text-2xl font-bold text-foreground mb-6">
                   {t("operatorChallenges")}
                 </h3>
                 <ul className="space-y-4">
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("operator1")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("operator2")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("operator3")}
                     </span>
                   </li>
                   <li className="flex items-start gap-3">
-                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 shrink-0" />
                     <span className="text-muted-foreground">
                       {t("operator4")}
                     </span>
@@ -330,7 +330,7 @@ export default function AboutPage() {
                       }}
                       className="flex items-start gap-3"
                     >
-                      <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <Zap className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                       <span className="text-muted-foreground">{text}</span>
                     </motion.li>
                   ),
@@ -378,7 +378,7 @@ export default function AboutPage() {
                       }}
                       className="flex items-start gap-3"
                     >
-                      <Zap className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
+                      <Zap className="w-5 h-5 text-primary mt-0.5 shrink-0" />
                       <span className="text-muted-foreground">{text}</span>
                     </motion.li>
                   ),
@@ -402,7 +402,7 @@ export default function AboutPage() {
           viewport={{ once: true, margin: "-100px" }}
         >
           <motion.div variants={cardVariants} className="text-center mb-16">
-            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-gradient-to-r from-foreground to-foreground/70">
+            <h2 className="text-4xl md:text-5xl font-extrabold mb-6 bg-clip-text text-transparent bg-linear-to-r from-foreground to-foreground/70">
               Built for Ethiopia
             </h2>
             <div className="w-24 h-1 bg-primary mx-auto rounded-full" />
@@ -436,7 +436,7 @@ export default function AboutPage() {
                       variants={listItemVariants}
                       className="flex items-center gap-4 group/item"
                     >
-                      <div className="w-2 h-2 rounded-full bg-primary/40 group-hover/item:bg-primary group-hover/item:scale-150 transition-all duration-300 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-primary/40 group-hover/item:bg-primary group-hover/item:scale-150 transition-all duration-300 shrink-0" />
                       <span className="text-muted-foreground group-hover/item:text-foreground transition-colors duration-300">
                         {item}
                       </span>
@@ -473,7 +473,7 @@ export default function AboutPage() {
                       variants={listItemVariants}
                       className="flex items-center gap-4 group/item"
                     >
-                      <div className="w-2 h-2 rounded-full bg-primary/40 group-hover/item:bg-primary group-hover/item:scale-150 transition-all duration-300 flex-shrink-0" />
+                      <div className="w-2 h-2 rounded-full bg-primary/40 group-hover/item:bg-primary group-hover/item:scale-150 transition-all duration-300 shrink-0" />
                       <span className="text-muted-foreground group-hover/item:text-foreground transition-colors duration-300">
                         {item}
                       </span>
@@ -525,7 +525,7 @@ export default function AboutPage() {
                   className="group relative p-6 rounded-2xl bg-background border border-border hover:border-primary/50 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col items-center justify-center text-center gap-4"
                 >
                   {/* Subtle hover background glow */}
-                  <div className="absolute inset-0 bg-gradient-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none" />
+                  <div className="absolute inset-0 bg-linear-to-b from-primary/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-2xl pointer-events-none" />
 
                   <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 group-hover:bg-primary group-hover:text-primary-foreground transition-all duration-300">
                     <Icon className="w-6 h-6" strokeWidth={2} />
@@ -588,7 +588,7 @@ export default function AboutPage() {
       </section>
 
       {/* Footer CTA */}
-      <section className="px-4 py-16 sm:px-6 lg:px-8 bg-gradient-to-r from-primary/10 to-accent/10 border-t border-border">
+      <section className="px-4 py-16 sm:px-6 lg:px-8 bg-linear-to-r from-primary/10 to-accent/10 border-t border-border">
         <div className="max-w-4xl mx-auto text-center">
           <h3 className="text-2xl font-bold text-foreground mb-4">
             Let&apos;s Move Forward Together
