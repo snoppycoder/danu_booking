@@ -76,6 +76,8 @@ export interface operatorAdminReport {
 }
 export interface searchResult {
   id: string;
+  trip_date: string;
+  arrival_time: string;
   operator: {
     id: string;
     name: string;
@@ -327,10 +329,16 @@ export const useSearchRoute = (
         page,
         per_page,
       });
+      const now = new Date();
 
-      let items: searchResult[] = !org_id
+      let items = !org_id
         ? res.items
-        : res.items.filter((t: searchResult) => t.operator.id == org_id);
+        : res.items.filter((t: searchResult) => {
+            const departure = new Date(`${t.trip_date}T${t.departure_time}Z`);
+
+            return t.operator.id == org_id && departure > now;
+          });
+
       return { items, total: res.total, page: res.page };
     },
   });

@@ -36,8 +36,7 @@ import { searchResult, useSearchRoute } from "@/components/Query";
 import EtDatePicker from "@/components/eth-calendar/habesha-date-picker/src/EtDatePicker";
 import SeatLayoutDialog from "@/components/SeatLayoutDialog";
 import { Spinner } from "@/components/ui/spinner";
-import { useDebounce } from "@/hooks/useDebounce";
-import { formatCurrency } from "@/lib/report-utils";
+
 import "@/i18n";
 import { useTranslation } from "react-i18next";
 
@@ -112,6 +111,7 @@ export default function DanuBooking() {
     currentPage,
     per_page,
   );
+  console.log(data, "filtered data");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const router = useRouter();
 
@@ -124,6 +124,7 @@ export default function DanuBooking() {
       to: form.route_to,
       date: form.departure_date,
     });
+
     router.replace(
       `/passenger/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
       { scroll: false },
@@ -462,7 +463,7 @@ export default function DanuBooking() {
                   className="grid gap-5 grid-cols-1"
                 >
                   {(data?.items || [])?.length > 0 ? (
-                    data?.items.map((route) => (
+                    data?.items.map((route: searchResult) => (
                       <motion.div
                         variants={itemVariants}
                         key={route.id}
@@ -537,10 +538,11 @@ export default function DanuBooking() {
                               </div>
                               <div>
                                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                  Departure
+                                  Departure and Arrival time
                                 </p>
                                 <p className="text-lg font-semibold text-gray-900">
-                                  {formatAmharicTime(route.departure_time)}
+                                  {formatAmharicTime(route.departure_time)} -{" "}
+                                  {formatAmharicTime(route.arrival_time)}
                                 </p>
                               </div>
                             </div>

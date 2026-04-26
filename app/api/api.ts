@@ -1,5 +1,6 @@
 // "use server";
 
+import { searchResult } from "@/components/Query";
 import { UpdateAgentDto } from "@/components/UpdateAgentForm";
 import {
   deleteAllCookies,
@@ -1150,7 +1151,17 @@ export const passengerApi = {
         },
       });
 
-      return response.data;
+      const res: searchResult[] = response.data.items;
+      const now = new Date();
+      let items = res.filter((t) => {
+        const departure = new Date(`${t.trip_date}T${t.departure_time}Z`);
+
+        return departure > now;
+      });
+      const total = response.data.total;
+      const page = response.data.page;
+
+      return { items, total, page };
     } catch (err) {
       console.log(err);
       throw err;
