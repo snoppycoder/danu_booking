@@ -38,6 +38,28 @@ export default function DanuBooking() {
   const [popularRoutes, setPopularRoutes] = useState<PopularRoute[]>([]);
   const [date, setDate] = useState<Date | null>();
   const { t } = useTranslation();
+  const socialLinks = {
+    fa: {
+      name: "facebook",
+
+      link: "https://www.facebook.com/profile.php?id=61582153215076",
+    },
+    tiktok: {
+      name: "TikTok",
+
+      link: "https://www.tiktok.com/@danubooking",
+    },
+    instagram: {
+      name: "Instagram",
+
+      link: "https://www.instagram.com/danubooking/",
+    },
+    linkedin: {
+      name: "Linkedin",
+
+      link: " https://www.linkedin.com/company/danubooking/about/?viewAsMember=true",
+    },
+  };
 
   // --- PARTNER LOGOS ---
   const PARTNER_LOGOS = [
@@ -497,7 +519,7 @@ export default function DanuBooking() {
 
             <div className="flex items-center gap-2 mt-6">
               <Link
-                href="#"
+                href={socialLinks.fa.link}
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
                 <Facebook
@@ -507,19 +529,21 @@ export default function DanuBooking() {
                 />
               </Link>
               <Link
-                href="#"
+                href={socialLinks.instagram.link}
+                target="_blank"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
                 <Instagram size={16} className="text-gray-200" />
               </Link>
-              <Link
+              {/* <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
                 <Youtube size={16} className="text-gray-200" />
-              </Link>
+              </Link> */}
               <Link
-                href="#"
+                href={socialLinks.linkedin.link}
+                target="_blank"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
                 <Linkedin
@@ -528,6 +552,7 @@ export default function DanuBooking() {
                   className="text-gray-200"
                 />
               </Link>
+              {/* this is twitter    */}
               <Link
                 href="#"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
@@ -541,7 +566,8 @@ export default function DanuBooking() {
                 </svg>
               </Link>
               <Link
-                href="#"
+                href={socialLinks.tiktok.link}
+                target="_blank"
                 className="w-8 h-8 rounded-full bg-black/30 flex items-center justify-center hover:bg-black/50 transition-colors"
               >
                 <svg
