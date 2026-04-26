@@ -49,13 +49,19 @@ function formatEthiopianTime(date: Date): string {
   return `${ethHour}:${minutes.toString().padStart(2, "0")} ${period}`;
 }
 
-export function exportTicketIntoPDF(booking: History): void {
+// Ensure your History interface matches the payload
+export function exportTicketIntoPDF(booking: any): void {
   console.log("Exporting booking to PDF:", booking);
+
   const doc = new jsPDF({
     orientation: "landscape",
     unit: "mm",
     format: [240, 100],
   });
+
+  // Extract first ticket (since passenger_count is 1 in this payload)
+  const ticket = booking.tickets[0];
+  const depDate = new Date(booking.departure_at);
 
   // --- MODERN COLOR PALETTE ---
   const brandTeal = [13, 148, 136]; // Deep, sophisticated teal (#0d9488)
@@ -63,8 +69,7 @@ export function exportTicketIntoPDF(booking: History): void {
   const textDark = [31, 41, 55]; // Gray 800 for primary text
   const textMuted = [107, 114, 128]; // Gray 500 for labels
   const borderLight = [229, 231, 235]; // Gray 200 for subtle lines
-
-  const depDate = new Date(booking.departure_at);
+  const bgHighlight = [249, 250, 251]; // Gray 50 for footer/cards
 
   // --- 1. BASE BACKGROUND ---
   doc.setFillColor(bgWhite[0], bgWhite[1], bgWhite[2]);
@@ -75,33 +80,34 @@ export function exportTicketIntoPDF(booking: History): void {
   doc.rect(0, 0, 6, 100, "F");
 
   // --- 3. SEPARATOR LINE (The "Tear-off" Stub) ---
-  const stubX = 170; // Moved slightly right to give the main body more breathing room
+  const stubX = 175; // The perforation line
   doc.setLineWidth(0.5);
   doc.setDrawColor(borderLight[0], borderLight[1], borderLight[2]);
   doc.setLineDashPattern([2, 2], 0);
-  doc.line(stubX, 5, stubX, 85);
-  doc.setLineDashPattern([], 0); // Reset dash
+  doc.line(stubX, 5, stubX, 95);
+  doc.setLineDashPattern([], 0);
 
   // ==========================================
-  //         MAIN TICKET BODY (LEFT)
+  //        MAIN TICKET BODY (LEFT)
   // ==========================================
 
   // Header
   doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(20);
+  doc.setFontSize(22);
   doc.text("DANU", 15, 18);
+
   doc.setFont("helvetica", "normal");
   doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
   doc.setFontSize(10);
-  doc.text("BOARDING PASS", 38, 18);
+  doc.text("BOARDING PASS", 42, 18);
 
-  // Subtle Header Divider
+  // Header Divider
   doc.setDrawColor(borderLight[0], borderLight[1], borderLight[2]);
-  doc.setLineWidth(0.2);
+  doc.setLineWidth(0.3);
   doc.line(15, 24, stubX - 10, 24);
 
-  // Helper function to draw label/value pairs to keep code DRY
+  // Helper function for standard info blocks
   const drawInfoBox = (
     label: string,
     value: string,
@@ -120,85 +126,134 @@ export function exportTicketIntoPDF(booking: History): void {
     doc.text(value, x, y + 5);
   };
 
-  // Row 1: Key Info
-  drawInfoBox("PASSENGER / OPERATOR", booking.operator_name, 15, 33);
-  drawInfoBox("DATE", format(depDate, "MMM dd, yyyy"), 80, 33);
-  drawInfoBox("TIME", format(depDate, "HH:mm"), 115, 33);
+  // Row 1: Passenger & Operator
+  drawInfoBox("PASSENGER NAME", ticket.passenger_name, 15, 33, 11);
+  drawInfoBox("BUS OPERATOR", booking.operator_name, 80, 33, 11);
 
-  // Row 2: Large Routing (From -> To)
+  // Row 2: Routing
   doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
   doc.setFontSize(7);
-  doc.text("FROM", 15, 50);
-  doc.text("TO", 80, 50);
+  doc.text("FROM", 15, 48);
+  doc.text("TO", 80, 48);
 
   doc.setTextColor(textDark[0], textDark[1], textDark[2]);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(16);
-  doc.text(booking.route_from.toUpperCase(), 15, 58);
+  doc.text(booking.route_from.toUpperCase(), 15, 55);
 
-  // Arrow graphic between routes
-  doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
-  doc.setFont("helvetica", "normal");
-
-  const arrowY = 55;
-  const arrowStart = 65;
-  const endX = 75;
-
+  // Arrow graphic
+  const arrowY = 52.5;
+  const arrowStart = 58;
+  const endX = 70;
   doc.setDrawColor(brandTeal[0], brandTeal[1], brandTeal[2]);
   doc.setLineWidth(0.8);
   doc.line(arrowStart, arrowY, endX, arrowY);
-  doc.line(endX, arrowY, endX - 3, arrowY - 2);
-  doc.line(endX, arrowY, endX - 3, arrowY + 2);
+  doc.line(endX, arrowY, endX - 2.5, arrowY - 2.5);
+  doc.line(endX, arrowY, endX - 2.5, arrowY + 2.5);
 
   doc.setTextColor(textDark[0], textDark[1], textDark[2]);
   doc.setFont("helvetica", "bold");
-  doc.text(booking.route_to.toUpperCase(), 80, 58);
+  doc.text(booking.route_to.toUpperCase(), 80, 55);
 
-  // Footer / Reference Info
-  doc.setFillColor(249, 250, 251);
-  doc.rect(15, 70, stubX - 25, 12, "F");
-
-  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
-  doc.setFontSize(8);
-  doc.setFont("helvetica", "normal");
-  doc.text(`REF:`, 18, 77);
-  drawInfoBox("TRIP ID", booking.trip_id, 18, 82);
-
-  doc.setFont("helvetica", "bold");
-  doc.setTextColor(textDark[0], textDark[1], textDark[2]);
-  doc.text(booking.booking_ref, 26, 77);
-
-  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
-  doc.setFont("helvetica", "normal");
-  doc.text(`STATUS:`, 65, 77);
-
-  // Color code the status
-  const isConfirmed = booking.booking_status.toLowerCase() === "confirmed";
-  doc.setTextColor(
-    isConfirmed ? 22 : 200,
-    isConfirmed ? 163 : 0,
-    isConfirmed ? 74 : 0,
+  // Row 3: Bus Details & Date/Time
+  drawInfoBox(
+    "BUS PLATE / SIDE NO.",
+    `${booking.bus_plate}  (Side: ${booking.bus_side_no})`,
+    15,
+    68,
   );
+  drawInfoBox(
+    "DEPARTURE DATE & TIME",
+    format(depDate, "MMM dd, yyyy • HH:mm"),
+    80,
+    68,
+  );
+
+  // --- SEAT HIGHLIGHT BADGE (Right aligned on main body) ---
+  const badgeX = 135;
+  const badgeY = 30;
+  doc.setFillColor(brandTeal[0], brandTeal[1], brandTeal[2]);
+  // Use rounded rectangle for a modern look
+  doc.roundedRect(badgeX, badgeY, 28, 28, 3, 3, "F");
+
+  doc.setTextColor(255, 255, 255);
   doc.setFont("helvetica", "bold");
   doc.setFontSize(8);
-  doc.text(booking.booking_status.toUpperCase(), 84, 77);
+  doc.text("SEAT", badgeX + 14, badgeY + 7, { align: "center" });
+
+  doc.setFontSize(20);
+  doc.text(ticket.seat_no, badgeX + 14, badgeY + 20, { align: "center" });
+
+  // --- FOOTER: Receipt & Status Info ---
+  doc.setFillColor(bgHighlight[0], bgHighlight[1], bgHighlight[2]);
+  doc.roundedRect(15, 78, stubX - 25, 14, 2, 2, "F");
+
+  // Booking Ref
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(7);
+  doc.setFont("helvetica", "bold");
+  doc.text("REF:", 18, 83);
+  doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+  doc.setFontSize(9);
+  doc.text(booking.booking_ref, 26, 83);
+
+  // Price
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(7);
+  doc.text("PRICE:", 18, 89);
+  doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+  doc.setFontSize(9);
+  doc.text(`Br. ${ticket.price_paid.toFixed(2)}`, 28, 89);
+
+  // Lottery / Status
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(7);
+  doc.text("LOTTERY:", 65, 83);
+  doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+  doc.setFontSize(9);
+  doc.text(ticket.lottery_number || "N/A", 80, 83);
+
+  // Colored Status
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(7);
+  doc.text("STATUS:", 65, 89);
+
+  const isPaid = ticket.status.toLowerCase() === "paid";
+  doc.setTextColor(isPaid ? 22 : 220, isPaid ? 163 : 38, isPaid ? 74 : 38); // Green if paid, Red if not
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(9);
+  doc.text(ticket.status.toUpperCase(), 78, 89);
 
   const startX = stubX + 8;
 
+  // Stub Header
   doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
   doc.setFont("helvetica", "bold");
-  doc.setFontSize(14);
+  doc.setFontSize(16);
   doc.text("DANU", startX, 18);
 
-  drawInfoBox("OPERATOR", booking.operator_name, startX, 30);
-  drawInfoBox("FROM", booking.route_from.toUpperCase(), startX, 42);
-  drawInfoBox("TO", booking.route_to.toUpperCase(), startX, 54);
+  // Huge Seat Number on Stub for easy reading by attendants
+  doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+  doc.setFontSize(8);
+  doc.text("SEAT", startX, 28);
+  doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
+  doc.setFontSize(22);
+  doc.text(ticket.seat_no, startX, 36);
 
-  doc.setFont("ethiopic");
-  drawInfoBox("TIME", format(depDate, "HH:mm"), startX, 66);
+  // Stub Fields
+  drawInfoBox("PASSENGER", ticket.passenger_name, startX, 45, 9);
+  drawInfoBox("BUS PLATE", booking.bus_plate, startX, 57, 9);
+  drawInfoBox("DEPARTURE", format(depDate, "MMM dd • HH:mm"), startX, 69, 9);
+  drawInfoBox(
+    "ROUTE",
+    `${booking.route_from} - ${booking.route_to}`,
+    startX,
+    81,
+    9,
+  );
 
   // Save the PDF
-  doc.save(`ticket_${booking.booking_ref}.pdf`);
+  doc.save(`Ticket_${booking.booking_ref}.pdf`);
 }
 
 export default function PassengerHistoryPageClient() {

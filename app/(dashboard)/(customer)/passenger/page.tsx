@@ -44,17 +44,17 @@ export default function DanuBooking() {
     "/images/ABAY.png",
     "/images/Airbus.png",
     "/images/Alifa.png",
-    "/images/Buna.jfif",
+    "/images/Buna.png",
     "/images/Africa.png",
     "/images/Dearm.png",
     "/images/Ghion.png",
     "/images/GoldenBus.jfif",
-    "/images/NoahBus.jfif",
-    "/images/HabeshaBus.jfif",
+    "/images/NoahBus.png",
+    "/images/HabeshaBus.png",
     "/images/Odaa_Bus.png",
     "/images/selamBus.png",
     "/images/uegnaBus.png",
-    "/images/WaliyaBus.jfif",
+    "/images/WaliyaBus.png",
   ];
 
   const SCROLLING_LOGOS = [
@@ -406,7 +406,7 @@ export default function DanuBooking() {
               {SCROLLING_LOGOS.map((logo, idx) => (
                 <div
                   key={idx}
-                  className="shrink-0 flex items-center justify-center w-32 h-20 sm:w-40 sm:h-24 p-2 rounded-xl shadow-xs transition-all duration-300 opacity-70 grayscale  hover:grayscale-0 hover:opacity-100 hover:scale-105 cursor-pointer"
+                  className="shrink-0 flex items-center justify-center w-32 h-20 sm:w-40 sm:h-24 p-2 rounded-xl shadow-xs transition-all duration-300 opacity-70 lg:grayscale  hover:grayscale-0 hover:opacity-100 hover:scale-105 cursor-pointer"
                 >
                   <img
                     src={logo}

@@ -228,9 +228,9 @@ export default function DanuBooking() {
       <div className="p-8 bg-primary">
         <form onSubmit={handleSubmit}>
           <Card className="p-6 bg-white rounded-lg shadow-xl hover:shadow-2xl max-w-xl lg:max-w-max mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 lg:grid-cols-4 gap-4">
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2 text-left">
                   {t("from")}
                 </label>
                 <div className="relative">
@@ -245,7 +245,7 @@ export default function DanuBooking() {
                       setForm({ ...form, route_from: value });
                       handleAutoCompleteFrom(value);
                     }}
-                    className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                    className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896] text-black"
                   />
 
                   {showDropdownFrom && suggestionsFrom.length > 0 && (
@@ -255,7 +255,7 @@ export default function DanuBooking() {
                           key={idx}
                           type="button"
                           onClick={() => handleSelectFromCity(city)}
-                          className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                          className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0 text-black"
                         >
                           <MapPin className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{city}</span>
@@ -267,7 +267,7 @@ export default function DanuBooking() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2 text-left">
                   {t("to")}
                 </label>
                 <div className="relative">
@@ -280,7 +280,7 @@ export default function DanuBooking() {
                       handleAutoCompleteTo(e.target.value);
                       setForm({ ...form, route_to: e.target.value });
                     }}
-                    className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                    className="w-full pl-10 pr-4 py-3 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896] text-black"
                   />
                   {showDropdownTo && suggestionsTo.length > 0 && (
                     <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-border rounded-md shadow-lg z-50 max-h-60 overflow-y-auto">
@@ -289,7 +289,7 @@ export default function DanuBooking() {
                           key={idx}
                           type="button"
                           onClick={() => handleSelectToCity(city)}
-                          className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0"
+                          className="w-full text-left px-4 py-2.5 hover:bg-[#00a896] hover:text-white transition-colors flex items-center gap-2 border-b border-border last:border-b-0 text-black"
                         >
                           <MapPin className="w-4 h-4 shrink-0" />
                           <span className="text-sm font-medium">{city}</span>
@@ -301,7 +301,7 @@ export default function DanuBooking() {
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-muted-foreground mb-2">
+                <label className="block text-sm font-medium text-muted-foreground mb-2 text-left">
                   {t("departureDate")}
                 </label>
                 <EtDatePicker
@@ -333,12 +333,17 @@ export default function DanuBooking() {
                         : "",
                     });
                   }}
-                  className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896]"
+                  className="w-full px-4 border border-input rounded-md focus:outline-none focus:ring-2 focus:ring-[#00a896] text-black"
                 />
               </div>
 
               <div className="flex items-end">
-                <Button className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
+                <Button
+                  disabled={
+                    !form.route_from || !form.route_to || !form.departure_date
+                  }
+                  className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold"
+                >
                   {t("findTickets")}
                 </Button>
               </div>
@@ -391,10 +396,7 @@ export default function DanuBooking() {
           </CardContent>
         </Card>
       </div>
-      <div
-        ref={resultsRef}
-        className="min-h-screen bg-linear-to-br from-teal-50 to-blue-50/50 p-4 sm:p-8"
-      >
+      <div className="min-h-screen bg-linear-to-br from-teal-50 to-blue-50/50 p-4 sm:p-8">
         <div className="mx-auto max-w-5xl">
           {/* Header */}
           <motion.div
@@ -406,7 +408,7 @@ export default function DanuBooking() {
             <h1 className="text-3xl sm:text-4xl font-bold tracking-tight text-gray-900">
               {t("availableTrips")}
             </h1>
-            <p className="mt-2 text-gray-600 text-lg">
+            <p className="mt-2 text-gray-600 text-lg" ref={resultsRef}>
               {t("selectYourPreferedBus")}
             </p>
           </motion.div>
