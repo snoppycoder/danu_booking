@@ -1,6 +1,6 @@
 "use client";
 
-import React, { SetStateAction, useState } from "react";
+import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 
 type PassengerInfoFormProps = {
@@ -40,159 +39,225 @@ export default function PassengerInfoForm({
     updated[index][field] = value;
     onPassengersChange(updated);
   };
+
   const [idx, setIdx] = useState(0);
   const { t } = useTranslation();
-  // Check if all passengers have required fields filled
   const [isOpen, setIsOpen] = useState(false);
+
+  // Check if all passengers have required fields filled
   const allPassengersComplete =
     passengers.length > 0 &&
     passengers.every((p) => p.name.trim() && p.phone.trim());
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8">
       {/* Display existing passengers */}
-      {passengers.map((passenger, index) => (
-        <div key={index} className="border rounded-xl p-4 space-y-4">
-          <div className="flex justify-between items-center">
-            <h3 className="font-semibold">
-              {t("passenger")} {index + 1}
-            </h3>
+      <div className="space-y-6">
+        {passengers.map((passenger, index) => (
+          <div
+            key={index}
+            className="bg-white border border-gray-200 shadow-sm rounded-xl overflow-hidden transition-all duration-200 hover:shadow-md"
+          >
+            {/* Card Header */}
+            <div className="bg-gray-50/80 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
+              <h3 className="font-semibold text-gray-900 text-lg flex items-center gap-2">
+                {t("passenger")}{" "}
+                <span className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/10 text-primary text-sm">
+                  {index + 1}
+                </span>
+              </h3>
+            </div>
+
+            {/* Card Body */}
+            <div className="p-6">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                {/* Name Input */}
+                <div className="space-y-2">
+                  <Label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor={`name-${index}`}
+                  >
+                    {t("nameBookingForm")}{" "}
+                    <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    required
+                    id={`name-${index}`}
+                    value={passenger.name}
+                    onChange={(e) =>
+                      updatePassenger(index, "name", e.target.value)
+                    }
+                    className="focus-visible:ring-primary/20"
+                  />
+                </div>
+
+                {/* Email Input */}
+                <div className="space-y-2">
+                  <Label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor={`email-${index}`}
+                  >
+                    {t("email")}
+                  </Label>
+                  <Input
+                    type="email"
+                    id={`email-${index}`}
+                    value={passenger.email ?? ""}
+                    onChange={(e) =>
+                      updatePassenger(index, "email", e.target.value)
+                    }
+                    className="focus-visible:ring-primary/20"
+                  />
+                </div>
+
+                {/* Phone Input */}
+                <div className="space-y-2">
+                  <Label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor={`phone-${index}`}
+                  >
+                    {t("phone")} <span className="text-red-500">*</span>
+                  </Label>
+                  <Input
+                    required
+                    id={`phone-${index}`}
+                    value={passenger.phone}
+                    onChange={(e) =>
+                      updatePassenger(index, "phone", e.target.value.trim())
+                    }
+                    className="focus-visible:ring-primary/20"
+                  />
+                </div>
+
+                {/* Fayda ID Input */}
+                <div className="space-y-2">
+                  <Label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor={`id-${index}`}
+                  >
+                    {t("faydaId")}
+                  </Label>
+                  <Input
+                    id={`id-${index}`}
+                    value={passenger.id_number ?? ""}
+                    onChange={(e) =>
+                      updatePassenger(index, "id_number", e.target.value)
+                    }
+                    placeholder="FAYDA ID"
+                    className="focus-visible:ring-primary/20"
+                  />
+                </div>
+
+                {/* Divider to separate base info from settings */}
+                <div className="col-span-1 md:col-span-2 pt-2">
+                  <hr className="border-gray-200" />
+                </div>
+
+                {/* Child Switch - Taking Full Line */}
+                <div className="col-span-1 md:col-span-2">
+                  <div className="flex flex-row items-center   justify-between rounded-lg border border-gray-200 bg-gray-50/50 p-4 shadow-sm">
+                    <div className="space-y-1">
+                      <Label
+                        htmlFor={`child-switch-${index}`}
+                        className=" font-medium text-sm text-gray-800 cursor-pointer"
+                      >
+                        {t("isPassengerChild")}
+                      </Label>
+                    </div>
+                    <Switch
+                      id={`child-switch-${index}`}
+                      checked={passenger.is_child ?? false}
+                      onCheckedChange={(checked: boolean) =>
+                        updatePassenger(index, "is_child", checked)
+                      }
+                      className="data-[state=checked]:bg-primary"
+                    />
+                  </div>
+                </div>
+
+                {/* Company Info Button - Taking Full Line */}
+                <div className="col-span-1 md:col-span-2 flex justify-start">
+                  <Button
+                    variant="outline"
+                    className="text-gray-600 w-full hover:text-gray-900 bg-white border-gray-300"
+                    onClick={() => {
+                      setIdx(index);
+                      setIsOpen(true);
+                    }}
+                  >
+                    {t("companyInfo")}
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
+        ))}
+      </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <Label className="mb-2" htmlFor={`name-${index}`}>
-                {t("nameBookingForm")} <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                required
-                id={`name-${index}`}
-                value={passenger.name}
-                onChange={(e) => updatePassenger(index, "name", e.target.value)}
-                placeholder={t("nameBookingForm")}
-              />
-            </div>
-            <div>
-              <Label className="mb-2" htmlFor={`email-${index}`}>
-                {t("email")}
-              </Label>
-              <Input
-                type="email"
-                id={`email-${index}`}
-                value={passenger.email ?? ""}
-                onChange={(e) =>
-                  updatePassenger(index, "email", e.target.value)
-                }
-                placeholder={t("email")}
-              />
-            </div>
-
-            <div>
-              <Label className="mb-2" htmlFor={`phone-${index}`}>
-                {t("phone")} <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                required
-                id={`phone-${index}`}
-                value={passenger.phone}
-                onChange={(e) =>
-                  updatePassenger(index, "phone", e.target.value.trim())
-                }
-                placeholder={t("phone")}
-              />
-            </div>
-            <div>
-              <Label className="mb-2" htmlFor={`id-${index}`}>
-                {t("faydaId")}
-              </Label>
-              <Input
-                id={`id-${index}`}
-                value={passenger.id_number ?? ""}
-                onChange={(e) =>
-                  updatePassenger(index, "id_number", e.target.value)
-                }
-                // placeholder="ID number"
-              />
-            </div>
-            <div className="ml-1 mt-2.5">
-              <Label className="mb-2" htmlFor={`id-${index}`}>
-                {t("isPassengerChild")}
-              </Label>
-              <Switch
-                id={`id-${index}`}
-                checked={passenger.is_child ?? false}
-                onCheckedChange={(checked: boolean) =>
-                  updatePassenger(index, "is_child", checked)
-                }
-              />
-            </div>
-            <div className="ml-1 mt-2.5">
-              <Button
-                variant={"outline"}
-                onClick={() => {
-                  setIdx(index);
-                  setIsOpen(true);
-                }}
-              >
-                {t("companyInfo")}
-              </Button>
-            </div>
-          </div>
-        </div>
-      ))}
-
-      <div className="flex gap-2 pt-4">
-        <Button className="flex-1" variant={"outline"} onClick={onBack}>
+      {/* Action Buttons */}
+      <div className="flex flex-col sm:flex-row gap-3 pt-6 border-t border-gray-200">
+        <Button
+          className="flex-1 sm:flex-none sm:w-32 order-2 sm:order-1"
+          variant="outline"
+          onClick={onBack}
+        >
           Back
         </Button>
         <Button
-          className="flex-1"
+          className="flex-1 order-1 sm:order-2"
           disabled={!allPassengersComplete}
           onClick={onNext}
         >
-          Summary
+          Proceed to Summary
         </Button>
       </div>
+
+      {/* Company Info Dialog */}
       <Dialog open={isOpen} onOpenChange={setIsOpen}>
-        <DialogContent>
+        <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Company Information</DialogTitle>
+            <DialogTitle className="text-xl">Company Information</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="space-y-2.5">
-              <Label htmlFor="company">Company Name</Label>
+          <div className="space-y-6 pt-4">
+            <div className="space-y-3">
+              <Label htmlFor="company" className="text-sm font-medium">
+                Company Name
+              </Label>
               <Input
                 id="company"
-                value={passengers[idx].company_name ?? ""}
+                value={passengers[idx]?.company_name ?? ""}
                 onChange={(e) =>
                   updatePassenger(idx, "company_name", e.target.value)
                 }
                 placeholder="Enter company name"
+                className="focus-visible:ring-primary/20"
               />
             </div>
 
-            <div className="space-y-2.5">
-              <Label htmlFor="tin">TIN Number</Label>
+            <div className="space-y-3">
+              <Label htmlFor="tin" className="text-sm font-medium">
+                TIN Number
+              </Label>
               <Input
                 id="tin"
-                value={passengers[idx].tin_number ?? ""}
+                value={passengers[idx]?.tin_number ?? ""}
                 onChange={(e) =>
                   updatePassenger(idx, "tin_number", e.target.value)
                 }
                 placeholder="Enter TIN number"
+                className="focus-visible:ring-primary/20"
               />
             </div>
 
             <Button
-              className="w-full"
+              className="w-full mt-6"
               disabled={
-                passengers[idx].company_name === "" ||
-                passengers[idx].tin_number === ""
+                !passengers[idx]?.company_name || !passengers[idx]?.tin_number
               }
               onClick={() => setIsOpen(false)}
             >
-              Save
+              Save Details
             </Button>
           </div>
         </DialogContent>

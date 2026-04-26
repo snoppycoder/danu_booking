@@ -48,7 +48,7 @@ i18n.use(initReactI18next).init({
         noTripsFound: "No trips found.",
         enterPassengerInfo: "Enter Passenger Information",
         passenger: "Passenger",
-        isPassengerChild: "Is this passenger a child?",
+        isPassengerChild: "Is this passenger between 7 and 12 years old?",
         nameBookingForm: "Full name",
         faydaId: "ID Number",
         email: "Email",
