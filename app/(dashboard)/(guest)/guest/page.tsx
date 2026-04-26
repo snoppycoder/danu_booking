@@ -171,16 +171,21 @@ export default function GuestDanuBooking() {
       <Toaster richColors position="top-right"></Toaster>
 
       <section className="relative bg-primary/90 py-20 px-4 sm:py-32 text-center text-white overflow-hidden">
-        {/* <video
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 w-full h-full object-cover"
-        >
-          <source src="/videos/bus.mp4" type="video/mp4" />
-        </video> */}
-
+        <style>{`
+        @keyframes scroll {
+          0% { transform: translateX(0); }
+          100% { transform: translateX(calc(-100% / 3)); }
+        }
+        .animate-scroll {
+          display: flex;
+          width: max-content;
+          animation: scroll 30s linear infinite;
+        }
+        .animate-scroll:hover {
+          animation-play-state: paused;
+        }
+      `}</style>
+        ;
         <div className="relative max-w-6xl mx-auto z-10">
           <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">
             BOOK YOUR BUS TICKET
