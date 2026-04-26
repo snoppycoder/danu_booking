@@ -114,12 +114,17 @@ export default function AboutPage() {
         </div> */}
       </section>
 
-      {/* Vision & Mission Section */}
       <section className="px-4 py-12 sm:px-6 lg:px-8 bg-card/40 border-t border-b border-border">
         <div className="max-w-6xl mx-auto">
           <div className="grid md:grid-cols-2 gap-12">
             {/* Vision */}
-            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, ease: "easeOut" }}
+              className="space-y-4"
+            >
               <h2 className="text-3xl font-bold text-foreground">
                 {t("vision")}
               </h2>
@@ -134,10 +139,16 @@ export default function AboutPage() {
                 <div className="w-2 h-2 rounded-full bg-primary mt-2 shrink-0" />
                 <p className="text-muted-foreground">{t("visionPoint2")}</p>
               </div>
-            </div>
+            </motion.div>
 
             {/* Mission */}
-            <div className="space-y-4">
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+              className="space-y-4"
+            >
               <h2 className="text-3xl font-bold text-foreground">
                 {t("mission")}
               </h2>
@@ -152,89 +163,109 @@ export default function AboutPage() {
                 <div className="w-2 h-2 rounded-full bg-primary mt-2 flex-shrink-0" />
                 <p className="text-muted-foreground">{t("missionPoint2")}</p>
               </div>
-            </div>
+            </motion.div>
           </div>
         </div>
       </section>
 
-      {/* Why We Exist Section */}
       <section className="px-4 py-20 sm:px-6 lg:px-8">
         <div className="max-w-6xl mx-auto">
-          <div className="text-center mb-16">
+          {/* Section Header */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true, margin: "-100px" }}
+            transition={{ duration: 0.6, ease: "easeOut" }}
+            className="text-center mb-16"
+          >
             <h2 className="text-4xl font-bold text-foreground mb-4">
               {t("whyWeExist")}
             </h2>
             <p className="text-lg text-muted-foreground max-w-2xl mx-auto">
               {t("whyWeExistDesc")}
             </p>
-          </div>
+          </motion.div>
 
           <div className="grid md:grid-cols-2 gap-12">
             {/* Passenger Challenges */}
-            <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors">
-              <h3 className="text-2xl font-bold text-foreground mb-6">
-                {t("passengerChallenges")}
-              </h3>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("challenge1")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("challenge2")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("challenge3")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("challenge4")}
-                  </span>
-                </li>
-              </ul>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.2 }}
+            >
+              <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors h-full">
+                <h3 className="text-2xl font-bold text-foreground mb-6">
+                  {t("passengerChallenges")}
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("challenge1")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("challenge2")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("challenge3")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("challenge4")}
+                    </span>
+                  </li>
+                </ul>
+              </Card>
+            </motion.div>
 
             {/* Operator Challenges */}
-            <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors">
-              <h3 className="text-2xl font-bold text-foreground mb-6">
-                {t("operatorChallenges")}
-              </h3>
-              <ul className="space-y-4">
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("operator1")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("operator2")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("operator3")}
-                  </span>
-                </li>
-                <li className="flex items-start gap-3">
-                  <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
-                  <span className="text-muted-foreground">
-                    {t("operator4")}
-                  </span>
-                </li>
-              </ul>
-            </Card>
+            <motion.div
+              initial={{ opacity: 0, y: 30 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: "-100px" }}
+              transition={{ duration: 0.6, ease: "easeOut", delay: 0.4 }}
+            >
+              <Card className="p-8 bg-gradient-to-br from-card to-secondary/5 border-border hover:border-primary/50 transition-colors h-full">
+                <h3 className="text-2xl font-bold text-foreground mb-6">
+                  {t("operatorChallenges")}
+                </h3>
+                <ul className="space-y-4">
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("operator1")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("operator2")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("operator3")}
+                    </span>
+                  </li>
+                  <li className="flex items-start gap-3">
+                    <span className="w-2 h-2 rounded-full bg-accent mt-2 flex-shrink-0" />
+                    <span className="text-muted-foreground">
+                      {t("operator4")}
+                    </span>
+                  </li>
+                </ul>
+              </Card>
+            </motion.div>
           </div>
         </div>
       </section>
