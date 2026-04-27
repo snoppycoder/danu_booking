@@ -310,7 +310,7 @@ export default function GuestDanuBooking() {
                     disabled={
                       !form.route_from || !form.route_to || !form.departure_date
                     }
-                    className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold"
+                    className="cursor-pointer w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold"
                   >
                     Find Tickets
                   </Button>

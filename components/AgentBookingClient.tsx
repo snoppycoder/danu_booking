@@ -244,7 +244,7 @@ export default function AgentBookingClient() {
               </div>
 
               <div className="flex items-end">
-                <Button className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
+                <Button className="cursor-pointer w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
                   Find Tickets
                 </Button>
               </div>

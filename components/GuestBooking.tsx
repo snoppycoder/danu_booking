@@ -323,7 +323,7 @@ export default function GuestBooking() {
               </div>
 
               <div className="flex items-end">
-                <Button className="w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
+                <Button className="cursor-pointer w-full bg-[#00a896] hover:bg-[#028f7f] text-white py-6 text-lg font-semibold">
                   Find Tickets
                 </Button>
               </div>
@@ -475,12 +475,14 @@ export default function GuestBooking() {
                                     </div>
                                     <div>
                                       <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                        Departure
+                                        Departure and Arrival time
                                       </p>
                                       <p className="text-lg font-semibold text-gray-900">
                                         {formatAmharicTime(
                                           route.departure_time,
-                                        )}
+                                        )}{" "}
+                                        -{" "}
+                                        {formatAmharicTime(route.arrival_time)}
                                       </p>
                                     </div>
                                   </div>
