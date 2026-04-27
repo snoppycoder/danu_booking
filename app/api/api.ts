@@ -1106,9 +1106,9 @@ export const passengerApi = {
     }
   },
 
-  cancelBooking: async (booking_id: string) => {
+  cancelBooking: async (hold_id: string) => {
     try {
-      const response = await api.delete(`/user/bookings/${booking_id}`);
+      const response = await api.delete(`/user/bookings/${hold_id}`);
       return response.data;
     } catch (error) {
       console.log(error);

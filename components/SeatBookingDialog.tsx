@@ -194,8 +194,13 @@ export default function SeatBookingDialog({
     setLayoutToggle(false);
     setPaymentToggle(false);
   };
-  const handleBack = () => {
+  const handleBack = async () => {
     // we need to cancel the hold
+    if (!holdData || holdData?.hold_id.trim().length == 0) {
+      return;
+    }
+    const res = await passengerApi.cancelBooking(holdData.hold_id );
+    console.log(res, "canceling the booking... ")
     setPassengers([
       {
         name: "",
