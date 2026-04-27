@@ -12,9 +12,15 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import type { Passenger } from "@/lib/model";
 import "@/i18n";
-import { set } from "date-fns";
 
 type TransferTicketDialogProps = {
   open: boolean;
@@ -44,8 +50,9 @@ export default function TransferTicketDialog({
     onPassengerChange({ ...passenger, [field]: value });
   };
 
+  // Require Name, Phone, and Gender for completion
   const isComplete = Boolean(
-    passenger?.name?.trim() && passenger?.phone?.trim(),
+    passenger?.name?.trim() && passenger?.phone?.trim() && passenger?.gender,
   );
 
   return (
@@ -119,8 +126,32 @@ export default function TransferTicketDialog({
                   />
                 </div>
 
+                {/* Gender (Shadcn Select) */}
+                <div>
+                  <Label className="mb-2 block" htmlFor="gender">
+                    {t("gender", "Gender")}{" "}
+                    <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={passenger?.gender || ""}
+                    onValueChange={(value) => updateField("gender", value)}
+                  >
+                    <SelectTrigger id="gender" className="w-full bg-white">
+                      <SelectValue
+                        placeholder={t("selectGender", "Select gender")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">{t("male", "Male")}</SelectItem>
+                      <SelectItem value="Female">
+                        {t("female", "Female")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Is Child Switch */}
-                <div className="flex flex-col justify-center mt-1">
+                <div className="flex flex-col col-span-1 md:col-span-2 justify-center mt-1">
                   <Label className="mb-3 block" htmlFor="is-child">
                     {t("isPassengerChild")}
                   </Label>
@@ -134,7 +165,7 @@ export default function TransferTicketDialog({
                 </div>
 
                 {/* Company Info Trigger */}
-                <div className="flex flex-col justify-end">
+                <div className="flex flex-col justify-end col-span-1 md:col-span-2 mt-2">
                   <Button
                     variant="outline"
                     type="button"
@@ -170,7 +201,6 @@ export default function TransferTicketDialog({
       </Dialog>
 
       {/* COMPANY INFO SUB-DIALOG */}
-      {/* Kept outside the main DialogContent as a sibling to prevent nested modal backdrop issues */}
       <Dialog open={isCompanyInfoOpen} onOpenChange={setIsCompanyInfoOpen}>
         <DialogContent>
           <DialogHeader>
