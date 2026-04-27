@@ -47,6 +47,15 @@ export default function SeatBookingDialog({
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const queryClient = useQueryClient();
   const { t } = useTranslation();
+  const [totalFare, setTotalFare] = useState(0);
+  const [holdData, setHoldData] = useState<{
+    hold_id: string;
+    client_ref: string;
+    client_ref_token: string;
+    expires_at: string;
+    passenger_details: Passenger[];
+    //client ref when hold was created a guest account
+  } | null>();
   // Passenger information state
   const [passengers, setPassengers] = useState<Passenger[]>([
     {
@@ -86,7 +95,8 @@ export default function SeatBookingDialog({
   }, [number_of_passengers]);
 
   // Handle moving from passenger info to seat selection
-  const handlePassengerInfoNext = () => {
+  const handlePassengerInfoNext = async () => {
+    await handleHold();
     setStep(2);
     setCurrentPassengerIndex(0);
     setSeatToggle(true);
@@ -115,13 +125,11 @@ export default function SeatBookingDialog({
   };
 
   // Handle final booking submission
-  const handleSubmit = async () => {
+  const handleHold = async () => {
     const seatArr = Object.keys(seatDict);
     const passengerArr = Object.values(seatDict);
     console.log(passengerArr, "passenger array");
     setPassengerArr(passengerArr);
-
-    let uuid = uuidv4();
 
     try {
       console.log(selectedSeats, passengers);
@@ -130,37 +138,16 @@ export default function SeatBookingDialog({
       passengers.forEach(
         (p) => (p.email = (p.email ?? "").trim().length === 0 ? null : p.email),
       );
-
+      let uuid = uuidv4();
       const response = await passengerApi.holdSeat(tripId, {
         seat_codes: selectedSeats,
         passenger_details: passengers,
         client_ref: uuid,
       });
+      console.log(response, "hold response");
+      setHoldData(response);
+      setTotalFare(response.total_amount);
 
-      await passengerApi.confirmBooking(
-        response.hold_id,
-        `devpay_${uuid}`,
-        "cash",
-      );
-
-      toast.success("Seats successfully booked!", { duration: 3000 });
-      queryClient.invalidateQueries({ queryKey: ["history"] });
-      onSucess?.();
-
-      // Reset state
-      setPassengers([
-        {
-          name: "",
-          email: "",
-          phone: "",
-          id_number: "",
-          gender: "",
-        },
-      ]);
-      setToggle(false);
-      setStep(1);
-      setLayoutToggle(false);
-      setPaymentToggle(false);
     } catch (error) {
       if (isAxiosError(error)) {
         console.error("Axios error:", error.response?.data || error.message);
@@ -180,7 +167,35 @@ export default function SeatBookingDialog({
       }
     }
   };
+  const handleConfirm = async () => {
+    let uuid = uuidv4();
+    if (!holdData) return;
+    const response2 = await passengerApi.confirmBooking(
+      holdData.hold_id,
+      `devpay_${uuid}`,
+      "cash",
+    );
 
+  
+    toast.success("Seats successfully booked!", { duration: 3000 });
+    queryClient.invalidateQueries({ queryKey: ["history"] });
+    onSucess?.();
+
+    // Reset state
+    setPassengers([
+      {
+        name: "",
+        email: "",
+        phone: "",
+        id_number: "",
+        gender: "",
+      },
+    ]);
+    setToggle(false);
+    setStep(1);
+    setLayoutToggle(false);
+    setPaymentToggle(false);
+  };
   const handleBack = () => {
     setPassengers([
       {
@@ -298,7 +313,7 @@ export default function SeatBookingDialog({
             <div className="rounded-lg border p-4 bg-muted/50">
               <p className="text-sm">Total Passengers: {passengers.length}</p>
               <p className="text-sm font-medium">
-                Total Amount: ETB {passengers.length * 1200}
+                Total Amount: ETB {totalFare}
               </p>
             </div>
 
@@ -309,7 +324,7 @@ export default function SeatBookingDialog({
 
           <DialogFooter>
             <Button variant="outline">Cancel</Button>
-            <Button onClick={handleSubmit}>Pay & Confirm</Button>
+            <Button onClick={handleConfirm}>Pay & Confirm</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
