@@ -20,6 +20,7 @@ import {
 } from "@/lib/model";
 import { CodeOffRounded } from "@mui/icons-material";
 import axios from "axios";
+import { HdmiPort } from "lucide-react";
 
 const api = axios.create({
   // baseURL: "/api/proxy",
@@ -1083,6 +1084,15 @@ export const passengerApi = {
     } catch (error) {
       console.log(error);
       throw error;
+    }
+  },
+  cancelGuestBooking: async (hold_id: string) => {
+    try {
+      const res = await api.delete(`/user/trip-bookings/${hold_id}`);
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
     }
   },
   getBookingHistoryPublic: async (

@@ -181,7 +181,9 @@ export default function GuestSeatBookingDialog({
     setPaymentToggle(false);
   };
 
-  const handleBack = () => {
+  const handleBack = async () => {
+    if (!holdData || holdData?.hold_id === "") return;
+    await passengerApi.cancelGuestBooking(holdData?.hold_id);
     setPassengers([
       {
         name: "",
