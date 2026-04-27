@@ -290,6 +290,7 @@ export default function PassengerHistoryPageClient() {
     id_number: "",
     is_child: false,
     tin_number: "",
+    gender: "",
     company_name: "",
   });
 

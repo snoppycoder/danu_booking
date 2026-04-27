@@ -78,7 +78,8 @@ export default function UserList() {
     (emp) =>
       emp?.first_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       emp?.last_name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      emp?.email?.toLowerCase().includes(searchTerm.toLowerCase()),
+      emp?.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      emp?.phone?.toLowerCase().includes(searchTerm.toLowerCase()),
   );
   console.log("Filtered Users: ", data);
 

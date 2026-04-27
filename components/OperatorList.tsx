@@ -10,6 +10,8 @@ import {
   RefreshCw,
   MoreHorizontal,
   CircleQuestionMark,
+  UserX,
+  UserPlus,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -172,6 +174,7 @@ export default function OperatorList() {
     await refetch();
     setSpinning(false);
   }
+  const hasUsers = filteredOperators && filteredUsers?.length > 0;
 
   return (
     <div className="relative space-y-6">
@@ -182,41 +185,81 @@ export default function OperatorList() {
         <AddOperatorModal onSuccess={refetch} />
       </div>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DialogContent className="max-w-md ">
-          <DialogHeader>
-            <DialogTitle>User List</DialogTitle>
-          </DialogHeader>
+        <DialogContent className="max-w-md sm:rounded-2xl border-none shadow-2xl overflow-hidden p-0">
+          <div className="bg-gray-50/50 p-6 border-b border-gray-100">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-semibold flex items-center gap-2">
+                <UserPlus className="w-5 h-5 text-primary" />
+                Assign User
+              </DialogTitle>
+              <DialogDescription className="text-sm text-gray-500">
+                Select a user from the list below to assign them to this
+                operator.
+              </DialogDescription>
+            </DialogHeader>
+          </div>
 
-          <div className="space-y-2 mt-4 max-h-[400px] overflow-y-auto">
-            {filteredOperators ? (
-              filteredUsers.map((users) => (
-                <div
-                  key={users.id}
-                  className="flex justify-between items-center p-2 rounded hover:bg-gray-100"
-                >
-                  <div>
-                    <p className="font-medium">
-                      {(users.first_name ?? "") + " " + (users.last_name ?? "")}
-                    </p>
+          <div className="p-4 sm:p-6">
+            <div className="space-y-3 max-h-[380px] overflow-y-auto pr-2 custom-scrollbar">
+              {hasUsers ? (
+                filteredUsers.map((user) => {
+                  const firstName = user.first_name || "";
+                  const lastName = user.last_name || "";
+                  const initials =
+                    `${firstName.charAt(0)}${lastName.charAt(0)}`.toUpperCase();
+
+                  return (
+                    <div
+                      key={user.id}
+                      className="group flex items-center justify-between p-3 rounded-xl border border-transparent hover:border-gray-200 hover:bg-white hover:shadow-sm transition-all duration-200 ease-in-out"
+                    >
+                      <div className="flex items-center gap-4">
+                        {/* Avatar Placeholder */}
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-semibold text-primary">
+                          {initials || "?"}
+                        </div>
+
+                        {/* User Info */}
+                        <div className="flex flex-col">
+                          <p className="text-sm font-semibold text-gray-900 leading-none mb-1">
+                            {firstName} {lastName}
+                          </p>
+                          <p className="text-xs text-gray-500 font-medium">
+                            ID: {user.id.substring(0, 8)}...{" "}
+                            {/* Example subtitle */}
+                          </p>
+                        </div>
+                      </div>
+
+                      <Button
+                        size="sm"
+                        variant="secondary"
+                        className="opacity-0 group-hover:opacity-100 transition-opacity bg-primary/5 hover:bg-primary/15 text-primary"
+                        onClick={() => handleAssignOperatorToUser(user.id)}
+                      >
+                        Select
+                      </Button>
+                    </div>
+                  );
+                })
+              ) : (
+                /* Beautiful Empty State */
+                <div className="flex flex-col items-center justify-center py-12 px-4 text-center">
+                  <div className="h-12 w-12 rounded-full bg-gray-100 flex items-center justify-center mb-4">
+                    <UserX className="h-6 w-6 text-gray-400" />
                   </div>
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    onClick={() => {
-                      handleAssignOperatorToUser(users.id);
-                    }}
-                  >
-                    Select
-                  </Button>
+                  <h3 className="text-base font-semibold text-gray-900 mb-1">
+                    No users available
+                  </h3>
+                  <p className="text-sm text-gray-500 max-w-[250px]">
+                    There are currently no users available for assignment.
+                  </p>
                 </div>
-              ))
-            ) : (
-              <p>No users available for assignment.</p>
-            )}
+              )}
+            </div>
           </div>
         </DialogContent>
       </Dialog>
-
       <Dialog open={detailToggle} onOpenChange={setDetailToggle}>
         <DialogOverlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" />
 
