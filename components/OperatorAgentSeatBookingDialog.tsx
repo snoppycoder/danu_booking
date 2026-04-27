@@ -51,6 +51,7 @@ export default function OperatorAgentSeatBookingDialog({
   const [passengers, setPassengers] = useState<Passenger[]>([
     {
       name: "",
+      gender: "",
       email: "",
       phone: "",
       id_number: "",
@@ -73,6 +74,7 @@ export default function OperatorAgentSeatBookingDialog({
       Array.from({ length: number_of_passengers }, () => ({
         name: "",
         email: "",
+        gender: "",
         phone: "",
         id_number: "",
       })),
@@ -144,6 +146,7 @@ export default function OperatorAgentSeatBookingDialog({
           email: "",
           phone: "",
           id_number: "",
+          gender: "",
         },
       ]);
       setToggle(false);
@@ -176,6 +179,7 @@ export default function OperatorAgentSeatBookingDialog({
         email: "",
         phone: "",
         id_number: "",
+        gender: "",
       },
     ]);
     // setSeatDict({});
@@ -194,6 +198,7 @@ export default function OperatorAgentSeatBookingDialog({
     setPassengers([
       {
         name: "",
+        gender: "",
         email: "",
         phone: "",
         id_number: "",

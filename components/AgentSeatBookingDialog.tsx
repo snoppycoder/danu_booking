@@ -51,6 +51,7 @@ export default function AgentSeatBookingDialog({
     {
       name: "",
       email: "",
+      gender: "",
       phone: "",
       id_number: "",
     },
@@ -72,6 +73,7 @@ export default function AgentSeatBookingDialog({
       Array.from({ length: number_of_passengers }, () => ({
         name: "",
         email: "",
+        gender: "",
         phone: "",
         id_number: "",
       })),
@@ -142,6 +144,7 @@ export default function AgentSeatBookingDialog({
           name: "",
           email: "",
           phone: "",
+          gender: "",
           id_number: "",
         },
       ]);
@@ -175,6 +178,7 @@ export default function AgentSeatBookingDialog({
         email: "",
         phone: "",
         id_number: "",
+        gender: "",
       },
     ]);
     // setSeatDict({});
@@ -194,6 +198,7 @@ export default function AgentSeatBookingDialog({
     setPassengers([
       {
         name: "",
+        gender: "",
         email: "",
         phone: "",
         id_number: "",

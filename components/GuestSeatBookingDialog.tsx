@@ -52,6 +52,7 @@ export default function GuestSeatBookingDialog({
       email: "",
       phone: "",
       id_number: "",
+      gender: "",
     },
   ]);
   const [paymentToggle, setPaymentToggle] = useState(false);
@@ -87,6 +88,7 @@ export default function GuestSeatBookingDialog({
         email: "",
         phone: "",
         id_number: "",
+        gender: "",
       })),
     );
   }, [number_of_passengers]);
@@ -139,6 +141,7 @@ export default function GuestSeatBookingDialog({
           email: "",
           phone: "",
           id_number: "",
+          gender: "",
         },
       ]);
       setToggle(false);
@@ -167,6 +170,7 @@ export default function GuestSeatBookingDialog({
     setPassengers([
       {
         name: "",
+        gender: "",
         email: "",
         phone: "",
         id_number: "",
@@ -189,6 +193,7 @@ export default function GuestSeatBookingDialog({
     setPassengers([
       {
         name: "",
+        gender: "",
         email: "",
         phone: "",
         id_number: "",

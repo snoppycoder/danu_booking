@@ -54,6 +54,7 @@ export default function SeatBookingDialog({
       email: "",
       phone: "",
       id_number: "",
+      gender: "",
     },
   ]);
 
@@ -79,6 +80,7 @@ export default function SeatBookingDialog({
         email: "",
         phone: "",
         id_number: "",
+        gender: "",
       })),
     );
   }, [number_of_passengers]);
@@ -152,6 +154,7 @@ export default function SeatBookingDialog({
           email: "",
           phone: "",
           id_number: "",
+          gender: "",
         },
       ]);
       setToggle(false);
@@ -183,6 +186,7 @@ export default function SeatBookingDialog({
       {
         name: "",
         email: "",
+        gender: "",
         phone: "",
         id_number: "",
       },
@@ -204,6 +208,7 @@ export default function SeatBookingDialog({
     setPassengers([
       {
         name: "",
+        gender: "",
         email: "",
         phone: "",
         id_number: "",

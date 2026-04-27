@@ -4,16 +4,23 @@ import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import type { Passenger } from "@/lib/model";
-import "@/i18n";
-import { useTranslation } from "react-i18next";
-import { Switch } from "./ui/switch";
+import { Switch } from "@/components/ui/switch";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import type { Passenger } from "@/lib/model";
+import "@/i18n";
+import { useTranslation } from "react-i18next";
 
 type PassengerInfoFormProps = {
   numberOfPassengers: number;
@@ -44,10 +51,9 @@ export default function PassengerInfoForm({
   const { t } = useTranslation();
   const [isOpen, setIsOpen] = useState(false);
 
-  // Check if all passengers have required fields filled
   const allPassengersComplete =
     passengers.length > 0 &&
-    passengers.every((p) => p.name.trim() && p.phone.trim());
+    passengers.every((p) => p.name.trim() && p.phone.trim() && p.gender);
 
   return (
     <div className="space-y-8">
@@ -148,6 +154,38 @@ export default function PassengerInfoForm({
                   />
                 </div>
 
+                {/* Gender Input with Shadcn */}
+                <div className="space-y-2">
+                  <Label
+                    className="text-sm font-medium text-gray-700"
+                    htmlFor={`gender-${index}`}
+                  >
+                    {t("gender", "Gender")}{" "}
+                    <span className="text-red-500">*</span>
+                  </Label>
+                  <Select
+                    value={passenger.gender ?? ""}
+                    onValueChange={(value) =>
+                      updatePassenger(index, "gender", value)
+                    }
+                  >
+                    <SelectTrigger
+                      id={`gender-${index}`}
+                      className="w-full focus:ring-primary/20 bg-white"
+                    >
+                      <SelectValue
+                        placeholder={t("selectGender", "Select gender")}
+                      />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Male">{t("male", "Male")}</SelectItem>
+                      <SelectItem value="Female">
+                        {t("female", "Female")}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
                 {/* Divider to separate base info from settings */}
                 <div className="col-span-1 md:col-span-2 pt-2">
                   <hr className="border-gray-200" />
@@ -155,11 +193,11 @@ export default function PassengerInfoForm({
 
                 {/* Child Switch - Taking Full Line */}
                 <div className="col-span-1 md:col-span-2">
-                  <div className="flex flex-row items-center   justify-between rounded-lg border border-gray-200 bg-gray-50/50 p-4 shadow-sm">
+                  <div className="flex flex-row items-center justify-between rounded-lg border border-gray-200 bg-gray-50/50 p-4 shadow-sm">
                     <div className="space-y-1">
                       <Label
                         htmlFor={`child-switch-${index}`}
-                        className=" font-medium text-sm text-gray-800 cursor-pointer"
+                        className="font-medium text-sm text-gray-800 cursor-pointer"
                       >
                         {t("isPassengerChild")}
                       </Label>

@@ -308,6 +308,7 @@ export interface PopularRoutesResponse {
 export type Passenger = {
   name: string;
   email: string | null;
+  gender: string | null;
   phone: string;
   id_number: string | null;
   is_child?: boolean;
