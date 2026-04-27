@@ -147,7 +147,6 @@ export default function SeatBookingDialog({
       console.log(response, "hold response");
       setHoldData(response);
       setTotalFare(response.total_amount);
-
     } catch (error) {
       if (isAxiosError(error)) {
         console.error("Axios error:", error.response?.data || error.message);
@@ -176,7 +175,6 @@ export default function SeatBookingDialog({
       "cash",
     );
 
-  
     toast.success("Seats successfully booked!", { duration: 3000 });
     queryClient.invalidateQueries({ queryKey: ["history"] });
     onSucess?.();
@@ -197,6 +195,7 @@ export default function SeatBookingDialog({
     setPaymentToggle(false);
   };
   const handleBack = () => {
+    // we need to cancel the hold
     setPassengers([
       {
         name: "",
@@ -234,6 +233,12 @@ export default function SeatBookingDialog({
     setCurrentPassengerIndex(0);
     setEditingPassenger({});
   };
+  // needs to get integrated
+  async function handleCancel(
+    event: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ): Promise<void> {
+    event.preventDefault();
+  }
 
   return (
     <div>
@@ -323,7 +328,9 @@ export default function SeatBookingDialog({
           </div>
 
           <DialogFooter>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" onClick={handleCancel}>
+              Cancel
+            </Button>
             <Button onClick={handleConfirm}>Pay & Confirm</Button>
           </DialogFooter>
         </DialogContent>
