@@ -209,6 +209,7 @@ export const AuthProvider = ({
         setUser(response.user_info);
         await setAuthCookies(response);
         const decoded = await decodeJWT(response.access_token);
+        console.log(decoded.roles, "roles of the user");
 
         if (decoded.roles.includes("passenger")) {
           router.push("/passenger");

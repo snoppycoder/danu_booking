@@ -43,10 +43,6 @@ const data: {
   },
 ];
 export default function Passenger() {
-  useEffect(() => {
-    //api call to fetch passengers data
-  }, []);
-
   const [data_, setData] = useState(data);
   function handleInput(e: React.FormEvent<HTMLInputElement>) {
     const query = e.currentTarget.value.toLowerCase();
@@ -55,7 +51,7 @@ export default function Passenger() {
   }
 
   function handleDownload(
-    event: React.MouseEvent<HTMLTableDataCellElement, MouseEvent>
+    event: React.MouseEvent<HTMLTableDataCellElement, MouseEvent>,
   ): void {
     event.stopPropagation();
     // generate the csv and create a a.download link

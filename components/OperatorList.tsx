@@ -70,12 +70,14 @@ export default function OperatorList() {
     currentPage,
     Number(displayCount),
   );
-  const { data: users, ...rest } = useUsers(undefined, undefined, true); //make all
+  const { data: users, ...rest } = useUsers(1, 200, true); //make all
   const filteredUsers =
     users?.items?.filter(
       (u) => u.roles[0]?.name == "Operator Admin" && !u.organization_id,
     ) ?? [];
-  console.log(users, "filtered users");
+
+  console.log(filteredUsers, "all");
+
   useEffect(() => {
     setCurrentPage(1);
   }, [displayCount]);
@@ -174,7 +176,8 @@ export default function OperatorList() {
     await refetch();
     setSpinning(false);
   }
-  const hasUsers = filteredOperators && filteredUsers?.length > 0;
+  const hasUsers = filteredUsers?.length > 0;
+  console.log(hasUsers);
 
   return (
     <div className="relative space-y-6">

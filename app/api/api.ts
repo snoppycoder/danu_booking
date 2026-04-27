@@ -88,7 +88,6 @@ api.interceptors.request.use(
     // This will log on every single call
     const refresh_token = (await getRefreshToken()) ?? "No token found";
 
-    console.log(`🚀 API Call to: ${config.url}`);
     console.log("Current Refresh Token:", refresh_token);
 
     return config;
