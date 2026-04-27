@@ -1315,6 +1315,26 @@ export const passengerApi = {
   },
 };
 export const agentApi = {
+  transferTickets: async (
+    operator_id: string,
+    booking_id: string,
+    ticket_ids: string[],
+    new_passenger: Passenger,
+  ) => {
+    try {
+      const res = await api.post(
+        `/operator-agents/${operator_id}/bookings/${booking_id}/transfer`,
+        {
+          ticket_ids,
+          new_passenger,
+        },
+      );
+      return res.data;
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   cancelBooking: async (operator_id: string, booking_id: string) => {
     try {
       const res = await api.delete(
