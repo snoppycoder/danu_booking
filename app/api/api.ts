@@ -1343,11 +1343,18 @@ export const agentApi = {
     new_passenger: Passenger,
   ) => {
     try {
+      const { email, ...rest } = new_passenger;
+
+      // rebuild passenger conditionally
+      const newPassenger = {
+        ...rest,
+        ...(email && email.trim() !== "" ? { email } : {}),
+      };
       const res = await api.post(
         `/operator-agents/${operator_id}/bookings/${booking_id}/transfer`,
         {
           ticket_ids,
-          new_passenger,
+          new_passenger: newPassenger,
         },
       );
       return res.data;
