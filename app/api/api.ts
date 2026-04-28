@@ -1060,11 +1060,21 @@ export const passengerApi = {
     ticket_ids: string[],
   ) => {
     try {
+      // destructure email out
+      const { email, ...rest } = passenger;
+
+      // rebuild passenger conditionally
+      const newPassenger = {
+        ...rest,
+        ...(email && email.trim() !== "" ? { email } : {}),
+      };
+
       const response = await api.post(`/user/bookings/${booking_id}/transfer`, {
-        new_passenger: passenger,
+        new_passenger: newPassenger,
         ticket_ids: ticket_ids,
         transfer_key: crypto.randomUUID(),
       });
+
       return response.data;
     } catch (error) {
       console.log(error, "error from transfer booking");
@@ -1080,6 +1090,7 @@ export const passengerApi = {
           per_page,
         },
       });
+      console.log(response.data);
       return response.data;
     } catch (error) {
       console.log(error);

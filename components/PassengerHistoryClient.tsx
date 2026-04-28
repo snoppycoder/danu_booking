@@ -275,6 +275,7 @@ export default function PassengerHistoryPageClient() {
     error,
     refetch,
   } = usePassengerHistory(currentPage, numberOfCard);
+  console.log(bookings);
   const [open, setOpen] = useState(false);
   const [openTransfer, setOpenTransfer] = useState(false);
   const canCancel = (departure_at: string) => {
@@ -585,6 +586,7 @@ export default function PassengerHistoryPageClient() {
                                   setBookingId(booking.booking_id);
                                   setOpenTransfer(true);
                                   setTicketIds(booking.ticket_ids);
+
                                   refetch();
                                 }}
                               >
