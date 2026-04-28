@@ -840,7 +840,23 @@ export const useBookingHistoryPublic = (
           booking_status: string;
 
           trip_id: string;
+          tickets: {
+            email: string | null;
+            gender: "Male" | "Female";
 
+            ticket_id: string;
+            status: string;
+            passenger_name: string;
+            seat_no: string;
+
+            phone: string;
+
+            price_paid: number;
+            price_in_words: string;
+            qr_code_url: string | null;
+            lottery_number: string | null;
+          }[];
+          ticket_ids: string[];
           route_from: string;
           route_to: string;
 

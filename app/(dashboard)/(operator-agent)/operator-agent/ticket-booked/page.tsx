@@ -366,7 +366,7 @@ export default function TicketBookedPage() {
                                       setBookingId(booking.booking_id);
                                       setOpenTransfer(true);
 
-                                      // setTicketIds(booking.ticket_ids);
+                                      setTicketIds(booking.ticket_ids);
                                       refetch();
                                     }}
                                   >
