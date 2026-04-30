@@ -24,7 +24,7 @@ import { HdmiPort } from "lucide-react";
 
 const api = axios.create({
   // baseURL: "/api/proxy",
-  baseURL: `https://danu.biisho.et/api/v1`,
+  baseURL: `https://danubooking.et/api/v1`,
 
   headers: {
     "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
@@ -38,7 +38,7 @@ const api = axios.create({
 });
 const refreshApi = axios.create({
   // baseURL: "/api/proxy",
-  baseURL: `https://danu.biisho.et/api/v1`,
+  baseURL: `https://danubooking.et/api/v1`,
 
   headers: {
     "X-API-KEY": process.env.NEXT_PUBLIC_API_KEY,
