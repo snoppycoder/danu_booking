@@ -15,6 +15,7 @@ import {
   ChevronDown,
   ScanFace,
   TicketCheck,
+  TrendingUp,
 } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -68,6 +69,7 @@ export default function Sidebar() {
         { label: "Draw Lottery", href: "/superadmin/lottery/draw" },
       ],
     },
+    { icon: TrendingUp, label: "Report", href: "/superadmin/report" },
     { icon: AlertCircle, label: "Settings", href: "/superadmin/settings" },
   ];
 

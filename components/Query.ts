@@ -817,6 +817,97 @@ export const useAvatar = () => {
     },
   });
 };
+export const useSuperadminOperatorGraphReport = (
+  operator_id?: string,
+  page?: number,
+  per_page?: number,
+  from_date?: string,
+  to_date?: string,
+) => {
+  return useQuery({
+    queryKey: [
+      "superadmin-graph-report-operator",
+
+      operator_id,
+      page,
+      per_page,
+      from_date,
+      to_date,
+    ],
+    queryFn: async () => {
+      const res = await superAdminApi.getAdminReportOnOperators(
+        from_date,
+        to_date,
+        operator_id,
+        page,
+        per_page,
+      );
+      return res as {
+        items: {
+          operator_name: string;
+          operator_id: string;
+          Total_Ticket_Sales: number;
+          Gross_Revenue: number;
+          Bus: {
+            bus_id: string;
+            capacity: number;
+            plate_no: string;
+            side_no: string;
+            Total_Ticket_Sales: number;
+            Gross_Revenue: number;
+            who_is_selling: {
+              seller_id: string,
+              seller_name: string,
+              seller_type: string,
+              Total_Ticket_Sales:number,
+              Gross_Revenue:number
+            }[]
+          }[];
+
+        }[];
+        total:number;
+        per_page:number;
+        page:number;
+      };
+    },
+  });
+};
+export const useSuperadminGraphReport = (
+  entity: "bookings" | "operators" | "passengers",
+  interval: "day" | "week" | "month",
+  metric: "count" | "revenue" | "active" | "new",
+  from_date?: string,
+  to_date?: string,
+) => {
+  return useQuery({
+    queryKey: [
+      "superadmin-graph-report",
+      entity,
+      interval,
+      metric,
+      from_date,
+      to_date,
+    ],
+    queryFn: async () => {
+      const res = await superAdminApi.getEntityTimeSeriesGraphData(
+        entity,
+        interval,
+        metric,
+        from_date,
+        to_date,
+      );
+      return res as {
+        entity: string;
+        interval: string;
+        metric: string;
+        data: {
+          period: string;
+          value:number;
+        }[];
+      };
+    },
+  });
+};
 export const useBookingHistoryPublic = (
   user_id: string,
   page?: number,

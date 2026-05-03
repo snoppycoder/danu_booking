@@ -21,6 +21,8 @@ import {
 import { CodeOffRounded } from "@mui/icons-material";
 import axios from "axios";
 import { HdmiPort } from "lucide-react";
+import { Constants } from "@/lib/constant";
+import { string } from "zod";
 
 const api = axios.create({
   // baseURL: "/api/proxy",
@@ -103,7 +105,7 @@ api.interceptors.response.use(
   (response) => response,
   (error) => {
     // Log only if the call fails
-    console.error("❌ API Error:", error.response?.status, error.config.url);
+    console.error("API Error:", error.response?.status, error.config.url);
     return Promise.reject(error);
   },
 );
@@ -111,7 +113,7 @@ api.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
-    const publicPath = ["/login", "/signup", "/verify"];
+    const publicPath = Constants.public_paths;
 
     if (error.response) {
       const status = error.response.status ?? "";
@@ -569,6 +571,52 @@ export const superAdminApi = {
    *
    * This are the operator operation below
    */
+  getAdminReportOnOperators: async (
+    from_date?: string,
+    to_date?: string,
+    operator_id?: string,
+    page?: number,
+    per_page?: number,
+  ) => {
+    const response = await api.get(`/admin/reports/operator-revenue`, {
+      params: {
+        from_date,
+        to_date,
+        operator_id,
+        page,
+        per_page,
+      },
+    });
+    return response.data;
+  },
+  getEntityTimeSeriesGraphData: async (
+    entity: "bookings" | "operators" | "passengers",
+    interval: "day" | "week" | "month",
+    metric: "count" | "revenue" | "active" | "new",
+    from_date?: string,
+    to_date?: string,
+  ) => {
+    const response = await api.get(
+      `/admin/dashboard/dashboard/timeseries/${entity}`,
+      {
+        params: {
+          interval,
+          metric,
+          from_date,
+          to_date,
+        },
+      },
+    );
+    return response.data as {
+      entity: "string";
+      interval: "string";
+      metric: "string";
+      data: {
+        period: "string";
+        value: 0;
+      }[];
+    };
+  },
   addOperator: async (body: AddOperatorForm) => {
     const response = await api.post("/admin/operators", body);
     return response.data;

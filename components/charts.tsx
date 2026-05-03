@@ -1,4 +1,5 @@
 "use client";
+
 import {
   BarChart,
   Bar,
@@ -6,57 +7,121 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-  Legend,
   ResponsiveContainer,
 } from "recharts";
-
-const yearlyData = [
-  { name: "", income: 28000, expense: 0 },
-  { name: "", income: 32000, expense: 0 },
-  { name: "", income: 35000, expense: 2000 },
-];
-
-const weeklyData = [
-  { name: "", income: 1.2, expense: 0.5 },
-  { name: "", income: 1.4, expense: 0.6 },
-  { name: "", income: 1.6, expense: 0.7 },
-  { name: "", income: 1.8, expense: 0.8 },
-];
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useSuperadminGraphReport } from "./Query";
+// Ensure the path below matches where your hook is actually located
 
 export default function Charts() {
+  // Fetching Monthly Revenue for Bookings
+  const { data: revenueData, isLoading: isRevenueLoading } =
+    useSuperadminGraphReport("bookings", "month", "revenue");
+
+  // Fetching Weekly New Passengers
+  const { data: passengersData, isLoading: isPassengersLoading } =
+    useSuperadminGraphReport("passengers", "week", "new");
+  console.log(passengersData, revenueData);
+
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-      {/* Yearly Chart */}
-      <div className="bg-card rounded-lg p-6 border border-border">
-        <h2 className="text-xl font-bold mb-4">Yearly Income & Expense</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={yearlyData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="income" fill="#14b8a6" radius={[8, 8, 0, 0]} />
-            <Bar dataKey="expense" fill="#a91f3a" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Monthly Bookings Revenue Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Monthly Revenue (Bookings)</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isRevenueLoading ? (
+            <Skeleton className="h-[300px] w-full rounded-xl" />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={revenueData?.data || []}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  className="stroke-muted"
+                />
+                <XAxis
+                  dataKey="period"
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                  tickFormatter={(value) => `$${value}`}
+                />
+                <Tooltip
+                  cursor={{ fill: "var(--accent)" }}
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid var(--border)",
+                  }}
+                />
+                <Bar
+                  dataKey="value"
+                  name="Revenue"
+                  fill="#14b8a6"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
 
-      {/* Weekly Chart */}
-      <div className="bg-card rounded-lg p-6 border border-border">
-        <h2 className="text-xl font-bold mb-4">Weekly Income & Expense</h2>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={weeklyData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="name" />
-            <YAxis />
-            <Tooltip />
-            <Legend />
-            <Bar dataKey="income" fill="#14b8a6" radius={[8, 8, 0, 0]} />
-            <Bar dataKey="expense" fill="#4f46e5" radius={[8, 8, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </div>
+      {/* Weekly New Passengers Chart */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Weekly New Passengers</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {isPassengersLoading ? (
+            <Skeleton className="h-[300px] w-full rounded-xl" />
+          ) : (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={passengersData?.data || []}>
+                <CartesianGrid
+                  strokeDasharray="3 3"
+                  vertical={false}
+                  className="stroke-muted"
+                />
+                <XAxis
+                  dataKey="period"
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <YAxis
+                  stroke="#888888"
+                  fontSize={12}
+                  tickLine={false}
+                  axisLine={false}
+                />
+                <Tooltip
+                  cursor={{ fill: "var(--accent)" }}
+                  contentStyle={{
+                    borderRadius: "8px",
+                    border: "1px solid var(--border)",
+                  }}
+                />
+                <Bar
+                  dataKey="value"
+                  name="New Passengers"
+                  fill="#4f46e5"
+                  radius={[4, 4, 0, 0]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 }
