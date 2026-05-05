@@ -79,7 +79,7 @@ export const AuthProvider = ({
     }
 
     const ws = new WebSocket(
-      `wss://danu.biisho.et/api/v1/ws/notifications/?token=${token}`,
+      `wss://danubooking.et/api/v1/ws/notifications/?token=${token}`,
     );
 
     socketRef.current = ws;
@@ -111,7 +111,7 @@ export const AuthProvider = ({
         });
         setCount((prev) => prev + 1);
       } catch (error) {
-        console.error("❌ JSON parse error:", error);
+        console.error("JSON parse error:", error);
       }
     };
 

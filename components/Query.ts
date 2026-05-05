@@ -827,7 +827,6 @@ export const useSuperadminOperatorGraphReport = (
   return useQuery({
     queryKey: [
       "superadmin-graph-report-operator",
-
       operator_id,
       page,
       per_page,
@@ -856,18 +855,17 @@ export const useSuperadminOperatorGraphReport = (
             Total_Ticket_Sales: number;
             Gross_Revenue: number;
             who_is_selling: {
-              seller_id: string,
-              seller_name: string,
-              seller_type: string,
-              Total_Ticket_Sales:number,
-              Gross_Revenue:number
-            }[]
+              seller_id: string;
+              seller_name: string;
+              seller_type: string;
+              Total_Ticket_Sales: number;
+              Gross_Revenue: number;
+            }[];
           }[];
-
         }[];
-        total:number;
-        per_page:number;
-        page:number;
+        total: number;
+        per_page: number;
+        page: number;
       };
     },
   });
@@ -902,7 +900,7 @@ export const useSuperadminGraphReport = (
         metric: string;
         data: {
           period: string;
-          value:number;
+          value: number;
         }[];
       };
     },
