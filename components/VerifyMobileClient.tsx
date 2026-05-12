@@ -117,7 +117,7 @@ export default function VerifyMobileClient() {
       <div className="max-w-md w-full bg-white rounded-3xl shadow-xl border border-slate-100 p-8">
         {/* Header Section */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-6 text-blue-600">
+          <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-blue-50 mb-6 text-primary">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               className="w-8 h-8"
@@ -171,10 +171,10 @@ export default function VerifyMobileClient() {
                 className={`w-12 h-14 sm:w-14 sm:h-16 text-center text-2xl font-semibold rounded-xl border transition-all duration-200 outline-none
                   ${
                     digit
-                      ? "border-blue-500 bg-blue-50/30 text-blue-700"
+                      ? "border-primary/90 bg-blue-50/30 text-primary"
                       : "border-slate-200 bg-slate-50 text-slate-900 hover:border-slate-300"
                   } 
-                  focus:border-blue-500 focus:ring-4 focus:ring-blue-500/20`}
+                  focus:border-primary/90 focus:ring-4 focus:ring-blue-500/20`}
               />
             ))}
           </div>
@@ -186,7 +186,7 @@ export default function VerifyMobileClient() {
               ${
                 isLoading || otp.join("").length !== 6 || !phone
                   ? "bg-slate-300 cursor-not-allowed"
-                  : "bg-blue-600 hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-600/25 active:scale-[0.98]"
+                  : "bg-primary hover:bg-primary hover:shadow-lg hover:shadow-blue-600/25 active:scale-[0.98]"
               }`}
           >
             {isLoading ? (
