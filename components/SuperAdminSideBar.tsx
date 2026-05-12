@@ -110,7 +110,7 @@ export default function Sidebar() {
         className={`fixed top-0 left-0 z-30 w-64 h-screen flex flex-col gap-y-3 p-2 border-r 
           border-gray-300 bg-white transform transition-transform duration-300 
           ${isOpen ? "translate-x-0" : "-translate-x-full"} 
-          md:static md:translate-x-0 md:flex-shrink-0`}
+          md:static md:translate-x-0 md:shrink-0`}
       >
         <div className="flex flex-1 flex-col gap-y-3 p-2 ">
           <div className="w-full flex gap-x-2.5 my-4 md:mb-5">

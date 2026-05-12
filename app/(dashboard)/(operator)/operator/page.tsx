@@ -116,10 +116,6 @@ export default function OperatorPage() {
   } = useOperatorBuses(user?.organization_id);
   console.log(seatTemplates);
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-    null,
-  );
-
   useEffect(() => {
     if (!user?.organization_id) return;
 
@@ -152,6 +148,7 @@ export default function OperatorPage() {
   };
   //const [selectedTemplate, setSelectedTemplate] = useState<SeatTemplate>();
   const [selectedTemplate, setSelectedTemplate] = useState<any>();
+  console.log(selectedTemplate);
   const showAccountBanner =
     isError &&
     error &&
@@ -210,9 +207,9 @@ export default function OperatorPage() {
 
   const handleAddBus = async () => {
     if (!user?.organization_id) return;
-    const seat51template = seatTemplates?.find((s) =>
-      s.name.includes("Standard 51 "),
-    );
+    // const seat51template = seatTemplates?.find((s) =>
+    //   s.name.includes("Standard 51 "),
+    // );
 
     //FIXED will be changed when level is add danubooking2.0
     const seat_numbers = 51;
@@ -221,7 +218,7 @@ export default function OperatorPage() {
       plate_no: newBus.plate_no,
       side_no: newBus.side_no,
       capacity: seat_numbers,
-      seat_template_id: seat51template?.id ?? "",
+      seat_template_id: selectedTemplate?.id ?? "",
       bus_status: "active",
     };
 

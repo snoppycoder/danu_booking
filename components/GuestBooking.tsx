@@ -73,7 +73,7 @@ export default function GuestBooking() {
     show: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.1, // Delay between each card appearing
+        staggerChildren: 0.1,
       },
     },
   };
@@ -584,11 +584,11 @@ export default function GuestBooking() {
             operator_id={id}
           />
         )}
-        {/* <TripDetailsModal
+        <TripDetailsModal
           isOpen={isModalOpen}
           onClose={() => setIsModalOpen(false)}
-          tripData={selectedTrip}
-        /> */}
+          tripData={selectedTrip!}
+        />
       </div>
     </div>
   );
