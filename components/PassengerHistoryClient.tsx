@@ -50,6 +50,8 @@ function formatEthiopianTime(date: Date): string {
   return `${ethHour}:${minutes.toString().padStart(2, "0")} ${period}`;
 }
 
+// Assuming you are using date-fns for formatting
+
 export function exportTicketIntoPDF(booking: any): void {
   console.log("Exporting booking to PDF:", booking);
 
@@ -69,7 +71,7 @@ export function exportTicketIntoPDF(booking: any): void {
 
   const depDate = new Date(booking.departure_at);
 
-  // Iterate over tickets (handles multiple passengers on one booking)
+  // Iterate over tickets (dynamically handles 1 to N tickets)
   booking.tickets.forEach((ticket: any, index: number) => {
     // Add new page for subsequent tickets
     if (index > 0) doc.addPage();
@@ -131,11 +133,12 @@ export function exportTicketIntoPDF(booking: any): void {
       doc.text(value, x, y + 5);
     };
 
-    // Row 1: Passenger & Date Info
+    // Row 1: Passenger, Gender, Phone & Date Info (X-coords adjusted to fit Gender)
     drawInfoBox("PASSENGER", ticket.passenger_name || "N/A", 15, 32, 11, true);
-    drawInfoBox("PHONE", ticket.phone || "N/A", 75, 32);
-    drawInfoBox("DATE", format(depDate, "MMM dd, yyyy"), 110, 32);
-    drawInfoBox("TIME", format(depDate, "HH:mm"), 140, 32, 10, true);
+    drawInfoBox("GENDER", ticket.gender || "N/A", 60, 32);
+    drawInfoBox("PHONE", ticket.phone || "N/A", 85, 32);
+    drawInfoBox("DATE", format(depDate, "MMM dd, yyyy"), 115, 32);
+    drawInfoBox("TIME", format(depDate, "HH:mm"), 145, 32, 10, true);
 
     // Row 2: Transport & Seat Info
     drawInfoBox("OPERATOR", booking.operator_name, 15, 47, 10, true);
@@ -243,15 +246,12 @@ export function exportTicketIntoPDF(booking: any): void {
     doc.setFontSize(18);
     doc.text(ticket.seat_no || "TBD", startX + 5, 39);
 
-    // Stub Details
-    drawInfoBox(
-      "PASSENGER",
-      ticket.passenger_name || "N/A",
-      startX,
-      48,
-      9,
-      true,
-    );
+    // Stub Details (Appended gender format for space-saving)
+    const passengerDisplay = ticket.gender
+      ? `${ticket.passenger_name || "N/A"} (${ticket.gender.charAt(0).toUpperCase()})`
+      : ticket.passenger_name || "N/A";
+
+    drawInfoBox("PASSENGER", passengerDisplay, startX, 48, 9, true);
     drawInfoBox("DEPARTURE", format(depDate, "MMM dd, HH:mm"), startX, 58, 9);
     drawInfoBox("FROM", booking.route_from.toUpperCase(), startX, 68, 9);
     drawInfoBox("TO", booking.route_to.toUpperCase(), startX, 78, 9);
