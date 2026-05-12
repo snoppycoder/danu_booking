@@ -80,6 +80,7 @@ export const AuthProvider = ({
 
     const ws = new WebSocket(
       `wss://danubooking.et/api/v1/ws/notifications/?token=${token}`,
+      // note to future self use an env variable
     );
 
     socketRef.current = ws;

@@ -11,6 +11,8 @@ import {
 } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
+import { authAPI } from "@/app/api/api";
+import { toast } from "sonner";
 // Import your API here. Example:
 // import { authAPI } from "@/lib/api";
 
@@ -25,7 +27,6 @@ export default function VerifyMobileClient() {
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
-  // 1. Fetch phone number from URL or LocalStorage on mount
   useEffect(() => {
     const urlPhone = searchParams.get("phone");
     const localPhone =
@@ -42,7 +43,6 @@ export default function VerifyMobileClient() {
     }
   }, [searchParams]);
 
-  // 2. Handle OTP input changes
   const handleChange = (index: number, value: string) => {
     if (isNaN(Number(value))) return;
 
@@ -51,20 +51,17 @@ export default function VerifyMobileClient() {
     newOtp[index] = value.substring(value.length - 1);
     setOtp(newOtp);
 
-    // Move to next input if value is entered
     if (value && index < 5 && inputRefs.current[index + 1]) {
       inputRefs.current[index + 1]?.focus();
     }
   };
 
-  // 3. Handle Backspace navigation
   const handleKeyDown = (index: number, e: KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
     }
   };
 
-  // 4. Handle Pasting a full code
   const handlePaste = (e: ClipboardEvent<HTMLInputElement>) => {
     e.preventDefault();
     const pastedData = e.clipboardData.getData("text").slice(0, 6).split("");
@@ -95,15 +92,16 @@ export default function VerifyMobileClient() {
     setIsLoading(true);
 
     try {
-      // NOTE: Replace with your actual authAPI import
-      // const response = await authAPI.verifyPhone(phone, code);
+      await authAPI.verifyPhone(phone, code);
 
-      // Simulating API call for demonstration
-      await new Promise((res) => setTimeout(res, 1500));
-      console.log("Verified:", { phone, code });
+      localStorage.setItem("phone_number", "");
 
-      // Success! Redirect user to dashboard or next step
-      // router.push("/dashboard");
+      toast.success(
+        "Successfully verified your phone number, redirecting you to the login page",
+      );
+      setInterval(() => {
+        router.replace("/login");
+      }, 3000);
     } catch (err: any) {
       setError(
         err?.response?.data?.message ||
