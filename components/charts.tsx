@@ -12,6 +12,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSuperadminGraphReport } from "./Query";
+import { formatCurrency } from "@/lib/report-utils";
 // Ensure the path below matches where your hook is actually located
 
 export default function Charts() {
@@ -54,7 +55,7 @@ export default function Charts() {
                   fontSize={12}
                   tickLine={false}
                   axisLine={false}
-                  tickFormatter={(value) => `$${value}`}
+                  tickFormatter={(value) => `${formatCurrency(value)}`}
                 />
                 <Tooltip
                   cursor={{ fill: "var(--accent)" }}

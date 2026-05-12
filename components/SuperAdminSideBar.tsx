@@ -51,7 +51,7 @@ export default function Sidebar() {
         // { label: "Operator Users", href: "/superadmin/operator/manage" },
       ],
     },
-    { icon: BarChart3, label: "Report", href: "/superadmin/report" },
+
     { icon: AddRoad, label: "Route", href: "/superadmin/route" },
     {
       icon: ScanFace,

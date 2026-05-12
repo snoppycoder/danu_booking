@@ -25,7 +25,7 @@ export default function StatCards() {
     },
     {
       title: "Total Booking Amount",
-      value: `${data?.total_amount} Birr`,
+      value: `${data?.total_amount} ETB`,
       icon: DollarSign,
       bgGradient: "from-emerald-500 to-teal-500",
       accentGradient: "from-emerald-400 to-teal-400",
