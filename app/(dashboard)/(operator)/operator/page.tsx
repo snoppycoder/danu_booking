@@ -729,7 +729,7 @@ export default function OperatorPage() {
                   </div>
 
                   <div
-                    className="grid gap-x-6 gap-y-3"
+                    className="grid gap-x-1.5 gap-y-3"
                     style={{
                       gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
                     }}
@@ -764,13 +764,6 @@ export default function OperatorPage() {
                         </div>
                       </div>
                     ))}
-                  </div>
-
-                  <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-2">
-                      <div className="w-5 h-5 border rounded-md bg-background" />
-                      <span>Seat</span>
-                    </div>
                   </div>
                 </div>
               )}
