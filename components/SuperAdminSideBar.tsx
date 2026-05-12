@@ -32,7 +32,7 @@ export default function Sidebar() {
 
   const menuItems = [
     { icon: Zap, label: "Dashboard", href: "/superadmin" },
-    { icon: BarChart3, label: "Driver Dashboard", href: "/superadmin/driver" },
+    // { icon: BarChart3, label: "Driver Dashboard", href: "/superadmin/driver" },
     // { icon: Briefcase, label: "Ticket Booking", href: "/ticket-booking" },
     { icon: Users, label: "Agent", href: "/superadmin/agent" },
     // { icon: Settings, label: "Account", href: "/account" },
