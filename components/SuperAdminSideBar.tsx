@@ -33,9 +33,9 @@ export default function Sidebar() {
   const menuItems = [
     { icon: Zap, label: "Dashboard", href: "/superadmin" },
     { icon: BarChart3, label: "Driver Dashboard", href: "/superadmin/driver" },
-    { icon: Briefcase, label: "Ticket Booking", href: "/ticket-booking" },
+    // { icon: Briefcase, label: "Ticket Booking", href: "/ticket-booking" },
     { icon: Users, label: "Agent", href: "/superadmin/agent" },
-    { icon: Settings, label: "Account", href: "/account" },
+    // { icon: Settings, label: "Account", href: "/account" },
     {
       icon: Users,
       label: "Users",
@@ -56,10 +56,11 @@ export default function Sidebar() {
     {
       icon: ScanFace,
       label: "KYC Approval",
-      subItems: [
-        { label: "Operator KYC Approval", href: "/superadmin/operator/kyc" },
-        { label: "Agent KYC Approval", href: "/superadmin/agent/kyc" },
-      ],
+      href: "/superadmin/operator/kyc",
+      // subItems: [
+      //   { label: "Operator KYC Approval", href: "/superadmin/operator/kyc" },
+      //   { label: "Agent KYC Approval", href: "/superadmin/agent/kyc" },
+      // ],
     },
     {
       icon: TicketCheck,
@@ -70,7 +71,6 @@ export default function Sidebar() {
       ],
     },
     { icon: TrendingUp, label: "Report", href: "/superadmin/report" },
-    { icon: AlertCircle, label: "Settings", href: "/superadmin/settings" },
   ];
 
   const pathname = usePathname();

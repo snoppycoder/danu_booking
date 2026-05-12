@@ -951,13 +951,9 @@ export const superAdminApi = {
     );
     return response.data;
   },
-  bulkVerifyKYCdocuments: async (
-    operator_id: string,
-    document_ids: string[],
-    status: string,
-  ) => {
+  bulkVerifyKYCdocuments: async (document_ids: Set<string>, status: string) => {
     const response = await api.post(
-      `/admin/operators/kyc-documents/${operator_id}/bulk-verify`,
+      `/admin/operators/kyc-documents/bulk-review`,
       { document_ids, status },
     );
     return response.data;
@@ -2005,7 +2001,8 @@ export const operatorApi = {
   getAllSeatTemplates: async (operator_id: string) => {
     console.log(operator_id);
     try {
-      const response = await api.get(`/operator/${operator_id}/seat-templates`);
+      // const response = await api.get(`/operator/${operator_id}/seat-templates`);
+      const response = await api.get(`/operator/seat-templates`);
       console.log(response.data.items, "seat templates response");
       return response.data.items;
     } catch (error) {

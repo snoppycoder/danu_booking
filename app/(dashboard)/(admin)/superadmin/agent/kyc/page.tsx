@@ -85,7 +85,6 @@ export default function AdminKYCPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
       await new Promise((resolve) => setTimeout(resolve, 800));
 
       setDocuments((prev) =>

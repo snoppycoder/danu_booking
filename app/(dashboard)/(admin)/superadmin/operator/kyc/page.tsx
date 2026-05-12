@@ -85,8 +85,7 @@ export default function AdminKYCPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
+      await superAdminApi.bulkVerifyKYCdocuments(selectedIds, "approved");
 
       setDocuments((prev) =>
         prev.map((doc) =>
@@ -119,9 +118,7 @@ export default function AdminKYCPage() {
 
     setIsLoading(true);
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 800));
-
+      await superAdminApi.bulkVerifyKYCdocuments(selectedIds, "rejected");
       setDocuments((prev) =>
         prev.map((doc) =>
           selectedIds.has(doc.id)

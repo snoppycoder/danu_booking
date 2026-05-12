@@ -167,7 +167,6 @@ export default function OperatorPage() {
   const isEmpty = isAuthReady && !isLoading && filteredBuses.length === 0;
 
   const handleTemplateSelect = (template: SeatTemplate) => {
-    console.log("Selected template:", template);
     setSelectedTemplate(template);
   };
 
@@ -208,10 +207,11 @@ export default function OperatorPage() {
 
   const handleAddBus = async () => {
     if (!user?.organization_id) return;
-    const seat51template = seatTemplates?.find(
-      (s) => s.name == "Standard 51 Seat Layout",
+    const seat51template = seatTemplates?.find((s) =>
+      s.name.includes("Standard 51 "),
     );
-    //FIXED
+
+    //FIXED will be changed when level is add danubooking2.0
     const seat_numbers = 51;
 
     const data = {
@@ -229,7 +229,7 @@ export default function OperatorPage() {
         queryKey: ["buses", user.organization_id],
       });
 
-      toast.success("Bus added successfully");
+      toast.success("Added the vehicle successfully");
       setIsAddBusOpen(false);
     } catch (error) {
       if (isAxiosError(error)) {
