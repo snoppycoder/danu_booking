@@ -116,6 +116,10 @@ export default function OperatorPage() {
   } = useOperatorBuses(user?.organization_id);
   console.log(seatTemplates);
 
+  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
+    null,
+  );
+
   useEffect(() => {
     if (!user?.organization_id) return;
 
@@ -207,9 +211,9 @@ export default function OperatorPage() {
 
   const handleAddBus = async () => {
     if (!user?.organization_id) return;
-    // const seat51template = seatTemplates?.find((s) =>
-    //   s.name.includes("Standard 51 "),
-    // );
+    const seat51template = seatTemplates?.find((s) =>
+      s.name.includes("Standard 51 "),
+    );
 
     //FIXED will be changed when level is add danubooking2.0
     const seat_numbers = 51;
@@ -719,37 +723,37 @@ export default function OperatorPage() {
                     <h3 className="text-lg font-semibold tracking-tight">
                       Seat Layout
                     </h3>
-
                     <p className="text-sm text-muted-foreground">
                       {selectedTemplate.name}
                     </p>
                   </div>
 
                   <div
-                    className="grid gap-x-1.5 gap-y-3"
+                    // Added justify-center to keep the whole grid centered nicely in the card
+                    className="grid gap-x-2 gap-y-3 justify-center"
                     style={{
-                      gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+                      gridTemplateColumns: "repeat(5, 3rem)",
                     }}
                   >
                     {selectedTemplate.layout?.grid?.map((seat: Seat) => (
                       <div
                         key={seat.seat_code}
                         style={{
-                          gridColumn: seat.col > 2 ? seat.col + 1 : seat.col,
+                          gridColumn: seat.col,
                           gridRow: seat.row,
                         }}
                         className="relative flex justify-center"
                       >
                         <div
                           className="
-                flex flex-col items-center justify-center
-                w-12 h-12
-                border-2 border-border/60
-                rounded-t-xl rounded-b-md
-                bg-background
-                text-foreground
-                shadow-sm
-              "
+              flex flex-col items-center justify-center
+              w-12 h-12
+              border-2 border-border/60
+              rounded-t-xl rounded-b-md
+              bg-background
+              text-foreground
+              shadow-sm
+            "
                         >
                           <span className="text-sm font-bold">
                             {seat.seat_code}
