@@ -221,9 +221,9 @@ export default function VerifyMobileClient() {
           Didn't receive the code?{" "}
           <button
             type="button"
-            className="text-blue-600 font-semibold hover:text-blue-700 hover:underline transition-colors"
-            onClick={() => {
-              /* Add resend logic here */
+            className="bg-primary text-white font-semibold hover:underline transition-colors"
+            onClick={async () => {
+              await authAPI.resendPhoneOTP(phone);
             }}
           >
             Resend SMS
