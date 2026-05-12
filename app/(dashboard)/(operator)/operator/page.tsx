@@ -75,7 +75,7 @@ import {
 import { operatorApi } from "@/app/api/api";
 import { useAuth } from "@/lib/authContext";
 import { useOperatorBuses } from "@/components/Query";
-import { Bus, SeatTemplate } from "@/lib/model";
+import { Bus, Seat, SeatTemplate } from "@/lib/model";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
@@ -106,13 +106,15 @@ export default function OperatorPage() {
   const [busToAssign, setBusToAssign] = useState<string | null>(null);
   const { user } = useAuth();
   const queryClient = useQueryClient();
-  const [seatTemplates, setSeatTemplates] = useState<SeatTemplate[]>();
+  //const [seatTemplates, setSeatTemplates] = useState<SeatTemplate[]>();
+  const [seatTemplates, setSeatTemplates] = useState<any[]>();
   const {
     data: buses = [],
     isLoading,
     isError,
     error,
   } = useOperatorBuses(user?.organization_id);
+  console.log(seatTemplates);
 
   const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
     null,
@@ -148,7 +150,8 @@ export default function OperatorPage() {
     setSelectedBus(bus);
     setIsDetailsOpen(true);
   };
-  const [selectedTemplate, setSelectedTemplate] = useState<SeatTemplate>();
+  //const [selectedTemplate, setSelectedTemplate] = useState<SeatTemplate>();
+  const [selectedTemplate, setSelectedTemplate] = useState<any>();
   const showAccountBanner =
     isError &&
     error &&
@@ -281,7 +284,7 @@ export default function OperatorPage() {
     <div className="flex flex-col">
       <Toaster position="top-right" richColors />
 
-      <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-[backdrop-filter]:bg-card/80">
+      <header className="sticky top-0 z-10 border-b border-border bg-card/95 backdrop-blur supports-backdrop-filter:bg-card/80">
         {showAccountBanner && <AccountNotActiveBanner />}
 
         <div className="flex h-16 items-center gap-4 px-6">
@@ -679,37 +682,99 @@ export default function OperatorPage() {
                 className="font-mono"
               />
             </div>
-            {/* <div className="space-y-2">
-                <Label htmlFor="new-license">Capacity</Label>
-                <Input
-                  id="capacity"
-                  type="number"
-                  // placeholder="MH-12-XX-0000"
-                  value={newBus.capacity}
-                  onChange={(e) =>
-                    setNewBus({ ...newBus, capacity: Number(e.target.value) })
-                  }
-                  className="font-mono"
-                />
-              </div> */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label>Select Seat Template</Label>
 
-            {/* <div className="space-y-2">
-                <Label htmlFor="new-facilities">
-                  Facilities (comma-separated)
-                </Label>
-                <Input
-                  id="new-facilities"
-                  placeholder="AC, WiFi, USB Charging"
-                  onChange={(e) =>
-                    setNewBus({
-                      ...newBus,
-                      facilities: e.target.value
-                        .split(",")
-                        .map((f) => f.trim()),
-                    })
-                  }
-                />
-              </div> */}
+                <Select
+                  value={selectedTemplate?.id || ""}
+                  onValueChange={(value) => {
+                    const template = seatTemplates?.find((t) => t.id === value);
+
+                    if (template) {
+                      setSelectedTemplate(template);
+
+                      setNewBus({
+                        ...newBus,
+                        seat_template_id: template.id,
+                        capacity: template.layout?.grid?.length || 0,
+                      });
+                    }
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Choose template" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    {seatTemplates?.map((template) => (
+                      <SelectItem key={template.id} value={template.id}>
+                        {template.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {selectedTemplate && (
+                <div className="flex flex-col items-center gap-6 p-6 border border-border/50 rounded-2xl bg-card shadow-sm">
+                  <div className="w-full space-y-1 text-center pb-4 border-b border-border/50">
+                    <h3 className="text-lg font-semibold tracking-tight">
+                      Seat Layout
+                    </h3>
+
+                    <p className="text-sm text-muted-foreground">
+                      {selectedTemplate.name}
+                    </p>
+                  </div>
+
+                  <div
+                    className="grid gap-x-6 gap-y-3"
+                    style={{
+                      gridTemplateColumns: "repeat(5, minmax(0, 1fr))",
+                    }}
+                  >
+                    {selectedTemplate.layout?.grid?.map((seat: Seat) => (
+                      <div
+                        key={seat.seat_code}
+                        style={{
+                          gridColumn: seat.col > 2 ? seat.col + 1 : seat.col,
+                          gridRow: seat.row,
+                        }}
+                        className="relative flex justify-center"
+                      >
+                        <div
+                          className="
+                flex flex-col items-center justify-center
+                w-12 h-12
+                border-2 border-border/60
+                rounded-t-xl rounded-b-md
+                bg-background
+                text-foreground
+                shadow-sm
+              "
+                        >
+                          <span className="text-sm font-bold">
+                            {seat.seat_code}
+                          </span>
+
+                          <span className="text-[9px] text-muted-foreground uppercase">
+                            {seat.type}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="flex items-center justify-center gap-6 text-sm text-muted-foreground">
+                    <div className="flex items-center gap-2">
+                      <div className="w-5 h-5 border rounded-md bg-background" />
+                      <span>Seat</span>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           <DialogFooter>

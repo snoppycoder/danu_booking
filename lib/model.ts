@@ -225,6 +225,7 @@ export interface UseAuthUser {
 
 export interface Seat {
   id: string;
+  type: string;
   seat_code: string;
   status: "available" | "booked" | "held";
   row: number;
