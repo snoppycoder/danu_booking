@@ -17,6 +17,15 @@ export function proxy(request: NextRequest) {
   const decoded = token ? decodeJWT(token) : null;
   const userRole = decoded?.roles?.[0];
 
+  if (
+    !token &&
+    (pathname.startsWith("/operator") ||
+      pathname.startsWith("/agent") ||
+      pathname.startsWith("/passenger") ||
+      pathname.startsWith("/superadmin"))
+  ) {
+    return NextResponse.redirect(new URL("/guest", request.url));
+  }
   if (isAuthPage) {
     if (userRole) {
       if (userRole === "super_admin")
