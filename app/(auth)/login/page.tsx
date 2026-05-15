@@ -42,6 +42,7 @@ export default function LoginPage() {
         console.log(error.response?.data?.error, "errorsssss");
         toast.warning(
           error.response?.data?.error ||
+            error.response?.data.detail ||
             "Invalid credentials. Please try again.",
         );
       } else if (error instanceof Error) {
