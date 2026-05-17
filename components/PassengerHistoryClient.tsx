@@ -275,6 +275,7 @@ export default function PassengerHistoryPageClient() {
     error,
     refetch,
   } = usePassengerHistory(currentPage, numberOfCard);
+
   console.log(bookings);
   const [open, setOpen] = useState(false);
   const [openTransfer, setOpenTransfer] = useState(false);

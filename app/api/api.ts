@@ -18,11 +18,9 @@ import {
   Bus,
   Passenger,
 } from "@/lib/model";
-import { CodeOffRounded } from "@mui/icons-material";
+
 import axios from "axios";
-import { HdmiPort } from "lucide-react";
 import { Constants } from "@/lib/constant";
-import { string } from "zod";
 
 const api = axios.create({
   // baseURL: "/api/proxy",
@@ -1367,7 +1365,6 @@ export const passengerApi = {
         ...body,
         passenger_details: body.passenger_details.map((passenger) => ({
           ...passenger,
-          name: passenger.phone.trim(),
         })),
         // client_ref: uuid,
       });
