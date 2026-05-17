@@ -183,24 +183,21 @@ export default function GuestSeatBookingDialog({
 
   const handleBack = async () => {
     if (!holdData || holdData?.hold_id === "") return;
-    await passengerApi.cancelGuestBooking(holdData?.hold_id);
-    setPassengers([
-      {
-        name: "",
-        gender: "",
-        email: "",
-        phone: "",
-        id_number: "",
-      },
-    ]);
-    // setSeatDict({});
+    try {
+      await passengerApi.guestCancelHold(holdData?.hold_id);
 
-    setCurrentPassengerIndex(0);
-    console.log(selectedSeats);
-    if (step === 2) {
-      setStep(1);
-    } else {
-      setToggle(false);
+      // setSeatDict({});
+
+      setCurrentPassengerIndex(0);
+      console.log(selectedSeats);
+
+      if (step === 2) {
+        setStep(1);
+      } else {
+        setToggle(false);
+      }
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -241,7 +238,7 @@ export default function GuestSeatBookingDialog({
               passengers={passengers}
               onPassengersChange={setPassengers}
               onNext={handlePassengerInfoNext}
-              onBack={handleBack}
+              onBack={() => setToggle(false)}
             />
           )}
 

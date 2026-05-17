@@ -1096,6 +1096,15 @@ export const DanuAgentApi = {
 };
 
 export const passengerApi = {
+  cancelHold: async (hold_id: string) => {
+    try {
+      const res = await api.delete(`/user/holds/${hold_id}`);
+      console.log(res.data);
+    } catch (err) {
+      console.log(err);
+      throw err;
+    }
+  },
   transferBooking: async (
     booking_id: string,
     passenger: Passenger,
@@ -1139,9 +1148,13 @@ export const passengerApi = {
       throw error;
     }
   },
-  cancelGuestBooking: async (hold_id: string) => {
+  guestCancelHold: async (hold_id: string) => {
     try {
-      const res = await api.delete(`/user/trip-bookings/${hold_id}`);
+      const res = await api.delete(`/guest/holds/${hold_id}`, {
+        headers: {
+          "X-Client-Token": getClientToken(),
+        },
+      });
       return res.data;
     } catch (err) {
       console.log(err);

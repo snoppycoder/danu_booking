@@ -195,29 +195,29 @@ export default function SeatBookingDialog({
     setPaymentToggle(false);
   };
   const handleBack = async () => {
+    console.log(holdData);
     // we need to cancel the hold
     if (!holdData || holdData?.hold_id.trim().length == 0) {
       return;
     }
-    const res = await passengerApi.cancelBooking(holdData.hold_id );
-    console.log(res, "canceling the booking... ")
-    setPassengers([
-      {
-        name: "",
-        email: "",
-        gender: "",
-        phone: "",
-        id_number: "",
-      },
-    ]);
-    // setSeatDict({});
+    try {
+      const res = await passengerApi.cancelHold(holdData.hold_id);
+      console.log(res, "canceling the booking... ");
 
-    setCurrentPassengerIndex(0);
-    console.log(selectedSeats);
-    if (step === 2) {
-      setStep(1);
-    } else {
-      setToggle(false);
+      // setSeatDict({});
+
+      setCurrentPassengerIndex(0);
+      console.log(selectedSeats);
+      if (step === 2) {
+        setStep(1);
+      } else {
+        setToggle(false);
+      }
+    } catch (error) {
+      if (isAxiosError(error)) {
+        toast.error(error.response?.data.detail || "Please try again later!");
+      }
+      return;
     }
   };
 
@@ -268,7 +268,7 @@ export default function SeatBookingDialog({
               passengers={passengers}
               onPassengersChange={setPassengers}
               onNext={handlePassengerInfoNext}
-              onBack={handleBack}
+              onBack={() => setToggle(false)}
             />
           )}
 

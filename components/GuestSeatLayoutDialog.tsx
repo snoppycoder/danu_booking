@@ -76,21 +76,27 @@ export default function GuestSeatLayoutDialog({
     });
   };
 
+  // const handleConfirm = () => {
+  //   // if (multiSelectSeats.length === 0) return;
+  //   setSelectedSeats(multiSelectSeats);
+  //   // Mark selected seats as booked
+  //   setSeats((prev) =>
+  //     prev?.map((s) =>
+  //       multiSelectSeats.includes(s.seat_code) ? { ...s, status: "booked" } : s,
+  //     ),
+  //   );
+
+  //   // Assign seats to passengers in order - first selected seat to first passenger, etc.
+  //   setOpen(true);
+  //   setToggle(false);
+
+  //   setMultiSelectSeats([]);
+  // };
   const handleConfirm = () => {
     // if (multiSelectSeats.length === 0) return;
     setSelectedSeats(multiSelectSeats);
-    // Mark selected seats as booked
-    setSeats((prev) =>
-      prev?.map((s) =>
-        multiSelectSeats.includes(s.seat_code) ? { ...s, status: "booked" } : s,
-      ),
-    );
-
-    // Assign seats to passengers in order - first selected seat to first passenger, etc.
     setOpen(true);
-    setToggle(false);
-
-    setMultiSelectSeats([]);
+    // setMultiSelectSeats([]);
   };
 
   const grouped = seats.reduce<Record<number, Seat[]>>((acc, seat) => {

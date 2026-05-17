@@ -10,6 +10,7 @@ import {
   Share,
   ArrowRight,
 } from "lucide-react";
+import QRCode from "qrcode";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { jsPDF } from "jspdf";
@@ -52,7 +53,7 @@ function formatEthiopianTime(date: Date): string {
 
 // Assuming you are using date-fns for formatting
 
-export function exportTicketIntoPDF(booking: any): void {
+export async function exportTicketIntoPDF(booking: any): Promise<void> {
   console.log("Exporting booking to PDF:", booking);
 
   const doc = new jsPDF({
@@ -71,8 +72,10 @@ export function exportTicketIntoPDF(booking: any): void {
 
   const depDate = new Date(booking.departure_at);
 
-  // Iterate over tickets (dynamically handles 1 to N tickets)
-  booking.tickets.forEach((ticket: any, index: number) => {
+  // Iterate over tickets using a traditional loop to support async/await for the QR Code
+  for (let index = 0; index < booking.tickets.length; index++) {
+    const ticket = booking.tickets[index];
+
     // Add new page for subsequent tickets
     if (index > 0) doc.addPage();
 
@@ -133,7 +136,32 @@ export function exportTicketIntoPDF(booking: any): void {
       doc.text(value, x, y + 5);
     };
 
-    // Row 1: Passenger, Gender, Phone & Date Info (X-coords adjusted to fit Gender)
+    // --- 4. GENERATE AND RENDER QR CODE ---
+    if (ticket.qr_code_url) {
+      try {
+        // Generate a base64 Data URI from the URL
+        const qrImage = await QRCode.toDataURL(ticket.qr_code_url, {
+          margin: 1,
+          width: 80,
+          color: {
+            dark: "#1F2937", // textDark to match the theme
+            light: "#FFFFFF",
+          },
+        });
+
+        // Add image to PDF at top right of the main ticket section
+        // (X: 142, Y: 6, Width: 22mm, Height: 22mm)
+        doc.addImage(qrImage, "PNG", 142, 6, 22, 22);
+      } catch (err) {
+        console.error(
+          "Failed to generate QR Code for ticket",
+          ticket.ticket_id,
+          err,
+        );
+      }
+    }
+
+    // Row 1: Passenger, Gender, Phone & Date Info
     drawInfoBox("PASSENGER", ticket.passenger_name || "N/A", 15, 32, 11, true);
     drawInfoBox("GENDER", ticket.gender || "N/A", 60, 32);
     drawInfoBox("PHONE", ticket.phone || "N/A", 85, 32);
@@ -256,7 +284,7 @@ export function exportTicketIntoPDF(booking: any): void {
     drawInfoBox("FROM", booking.route_from.toUpperCase(), startX, 68, 9);
     drawInfoBox("TO", booking.route_to.toUpperCase(), startX, 78, 9);
     drawInfoBox("BUS PLATE", booking.bus_plate || "N/A", startX, 88, 9);
-  });
+  }
 
   // Save the PDF
   doc.save(`ticket_${booking.booking_ref}.pdf`);

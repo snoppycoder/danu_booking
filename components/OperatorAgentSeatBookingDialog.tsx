@@ -228,7 +228,7 @@ export default function OperatorAgentSeatBookingDialog({
               passengers={passengers}
               onPassengersChange={setPassengers}
               onNext={handlePassengerInfoNext}
-              onBack={handleBack}
+              onBack={() => setToggle(false)}
             />
           )}
 
