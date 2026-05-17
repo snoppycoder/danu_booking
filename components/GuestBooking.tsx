@@ -370,156 +370,136 @@ export default function GuestBooking() {
             <div className="rounded-xl bg-white p-12  flex justify-center text-center shadow-sm">
               <Spinner />
             </div>
-          ) : data?.items.length === 0 ? (
+          ) : !data || data?.items.length === 0 ? (
             <div className="rounded-xl bg-white p-12 text-center shadow-sm">
               <p className="text-gray-500">No trips found</p>
             </div>
           ) : (
-            <div className="w-full">
-              {/* Routes Grid */}
-              <div className="grid gap-6 grid-cols-1">
-                        {(data?.items || [])?.length > 0 ? (
-                          data?.items.map((route) => (
-                            <motion.div
-                              variants={itemVariants}
-                              key={route.id}
-                              className="group relative flex flex-col md:flex-row bg-white/90 backdrop-blur-md border border-gray-200/60 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 ease-out"
+            <div className="grid gap-6 grid-cols-1">
+              {(data?.items || []).length > 0 ? (
+                data.items.map((route) => (
+                  <motion.div
+                    variants={itemVariants}
+                    key={route.id}
+                    className="group relative flex flex-col md:flex-row bg-white/90 backdrop-blur-md border border-gray-200/60 rounded-3xl overflow-hidden hover:shadow-xl hover:shadow-primary/5 hover:border-primary/30 transition-all duration-300 ease-out"
+                  >
+                    <div className="relative w-full md:w-72 h-48 md:h-auto shrink-0 overflow-hidden bg-gray-100">
+                      <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-size-[200%_100%] animate-[shimmer_2s_infinite]" />
+
+                      <div className="absolute top-4 left-4">
+                        <div
+                          className={`px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-sm
+              ${
+                route.is_available
+                  ? "bg-green-500/90 text-white"
+                  : "bg-red-500/90 text-white"
+              }`}
+                        >
+                          {route.is_available ? (
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                          ) : (
+                            <XCircle className="w-3.5 h-3.5" />
+                          )}
+
+                          {route.is_available ? "Available" : "Sold Out"}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-col grow p-6 sm:p-8">
+                      <div className="flex items-start justify-between mb-6">
+                        <div>
+                          <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
+                            {route.operator.name}
+                          </h3>
+                        </div>
+
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="rounded-full hover:bg-gray-100 -mt-2 -mr-2"
                             >
-                              <div className="relative w-full md:w-72 h-48 md:h-auto shrink-0 overflow-hidden bg-gray-100">
-                                <div className="absolute inset-0 bg-linear-to-r from-gray-200 via-gray-100 to-gray-200 bg-size-[200%_100%] animate-[shimmer_2s_infinite]" />
+                              <MoreHorizontal className="h-5 w-5 text-gray-500" />
+                            </Button>
+                          </DropdownMenuTrigger>
 
-                                {/* Availability Badge superimposed on image */}
-                                <div className="absolute top-4 left-4">
-                                  <div
-                                    className={`px-3 py-1.5 rounded-full backdrop-blur-md text-xs font-bold flex items-center gap-1.5 shadow-sm
-                                          ${
-                                            route.is_available
-                                              ? "bg-green-500/90 text-white"
-                                              : "bg-red-500/90 text-white"
-                                          }`}
-                                  >
-                                    {route.is_available ? (
-                                      <CheckCircle2 className="w-3.5 h-3.5" />
-                                    ) : (
-                                      <XCircle className="w-3.5 h-3.5" />
-                                    )}
-                                    {route.is_available
-                                      ? "Available"
-                                      : "Sold Out"}
-                                  </div>
-                                </div>
-                              </div>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-44 rounded-xl"
+                          >
+                            <DropdownMenuItem
+                              onClick={() => handleViewDetails(route.id)}
+                              className="cursor-pointer"
+                            >
+                              {t("viewDetails")}
+                            </DropdownMenuItem>
 
-                              {/* Content Section */}
-                              <div className="flex flex-col grow p-6 sm:p-8">
-                                {/* Top Row: Operator & Menu */}
-                                <div className="flex items-start justify-between mb-6">
-                                  <div>
-                                    <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
-                                      {route.operator.name}
-                                    </h3>
-                                  </div>
+                            <DropdownMenuItem className="cursor-pointer">
+                              Check Seats
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
 
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="icon"
-                                        className="rounded-full hover:bg-gray-100 -mt-2 -mr-2"
-                                      >
-                                        <MoreHorizontal className="h-5 w-5 text-gray-500" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent
-                                      align="end"
-                                      className="w-44 rounded-xl"
-                                    >
-                                      <DropdownMenuItem
-                                        onClick={() =>
-                                          handleViewDetails(route.id)
-                                        }
-                                        className="cursor-pointer"
-                                      >
-                                        {t("viewDetails")}
-                                      </DropdownMenuItem>
-                                      <DropdownMenuItem className="cursor-pointer">
-                                        Check Seats
-                                      </DropdownMenuItem>
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </div>
+                      <div className="grid grid-cols-2 gap-6 mb-8">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 shrink-0 mt-0.5">
+                            <Clock className="w-5 h-5" />
+                          </div>
 
-                                {/* Details Grid */}
-                                <div className="grid grid-cols-2 gap-6 mb-8">
-                                  {/* Departure Time */}
-                                  <div className="flex items-start gap-3">
-                                    <div className="p-2.5 rounded-xl bg-blue-50 text-blue-600 shrink-0 mt-0.5">
-                                      <Clock className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                        Departure and Arrival time
-                                      </p>
-                                      <p className="text-lg font-semibold text-gray-900">
-                                        {formatAmharicTime(
-                                          route.departure_time,
-                                        )}{" "}
-                                        -{" "}
-                                        {formatAmharicTime(route.arrival_time)}
-                                      </p>
-                                    </div>
-                                  </div>
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                              Departure and Arrival time
+                            </p>
 
-                                  {/* Price */}
-                                  <div className="flex items-start gap-3">
-                                    <div className="p-2.5 rounded-xl bg-green-50 text-green-600 shrink-0 mt-0.5">
-                                      <Wallet className="w-5 h-5" />
-                                    </div>
-                                    <div>
-                                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
-                                        Price
-                                      </p>
-                                      <p className="text-lg font-bold text-gray-900">
-                                        {route.price}
-                                        <span className="text-sm font-medium ml-1 text-gray-500">
-                                          Birr
-                                        </span>
-                                      </p>
-                                    </div>
-                                  </div>
-                                </div>
-
-                                {/* CTA Buttons */}
-                                <div className="flex gap-3 flex-col sm:flex-row mt-auto pt-6 border-t border-gray-100">
-                                  <Button
-                                    onClick={() => handleBookNow(route)}
-                                    disabled={!route.is_available}
-                                    className="w-full text-lg font-semibold h-12 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:hover:shadow-none"
-                                  >
-                                    {t("bookNow")}
-                                  </Button>
-                                </div>
-                              </div>
-                            </motion.div>
-                          ))
-                        ) : (
-                          <div className="col-span-full py-16 text-center">
-                            <p className="text-gray-500 text-sm">
-                              No routes available for your search
+                            <p className="text-lg font-semibold text-gray-900">
+                              {formatAmharicTime(route.departure_time)} -{" "}
+                              {formatAmharicTime(route.arrival_time)}
                             </p>
                           </div>
-                        )}
-                      </motion.div>
-                    </motion.div>
-                  ))
-                ) : (
-                  <div className="col-span-full py-16 text-center">
-                    <p className="text-muted-foreground text-sm">
-                      No routes available for your search
-                    </p>
-                  </div>
-                )}
-              </div>
+                        </div>
+
+                        <div className="flex items-start gap-3">
+                          <div className="p-2.5 rounded-xl bg-green-50 text-green-600 shrink-0 mt-0.5">
+                            <Wallet className="w-5 h-5" />
+                          </div>
+
+                          <div>
+                            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">
+                              Price
+                            </p>
+
+                            <p className="text-lg font-bold text-gray-900">
+                              {route.price}
+                              <span className="text-sm font-medium ml-1 text-gray-500">
+                                Birr
+                              </span>
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex gap-3 flex-col sm:flex-row mt-auto pt-6 border-t border-gray-100">
+                        <Button
+                          onClick={() => handleBookNow(route)}
+                          disabled={!route.is_available}
+                          className="w-full text-lg font-semibold h-12 rounded-xl bg-primary hover:bg-primary/90 text-white shadow-md hover:shadow-lg transition-all disabled:opacity-50 disabled:hover:shadow-none"
+                        >
+                          {t("bookNow")}
+                        </Button>
+                      </div>
+                    </div>
+                  </motion.div>
+                ))
+              ) : (
+                <div className="col-span-full py-16 text-center">
+                  <p className="text-muted-foreground text-sm">
+                    No routes available for your search
+                  </p>
+                </div>
+              )}
             </div>
           )}
         </div>
