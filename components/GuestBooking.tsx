@@ -378,23 +378,6 @@ export default function GuestBooking() {
             <div className="w-full">
               {/* Routes Grid */}
               <div className="grid gap-6 grid-cols-1">
-                {(data?.items || [])?.length > 0 ? (
-                  data?.items.map((route) => (
-                    <motion.div
-                      key="results"
-                      variants={fadeVariants}
-                      initial="hidden"
-                      animate="show"
-                      exit="exit"
-                      className="w-full space-y-6"
-                    >
-                      {/* Routes Grid */}
-                      <motion.div
-                        variants={containerVariants}
-                        initial="hidden"
-                        animate="show"
-                        className="grid gap-5 grid-cols-1"
-                      >
                         {(data?.items || [])?.length > 0 ? (
                           data?.items.map((route) => (
                             <motion.div
