@@ -171,6 +171,27 @@ export default function AgentSeatBookingDialog({
     }
   };
 
+  const handleBack = () => {
+    setPassengers([
+      {
+        name: "",
+        email: "",
+        phone: "",
+        id_number: "",
+        gender: "",
+      },
+    ]);
+    // setSeatDict({});
+
+    setCurrentPassengerIndex(0);
+    console.log(selectedSeats);
+    if (step === 2) {
+      setStep(1);
+    } else {
+      setToggle(false);
+    }
+  };
+
   const handleDialogClose = () => {
     setToggle(false);
     setStep(1);
@@ -207,7 +228,7 @@ export default function AgentSeatBookingDialog({
               passengers={passengers}
               onPassengersChange={setPassengers}
               onNext={handlePassengerInfoNext}
-              onBack={() => setToggle(false)}
+              onBack={handleBack}
             />
           )}
 
