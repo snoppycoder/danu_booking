@@ -288,14 +288,14 @@ export const publicApi = {
 export const tempAPI = {
   payment: async (body: {
     amount: number;
-    email: string;
+    email?: string;
     first_name: string;
     last_name: string;
     phone_number: string;
-
     hold_id: string;
+    client_ref: string;
   }) => {
-    const response = await api_webhook.post("/payment", body);
+    const response = await api.post("/payment", body);
     console.log(response.data);
     return response.data;
   },

@@ -129,7 +129,7 @@ export default function GuestBooking() {
   const [bus, setBus] = useState<
     { id: string; plate_no: string } | undefined
   >();
-  const [levelFilter, setLevelFilter] = useState("");
+
   const [tripId, setTripId] = useState<string>("");
   const debounced = useDebounce(form.route_to, 300);
   const { data, isLoading, refetch } = useSearchRoute(
@@ -145,13 +145,6 @@ export default function GuestBooking() {
   const router = useRouter();
 
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
-
-  // const handleViewDetails = async (trip: searchResult) => {
-  //   const response = await passengerApi.getTripDetails(trip.id);
-  //   console.log(response, "trip details");
-  //   setSelectedTrip(response);
-  //   setIsModalOpen(true);
-  // };
 
   async function handleSubmit(
     e: React.FormEvent<HTMLFormElement>,

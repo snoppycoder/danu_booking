@@ -15,7 +15,7 @@ import { Button } from "@/components/ui/button";
 import SeatLayoutDialog from "./GuestSeatLayoutDialog";
 import PassengerInfoForm from "./PassengerInfoForm";
 import type { Bus, Passenger, Seat } from "@/lib/model";
-import { operatorApi, passengerApi } from "@/app/api/api";
+import { operatorApi, passengerApi, tempAPI } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
 
@@ -44,7 +44,6 @@ export default function GuestSeatBookingDialog({
 }: SeatBookingDialogProps) {
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
-
   const [totalFare, setTotalFare] = useState(0);
   const [holdData, setHoldData] = useState<{
     hold_id: string;
@@ -156,14 +155,20 @@ export default function GuestSeatBookingDialog({
   const handleConfirm = async () => {
     let uuid = uuidv4();
     if (!holdData) return;
-    await passengerApi.guestConfirmBooking(
-      holdData.hold_id,
-      `devpay_${uuid}`,
-      "cash",
-    );
-    toast.success("Seats successfully booked!", { duration: 3000 });
-
-    onSucess?.();
+    // await passengerApi.guestConfirmBooking(
+    //   holdData.hold_id,
+    //   `devpay_${uuid}`,
+    //   "cash",
+    // );
+    const res = await tempAPI.guestPayment({
+      amount: totalFare,
+      first_name: holdData.passenger_details?.[0].name.split(" ")[0] ?? "Guest",
+      last_name: holdData.passenger_details?.[0].name.split(" ")[1] ?? "Guest",
+      phone_number: holdData.passenger_details?.[0].phone,
+      hold_id: holdData.hold_id,
+      client_ref: holdData.client_ref,
+    });
+    window.open(res.data.checkout_url);
 
     // Reset state
     setPassengers([
@@ -269,8 +274,8 @@ export default function GuestSeatBookingDialog({
                 <Button
                   className="flex-1"
                   disabled={selectedSeats.length != passengers.length}
-                  onClick={() => {
-                    setPaymentToggle(true);
+                  onClick={async () => {
+                    await handleConfirm();
                   }}
                 >
                   Confirm Booking
@@ -280,7 +285,7 @@ export default function GuestSeatBookingDialog({
           )}
         </DialogContent>
       </Dialog>
-      <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
+      {/* <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Payment</DialogTitle>
@@ -307,7 +312,7 @@ export default function GuestSeatBookingDialog({
             <Button onClick={handleConfirm}>Pay & Confirm</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

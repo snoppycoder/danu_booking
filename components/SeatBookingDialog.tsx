@@ -15,12 +15,13 @@ import { Button } from "@/components/ui/button";
 import SeatLayoutDialog from "./GuestSeatLayoutDialog";
 import PassengerInfoForm from "./PassengerInfoForm";
 import type { Bus, Passenger, Seat } from "@/lib/model";
-import { operatorApi, passengerApi } from "@/app/api/api";
+import { operatorApi, passengerApi, tempAPI } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
 import "@/i18n";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/lib/authContext";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -46,6 +47,7 @@ export default function SeatBookingDialog({
   // Step 1: Passenger Info, Step 2: Seat Selection, Step 3: Confirmation
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const queryClient = useQueryClient();
+  const { user } = useAuth();
   const { t } = useTranslation();
   const [totalFare, setTotalFare] = useState(0);
   const [holdData, setHoldData] = useState<{
@@ -169,15 +171,17 @@ export default function SeatBookingDialog({
   const handleConfirm = async () => {
     let uuid = uuidv4();
     if (!holdData) return;
-    const response2 = await passengerApi.confirmBooking(
-      holdData.hold_id,
-      `devpay_${uuid}`,
-      "cash",
-    );
-
-    toast.success("Seats successfully booked!", { duration: 3000 });
+    const res = await tempAPI.payment({
+      amount: totalFare,
+      first_name: user?.first_name ?? "Guest",
+      last_name: user?.last_name ?? "Guest",
+      phone_number: user?.phone ?? "N/A", // COULD CREATE PROBLEM IN THE FUTURE
+      hold_id: holdData.hold_id,
+      client_ref: holdData.client_ref,
+    });
+    window.open(res.data.checkout_url);
+    // toast.success("Seats successfully booked!", { duration: 3000 });
     queryClient.invalidateQueries({ queryKey: ["history"] });
-    onSucess?.();
 
     // Reset state
     setPassengers([
@@ -299,8 +303,8 @@ export default function SeatBookingDialog({
                 <Button
                   className="flex-1"
                   disabled={selectedSeats.length != passengers.length}
-                  onClick={() => {
-                    setPaymentToggle(true);
+                  onClick={async () => {
+                    await handleConfirm();
                   }}
                 >
                   Confirm Booking
@@ -310,7 +314,7 @@ export default function SeatBookingDialog({
           )}
         </DialogContent>
       </Dialog>
-      <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
+      {/* <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Payment</DialogTitle>
@@ -339,7 +343,7 @@ export default function SeatBookingDialog({
             <Button onClick={handleConfirm}>Pay & Confirm</Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }
