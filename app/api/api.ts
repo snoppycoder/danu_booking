@@ -299,6 +299,19 @@ export const tempAPI = {
     console.log(response.data);
     return response.data;
   },
+  guestPayment: async (body: {
+    amount: number;
+    email?: string;
+    first_name: string;
+    last_name: string;
+    phone_number: string;
+    hold_id: string;
+    client_ref: string;
+  }) => {
+    const response = await api.post("/guest/payment", body);
+    console.log(response.data);
+    return response.data;
+  },
 };
 export const kycApi = {
   operatorUploadKyc: async (
