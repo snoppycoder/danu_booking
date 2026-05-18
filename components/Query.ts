@@ -76,6 +76,7 @@ export interface operatorAdminReport {
 }
 export interface searchResult {
   id: string;
+  association?: string;
   trip_date: string;
   arrival_time: string;
   operator: {
@@ -310,12 +311,14 @@ export const useSearchRoute = (
   page?: number,
   per_page?: number,
   org_id?: string,
+  association?: string,
 ) => {
   return useQuery({
     queryKey: [
       "search_route",
       route_from,
       route_to,
+      association,
       trip_date,
       org_id,
       page,
@@ -328,6 +331,7 @@ export const useSearchRoute = (
         trip_date,
         page,
         per_page,
+        association,
       });
       const now = new Date();
 

@@ -1,4 +1,11 @@
 "use client";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 import {
   MapPin,
@@ -101,6 +108,7 @@ export default function GuestBooking() {
   const searchParams = useSearchParams();
   const [form, setForm] = useState({
     route_from: searchParams.get("from") || "",
+    level: searchParams.get("lvl") || "",
     route_to: searchParams.get("to") || "",
     departure_date: searchParams.get("date") || new Date().toString(),
   });
@@ -121,6 +129,7 @@ export default function GuestBooking() {
   const [bus, setBus] = useState<
     { id: string; plate_no: string } | undefined
   >();
+  const [levelFilter, setLevelFilter] = useState("");
   const [tripId, setTripId] = useState<string>("");
   const debounced = useDebounce(form.route_to, 300);
   const { data, isLoading, refetch } = useSearchRoute(
@@ -130,7 +139,9 @@ export default function GuestBooking() {
     currentPage,
     per_page,
     undefined,
+    form.level ?? "",
   );
+  console.log(data, "here");
   const router = useRouter();
 
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -148,7 +159,7 @@ export default function GuestBooking() {
     e.preventDefault();
     // Refetch data with updated form values
     router.replace(
-      `/guest/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
+      `/guest/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}&lvl=${form.level}`,
     );
   }
 
@@ -364,6 +375,46 @@ export default function GuestBooking() {
             <p className="mt-2 text-gray-600">
               Select your preferred bus for your journey
             </p>
+          </div>
+          <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white/80 p-4 backdrop-blur-sm md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">
+                Filter Trips
+              </h2>
+
+              <p className="text-sm text-muted-foreground">
+                Narrow down available buses
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Select
+                value={form.level}
+                onValueChange={(value) => {
+                  const updatedForm = {
+                    ...form,
+                    level: value,
+                  };
+
+                  setForm(updatedForm);
+
+                  router.replace(
+                    `/guest/bookings?from=${updatedForm.route_from}&to=${updatedForm.route_to}&date=${updatedForm.departure_date}&lvl=${updatedForm.level}`,
+                  );
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Association" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="LIYU_BUS">Liyu bus</SelectItem>
+                  <SelectItem value="LVL_ONE">Level one</SelectItem>
+                  <SelectItem value="LVL_TWO">Level two</SelectItem>
+                  <SelectItem value="LVL_THREE">Level three</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {isLoading ? (

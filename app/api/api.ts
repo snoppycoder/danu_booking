@@ -1214,6 +1214,7 @@ export const passengerApi = {
     trip_date: string;
     page?: number;
     per_page?: number;
+    association?: string;
   }) => {
     try {
       const response = await api.get("/guest/routes/search", {
@@ -1223,20 +1224,17 @@ export const passengerApi = {
           trip_date: body.trip_date,
           page: body.page,
           per_page: body.per_page,
+          association: body.association ?? "",
         },
       });
 
       const res: searchResult[] = response.data.items;
-      const now = new Date();
-      let items = res.filter((t) => {
-        const departure = new Date(`${t.trip_date}T${t.departure_time}Z`);
+      console.log(res);
 
-        return departure > now;
-      });
       const total = response.data.total;
       const page = response.data.page;
 
-      return { items, total, page };
+      return { items: res, total, page };
     } catch (err) {
       console.log(err);
       throw err;

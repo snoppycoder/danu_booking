@@ -24,6 +24,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Bus, Item, Seat, Trip, TripData } from "@/lib/model";
 import { passengerApi } from "@/app/api/api";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -73,17 +81,20 @@ export default function DanuBooking() {
   const searchParams = useSearchParams();
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
+  const lvl = searchParams.get("lvl") || "";
   const departure_date = searchParams.get("date") || new Date().toString();
   const [searchParamsState, setSearchParamsState] = useState({
     from: route_from,
     to: route_to,
     date: departure_date,
+    lvl: lvl,
   });
   const { t } = useTranslation();
   const [form, setForm] = useState({
     route_from: searchParamsState.from || "",
     route_to: searchParamsState.to || "",
     departure_date: searchParamsState.date,
+    level: searchParamsState.lvl || "",
   });
   const [currentPage, setCurrentPage] = useState(1);
   const per_page = 10;
@@ -110,6 +121,8 @@ export default function DanuBooking() {
     searchParamsState.date,
     currentPage,
     per_page,
+    undefined,
+    form.level,
   );
   console.log(data, "filtered data");
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
@@ -123,10 +136,11 @@ export default function DanuBooking() {
       from: form.route_from,
       to: form.route_to,
       date: form.departure_date,
+      lvl: form.level,
     });
 
     router.replace(
-      `/passenger/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}`,
+      `/passenger/bookings?from=${form.route_from}&to=${form.route_to}&date=${form.departure_date}&lvl=${form.level}`,
       { scroll: false },
     );
     setTimeout(() => {
@@ -413,6 +427,47 @@ export default function DanuBooking() {
               {t("selectYourPreferedBus")}
             </p>
           </motion.div>
+          <div className="mb-6 flex flex-col gap-4 rounded-2xl border border-gray-200 bg-white/80 p-4 backdrop-blur-sm md:flex-row md:items-center md:justify-between">
+            <div>
+              <h2 className="text-sm font-semibold text-gray-900">
+                Filter Trips
+              </h2>
+
+              <p className="text-sm text-muted-foreground">
+                Narrow down available buses
+              </p>
+            </div>
+
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <Select
+                value={form.level}
+                onValueChange={(value) => {
+                  const updatedForm = {
+                    ...form,
+                    level: value,
+                  };
+
+                  setForm(updatedForm);
+
+                  router.replace(
+                    `/passenger/bookings?from=${updatedForm.route_from}&to=${updatedForm.route_to}&date=${updatedForm.departure_date}&lvl=${updatedForm.level}`,
+                    { scroll: false },
+                  );
+                }}
+              >
+                <SelectTrigger className="w-full sm:w-[180px]">
+                  <SelectValue placeholder="Association" />
+                </SelectTrigger>
+
+                <SelectContent>
+                  <SelectItem value="LIYU_BUS">Liyu bus</SelectItem>
+                  <SelectItem value="LVL_ONE">Level one</SelectItem>
+                  <SelectItem value="LVL_TWO">Level two</SelectItem>
+                  <SelectItem value="LVL_THREE">Level three</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
           <AnimatePresence mode="wait">
             {isLoading ? (
@@ -498,7 +553,7 @@ export default function DanuBooking() {
                           <div className="flex items-start justify-between mb-6">
                             <div>
                               <h3 className="text-2xl font-bold text-gray-900 group-hover:text-primary transition-colors duration-300">
-                                {route.operator.name}
+                                {route.operator.name} - ({route.association})
                               </h3>
                             </div>
 
