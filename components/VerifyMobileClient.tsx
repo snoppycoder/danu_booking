@@ -13,6 +13,7 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Spinner } from "@/components/ui/spinner";
 import { authAPI } from "@/app/api/api";
 import { toast } from "sonner";
+import { isAxiosError } from "axios";
 // Import your API here. Example:
 // import { authAPI } from "@/lib/api";
 
@@ -103,10 +104,13 @@ export default function VerifyMobileClient() {
         router.replace("/login");
       }, 3000);
     } catch (err: any) {
-      setError(
-        err?.response?.data?.message ||
-          "Invalid verification code. Please try again.",
-      );
+      if (isAxiosError(err)) {
+        setError(
+          err?.response?.data?.message ||
+            err.response?.data.detail ||
+            "Invalid verification code. Please try again.",
+        );
+      }
     } finally {
       setIsLoading(false);
     }
@@ -221,7 +225,7 @@ export default function VerifyMobileClient() {
           Didn't receive the code?{" "}
           <button
             type="button"
-            className="bg-primary text-white font-semibold hover:underline transition-colors"
+            className=" text-primary font-semibold hover:underline transition-colors"
             onClick={async () => {
               await authAPI.resendPhoneOTP(phone);
             }}
