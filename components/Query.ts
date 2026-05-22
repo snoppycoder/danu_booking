@@ -7,6 +7,7 @@ import {
   operatorApi,
   passengerApi,
   profileApi,
+  publicApi,
   sessionMgmt,
   superAdminApi,
 } from "@/app/api/api";
@@ -26,6 +27,7 @@ import {
   SearchRouteResponse,
   Seat,
   Session,
+  TicketResponse,
   Trip,
   User,
 } from "@/lib/model";
@@ -154,6 +156,21 @@ export const useSuperAdminStat = () => {
       return res;
     },
     staleTime: 5 * 60 * 1000,
+  });
+};
+export const useTicketNumber = (ticket_number: string) => {
+  return useQuery({
+    queryKey: ["search-ticket-number", ticket_number],
+    queryFn: async () => {
+      // if (ticket_number.trim() === "") {
+      //   return ;
+      // }
+      const res = await publicApi.searchByTVN(ticket_number);
+
+      return res as TicketResponse;
+    },
+    enabled: ticket_number.trim() !== "",
+    staleTime: 15 * 60 * 1000,
   });
 };
 export const useDanuAgentOperatorReport = (

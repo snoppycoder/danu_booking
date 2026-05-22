@@ -306,6 +306,48 @@ export interface PopularRoutesResponse {
   routes: PopularRoute[];
   total: number;
 }
+export interface TicketResponse {
+  id: string;
+  ticket_number: string;
+  lottery_number: string;
+
+  passenger?: {
+    id: string;
+    name: string;
+    seat_code: string;
+    seat_fare: number;
+    gender: string;
+  } | null;
+
+  booking: {
+    operator: {
+      id: string;
+      name: string;
+    };
+
+    trip: {
+      schedule: {
+        route: {
+          route_to: string;
+          route_from: string;
+          distance_km: number;
+          estimated_duration_minutes: number;
+        };
+
+        // departure_time?: string;
+      };
+    };
+
+    booking_ref: string;
+
+    user: {
+      id: string;
+      // name?: string;
+    };
+  };
+
+  qr_code_url?: string | null;
+}
 export type Passenger = {
   name: string;
   email: string | null;

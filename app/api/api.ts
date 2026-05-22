@@ -19,7 +19,7 @@ import {
   Passenger,
 } from "@/lib/model";
 
-import axios from "axios";
+import axios, { isAxiosError } from "axios";
 import { Constants } from "@/lib/constant";
 
 const api = axios.create({
@@ -282,6 +282,22 @@ export const publicApi = {
       message: string;
       data?: any;
     };
+  },
+  searchByTVN: async (ticket_number: string) => {
+    try {
+      const res = await api.get(`/guest/tvn/${ticket_number}`);
+      console.log(res.data);
+      return res.data;
+    } catch (err) {
+      if (isAxiosError(err)) {
+        if (err.status === 404) {
+          return {
+            message: "Ticket not found",
+          };
+        }
+      }
+      throw err;
+    }
   },
 };
 

@@ -137,7 +137,7 @@ i18n.use(initReactI18next).init({
         last_name: "Last Name",
         email_address_optional: "Email Address (Optional)",
         phone_number: "Phone Number",
-
+        tvn: "Ticket Lookup",
         confirm_password: "Confirm Password",
         i_read_and_agree_to_the: "I read and agree to the",
         terms_and_conditions: "Terms & Conditions",
@@ -267,6 +267,7 @@ i18n.use(initReactI18next).init({
         emailUs: "Imeelii Nuuf Barreessaa",
 
         getInTouch: "Nu Quunnamaa",
+        tvn: "Barbaacha Tikeetii",
 
         sendMessage: "Ergi",
         viewAllPast: "Imala kee kan darbeefi kan fuulduraa hunda ilaali",
@@ -320,6 +321,7 @@ i18n.use(initReactI18next).init({
         contact: "ርኸቡና",
         profile: "ፕሮፋይል ናይይ",
         myBookings: "ቦኪንግ ናይይ",
+        tvn: "ምድላይ ቲኬት",
         manageSessions: "ሴሽን ኣስተዳድር",
         logout: "ውጻእ",
         from: "ካብ",
@@ -465,7 +467,7 @@ i18n.use(initReactI18next).init({
         logout: "ውጣ",
         from: "ከ",
         to: "ወደ",
-
+        tvn: "ቲኬት ፍለጋ",
         departureDate: "የመነሻ ቀን",
         returnDate: "የመመለሻ ቀን",
         findTickets: "ትኬቶችን ይፈልጉ",
