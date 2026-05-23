@@ -116,10 +116,6 @@ export default function OperatorPage() {
   } = useOperatorBuses(user?.organization_id);
   console.log(seatTemplates);
 
-  const [selectedTemplateId, setSelectedTemplateId] = useState<string | null>(
-    null,
-  );
-
   useEffect(() => {
     if (!user?.organization_id) return;
 
@@ -685,7 +681,7 @@ export default function OperatorPage() {
             </div>
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label>Select Seat Template</Label>
+                <Label>Select Bus Level Type</Label>
 
                 <Select
                   value={selectedTemplate?.id || ""}
@@ -710,7 +706,7 @@ export default function OperatorPage() {
                   <SelectContent>
                     {seatTemplates?.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
-                        {template.name}
+                        {template.association}
                       </SelectItem>
                     ))}
                   </SelectContent>

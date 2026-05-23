@@ -215,45 +215,69 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
     );
 
     // Footer / Reference Info
-    doc.setFillColor(249, 250, 251); // Very light gray background box
+    // Footer / Reference Info
+    doc.setFillColor(249, 250, 251);
     doc.rect(15, 76, stubX - 25, 18, "F");
 
-    // Footer Line 1
-    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+    // ===== ROW 1 =====
     doc.setFontSize(7);
+
+    // Ticket Number
+    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
     doc.setFont("helvetica", "bold");
-    doc.text(`BOOKING REF:`, 18, 81);
+    doc.text("TICKET NUMBER:", 18, 81);
 
     doc.setTextColor(textDark[0], textDark[1], textDark[2]);
-    doc.text(booking.booking_ref, 38, 81);
+    doc.setFont("helvetica", "italic");
+    doc.text(ticket.ticket_number || "N/A", 48, 81);
 
+    // Status
     doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
-    doc.text(`STATUS:`, 90, 81);
+    doc.setFont("helvetica", "bold");
+    doc.text("STATUS:", 120, 81);
+
     const isConfirmed =
       ticket.status.toUpperCase() === "PAID" ||
       booking.booking_status.toLowerCase() === "confirmed";
+
     doc.setTextColor(
       isConfirmed ? 22 : 200,
       isConfirmed ? 163 : 0,
       isConfirmed ? 74 : 0,
     );
-    doc.text(isConfirmed ? "PAID & CONFIRMED" : "PENDING", 103, 81);
 
-    // Footer Line 2
-    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
-    doc.text(`AMT IN WORDS:`, 18, 86);
-    doc.setTextColor(textDark[0], textDark[1], textDark[2]);
-    doc.setFont("helvetica", "italic");
-    doc.text(ticket.price_in_words || "N/A", 40, 86);
+    doc.text(isConfirmed ? "PAID & CONFIRMED" : "PENDING", 135, 81);
 
-    // Footer Line 3
+    // ===== ROW 2 =====
+
+    // Booking Ref
     doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
     doc.setFont("helvetica", "bold");
-    doc.text(`LOTTERY NO:`, 18, 91);
+    doc.text("BOOKING REF:", 18, 87);
+
+    doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+    doc.setFont("helvetica", "normal");
+    doc.text(booking.booking_ref, 48, 87);
+
+    // Lottery Number
+    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text("LOTTERY NO:", 120, 87);
+
     doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
     doc.setFont("helvetica", "normal");
-    doc.text(ticket.lottery_number || "N/A", 38, 91);
+    doc.text(ticket.lottery_number || "N/A", 145, 87);
 
+    // ===== ROW 3 =====
+
+    // Amount in words
+    doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
+    doc.setFont("helvetica", "bold");
+    doc.text("AMT IN WORDS:", 18, 92);
+
+    doc.setTextColor(textDark[0], textDark[1], textDark[2]);
+    doc.setFont("helvetica", "italic");
+    doc.text(ticket.price_in_words || "N/A", 48, 92);
     // ==========================================
     //          TEAR-OFF STUB (RIGHT)
     // ==========================================

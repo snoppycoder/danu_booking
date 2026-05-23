@@ -401,7 +401,7 @@ export default function GuestBooking() {
                 }}
               >
                 <SelectTrigger className="w-full sm:w-[180px]">
-                  <SelectValue placeholder="Association" />
+                  <SelectValue placeholder="BUS TYPE" />
                 </SelectTrigger>
 
                 <SelectContent>
