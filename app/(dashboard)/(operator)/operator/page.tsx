@@ -128,6 +128,7 @@ export default function OperatorPage() {
   const [newBus, setNewBus] = useState({
     plate_no: "",
     side_no: "",
+    association: "",
     capacity: 0,
     seat_template_id: "",
     bus_status: "active",
@@ -207,21 +208,18 @@ export default function OperatorPage() {
 
   const handleAddBus = async () => {
     if (!user?.organization_id) return;
-    const seat51template = seatTemplates?.find((s) =>
-      s.name.includes("Standard 51 "),
-    );
 
     //FIXED will be changed when level is add danubooking2.0
-    const seat_numbers = 51;
 
     const data = {
       plate_no: newBus.plate_no,
       side_no: newBus.side_no,
-      capacity: seat_numbers,
+      association: newBus.association,
+      capacity: newBus.capacity,
       seat_template_id: selectedTemplate?.id ?? "",
       bus_status: "active",
     };
-
+    console.log(data);
     try {
       await operatorApi.createBus(data, user.organization_id);
 
@@ -231,20 +229,22 @@ export default function OperatorPage() {
 
       toast.success("Added the vehicle successfully");
       setIsAddBusOpen(false);
+      setNewBus({
+        plate_no: "",
+        side_no: "",
+        association: "",
+        capacity: 0,
+        seat_template_id: "",
+        bus_status: "active",
+      });
     } catch (error) {
+      console.log(error);
       if (isAxiosError(error)) {
         toast.error(error.response?.data.error);
       } else {
         toast.error("Failed to add bus");
       }
     } finally {
-      setNewBus({
-        plate_no: "",
-        side_no: "",
-        capacity: 0,
-        seat_template_id: "",
-        bus_status: "active",
-      });
       setAddBusStep(1);
     }
   };
@@ -689,12 +689,17 @@ export default function OperatorPage() {
                     const template = seatTemplates?.find((t) => t.id === value);
 
                     if (template) {
+                      console.log(template);
                       setSelectedTemplate(template);
 
                       setNewBus({
                         ...newBus,
                         seat_template_id: template.id,
-                        capacity: template.layout?.grid?.length || 0,
+                        association: template.association ?? "Liyu Bus", // hard coded might need to change it
+                        capacity:
+                          template.layout?.grid?.length ||
+                          template.seats.length ||
+                          0,
                       });
                     }
                   }}
@@ -706,7 +711,9 @@ export default function OperatorPage() {
                   <SelectContent>
                     {seatTemplates?.map((template) => (
                       <SelectItem key={template.id} value={template.id}>
-                        {template.association}
+                        {template.association}{" "}
+                        {template.association == "Liyu Bus" &&
+                          `-${template.name}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
