@@ -18,6 +18,7 @@ import {
   User,
 } from "lucide-react";
 import { TripData } from "@/lib/model";
+import { formatAmharicTime } from "@/lib/common_functions";
 
 type Trip = {
   id: string;
@@ -33,16 +34,20 @@ type Trip = {
   operator: {
     id: string;
     name: string;
+    phone: string;
+    email: string;
   };
 
   bus: {
     id: string;
     plate_no: string;
+    side_no: string;
   };
 
   driver: {
     id: string;
     name: string;
+    phone: string;
   };
 
   price: number;
@@ -93,7 +98,7 @@ export function TripDetailsModal({
               <div className="text-right">
                 <p className="text-sm text-gray-600">Departure</p>
                 <p className="font-semibold text-gray-900">
-                  {formatDate(tripData.departure_time ?? "")}
+                  {formatAmharicTime(tripData.departure_time ?? "")}
                 </p>
               </div>
             </div>
@@ -125,6 +130,18 @@ export function TripDetailsModal({
                   {tripData.operator.name ?? "N/A"}
                 </span>
               </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Phone</span>
+                <span className="font-medium text-gray-900">
+                  {tripData.operator.phone ?? "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Email</span>
+                <span className="font-medium text-gray-900">
+                  {tripData.operator.email ?? "N/A"}
+                </span>
+              </div>
             </div>
           </div>
 
@@ -143,6 +160,15 @@ export function TripDetailsModal({
                   {tripData.bus?.plate_no ?? "N/A"}
                 </Badge>
               </div>
+              <div className=" flex justify-between">
+                <span className="text-gray-600">Side Number</span>
+                {/* <Badge variant="secondary" className="font-mono"> */}
+                <span className="font-medium text-sm">
+                  {tripData.bus?.side_no ?? "N/A"}
+                </span>
+
+                {/* </Badge> */}
+              </div>
             </div>
           </div>
 
@@ -159,6 +185,12 @@ export function TripDetailsModal({
                 <span className="text-gray-600">Name</span>
                 <span className="font-medium text-gray-900">
                   {tripData.driver?.name ?? "N/A"}
+                </span>
+              </div>
+              <div className="flex justify-between">
+                <span className="text-gray-600">Phone Number</span>
+                <span className="font-medium text-gray-900">
+                  {tripData.driver?.phone ?? "N/A"}
                 </span>
               </div>
             </div>

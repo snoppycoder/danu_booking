@@ -100,7 +100,7 @@ export default function GuestTicketSearch() {
             <h3 className="text-lg font-semibold text-slate-900">
               Ready to travel?
             </h3>
-            <p className="text-slate-500 mt-1 max-w-sm">
+            <p className="text-xs md:text-md text-slate-500 mt-1 max-w-sm">
               Search for your ticket number above to pull up your digital
               boarding pass.
             </p>

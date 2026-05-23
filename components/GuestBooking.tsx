@@ -591,11 +591,13 @@ export default function GuestBooking() {
             operator_id={id}
           />
         )}
-        <TripDetailsModal
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-          tripData={selectedTrip!}
-        />
+        {isModalOpen && (
+          <TripDetailsModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            tripData={selectedTrip!}
+          />
+        )}
       </div>
     </div>
   );

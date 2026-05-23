@@ -108,7 +108,7 @@ export default function GuestNavBar() {
         >
           <div className="pt-4 pb-2 space-y-1 border-t border-border/40">
             {/* Mobile Links */}
-            <div className="flex flex-col space-y-1 mb-4">
+            <div className="flex flex-col items-center space-y-1 mb-4">
               {linksObj.map((link) => {
                 const isActive = pathname === link.href;
                 return (
