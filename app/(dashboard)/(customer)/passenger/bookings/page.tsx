@@ -63,21 +63,26 @@ export default function DanuBooking() {
     operator: {
       id: string;
       name: string;
+      phone: string;
+      email: string;
     };
 
     bus: {
       id: string;
       plate_no: string;
+      side_no: string;
     };
 
     driver: {
       id: string;
       name: string;
+      phone: string;
     };
 
     price: number;
     is_available: boolean;
   };
+
   const searchParams = useSearchParams();
   const route_from = searchParams.get("from") || "";
   const route_to = searchParams.get("to") || "";
