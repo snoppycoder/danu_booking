@@ -60,16 +60,20 @@ export default function GuestBooking() {
     operator: {
       id: string;
       name: string;
+      phone: string;
+      email: string;
     };
 
     bus: {
       id: string;
       plate_no: string;
+      side_no: string;
     };
 
     driver: {
       id: string;
       name: string;
+      phone: string;
     };
 
     price: number;
