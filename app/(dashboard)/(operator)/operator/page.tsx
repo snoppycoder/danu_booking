@@ -695,7 +695,7 @@ export default function OperatorPage() {
                       setNewBus({
                         ...newBus,
                         seat_template_id: template.id,
-                        association: "Liy2 Bus", // hard coded might need to change it
+                        association: template.association, // hard coded might need to change it
                         capacity:
                           template.layout?.grid?.length ||
                           template.seats.length ||
