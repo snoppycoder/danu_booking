@@ -136,31 +136,6 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
       doc.text(value, x, y + 5);
     };
 
-    // --- 4. GENERATE AND RENDER QR CODE ---
-    if (ticket.qr_code_url) {
-      try {
-        // Generate a base64 Data URI from the URL
-        const qrImage = await QRCode.toDataURL(ticket.qr_code_url, {
-          margin: 1,
-          width: 80,
-          color: {
-            dark: "#1F2937", // textDark to match the theme
-            light: "#FFFFFF",
-          },
-        });
-
-        // Add image to PDF at top right of the main ticket section
-        // (X: 142, Y: 6, Width: 22mm, Height: 22mm)
-        doc.addImage(qrImage, "PNG", 142, 6, 22, 22);
-      } catch (err) {
-        console.error(
-          "Failed to generate QR Code for ticket",
-          ticket.ticket_id,
-          err,
-        );
-      }
-    }
-
     // Row 1: Passenger, Gender, Phone & Date Info
     drawInfoBox("PASSENGER", ticket.passenger_name || "N/A", 15, 32, 11, true);
     drawInfoBox("GENDER", ticket.gender || "N/A", 60, 32);
@@ -266,7 +241,7 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
 
     doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
     doc.setFont("helvetica", "normal");
-    doc.text(ticket.lottery_number || "N/A", 145, 87);
+    doc.text(ticket.lottery_number || "N/A", 138, 87);
 
     // ===== ROW 3 =====
 
@@ -282,6 +257,31 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
     //          TEAR-OFF STUB (RIGHT)
     // ==========================================
     const startX = stubX + 8;
+
+    // --- 4. GENERATE AND RENDER QR CODE ---
+    if (ticket.qr_code_url) {
+      try {
+        // Generate a base64 Data URI from the URL
+        const qrImage = await QRCode.toDataURL(ticket.qr_code_url, {
+          margin: 1,
+          width: 80,
+          color: {
+            dark: "#1F2937", // textDark to match the theme
+            light: "#FFFFFF",
+          },
+        });
+
+        // Add image to PDF at top right of the main ticket section
+        // (X: 142, Y: 6, Width: 22mm, Height: 22mm)
+        doc.addImage(qrImage, "PNG", startX, 65, 29, 29);
+      } catch (err) {
+        console.error(
+          "Failed to generate QR Code for ticket",
+          ticket.ticket_id,
+          err,
+        );
+      }
+    }
 
     doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
     doc.setFont("helvetica", "bold");
@@ -305,9 +305,9 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
 
     drawInfoBox("PASSENGER", passengerDisplay, startX, 48, 9, true);
     drawInfoBox("DEPARTURE", format(depDate, "MMM dd, HH:mm"), startX, 58, 9);
-    drawInfoBox("FROM", booking.route_from.toUpperCase(), startX, 68, 9);
-    drawInfoBox("TO", booking.route_to.toUpperCase(), startX, 78, 9);
-    drawInfoBox("BUS PLATE", booking.bus_plate || "N/A", startX, 88, 9);
+    // drawInfoBox("FROM", booking.route_from.toUpperCase(), startX, 68, 9);
+    // drawInfoBox("TO", booking.route_to.toUpperCase(), startX, 78, 9);
+    // drawInfoBox("BUS PLATE", booking.bus_plate || "N/A", startX, 88, 9);
   }
 
   // Save the PDF

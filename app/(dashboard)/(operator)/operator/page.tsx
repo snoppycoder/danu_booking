@@ -695,7 +695,7 @@ export default function OperatorPage() {
                       setNewBus({
                         ...newBus,
                         seat_template_id: template.id,
-                        association: template.association ?? "Liyu Bus", // hard coded might need to change it
+                        association: "Liy2 Bus", // hard coded might need to change it
                         capacity:
                           template.layout?.grid?.length ||
                           template.seats.length ||
@@ -713,7 +713,7 @@ export default function OperatorPage() {
                       <SelectItem key={template.id} value={template.id}>
                         {template.association}{" "}
                         {template.association == "Liyu Bus" &&
-                          `-${template.name}`}
+                          `- ${template.name}`}
                       </SelectItem>
                     ))}
                   </SelectContent>
