@@ -289,13 +289,6 @@ export const publicApi = {
       console.log(res.data);
       return res.data;
     } catch (err) {
-      if (isAxiosError(err)) {
-        if (err.status === 404) {
-          return {
-            message: "Ticket not found",
-          };
-        }
-      }
       throw err;
     }
   },

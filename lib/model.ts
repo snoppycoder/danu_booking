@@ -236,6 +236,7 @@ export interface Seat {
 
 export interface SeatTemplate {
   id: string;
+  association?: string;
   name: string;
   seats: Seat[];
   created_at: string; // ISO date string
@@ -243,6 +244,7 @@ export interface SeatTemplate {
 
 export interface Bus {
   id: string;
+  seat_template_id: string;
   seat_template: SeatTemplate;
   operator_id: string;
   bus_status: string;

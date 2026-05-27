@@ -15,13 +15,12 @@ import {
   User,
   Hash,
   CreditCard,
-  ArrowRight,
   Clock,
 } from "lucide-react";
 
 import { useTicketNumber } from "@/components/Query";
 
-export default function TicketSearch() {
+export default function GuestTicketSearch() {
   const [searchInput, setSearchInput] = useState("");
   const [ticketNumber, setTicketNumber] = useState<string>("");
 
@@ -76,36 +75,12 @@ export default function TicketSearch() {
           </form>
         </Card>
 
-        {/* Error State */}
+        {/* Not Found State */}
         {error && (
-          <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-red-600 border border-red-100 shadow-sm">
+          <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-amber-600 border border-amber-100 shadow-sm">
             <AlertCircle className="size-5 shrink-0" />
             <p className="font-medium">{error.message}</p>
           </div>
-        )}
-
-        {/* Not Found State */}
-        {!ticket && ticketNumber && !loading && !error && (
-          <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-amber-600 border border-amber-100 shadow-sm">
-            <AlertCircle className="size-5 shrink-0" />
-            <p className="font-medium">No ticket found with that number.</p>
-          </div>
-        )}
-
-        {/* Empty State */}
-        {!ticket && !loading && !error && !ticketNumber && (
-          <Card className="flex flex-col items-center justify-center py-16 text-center border-dashed shadow-sm">
-            <div className="rounded-full bg-slate-100 p-4 mb-4">
-              <Ticket className="size-8 text-slate-400" />
-            </div>
-            <h3 className="text-lg font-semibold text-slate-900">
-              Ready to travel?
-            </h3>
-            <p className="text-xs md:text-md text-slate-500 mt-1 max-w-sm">
-              Search for your ticket number above to pull up your digital
-              boarding pass.
-            </p>
-          </Card>
         )}
 
         {/* Ticket Result - Boarding Pass Style */}
@@ -257,6 +232,12 @@ export default function TicketSearch() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+        {!ticket && !loading && !error && ticketNumber && (
+          <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-amber-600 border border-amber-100 shadow-sm">
+            <AlertCircle className="size-5 shrink-0" />
+            <p>Ticket not found.</p>
           </div>
         )}
       </div>

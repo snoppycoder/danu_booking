@@ -162,15 +162,27 @@ export const useTicketNumber = (ticket_number: string) => {
   return useQuery({
     queryKey: ["search-ticket-number", ticket_number],
     queryFn: async () => {
-      // if (ticket_number.trim() === "") {
-      //   return ;
-      // }
-      const res = await publicApi.searchByTVN(ticket_number);
+      try {
+        const res = await publicApi.searchByTVN(ticket_number);
 
-      return res as TicketResponse;
+        // if API returns null/undefined
+        if (!res) {
+          throw new Error("Ticket not found");
+        }
+
+        return res as TicketResponse;
+      } catch (error: any) {
+        // if backend sends 404
+        if (error?.response?.status === 404) {
+          throw new Error("Ticket not found");
+        }
+
+        throw error;
+      }
     },
     enabled: ticket_number.trim() !== "",
     staleTime: 15 * 60 * 1000,
+    retry: false,
   });
 };
 export const useDanuAgentOperatorReport = (

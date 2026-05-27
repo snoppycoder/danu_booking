@@ -428,6 +428,9 @@ export default function OperatorPage() {
                       <TableCell className="font-mono font-medium">
                         {bus.plate_no}
                       </TableCell>
+                      {/* <TableCell className="font-mono font-medium">
+                        {bus.seat_template_id ?? "N/A"}
+                      </TableCell> */}
                       <TableCell className="font-mono font-medium">
                         {bus.side_no}
                       </TableCell>

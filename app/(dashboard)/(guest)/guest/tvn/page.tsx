@@ -77,19 +77,13 @@ export default function GuestTicketSearch() {
 
         {/* Error State */}
         {error && (
-          <div className="flex items-center gap-3 rounded-xl bg-red-50 p-4 text-red-600 border border-red-100 shadow-sm">
+          <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-amber-600 border border-amber-100 shadow-sm">
             <AlertCircle className="size-5 shrink-0" />
             <p className="font-medium">{error.message}</p>
           </div>
         )}
 
         {/* Not Found State */}
-        {!ticket && ticketNumber && !loading && !error && (
-          <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-amber-600 border border-amber-100 shadow-sm">
-            <AlertCircle className="size-5 shrink-0" />
-            <p className="font-medium">No ticket found with that number.</p>
-          </div>
-        )}
 
         {/* Empty State */}
         {!ticket && !loading && !error && !ticketNumber && (
@@ -256,6 +250,12 @@ export default function GuestTicketSearch() {
                 </div>
               </div>
             </div>
+          </div>
+        )}
+        {!ticket && !loading && !error && ticketNumber && (
+          <div className="flex items-center gap-3 rounded-xl bg-amber-50 p-4 text-amber-600 border border-amber-100 shadow-sm">
+            <AlertCircle className="size-5 shrink-0" />
+            <p>Ticket not found.</p>
           </div>
         )}
       </div>
