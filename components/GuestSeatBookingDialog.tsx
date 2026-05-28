@@ -50,7 +50,7 @@ export default function GuestSeatBookingDialog({
     client_ref: string;
     client_ref_token: string;
     expires_at: string;
-    passenger_details: Passenger[];
+    passengers: Passenger[];
 
     //client ref when hold was created a guest account
   } | null>();
@@ -74,6 +74,9 @@ export default function GuestSeatBookingDialog({
 
   const [seatDict, setSeatDict] = useState<Record<string, Passenger>>({});
   const [currentPassengerIndex, setCurrentPassengerIndex] = useState<number>(0);
+  const [selectedPayment, setSelectedPayment] = useState<
+    "star_pay" | "chapa" | "telebirr"
+  >("chapa");
   const [editingPassenger, setEditingPassenger] = useState<
     Record<number, number>
   >({});
@@ -155,20 +158,30 @@ export default function GuestSeatBookingDialog({
   const handleConfirm = async () => {
     let uuid = uuidv4();
     if (!holdData) return;
-    // await passengerApi.guestConfirmBooking(
-    //   holdData.hold_id,
-    //   `devpay_${uuid}`,
-    //   "cash",
-    // );
-    const res = await tempAPI.guestPayment({
-      amount: totalFare,
-      first_name: holdData.passenger_details?.[0].name.split(" ")[0] ?? "Guest",
-      last_name: holdData.passenger_details?.[0].name.split(" ")[1] ?? "Guest",
-      phone_number: holdData.passenger_details?.[0].phone,
-      hold_id: holdData.hold_id,
-      client_ref: holdData.client_ref,
-    });
-    window.open(res.data.checkout_url);
+    console.log(holdData.passengers, "hold data at confirmation");
+    if (selectedPayment === "chapa") {
+      const res = await tempAPI.guestPayment({
+        payment_method: "chapa",
+        amount: totalFare,
+        first_name: holdData.passengers?.[0].name.split(" ")[0] ?? "Guest",
+        last_name: holdData.passengers?.[0].name.split(" ")[1] ?? "Guest",
+        phone_number: holdData.passengers?.[0].phone,
+        hold_id: holdData.hold_id,
+        client_ref: holdData.client_ref,
+      });
+      window.open(res.data.checkout_url);
+    } else if (selectedPayment === "star_pay") {
+      const res = await tempAPI.guestPayment({
+        payment_method: "star_pay",
+        amount: totalFare,
+        first_name: holdData.passengers?.[0].name.split(" ")[0] ?? "Guest",
+        last_name: holdData.passengers?.[0].name.split(" ")[1] ?? "Guest",
+        phone_number: holdData.passengers?.[0].phone?.replace(/^0/, "+251"),
+        hold_id: holdData.hold_id,
+        client_ref: holdData.client_ref,
+      });
+      window.open(res.data.payment_url);
+    }
 
     // Reset state
     setPassengers([
@@ -275,7 +288,7 @@ export default function GuestSeatBookingDialog({
                   className="flex-1"
                   disabled={selectedSeats.length != passengers.length}
                   onClick={async () => {
-                    await handleConfirm();
+                    setPaymentToggle(true);
                   }}
                 >
                   Confirm Booking
@@ -285,34 +298,99 @@ export default function GuestSeatBookingDialog({
           )}
         </DialogContent>
       </Dialog>
-      {/* <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
+      <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Payment</DialogTitle>
+            <DialogTitle>Select Payment Method</DialogTitle>
             <DialogDescription>
-              This is a placeholder for payment integration.
+              Choose your preferred payment option to continue.
             </DialogDescription>
           </DialogHeader>
 
           <div className="space-y-4">
-            <div className="rounded-lg border p-4 bg-muted/50">
+            <div className="rounded-lg border p-4 bg-muted/50 space-y-1">
               <p className="text-sm">Total Passengers: {passengers.length}</p>
               <p className="text-sm font-medium">
                 Total Amount: {totalFare} ETB
               </p>
             </div>
 
-            <div className="text-sm text-muted-foreground">
-              Payment options will appear here (Telebirr, Chapa, Card, etc.)
+            <div className="grid gap-3">
+              <div
+                onClick={() => setSelectedPayment("chapa")}
+                className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
+                  selectedPayment === "chapa"
+                    ? "border-primary bg-primary/5"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/logos/chapa.svg"
+                    alt="Chapa"
+                    className="h-8 w-auto object-contain"
+                  />
+
+                  <div>
+                    <p className="font-medium">Chapa</p>
+                    <p className="text-sm text-muted-foreground">
+                      Use chapa for secure transaction.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div
+                onClick={() => setSelectedPayment("star_pay")}
+                className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
+                  selectedPayment === "star_pay"
+                    ? "border-primary bg-primary/5"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <img
+                    src="/logos/star_pay.svg"
+                    alt="StarPay"
+                    className="h-8 w-auto object-contain"
+                  />
+
+                  <div>
+                    <p className="font-medium">StarPay</p>
+                    <p className="text-sm text-muted-foreground">
+                      Use StarPay for quick checkout.
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              {/* <div
+          onClick={() => setSelectedPayment("telebirr")}
+          className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
+            selectedPayment === "telebirr"
+              ? "border-primary bg-primary/5"
+              : ""
+          }`}
+        >
+          <p className="font-medium">Telebirr</p>
+          <p className="text-sm text-muted-foreground">
+            Pay directly with Telebirr.
+          </p>
+        </div> */}
             </div>
           </div>
 
           <DialogFooter>
-            <Button variant="outline">Cancel</Button>
-            <Button onClick={handleConfirm}>Pay & Confirm</Button>
+            <Button variant="outline" onClick={() => setPaymentToggle(false)}>
+              Cancel
+            </Button>
+
+            <Button disabled={!selectedPayment} onClick={handleConfirm}>
+              Continue Payment
+            </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog> */}
+      </Dialog>
     </div>
   );
 }
