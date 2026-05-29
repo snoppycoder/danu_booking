@@ -256,7 +256,7 @@ export default function Navbar(props: NavbarProps) {
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger/tvn"
-              className={getMobileLinkClass("/passenger/tvn")}
+              className={getMobileLinkClass("/tvn")}
             >
               {t("tvn")}
             </Link>

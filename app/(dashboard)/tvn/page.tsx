@@ -47,13 +47,6 @@ export default function GuestTicketSearch() {
       setTicketNumber(q);
     }
   }, [searchParams]);
-  useEffect(() => {
-    const q = searchParams.get("q");
-    if (!q) return;
-
-    setSearchInput(q);
-    setTicketNumber(q);
-  }, []);
 
   return (
     <div className="min-h-screen bg-slate-50 p-6">

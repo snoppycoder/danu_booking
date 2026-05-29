@@ -52,7 +52,7 @@ export default function DashboardLayout({
             initalPath={[
               { href: "/passenger", label: t("home") },
               { href: "/passenger/history", label: t("myBookings") },
-              { href: "/passenger/tvn", label: t("tvn") },
+              { href: "/tvn", label: t("tvn") },
               { href: "/passenger/about-us", label: t("about") },
               { href: "/passenger/contact", label: t("contact") },
             ]}
