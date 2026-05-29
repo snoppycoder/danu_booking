@@ -1291,10 +1291,7 @@ export const passengerApi = {
       // console.log({ ...body, client_ref: `client_${uuid}` }, "body here");
       const response = await api.post(`/guest/holds/${tripId}`, {
         ...body,
-        passenger_details: body.passenger_details.map((passenger) => ({
-          ...passenger,
-          name: passenger.phone.trim(),
-        })),
+        passenger_details: body.passenger_details,
         // client_ref: uuid,
       });
 
