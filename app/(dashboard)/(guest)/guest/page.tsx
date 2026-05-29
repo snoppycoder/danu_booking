@@ -185,7 +185,7 @@ export default function GuestDanuBooking() {
           animation-play-state: paused;
         }
       `}</style>
-        ;
+
         <div className="relative max-w-6xl mx-auto z-10">
           <h1 className="text-2xl sm:text-5xl lg:text-6xl font-bold mb-4 text-balance">
             BOOK YOUR BUS TICKET

@@ -27,7 +27,7 @@ import { useTranslation } from "react-i18next";
 import TransferTicketDialog from "./TransferTicketDialog";
 import { isAxiosError } from "axios";
 import { toast } from "sonner";
-
+import Image from "next/image";
 function formatEthiopianTime(date: Date): string {
   let hour = date.getHours();
   const minutes = date.getMinutes();
@@ -51,6 +51,28 @@ function formatEthiopianTime(date: Date): string {
   return `${ethHour}:${minutes.toString().padStart(2, "0")} ${period}`;
 }
 
+const paymentLogoMapSVG: Record<string, string> = {
+  chapa: "/logos/chapa.svg",
+  star_pay: "/logos/star_pay.svg",
+};
+const paymentLogoMapPNG: Record<string, string> = {
+  chapa: "/logos/chapa.png",
+  star_pay: "/logos/star_pay.png",
+};
+async function loadImageAsDataURL(path: string): Promise<string> {
+  const response = await fetch(path);
+  const blob = await response.blob();
+
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onloadend = () => resolve(reader.result as string);
+    reader.onerror = reject;
+
+    reader.readAsDataURL(blob);
+  });
+}
+
 // Assuming you are using date-fns for formatting
 
 export async function exportTicketIntoPDF(booking: any): Promise<void> {
@@ -62,6 +84,23 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
     format: [240, 100],
   });
 
+  // if (logoPath) {
+  //   try {
+  //     const logoData = await loadImageAsDataURL(logoPath);
+
+  //     doc.addImage(
+  //       logoData,
+  //       "PNG",
+  //       135, // x
+  //       8, // y
+  //       22, // width
+  //       10, // height
+  //     );
+  //   } catch (err) {
+  //     console.error("Failed to load payment logo", err);
+  //   }
+  // }
+
   // --- MODERN COLOR PALETTE ---
   const brandTeal = [13, 148, 136]; // Deep, sophisticated teal (#0d9488)
   const bgWhite = [255, 255, 255]; // Clean white background
@@ -71,6 +110,13 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
   const accentOrange = [249, 115, 22]; // Orange for emphasis (Seat/Price)
 
   const depDate = new Date(booking.departure_at);
+
+  const paymentName =
+    booking.booking_method === "star_pay"
+      ? "Star Pay"
+      : booking.booking_method === "chapa"
+        ? "Chapa"
+        : booking.booking_method;
 
   // Iterate over tickets using a traditional loop to support async/await for the QR Code
   for (let index = 0; index < booking.tickets.length; index++) {
@@ -87,7 +133,6 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
     doc.setFillColor(brandTeal[0], brandTeal[1], brandTeal[2]);
     doc.rect(0, 0, 6, 100, "F");
 
-    // --- 3. SEPARATOR LINE (The "Tear-off" Stub) ---
     const stubX = 170; // Separator for the tear-off stub
     doc.setLineWidth(0.5);
     doc.setDrawColor(borderLight[0], borderLight[1], borderLight[2]);
@@ -95,11 +140,6 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
     doc.line(stubX, 5, stubX, 95);
     doc.setLineDashPattern([], 0); // Reset dash
 
-    // ==========================================
-    //          MAIN TICKET BODY (LEFT)
-    // ==========================================
-
-    // Header
     doc.setTextColor(brandTeal[0], brandTeal[1], brandTeal[2]);
     doc.setFont("helvetica", "bold");
     doc.setFontSize(22);
@@ -139,23 +179,15 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
     // Row 1: Passenger, Gender, Phone & Date Info
     drawInfoBox("PASSENGER", ticket.passenger_name || "N/A", 15, 32, 11, true);
     drawInfoBox("GENDER", ticket.gender || "N/A", 60, 32);
-    drawInfoBox("PHONE", ticket.phone || "N/A", 85, 32);
-    drawInfoBox("DATE", format(depDate, "MMM dd, yyyy"), 115, 32);
-    drawInfoBox("TIME", format(depDate, "HH:mm"), 145, 32, 10, true);
+    drawInfoBox("PHONE", ticket.phone || "N/A", 105, 32);
+
+    drawInfoBox("METHOD", paymentName, 145, 32);
+    //drawInfoBox("TIME", format(depDate, "HH:mm"), 145, 32, 10, true);
 
     // Row 2: Transport & Seat Info
     drawInfoBox("OPERATOR", booking.operator_name, 15, 47, 10, true);
-    drawInfoBox("BUS PLATE", booking.bus_plate || "N/A", 75, 47);
-    drawInfoBox("SIDE NO", booking.bus_side_no || "N/A", 110, 47);
-    drawInfoBox(
-      "SEAT NO",
-      ticket.seat_no || "TBD",
-      140,
-      47,
-      12,
-      true,
-      accentOrange,
-    ); // Emphasized
+    drawInfoBox("BUS PLATE", booking.bus_plate || "N/A", 60, 47);
+    drawInfoBox("SIDE NO", booking.bus_side_no || "N/A", 105, 47);
 
     // Row 3: Routing Details
     doc.setTextColor(textMuted[0], textMuted[1], textMuted[2]);
@@ -273,7 +305,7 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
 
         // Add image to PDF at top right of the main ticket section
         // (X: 142, Y: 6, Width: 22mm, Height: 22mm)
-        doc.addImage(qrImage, "PNG", startX, 65, 29, 29);
+        doc.addImage(qrImage, "PNG", startX, 58, 32, 32);
       } catch (err) {
         console.error(
           "Failed to generate QR Code for ticket",
@@ -299,12 +331,13 @@ export async function exportTicketIntoPDF(booking: any): Promise<void> {
     doc.text(ticket.seat_no || "TBD", startX + 5, 39);
 
     // Stub Details (Appended gender format for space-saving)
-    const passengerDisplay = ticket.gender
-      ? `${ticket.passenger_name || "N/A"} (${ticket.gender.charAt(0).toUpperCase()})`
-      : ticket.passenger_name || "N/A";
+    // const passengerDisplay = ticket.gender
+    //   ? `${ticket.passenger_name || "N/A"} (${ticket.gender.charAt(0).toUpperCase()})`
+    //   : ticket.passenger_name || "N/A";
 
-    drawInfoBox("PASSENGER", passengerDisplay, startX, 48, 9, true);
-    drawInfoBox("DEPARTURE", format(depDate, "MMM dd, HH:mm"), startX, 58, 9);
+    // drawInfoBox("PASSENGER", passengerDisplay, startX, 48, 9, true);
+    doc.setFont("helvetica", "bold");
+    drawInfoBox("DEPARTURE", format(depDate, "MMM dd, HH:mm"), startX, 50, 9);
     // drawInfoBox("FROM", booking.route_from.toUpperCase(), startX, 68, 9);
     // drawInfoBox("TO", booking.route_to.toUpperCase(), startX, 78, 9);
     // drawInfoBox("BUS PLATE", booking.bus_plate || "N/A", startX, 88, 9);
@@ -424,7 +457,7 @@ export default function PassengerHistoryPageClient() {
             }}
           >
             <AnimatePresence mode="popLayout">
-              {bookings.items.map((booking) => {
+              {bookings.items.map((booking: any) => {
                 // Modern, professional status styling using subtle backgrounds and inset rings
                 const statusConfig: Record<
                   string,
@@ -491,7 +524,6 @@ export default function PassengerHistoryPageClient() {
                     exit="exit"
                   >
                     <Card className="overflow-hidden bg-white border-gray-200 hover:shadow-md transition-all duration-200 border-t-4 border-t-primary">
-                      {/* Card Header: Ref & Status */}
                       <div className="px-6 py-4 border-b border-gray-100 flex flex-wrap justify-between items-center gap-4 bg-gray-50/50">
                         <div>
                           <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
@@ -500,7 +532,29 @@ export default function PassengerHistoryPageClient() {
                           <p className="font-mono font-bold text-gray-900 text-lg">
                             {booking.booking_ref}
                           </p>
+                          <div className="flex items-center gap-2">
+                            <Badge
+                              className={`${status.bg} ${status.text} ring-1 ring-inset ${status.ring}`}
+                            >
+                              {t(status.label)}
+                            </Badge>
+
+                            {paymentLogoMapSVG[booking.booking_method] && (
+                              <div className="bg-white rounded-lg border px-2 py-1 h-8 flex items-center">
+                                <Image
+                                  src={
+                                    paymentLogoMapSVG[booking.booking_method]
+                                  }
+                                  alt={booking.booking_method}
+                                  width={70}
+                                  height={24}
+                                  className="object-contain"
+                                />
+                              </div>
+                            )}
+                          </div>
                         </div>
+
                         <Badge
                           className={`${status.bg} ${status.text} ring-1 ring-inset ${status.ring} hover:${status.bg} font-medium text-xs px-3 py-1 shadow-none`}
                         >
@@ -508,9 +562,8 @@ export default function PassengerHistoryPageClient() {
                         </Badge>
                       </div>
 
-                      {/* Card Body: Route & Details */}
-                      <div className="px-6 py-6">
-                        {/* Visual Route Indicator */}
+                      {/* <div className="px-6 py-6">
+                   
                         <div className="flex items-center gap-4 mb-8">
                           <div className="flex-1">
                             <p className="text-xs font-medium text-gray-500 uppercase tracking-wider mb-1">
@@ -535,7 +588,6 @@ export default function PassengerHistoryPageClient() {
                           </div>
                         </div>
 
-                        {/* 2x2 Details Grid */}
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-6 gap-x-6">
                           <div className="flex items-start gap-3">
                             <Calendar className="w-5 h-5 text-primary/70 shrink-0" />
@@ -592,9 +644,151 @@ export default function PassengerHistoryPageClient() {
                             </div>
                           </div>
                         </div>
+                      </div> */}
+                      <div className="px-6 py-6">
+                        <div className="grid lg:grid-cols-[1fr_180px] gap-6">
+                          {/* Left Side */}
+                          <div>
+                            {/* Route */}
+                            <div className="flex items-center justify-between mb-8">
+                              <div>
+                                <p className="text-xs uppercase tracking-wider text-gray-500">
+                                  {t("from")}
+                                </p>
+                                <h3 className="text-2xl font-bold">
+                                  {booking.route_from}
+                                </h3>
+                              </div>
+
+                              <div className="flex-1 px-4">
+                                <div className="relative">
+                                  <div className="h-[2px] bg-primary/20" />
+                                  <ArrowRight className="absolute right-0 -top-2 h-5 w-5 text-primary" />
+                                </div>
+                              </div>
+
+                              <div className="text-right">
+                                <p className="text-xs uppercase tracking-wider text-gray-500">
+                                  {t("to")}
+                                </p>
+                                <h3 className="text-2xl font-bold">
+                                  {booking.route_to}
+                                </h3>
+                              </div>
+                            </div>
+
+                            {/* Details */}
+                            <div className="grid sm:grid-cols-2 xl:grid-cols-3 gap-4">
+                              <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Passenger
+                                </p>
+                                <p className="font-semibold">
+                                  {booking.tickets?.[0]?.passenger_name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  Seat {booking.tickets?.[0]?.seat_no}
+                                </p>
+                              </div>
+
+                              <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Departure
+                                </p>
+                                <p className="font-semibold">
+                                  {format(
+                                    new Date(booking.departure_at),
+                                    "MMM dd, yyyy",
+                                  )}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {formatEthiopianTime(
+                                    new Date(booking.departure_at),
+                                  )}
+                                </p>
+                              </div>
+
+                              <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Operator
+                                </p>
+                                <p className="font-semibold">
+                                  {booking.operator_name}
+                                </p>
+                                <p className="text-sm text-gray-500">
+                                  {booking.bus_plate}
+                                </p>
+                              </div>
+
+                              <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Payment
+                                </p>
+                                <p className="font-semibold capitalize">
+                                  {booking.booking_method.replace("_", " ")}
+                                </p>
+                              </div>
+
+                              <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Ticket Number
+                                </p>
+                                <p className="font-mono text-sm font-semibold">
+                                  {booking.tickets?.[0]?.ticket_number}
+                                </p>
+                              </div>
+
+                              <div className="rounded-xl bg-slate-50 p-4">
+                                <p className="text-xs text-gray-500 mb-1">
+                                  Total
+                                </p>
+                                <p className="text-lg font-bold text-primary">
+                                  Br {booking.total_amount.toLocaleString()}
+                                </p>
+                              </div>
+                            </div>
+
+                            {/* Bus Info */}
+                            <div className="mt-4 flex flex-wrap gap-2">
+                              <Badge variant="outline">
+                                Plate: {booking.bus_plate}
+                              </Badge>
+
+                              <Badge variant="outline">
+                                Side No: {booking.bus_side_no}
+                              </Badge>
+
+                              {booking.tickets?.[0]?.lottery_number && (
+                                <Badge variant="outline">
+                                  Lottery: {booking.tickets[0].lottery_number}
+                                </Badge>
+                              )}
+                            </div>
+                          </div>
+
+                          <div className="border-t lg:border-t-0 lg:border-l border-dashed flex flex-col items-center justify-center pt-4 lg:pt-0 lg:pl-6">
+                            <div className="bg-white p-3 rounded-xl border shadow-sm">
+                              <img
+                                src={`https://api.qrserver.com/v1/create-qr-code/?size=160x160&data=${encodeURIComponent(
+                                  booking.tickets?.[0]?.qr_code_url ||
+                                    booking.booking_ref,
+                                )}`}
+                                alt="QR Code"
+                                className="w-32 h-32"
+                              />
+                            </div>
+
+                            <p className="text-xs text-gray-500 mt-3">
+                              Scan Ticket
+                            </p>
+
+                            <p className="font-mono text-xs mt-1 text-center break-all">
+                              {booking.booking_ref}
+                            </p>
+                          </div>
+                        </div>
                       </div>
 
-                      {/* Card Footer: Meta Info & Actions */}
                       <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <p className="text-xs text-gray-500 font-medium">
                           {t("bookedOn")}{" "}

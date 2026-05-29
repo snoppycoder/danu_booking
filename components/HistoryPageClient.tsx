@@ -43,15 +43,6 @@ export default function HistoryPageClient() {
     refetch,
   } = usePassengerHistory(currentPage, numberOfCard);
   const [open, setOpen] = useState(false);
-
-  // const canCancel = (departure_at: string) => {
-  //   const now = new Date().getTime();
-  //   const departure = new Date(departure_at).getTime();
-
-  //   const diffMs = departure - now;
-  //   const diffDays = diffMs / (1000 * 60 * 60 * 24);
-  //   return diffDays >= 0 && diffDays <= 5;
-  // };
   const canCancel = (departure_at: string) => {
     const now = new Date().getTime();
     const departure = new Date(departure_at).getTime();
@@ -78,10 +69,10 @@ export default function HistoryPageClient() {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-linear-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <Card className="w-full max-w-md p-6 border-red-200 bg-red-50">
           <div className="flex items-start gap-4">
-            <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0 mt-1" />
+            <AlertCircle className="w-5 h-5 text-red-600 shrink-0 mt-1" />
             <div>
               <h3 className="font-semibold text-red-900 mb-1">
                 Error Loading Tickets
@@ -206,7 +197,7 @@ export default function HistoryPageClient() {
 
                     {/* Departure Date & Time */}
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <Calendar className="w-5 h-5 text-indigo-600 mt-1" />
                       </div>
                       <div className="flex-1">
@@ -222,7 +213,7 @@ export default function HistoryPageClient() {
 
                     {/* Operator */}
                     <div className="flex items-start gap-4">
-                      <div className="flex-shrink-0">
+                      <div className="shrink-0">
                         <div className="w-5 h-5 bg-indigo-600 rounded-full mt-1" />
                       </div>
                       <div className="flex-1">
