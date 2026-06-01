@@ -335,9 +335,9 @@ export interface TicketResponse {
           distance_km: number;
           estimated_duration_minutes: number;
         };
-
-        // departure_time?: string;
+        departure_time: string;
       };
+      trip_date: string;
     };
 
     booking_ref: string;

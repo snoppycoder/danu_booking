@@ -14,7 +14,7 @@ export default function GuestNavBar() {
 
   const linksObj = [
     { label: "Home", href: "/guest" },
-    { label: "Ticket Lookup", href: "/tvn" },
+    { label: "Ticket Lookup", href: "/guest/tvn" },
     { label: "About Us", href: "/guest/about-us" },
     { label: "Contact Us", href: "/guest/contact" },
   ];

@@ -23,7 +23,7 @@ import {
 
 interface NavbarProps {
   initalPath: { href: string; label: string }[];
-  onLoaded: () => void;
+  onLoaded?: () => void;
 }
 
 export default function Navbar(props: NavbarProps) {
@@ -52,7 +52,7 @@ export default function Navbar(props: NavbarProps) {
 
   useEffect(() => {
     if (user) {
-      props.onLoaded();
+      props.onLoaded?.();
     }
   }, [user, props.onLoaded]);
 
@@ -256,7 +256,7 @@ export default function Navbar(props: NavbarProps) {
             <Link
               onClick={() => setIsMenuOpen(false)}
               href="/passenger/tvn"
-              className={getMobileLinkClass("/tvn")}
+              className={getMobileLinkClass("/passenger/tvn")}
             >
               {t("tvn")}
             </Link>

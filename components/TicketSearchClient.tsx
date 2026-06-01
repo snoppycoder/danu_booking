@@ -21,8 +21,9 @@ import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 import { useTicketNumber } from "@/components/Query";
+import { formatAmharicTime } from "@/lib/common_functions";
 
-export default function GuestTicketSearch() {
+export default function TicketSearch() {
   const [searchInput, setSearchInput] = useState("");
   const [ticketNumber, setTicketNumber] = useState<string>("");
 
@@ -129,7 +130,7 @@ export default function GuestTicketSearch() {
               </Badge>
             </div>
 
-            <div className="flex flex-col md:flex-row">
+            <div className="flex px-1 flex-col md:flex-row">
               {/* Left Side: Main Details */}
               <div className="flex-1 p-6 md:p-8">
                 {/* Route Information */}
@@ -177,9 +178,33 @@ export default function GuestTicketSearch() {
                 </div>
 
                 <hr className="my-6 border-slate-100" />
+                <div className="flex items-center justify-between text-sm text-slate-600 bg-slate-50 p-3 rounded-lg border border-slate-100">
+                  <div className="flex flex-col">
+                    <p className="text-xs font-semibold text-slate-500 uppercase">
+                      Departure Time
+                    </p>
+                    <p className="font-bold text-slate-900">
+                      {formatAmharicTime(
+                        ticket.booking?.trip.schedule.departure_time || "",
+                      )}
+                    </p>
+                  </div>
+
+                  <div className="flex flex-col text-right">
+                    <p className="text-xs font-semibold text-slate-500 uppercase">
+                      Trip Date
+                    </p>
+                    <p className="font-bold text-slate-900">
+                      {new Date(
+                        ticket.booking?.trip.trip_date,
+                      ).toLocaleDateString()}
+                    </p>
+                  </div>
+                </div>
+                <hr className="my-4 border-slate-100 " />
 
                 {/* Passenger & Booking Details Grid */}
-                <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+                <div className="grid grid-cols-2 gap-y-6 gap-x-6">
                   {ticket.passenger && (
                     <>
                       <div>
@@ -242,7 +267,7 @@ export default function GuestTicketSearch() {
               </div>
 
               {/* Right Side: QR Code & Ticket Info */}
-              <div className="bg-slate-50 p-6 md:p-8 flex flex-col items-center justify-center border-t md:border-t-0 md:w-72">
+              <div className="bg-slate-50 p-6 md:p-8 flex flex-col items-center justify-center border-t md:border-t-0 md:w-64">
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-slate-100 mb-4">
                   {/* Rendering the actual QR code image */}
                   <QRCode

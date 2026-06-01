@@ -19,7 +19,9 @@ import {
 } from "lucide-react";
 
 import { useTicketNumber } from "@/components/Query";
-import GuestTicketSearch from "@/components/TicketSearchClient";
+import TicketSearch from "@/components/TicketSearchClient";
+
+// import { useAuth } from "@/lib/authContext";
 
 export default function TVN() {
   return (
@@ -30,7 +32,7 @@ export default function TVN() {
         </div>
       }
     >
-      <GuestTicketSearch />
+      <TicketSearch />
     </Suspense>
   );
 }

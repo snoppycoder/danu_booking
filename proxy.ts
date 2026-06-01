@@ -26,6 +26,16 @@ export function proxy(request: NextRequest) {
   ) {
     return NextResponse.redirect(new URL("/guest", request.url));
   }
+  if (pathname.startsWith("/tvn")) {
+    const q = request.nextUrl.searchParams.get("q");
+    console.log(pathname);
+    if (token) {
+      return NextResponse.redirect(
+        new URL(`/passenger/tvn?q=${q}`, request.url),
+      );
+    }
+    return NextResponse.redirect(new URL(`/guest/tvn?q=${q}`, request.url));
+  }
   if (isAuthPage) {
     if (userRole) {
       if (userRole === "super_admin")

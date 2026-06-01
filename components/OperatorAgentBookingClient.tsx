@@ -40,6 +40,7 @@ import OperatorAgentSeatLayoutDialog from "./OperatorAgentSeatLayout";
 import { AnimatePresence, motion, Variants } from "framer-motion";
 import "@/i18n";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/lib/authContext";
 export default function OperatorAgentBookingClient() {
   const searchParams = useSearchParams();
   const [form, setForm] = useState({
@@ -101,7 +102,7 @@ export default function OperatorAgentBookingClient() {
   const [tripId, setTripId] = useState<string>("");
   const debouncedTo = useDebounce(form.route_to, 300);
   const resultsRef = useRef<HTMLDivElement>(null);
-
+  const { user } = useAuth();
   const deboundedFrom = useDebounce(form.route_from, 300);
   const { data, isLoading, refetch } = useSearchRoute(
     deboundedFrom,
@@ -109,6 +110,7 @@ export default function OperatorAgentBookingClient() {
     form.departure_date,
     currentPage,
     per_page,
+    user?.organization_id || "",
   );
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const router = useRouter();
