@@ -763,6 +763,7 @@ export const useOperatorReport2 = (
           agent_type: string;
         }[],
         tickets_sold: res.tickets_sold,
+        commission_owed: res.commission_owed,
         revenue: res.revenue,
         total: res.total,
         page: res.page,

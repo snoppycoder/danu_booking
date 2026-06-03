@@ -297,6 +297,8 @@ export default function OperatorDashboard() {
                 <TableRow>
                   <TableHead className="p-2">Tickets Sold</TableHead>
                   <TableHead className="p-2 ">Revenue</TableHead>
+                                    <TableHead className="p-2 ">Total Commission</TableHead>
+
                 </TableRow>
                 <TableBody>
                   <TableRow>
@@ -305,6 +307,9 @@ export default function OperatorDashboard() {
                     </TableCell>
                     <TableCell className="p-2 font-bold">
                       {formatCurrency(data?.revenue ?? 0)}
+                    </TableCell>
+                     <TableCell className="p-2 font-bold">
+                      {formatCurrency(data?.commission_owed ?? 0)}
                     </TableCell>
                   </TableRow>
                 </TableBody>
