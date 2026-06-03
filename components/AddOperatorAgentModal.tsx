@@ -19,6 +19,13 @@ import { toast, Toaster } from "sonner";
 import { useCreateOperatorAgent } from "./Query";
 import { normalize } from "path";
 import { normalizeEthiopianPhone } from "@/lib/common_functions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface CreateOperatorAgentDialogProps {
   operatorId: string;
@@ -33,12 +40,22 @@ export function CreateOperatorAgentDialog({
   const [isActive, setIsActive] = useState(true);
   const [showPassword, setShowPassword] = useState(false);
 
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<{
+    first_name: string;
+    last_name: string;
+    email: string;
+    phone: string;
+    password: string;
+    commission_rate: string | number;
+    commission_type: "percentage" | "fixed";
+  }>({
     first_name: "",
     last_name: "",
     email: "",
     phone: "",
     password: "",
+    commission_rate: "",
+    commission_type: "percentage",
   });
 
   const createMutation = useCreateOperatorAgent();
@@ -49,9 +66,11 @@ export function CreateOperatorAgentDialog({
     if (
       !form.first_name ||
       !form.last_name ||
-      !form.email ||
+      // !form.email ||
       !form.phone ||
-      !form.password
+      !form.password ||
+      !form.commission_rate ||
+      !form.commission_type
     ) {
       toast.warning("Please fill in all fields");
       return;
@@ -63,8 +82,9 @@ export function CreateOperatorAgentDialog({
         operator_id: operatorId,
         body: {
           ...form,
+          commission_rate: Number(form.commission_rate),
           phone: normalizedPhone,
-          is_active: isActive,
+          is_active: true,
         },
       });
 
@@ -76,6 +96,8 @@ export function CreateOperatorAgentDialog({
         email: "",
         phone: "",
         password: "",
+        commission_rate: 0.0,
+        commission_type: "percentage",
       });
       setIsActive(true);
       onSuccess?.();
@@ -188,6 +210,53 @@ export function CreateOperatorAgentDialog({
                   disabled={createMutation.isPending}
                 />
               </div>
+              {/* Commission Rate */}
+              <div className="w-full grid gap-2">
+                <Label htmlFor="commission_rate">
+                  Commission Rate <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="commission_rate"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={form.commission_rate}
+                  onChange={(e) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      commission_rate: e.target.value,
+                    }))
+                  }
+                  disabled={createMutation.isPending}
+                />
+              </div>
+
+              {/* Commission Type */}
+              <div className="w-full grid gap-2">
+                <Label htmlFor="commission_type">
+                  Commission Type <span className="text-red-500">*</span>
+                </Label>
+
+                <Select
+                  value={form.commission_type}
+                  onValueChange={(value) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      commission_type: value as "fixed" | "percentage",
+                    }))
+                  }
+                  disabled={createMutation.isPending}
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select commission type" />
+                  </SelectTrigger>
+
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentage</SelectItem>
+                    <SelectItem value="fixed">Fixed</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
 
               {/* Password */}
               <div className="w-full grid gap-2">
@@ -230,7 +299,7 @@ export function CreateOperatorAgentDialog({
               </div>
 
               {/* Active Status */}
-              <div className="flex items-center justify-between p-3 border rounded-lg">
+              {/* <div className="flex items-center justify-between p-3 border rounded-lg">
                 <Label htmlFor="active">Active</Label>
                 <Switch
                   id="active"
@@ -238,7 +307,7 @@ export function CreateOperatorAgentDialog({
                   onCheckedChange={setIsActive}
                   disabled={createMutation.isPending}
                 />
-              </div>
+              </div> */}
             </div>
           </div>
 

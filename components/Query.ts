@@ -68,6 +68,7 @@ export interface operatorAdminReport {
     route_to: string;
     passenger_name: string;
     seat_no: string;
+    commission_amount?: number;
     price: number;
     sold_by: string;
     agent_type: string;
@@ -274,6 +275,7 @@ export const useDanuAgentReportData = (
         items: res.items as {
           ticket_id: string;
           bus_plate_number: string;
+          commission_amount?: number;
           route_from: string;
           route_to: string;
           passenger_name: string;
@@ -638,6 +640,8 @@ export const useCreateOperatorAgent = () => {
         email: string;
         phone: string;
         password: string;
+        commission_rate: number;
+        commission_type: "percentage" | "fixed";
         is_active: boolean;
       };
     }
@@ -749,6 +753,7 @@ export const useOperatorReport2 = (
         items: res.items as {
           ticket_id: string;
           bus_plate_number: string;
+          commission_amount?: number;
           route_from: string;
           route_to: string;
           passenger_name: string;

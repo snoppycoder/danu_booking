@@ -61,8 +61,6 @@ export default function OperatorDashboard() {
   const { data: statCard, isLoading: statCardIsLoading } = useOperatorStatCard(
     user?.organization_id || "",
   );
-  console.log(operator_agents);
-  console.log(startDate, endDate);
 
   const { data, isLoading: report2IsLoading } = useOperatorReport2(
     user?.organization_id || "",
@@ -79,7 +77,20 @@ export default function OperatorDashboard() {
   );
 
   const { data: routes, isLoading: routeIsLoading } = useRoutes();
-  console.log(agent, "agent id");
+  const [showFull, setShowFull] = useState(false);
+  function ShortenColName({ id }: { id: string }) {
+    const displayName = showFull ? id : id.slice(0, 8) + "..."; // truncate first 8 chars
+
+    return (
+      <span
+        className="cursor-pointer"
+        onClick={() => setShowFull(!showFull)}
+        title={id}
+      >
+        {displayName}
+      </span>
+    );
+  }
 
   const statsData = [
     {
@@ -139,9 +150,6 @@ export default function OperatorDashboard() {
               <h1 className="text-2xl font-bold text-foreground">
                 {operator_name} Report
               </h1>
-              {/* <p className="text-sm text-muted-foreground">
-                Total Tickets: 10 | Total Revenue: 54,800 ETB
-              </p> */}
             </div>
           </div>
         </div>
@@ -333,6 +341,9 @@ export default function OperatorDashboard() {
                     <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold p-4">
                       Sold By
                     </TableHead>
+                    <TableHead className="text-xs uppercase tracking-wide text-muted-foreground font-semibold py-4 px-2">
+                      {ShortenColName({ id: "Commission Amount" })}
+                    </TableHead>
 
                     <TableHead className="text-xs uppercase  tracking-wide text-muted-foreground font-semibold ">
                       Price
@@ -377,8 +388,11 @@ export default function OperatorDashboard() {
                           </span>
                         </TableCell>
 
+                        <TableCell className="p-4 font-bold">
+                          {formatCurrency(ticket.commission_amount ?? 0)}
+                        </TableCell>
                         <TableCell className="p-4 font-semibold">
-                          {ticket.price}
+                          {formatCurrency(ticket.price)}
                         </TableCell>
                       </TableRow>
                     ))

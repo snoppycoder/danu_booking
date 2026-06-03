@@ -1915,6 +1915,8 @@ export const operatorApi = {
       last_name: string;
       email: string;
       phone: string;
+      commission_rate: number;
+      commission_type: "percentage" | "fixed";
       password: string;
       is_active: boolean;
     },

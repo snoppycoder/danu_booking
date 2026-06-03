@@ -115,9 +115,9 @@ const DayCard = ({
       }}
       className="bg-white border border-border rounded-lg p-6 shadow-sm hover:shadow-md transition-all duration-300 cursor-pointer group"
     >
-      <div className="flex justify-between items-start">
-        {/* LEFT - Main Content */}
-        <div className="flex-1">
+      <div className="flex flex-col md:flex-row justify-between items-start">
+        {/* LEFT */}
+        <div className="flex-1 w-full">
           <div className="mb-4">
             <h3 className="text-lg font-semibold text-foreground group-hover:text-primary transition-colors">
               {day}
@@ -127,7 +127,7 @@ const DayCard = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-3 gap-3.5 md:gap-6 mt-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-4">
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                 Tickets Sold
@@ -136,6 +136,7 @@ const DayCard = ({
                 {tickets_sold}
               </p>
             </div>
+
             <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                 Total Revenue
@@ -144,14 +145,13 @@ const DayCard = ({
                 {formatCurrency(revenue ?? 0)}
               </p>
             </div>
-            <div className="mt-1">
+
+            <div>
               <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
                 Transaction ID
               </p>
               <p
-                className="text-md text-left
-              
-               font-semibold text-foreground"
+                className="text-sm md:text-md break-all font-semibold text-foreground"
                 onClick={() => setShowFull(!showFull)}
               >
                 {displayTx}
@@ -160,21 +160,21 @@ const DayCard = ({
           </div>
         </div>
 
-        <div className="flex flex-col gap-y-3.5 items-end justify-between ml-6">
+        {/* RIGHT */}
+        <div className="flex flex-row md:flex-col gap-3 w-full md:w-auto mt-4 md:mt-0 md:ml-6">
           <button
             onClick={onClick}
-            className="text-sm font-medium text-primary hover:underline transition-all group-hover:gap-1 flex items-center gap-0.5"
+            className="flex-1 md:flex-none text-sm font-medium text-primary hover:underline"
           >
-            View Details
-            <span className="text-xs">→</span>
+            View Details →
           </button>
+
           <Button
             onClick={(e) => {
               e.stopPropagation();
               onPayNow?.();
             }}
-            className="text-sm cursor-pointer text-white font-medium mt-6 transition-all group-hover:gap-1 flex items-center justify-start gap-0.5"
-            // disabled={(transaction_id ?? "").trim().length > 0}
+            className="flex-1 md:flex-none"
           >
             Pay now
           </Button>
@@ -338,9 +338,6 @@ export default function OperatorAdminReport() {
                   <p className="text-base font-medium text-gray-500">
                     No report data available
                   </p>
-                  {/* <p className="text-xs opacity-70 mt-2">
-                    Try adjusting your filters or check back later
-                  </p> */}
                 </div>
               ) : (
                 (Array.isArray(data) ? [...data].reverse() : [data]).map(
