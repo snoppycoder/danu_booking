@@ -85,6 +85,7 @@ const getDayLabel = (date: string) => {
 const DayCard = ({
   date,
   tickets_sold,
+  commission_earned,
   revenue,
   transaction_id,
   onClick,
@@ -92,6 +93,7 @@ const DayCard = ({
 }: {
   date?: string;
   tickets_sold?: number;
+  commission_earned?: number;
   revenue?: number;
   transaction_id?: string;
   onClick?: () => void;
@@ -134,6 +136,14 @@ const DayCard = ({
               </p>
               <p className="text-lg md:text-2xl font-bold text-foreground">
                 {tickets_sold}
+              </p>
+            </div>
+            <div>
+              <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+                Commission Earned
+              </p>
+              <p className="text-lg md:text-2xl font-bold text-foreground">
+                {formatCurrency(commission_earned ?? 0)}
               </p>
             </div>
 
@@ -255,6 +265,10 @@ export default function OperatorAdminReport() {
       label: "Tickets Sold Today",
       value: selectedDay?.tickets_sold ?? 0,
     },
+    {
+      label: "Commission Earned Today",
+      value: formatCurrency(selectedDay?.commission_amount ?? 0),
+    },
   ];
 
   const isLoading = !user?.organization_id || routeIsLoading;
@@ -349,6 +363,7 @@ export default function OperatorAdminReport() {
                       <DayCard
                         date={item?.date}
                         tickets_sold={item?.tickets_sold}
+                        commission_earned={item?.commission_amount}
                         revenue={item?.revenue}
                         transaction_id={item?.transaction_id}
                         onClick={() => setSelectedDay(item!)}

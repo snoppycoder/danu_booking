@@ -60,6 +60,7 @@ export interface operatorAdminReport {
   date: string;
   tickets_sold: number;
   revenue: number;
+  commission_amount?: number;
   transaction_id?: string;
   items: {
     ticket_id: string;
@@ -68,7 +69,7 @@ export interface operatorAdminReport {
     route_to: string;
     passenger_name: string;
     seat_no: string;
-    commission_amount?: number;
+    //commission_amount?: number;
     price: number;
     sold_by: string;
     agent_type: string;
