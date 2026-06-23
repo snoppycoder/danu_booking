@@ -8,12 +8,10 @@ export default function GuestDashboard({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <GuestNavBar />
+    <>
+      <GuestNavBar />
 
-        <main>{children}</main>
-      </body>
-    </html>
+      <main>{children}</main>
+    </>
   );
 }

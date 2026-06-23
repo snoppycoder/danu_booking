@@ -15,16 +15,12 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <QueryProvider>
-          <AuthProvider blackListRoles={[]}>
-            <AuthProtector>
-              <main>{children}</main>
-            </AuthProtector>
-          </AuthProvider>
-        </QueryProvider>
-      </body>
-    </html>
+    <QueryProvider>
+      <AuthProvider blackListRoles={[]}>
+        <AuthProtector>
+          <main>{children}</main>
+        </AuthProtector>
+      </AuthProvider>
+    </QueryProvider>
   );
 }
