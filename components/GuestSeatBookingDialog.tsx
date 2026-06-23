@@ -18,6 +18,10 @@ import type { Bus, Passenger, Seat } from "@/lib/model";
 import { operatorApi, passengerApi, tempAPI } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
+import {
+  isInTelebirrSuperApp,
+  startTelebirrPay,
+} from "@/lib/telebirr/bridge";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -77,6 +81,14 @@ export default function GuestSeatBookingDialog({
   const [selectedPayment, setSelectedPayment] = useState<
     "star_pay" | "chapa" | "telebirr"
   >("chapa");
+  // When the app is opened inside the telebirr SuperApp, default to telebirr.
+  const [inSuperApp, setInSuperApp] = useState(false);
+  useEffect(() => {
+    if (isInTelebirrSuperApp()) {
+      setInSuperApp(true);
+      setSelectedPayment("telebirr");
+    }
+  }, []);
   const [editingPassenger, setEditingPassenger] = useState<
     Record<number, number>
   >({});
@@ -181,6 +193,28 @@ export default function GuestSeatBookingDialog({
         client_ref: holdData.client_ref,
       });
       window.open(res.data.payment_url);
+    } else if (selectedPayment === "telebirr") {
+      const res = await tempAPI.guestPayment({
+        payment_method: "telebirr",
+        amount: totalFare,
+        first_name: holdData.passengers?.[0].name.split(" ")[0] ?? "Guest",
+        last_name: holdData.passengers?.[0].name.split(" ")[1] ?? "Guest",
+        phone_number: holdData.passengers?.[0].phone?.replace(/^0/, "+251"),
+        hold_id: holdData.hold_id,
+        client_ref: holdData.client_ref,
+      });
+      // Backend returns the telebirr prepay/payment URL. Inside the SuperApp
+      // this invokes the native checkout; in a plain browser it opens the URL.
+      const payUrl =
+        res.data.payment_url ?? res.data.checkout_url ?? res.data.toPayUrl;
+      const result = await startTelebirrPay(payUrl);
+      if (result === "failed") {
+        toast.error("Telebirr payment could not be completed. Please try again.", {
+          duration: 3000,
+        });
+      } else if (result === "cancelled") {
+        toast.message("Payment cancelled.", { duration: 3000 });
+      }
     }
 
     // Reset state
@@ -364,19 +398,28 @@ export default function GuestSeatBookingDialog({
                 </div>
               </div>
 
-              {/* <div
-          onClick={() => setSelectedPayment("telebirr")}
-          className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
-            selectedPayment === "telebirr"
-              ? "border-primary bg-primary/5"
-              : ""
-          }`}
-        >
-          <p className="font-medium">Telebirr</p>
-          <p className="text-sm text-muted-foreground">
-            Pay directly with Telebirr.
-          </p>
-        </div> */}
+              <div
+                onClick={() => setSelectedPayment("telebirr")}
+                className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
+                  selectedPayment === "telebirr"
+                    ? "border-primary bg-primary/5"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium">telebirr</p>
+                    <p className="text-sm text-muted-foreground">
+                      Pay directly with telebirr.
+                    </p>
+                  </div>
+                  {inSuperApp && (
+                    <span className="text-xs font-medium text-primary">
+                      Recommended
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 
