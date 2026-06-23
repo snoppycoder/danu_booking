@@ -102,8 +102,16 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    // Log only if the call fails
-    console.error("API Error:", error.response?.status, error.config.url);
+    // Log only if the call fails. Reserve console.error for genuine server
+    // faults (5xx) — expected/handled client responses (e.g. a 401 on a public
+    // endpoint) are logged as warnings so they don't flood the error overlay.
+    const status = error.response?.status;
+    const url = error.config?.url;
+    if (!status || status >= 500) {
+      console.error("API Error:", status, url);
+    } else {
+      console.warn("API request failed:", status, url);
+    }
     return Promise.reject(error);
   },
 );

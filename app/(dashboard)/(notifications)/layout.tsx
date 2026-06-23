@@ -11,11 +11,5 @@ export default function NotificationLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  return (
-    <html lang="en" className="">
-      <body className={`font-sans antialiased`}>
-        <AuthProvider blackListRoles={[]}>{children}</AuthProvider>
-      </body>
-    </html>
-  );
+  return <AuthProvider blackListRoles={[]}>{children}</AuthProvider>;
 }
