@@ -45,28 +45,24 @@ export default function DashboardLayout({
   const [isNavbarLoaded, setIsNavbarLoaded] = useState(false);
   const { t } = useTranslation();
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <AuthProvider blackListRoles={[]}>
-          <Navbar
-            initalPath={[
-              { href: "/passenger", label: t("home") },
-              { href: "/passenger/history", label: t("myBookings") },
-              { href: "/passenger/tvn", label: t("tvn") },
-              { href: "/passenger/about-us", label: t("about") },
-              { href: "/passenger/contact", label: t("contact") },
-            ]}
-            onLoaded={() => setIsNavbarLoaded(true)}
-          />
-          {isNavbarLoaded ? (
-            // <AuthProtector>
-            <main>{children}</main>
-          ) : (
-            // </AuthProtector>
-            <div className="p-4"></div>
-          )}
-        </AuthProvider>
-      </body>
-    </html>
+    <AuthProvider blackListRoles={[]}>
+      <Navbar
+        initalPath={[
+          { href: "/passenger", label: t("home") },
+          { href: "/passenger/history", label: t("myBookings") },
+          { href: "/passenger/tvn", label: t("tvn") },
+          { href: "/passenger/about-us", label: t("about") },
+          { href: "/passenger/contact", label: t("contact") },
+        ]}
+        onLoaded={() => setIsNavbarLoaded(true)}
+      />
+      {isNavbarLoaded ? (
+        // <AuthProtector>
+        <main>{children}</main>
+      ) : (
+        // </AuthProtector>
+        <div className="p-4"></div>
+      )}
+    </AuthProvider>
   );
 }

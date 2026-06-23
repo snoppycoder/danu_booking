@@ -32,12 +32,8 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <AuthProvider blackListRoles={[]}>
-          <main>{children}</main>
-        </AuthProvider>
-      </body>
-    </html>
+    <AuthProvider blackListRoles={[]}>
+      <main>{children}</main>
+    </AuthProvider>
   );
 }

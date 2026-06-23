@@ -35,26 +35,22 @@ export default function DashboardLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body className={`font-sans antialiased`}>
-        <AuthProvider
-          blackListRoles={["passenger", "agent_admin", "operator-admin"]}
-        >
-          <QueryProvider>
-            <div className="min-h-screen w-full flex flex-col md:flex-row">
-              <aside className="w-full md:w-64 md:min-h-screen border-r border-gray-300">
-                <Sidebar />
-              </aside>
-              <div className="md:flex md:flex-col w-full h-full">
-                <div className="h-12 w-full hidden md:flex md:flex-row-reverse px-4 py-3">
-                  <AvatarHero />
-                </div>
-                <main className="flex-1">{children}</main>
-              </div>
+    <AuthProvider
+      blackListRoles={["passenger", "agent_admin", "operator-admin"]}
+    >
+      <QueryProvider>
+        <div className="min-h-screen w-full flex flex-col md:flex-row">
+          <aside className="w-full md:w-64 md:min-h-screen border-r border-gray-300">
+            <Sidebar />
+          </aside>
+          <div className="md:flex md:flex-col w-full h-full">
+            <div className="h-12 w-full hidden md:flex md:flex-row-reverse px-4 py-3">
+              <AvatarHero />
             </div>
-          </QueryProvider>
-        </AuthProvider>
-      </body>
-    </html>
+            <main className="flex-1">{children}</main>
+          </div>
+        </div>
+      </QueryProvider>
+    </AuthProvider>
   );
 }

@@ -91,8 +91,10 @@ export default function GuestDanuBooking() {
         const response = await passengerApi.getPopularRoutes();
 
         setPopularRoutes(response.slice(0, 6)); // Show top 6 routes
-      } catch (error) {
-        console.error(error);
+      } catch {
+        // Popular routes is a non-critical widget; the empty state below
+        // handles failures, so no need to surface this as an error.
+        console.warn("Popular routes unavailable");
       } finally {
         setLoading(false);
       }
@@ -135,30 +137,32 @@ export default function GuestDanuBooking() {
   };
 
   function handleAutoCompleteFrom(value: string) {
-    try {
-      setTimeout(async () => {
+    // The try/catch must live inside the async callback — a rejection from the
+    // awaited call won't propagate to a try block wrapping setTimeout.
+    setTimeout(async () => {
+      try {
         const response = await passengerApi.autoComplete(value, "origin");
 
         setSuggestionsFrom(response);
         setShowDropdownFrom(true);
-        console.log(response);
-      }, 300);
-    } catch (error) {
-      console.error("Auto complete error:", error);
-    }
+      } catch {
+        setSuggestionsFrom([]);
+        setShowDropdownFrom(false);
+      }
+    }, 300);
   }
   function handleAutoCompleteTo(value: string) {
-    try {
-      setTimeout(async () => {
+    setTimeout(async () => {
+      try {
         const response = await passengerApi.autoComplete(value, "destination");
 
         setSuggestionsTo(response);
         setShowDropdownTo(true);
-        console.log(response);
-      }, 200);
-    } catch (error) {
-      console.error("Auto complete error:", error);
-    }
+      } catch {
+        setSuggestionsTo([]);
+        setShowDropdownTo(false);
+      }
+    }, 200);
   }
 
   const handleSelect = (newSelected: Date | undefined) => {
