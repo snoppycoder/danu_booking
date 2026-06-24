@@ -18,6 +18,7 @@ import type { Bus, Passenger, Seat } from "@/lib/model";
 import { operatorApi, passengerApi, tempAPI } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
+import { isInTelebirrSuperApp, startTelebirrPay } from "@/lib/telebirr/bridge";
 import "@/i18n";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
@@ -78,6 +79,14 @@ export default function SeatBookingDialog({
   const [selectedPayment, setSelectedPayment] = useState<
     "star_pay" | "chapa" | "telebirr"
   >("chapa");
+  // When the app is opened inside the telebirr SuperApp, default to telebirr.
+  const [inSuperApp, setInSuperApp] = useState(false);
+  useEffect(() => {
+    if (isInTelebirrSuperApp()) {
+      setInSuperApp(true);
+      setSelectedPayment("telebirr");
+    }
+  }, []);
   const [seatDict, setSeatDict] = useState<Record<string, Passenger>>({});
   const [currentPassengerIndex, setCurrentPassengerIndex] = useState<number>(0);
   const [editingPassenger, setEditingPassenger] = useState<
@@ -174,6 +183,24 @@ export default function SeatBookingDialog({
   const handleConfirm = async () => {
     let uuid = uuidv4();
     if (!holdData) return;
+
+    const resetAndClose = () => {
+      queryClient.invalidateQueries({ queryKey: ["history"] });
+      setPassengers([
+        {
+          name: "",
+          email: "",
+          phone: "",
+          id_number: "",
+          gender: "",
+        },
+      ]);
+      setToggle(false);
+      setStep(1);
+      setLayoutToggle(false);
+      setPaymentToggle(false);
+    };
+
     if (selectedPayment === "chapa") {
       const res = await tempAPI.payment({
         payment_method: "chapa",
@@ -185,7 +212,7 @@ export default function SeatBookingDialog({
         client_ref: holdData.client_ref,
       });
       window.open(res.data.checkout_url);
-      // toast.success("Seats successfully booked!", { duration: 3000 });
+      resetAndClose();
     } else if (selectedPayment === "star_pay") {
       const res = await tempAPI.payment({
         payment_method: "star_pay",
@@ -201,23 +228,83 @@ export default function SeatBookingDialog({
         client_ref: holdData.client_ref,
       });
       window.open(res.data.payment_url);
-    }
-    queryClient.invalidateQueries({ queryKey: ["history"] });
+      resetAndClose();
+    } else if (selectedPayment === "telebirr") {
+      let res;
+      try {
+        res = await tempAPI.payment({
+          payment_method: "telebirr",
+          amount: totalFare,
+          first_name: user?.first_name ?? "Guest",
+          last_name: user?.last_name ?? "Guest",
+          phone_number:
+            (user?.phone ?? holdData.passengers?.[0].phone)?.replace(
+              /^0/,
+              "+251",
+            ) ?? "N/A",
+          hold_id: holdData.hold_id,
+          client_ref: holdData.client_ref,
+        });
+      } catch (error) {
+        const detailMsg = isAxiosError(error)
+          ? error.response?.data?.detail?.[0]?.msg ?? error.response?.data?.error
+          : undefined;
+        toast.error(
+          detailMsg ?? "Could not start telebirr payment. Please try again.",
+          { duration: 3000 },
+        );
+        return;
+      }
 
-    // Reset state
-    setPassengers([
-      {
-        name: "",
-        email: "",
-        phone: "",
-        id_number: "",
-        gender: "",
-      },
-    ]);
-    setToggle(false);
-    setStep(1);
-    setLayoutToggle(false);
-    setPaymentToggle(false);
+      const payUrl =
+        res?.data?.payment_url ?? res?.data?.checkout_url ?? res?.data?.toPayUrl;
+      if (!payUrl) {
+        toast.error(
+          res?.error ?? "Could not start telebirr payment. Please try again.",
+          { duration: 3000 },
+        );
+        return;
+      }
+
+      const result = await startTelebirrPay(payUrl);
+      if (result === "failed") {
+        toast.error("Telebirr payment could not be completed. Please try again.", {
+          duration: 3000,
+        });
+        return;
+      }
+      if (result === "cancelled") {
+        toast.message("Payment cancelled.", { duration: 3000 });
+        return;
+      }
+      if (result === "pending") {
+        toast.message(
+          "Complete the payment in telebirr to confirm your booking.",
+          { duration: 4000 },
+        );
+        return;
+      }
+
+      // result === "success": confirm server-side (queryOrder) before finalizing.
+      try {
+        const conf = await tempAPI.telebirrConfirm(holdData.hold_id);
+        if (conf?.success) {
+          toast.success("Booking confirmed.", { duration: 3000 });
+          onSucess?.();
+          resetAndClose();
+        } else {
+          toast.error(
+            "Payment could not be verified. If you were charged, your seat is held — please contact support.",
+            { duration: 5000 },
+          );
+        }
+      } catch (e) {
+        toast.error(
+          "Payment is being verified. If you were charged, your seat is held — please do not pay again.",
+          { duration: 5000 },
+        );
+      }
+    }
   };
   const handleBack = async () => {
     console.log(holdData);
@@ -401,19 +488,28 @@ export default function SeatBookingDialog({
                 </div>
               </div>
 
-              {/* <div
-          onClick={() => setSelectedPayment("telebirr")}
-          className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
-            selectedPayment === "telebirr"
-              ? "border-primary bg-primary/5"
-              : ""
-          }`}
-        >
-          <p className="font-medium">Telebirr</p>
-          <p className="text-sm text-muted-foreground">
-            Pay directly with Telebirr.
-          </p>
-        </div> */}
+              <div
+                onClick={() => setSelectedPayment("telebirr")}
+                className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
+                  selectedPayment === "telebirr"
+                    ? "border-primary bg-primary/5"
+                    : ""
+                }`}
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div>
+                    <p className="font-medium">telebirr</p>
+                    <p className="text-sm text-muted-foreground">
+                      Pay directly with telebirr.
+                    </p>
+                  </div>
+                  {inSuperApp && (
+                    <span className="text-xs font-medium text-primary">
+                      Recommended
+                    </span>
+                  )}
+                </div>
+              </div>
             </div>
           </div>
 

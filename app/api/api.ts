@@ -323,6 +323,19 @@ export const tempAPI = {
     console.log(response.data);
     return response.data;
   },
+  // Finalize a telebirr InApp payment after ma.tradePay reports success.
+  // The backend re-verifies with telebirr (queryOrder) before confirming the
+  // hold, so this is safe to call from the client.
+  telebirrConfirm: async (hold_id: string) => {
+    const response = await api.post(`/payment/telebirr/confirm/${hold_id}`);
+    return response.data;
+  },
+  guestTelebirrConfirm: async (client_ref: string, hold_id: string) => {
+    const response = await api.post(
+      `/guest/payment/telebirr/confirm/${client_ref}/${hold_id}`,
+    );
+    return response.data;
+  },
 };
 export const kycApi = {
   operatorUploadKyc: async (

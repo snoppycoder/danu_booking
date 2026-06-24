@@ -171,6 +171,22 @@ export default function GuestSeatBookingDialog({
     let uuid = uuidv4();
     if (!holdData) return;
     console.log(holdData.passengers, "hold data at confirmation");
+    const resetAndClose = () => {
+      setPassengers([
+        {
+          name: "",
+          email: "",
+          phone: "",
+          id_number: "",
+          gender: "",
+        },
+      ]);
+      setToggle(false);
+      setStep(1);
+      setLayoutToggle(false);
+      setPaymentToggle(false);
+    };
+
     if (selectedPayment === "chapa") {
       const res = await tempAPI.guestPayment({
         payment_method: "chapa",
@@ -182,6 +198,7 @@ export default function GuestSeatBookingDialog({
         client_ref: holdData.client_ref,
       });
       window.open(res.data.checkout_url);
+      resetAndClose();
     } else if (selectedPayment === "star_pay") {
       const res = await tempAPI.guestPayment({
         payment_method: "star_pay",
@@ -193,44 +210,86 @@ export default function GuestSeatBookingDialog({
         client_ref: holdData.client_ref,
       });
       window.open(res.data.payment_url);
+      resetAndClose();
     } else if (selectedPayment === "telebirr") {
-      const res = await tempAPI.guestPayment({
-        payment_method: "telebirr",
-        amount: totalFare,
-        first_name: holdData.passengers?.[0].name.split(" ")[0] ?? "Guest",
-        last_name: holdData.passengers?.[0].name.split(" ")[1] ?? "Guest",
-        phone_number: holdData.passengers?.[0].phone?.replace(/^0/, "+251"),
-        hold_id: holdData.hold_id,
-        client_ref: holdData.client_ref,
-      });
-      // Backend returns the telebirr prepay/payment URL. Inside the SuperApp
-      // this invokes the native checkout; in a plain browser it opens the URL.
+      let res;
+      try {
+        res = await tempAPI.guestPayment({
+          payment_method: "telebirr",
+          amount: totalFare,
+          first_name: holdData.passengers?.[0].name.split(" ")[0] ?? "Guest",
+          last_name: holdData.passengers?.[0].name.split(" ")[1] ?? "Guest",
+          phone_number: holdData.passengers?.[0].phone?.replace(/^0/, "+251"),
+          hold_id: holdData.hold_id,
+          client_ref: holdData.client_ref,
+        });
+      } catch (error) {
+        const detailMsg = isAxiosError(error)
+          ? error.response?.data?.detail?.[0]?.msg ?? error.response?.data?.error
+          : undefined;
+        toast.error(
+          detailMsg ?? "Could not start telebirr payment. Please try again.",
+          { duration: 3000 },
+        );
+        return; // keep the dialog open so the user can retry
+      }
+
+      // Backend returns the telebirr rawRequest as payment_url. Inside the
+      // SuperApp this pulls up the native cashier; in a browser it opens the H5.
       const payUrl =
-        res.data.payment_url ?? res.data.checkout_url ?? res.data.toPayUrl;
+        res?.data?.payment_url ?? res?.data?.checkout_url ?? res?.data?.toPayUrl;
+      if (!payUrl) {
+        toast.error(
+          res?.error ?? "Could not start telebirr payment. Please try again.",
+          { duration: 3000 },
+        );
+        return;
+      }
+
       const result = await startTelebirrPay(payUrl);
       if (result === "failed") {
         toast.error("Telebirr payment could not be completed. Please try again.", {
           duration: 3000,
         });
-      } else if (result === "cancelled") {
+        return; // keep dialog open for retry
+      }
+      if (result === "cancelled") {
         toast.message("Payment cancelled.", { duration: 3000 });
+        return;
+      }
+      if (result === "pending") {
+        toast.message(
+          "Complete the payment in telebirr to confirm your booking.",
+          { duration: 4000 },
+        );
+        return;
+      }
+
+      // result === "success": ma.tradePay reported 9000. InApp does not use
+      // notify_url, so confirm server-side (backend runs queryOrder) before
+      // finalizing the booking.
+      try {
+        const conf = await tempAPI.guestTelebirrConfirm(
+          holdData.client_ref,
+          holdData.hold_id,
+        );
+        if (conf?.success) {
+          toast.success("Booking confirmed.", { duration: 3000 });
+          onSucess?.();
+          resetAndClose();
+        } else {
+          toast.error(
+            "Payment could not be verified. If you were charged, your seat is held — please contact support.",
+            { duration: 5000 },
+          );
+        }
+      } catch (e) {
+        toast.error(
+          "Payment is being verified. If you were charged, your seat is held — please do not pay again.",
+          { duration: 5000 },
+        );
       }
     }
-
-    // Reset state
-    setPassengers([
-      {
-        name: "",
-        email: "",
-        phone: "",
-        id_number: "",
-        gender: "",
-      },
-    ]);
-    setToggle(false);
-    setStep(1);
-    setLayoutToggle(false);
-    setPaymentToggle(false);
   };
 
   const handleBack = async () => {

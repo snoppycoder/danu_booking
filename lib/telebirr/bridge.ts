@@ -78,12 +78,23 @@ export function getTelebirrAuthCode(): Promise<string | null> {
   });
 }
 
-export type TelebirrPayResult = "success" | "cancelled" | "failed";
+export type TelebirrPayResult = "success" | "cancelled" | "failed" | "pending";
+
+/**
+ * True only when the native telebirr cashier bridge is actually callable.
+ * Use this (not the UA heuristic) to gate anything that depends on a real
+ * in-container payment.
+ */
+export function canTelebirrTradePay(): boolean {
+  return typeof getBridge()?.tradePay === "function";
+}
 
 /**
  * Start a telebirr payment for the given backend-issued payment URL / prepay
- * string. Inside the SuperApp this pulls up the native `ma.tradePay` cashier;
- * in a plain browser it falls back to opening the H5 payment URL.
+ * string. Inside the SuperApp this pulls up the native `ma.tradePay` cashier
+ * and resolves with the real outcome. In a plain browser there is no completion
+ * signal, so it resolves "pending" (never "success") — the caller must confirm
+ * server-side before treating the booking as paid.
  */
 export function startTelebirrPay(paymentUrl: string): Promise<TelebirrPayResult> {
   return new Promise((resolve) => {
@@ -103,10 +114,14 @@ export function startTelebirrPay(paymentUrl: string): Promise<TelebirrPayResult>
       return;
     }
 
-    // Plain-web fallback: navigate to the telebirr H5 payment page.
+    // Plain-web fallback: hand off to the telebirr H5 payment page. window.open
+    // gives no completion signal, so we cannot report "success" here — the real
+    // outcome is confirmed server-side. Inside a restrictive WebView `_blank`
+    // may be blocked, so fall back to a same-tab navigation.
     if (typeof window !== "undefined" && paymentUrl) {
-      window.open(paymentUrl, "_blank");
-      resolve("success");
+      const win = window.open(paymentUrl, "_blank");
+      if (!win) window.location.assign(paymentUrl);
+      resolve("pending");
       return;
     }
 
