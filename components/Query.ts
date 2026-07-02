@@ -31,9 +31,54 @@ import {
   Trip,
   User,
 } from "@/lib/model";
-import { ScheduleDTO } from "@/app/(dashboard)/(operator)/operator/trips/page";
+
 import { $ZodNumberInternals } from "zod/v4/core";
 import { Notification } from "@/lib/dixiedb";
+
+export type ScheduleDTO = {
+  id: string;
+
+  operator: {
+    id: string;
+    name: string;
+  };
+
+  route: {
+    id: string;
+    route_from: string;
+    route_to: string;
+  };
+
+  bus: {
+    id: string;
+    plate_no: string;
+  };
+
+  driver: {
+    id: string;
+    name: string;
+  };
+
+  departure_time: string;
+  price: number;
+
+  freq: string;
+  interval: number;
+
+  byweekday: string;
+  bymonthday: string;
+  bymonth: string;
+
+  until: string;
+  count: number;
+  wkst: number;
+
+  start_date: string;
+  end_date: string;
+
+  created_at: string;
+  updated_at: string;
+};
 export interface Trips_s {
   id: string;
   trip_id: string;

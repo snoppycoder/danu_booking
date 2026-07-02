@@ -18,10 +18,7 @@ import type { Bus, Passenger, Seat } from "@/lib/model";
 import { operatorApi, passengerApi, tempAPI } from "@/app/api/api";
 import { toast, Toaster } from "sonner";
 import { isAxiosError } from "axios";
-import {
-  isInTelebirrSuperApp,
-  startTelebirrPay,
-} from "@/lib/telebirr/bridge";
+import { isInTelebirrSuperApp, startTelebirrPay } from "@/lib/telebirr/bridge";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -209,9 +206,12 @@ export default function GuestSeatBookingDialog({
         res.data.payment_url ?? res.data.checkout_url ?? res.data.toPayUrl;
       const result = await startTelebirrPay(payUrl);
       if (result === "failed") {
-        toast.error("Telebirr payment could not be completed. Please try again.", {
-          duration: 3000,
-        });
+        toast.error(
+          "Telebirr payment could not be completed. Please try again.",
+          {
+            duration: 3000,
+          },
+        );
       } else if (result === "cancelled") {
         toast.message("Payment cancelled.", { duration: 3000 });
       }
@@ -321,9 +321,7 @@ export default function GuestSeatBookingDialog({
                 <Button
                   className="flex-1"
                   disabled={selectedSeats.length != passengers.length}
-                  onClick={async () => {
-                    setPaymentToggle(true);
-                  }}
+                  onClick={() => setSelectedPayment("telebirr")}
                 >
                   Confirm Booking
                 </Button>
@@ -332,7 +330,7 @@ export default function GuestSeatBookingDialog({
           )}
         </DialogContent>
       </Dialog>
-      <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
+      {/* <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Select Payment Method</DialogTitle>
@@ -433,7 +431,7 @@ export default function GuestSeatBookingDialog({
             </Button>
           </DialogFooter>
         </DialogContent>
-      </Dialog>
+      </Dialog> */}
     </div>
   );
 }

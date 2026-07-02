@@ -1,7 +1,12 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  output: "export",
+
+  images: {
+    unoptimized: true,
+  },
+
   async rewrites() {
     return [
       {
@@ -10,16 +15,6 @@ const nextConfig: NextConfig = {
       },
     ];
   },
-
-  // You can keep your commented-out webpack stuff here if you want
-  // webpack(config) {
-  //   config.module?.rules?.push({
-  //     test: /\.svg$/i,
-  //     issuer: /\.[jt]sx?$/,
-  //     use: ["@svgr/webpack"],
-  //   });
-  //   return config;
-  // },
 };
 
 export default nextConfig;

@@ -1,6 +1,34 @@
-"use server";
+// lib/auth.ts (Mini App / H5 compatible)
 
-import { cookies } from "next/headers";
+const setCookie = (name: string, value: string, maxAgeSeconds?: number) => {
+  let cookie = `${name}=${encodeURIComponent(value)}; path=/; SameSite=Lax`;
+
+  if (maxAgeSeconds) {
+    cookie += `; max-age=${maxAgeSeconds}`;
+  }
+
+  if (typeof window !== "undefined" && location.protocol === "https:") {
+    cookie += "; Secure";
+  }
+
+  document.cookie = cookie;
+};
+
+const getCookie = (name: string): string | null => {
+  if (typeof document === "undefined") return null;
+
+  const match = document.cookie.match(new RegExp("(^| )" + name + "=([^;]+)"));
+
+  return match ? decodeURIComponent(match[2]) : null;
+};
+
+const deleteCookie = (name: string) => {
+  document.cookie = `${name}=; path=/; max-age=0`;
+};
+
+/* -----------------------------
+   SET AUTH COOKIES
+------------------------------*/
 
 export const setAuthCookies = async (response: {
   access_token: string;
@@ -10,116 +38,78 @@ export const setAuthCookies = async (response: {
   access_expires_at: string;
   csrf_token: string;
 }) => {
-  const now = new Date().getTime();
-  const cookie = await cookies();
+  const now = Date.now();
+
   const refresh_expiry =
     (new Date(response.refresh_expires_at).getTime() - now) / 1000;
+
   const access_token_expiry =
     (new Date(response.access_expires_at).getTime() - now) / 1000;
 
-  cookie.set({
-    name: "access_token",
-    value: response.access_token,
-    path: "/",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: access_token_expiry,
-  });
-  cookie.set({
-    name: "csrf_token",
-    value: response.csrf_token,
-    path: "/",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: access_token_expiry,
-  });
-  cookie.set({
-    name: "session_id",
-    value: response.session_id,
-    path: "/",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: access_token_expiry,
-  });
+  setCookie("access_token", response.access_token, access_token_expiry);
+  setCookie("csrf_token", response.csrf_token, access_token_expiry);
+  setCookie("session_id", response.session_id, access_token_expiry);
 
-  console.log(access_token_expiry, "access token expired at");
-  if (response.refresh_token)
-    cookie.set({
-      name: "refresh_token",
-      value: response.refresh_token,
-      path: "/",
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: refresh_expiry,
-    });
+  if (response.refresh_token) {
+    setCookie("refresh_token", response.refresh_token, refresh_expiry);
+  }
 };
+
+/* -----------------------------
+   SET REFRESH TOKEN
+------------------------------*/
 
 export const setRefreshToken = async (
   refresh_token: string,
   refresh_expiry: number,
 ) => {
-  const cookie = await cookies();
-  cookie.set({
-    name: "refresh_token",
-    value: refresh_token,
-    path: "/",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: refresh_expiry,
-  });
+  setCookie("refresh_token", refresh_token, refresh_expiry);
 };
+
+/* -----------------------------
+   GETTERS
+------------------------------*/
+
 export const getSessionId = async () => {
-  const cookie = await cookies();
-  const session_id = cookie.get("session_id")?.value;
-  return session_id;
+  return getCookie("session_id");
 };
+
 export const getCSRFToken = async () => {
-  const cookie = await cookies();
-  const csrf_token = cookie.get("csrf_token")?.value;
-  return csrf_token;
+  return getCookie("csrf_token");
 };
+
 export const getRefreshToken = async () => {
-  const cookie = await cookies();
-  const refresh_token = cookie.get("refresh_token")?.value;
-  return refresh_token;
+  return getCookie("refresh_token");
 };
 
 export const getAccessToken = async () => {
-  const cookie = await cookies();
-  return cookie.get("access_token")?.value;
+  return getCookie("access_token");
 };
+
+/* -----------------------------
+   DELETE ALL COOKIES
+------------------------------*/
+
 export const deleteAllCookies = async () => {
-  const cookie = await cookies();
+  deleteCookie("refresh_token");
+  deleteCookie("access_token");
+  deleteCookie("session_id");
+  deleteCookie("csrf_token");
 
-  cookie.delete("refresh_token");
-  cookie.delete("access_token");
-  cookie.delete("session_id");
-  cookie.delete("csrf_token");
-
-  const cookie2 = await cookies();
-  console.log(cookie2, "after deletion");
+  console.log("All auth cookies deleted (client-side)");
 };
+
+/* -----------------------------
+   SET ACCESS TOKEN
+------------------------------*/
 
 export const setAccessToken = async (
   access_token: string,
   access_expires_at: string,
 ) => {
-  const now = new Date().getTime();
-  const cookie = await cookies();
+  const now = Date.now();
+
   const access_expiry = (new Date(access_expires_at).getTime() - now) / 1000;
 
-  cookie.set({
-    name: "access_token",
-    value: access_token,
-    path: "/",
-    httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
-    maxAge: access_expiry,
-  });
+  setCookie("access_token", access_token, access_expiry);
 };
