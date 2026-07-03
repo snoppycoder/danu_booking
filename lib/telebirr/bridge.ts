@@ -1,43 +1,22 @@
 /**
- * telebirr SuperApp (Mini App / H5) bridge adapter.
+ * telebirr SuperApp (Mini App) bridge adapter.
  *
- * The mini app runs inside the telebirr SuperApp's Macle container, which is
- * built on Ant's mini-program runtime and injects a global `my` object exposing
- * JSAPIs (getAuthCode, tradePay, ...). When the same page is opened in a plain
- * browser (not inside telebirr) the bridge is absent, so every call here falls
+ * The mini app runs inside the telebirr SuperApp which injects a global
+ * `consumerapp` object. When the same page is opened in a plain browser
+ * (not inside telebirr) the bridge is absent, so every call here falls
  * back gracefully to ordinary web behaviour.
- *
- * Backend contract (implemented server-side against the telebirr Fabric gateway):
- *   1. POST /payment/v1/token          -> fabric token        (ApplyFabricToken)
- *   2. POST /payment/v1/auth/authToken -> open_id / user info  (login, uses the
- *                                         SuperApp access_token from getAuthCode)
- *   3. POST /payment/v1/merchant/preOrder -> prepay/paymentUrl (RequestCreateOrder)
- * Our app talks to its own backend (/guest/payment, /payment), which performs
- * those signed Fabric calls and returns a `payment_url` we hand to tradePay.
  */
-
-// Minimal shape of the Ant/Macle `my` global we rely on. Only the members we
-// use are typed; the runtime injects many more.
-type MaCallback<T> = (res: T) => void;
-
-interface MaBridge {
-  tradePay?: (opts: {
-    paymentUrl?: string;
-    orderStr?: string;
-    tradeNO?: string;
-    success?: MaCallback<{ resultCode: string }>;
-    fail?: MaCallback<unknown>;
-  }) => void;
-  getAuthCode?: (opts: {
-    scopes?: string | string[];
-    success?: MaCallback<{ authCode: string }>;
-    fail?: MaCallback<unknown>;
-  }) => void;
-}
 
 declare global {
   interface Window {
-    my?: MaBridge;
+    consumerapp?: {
+      evaluate: (payload: string) => void;
+    };
+    handleinitDataCallback?: () => void;
+    my?: {
+      tradePay?: (opts: any) => void;
+      getAuthCode?: (opts: any) => void;
+    };
   }
 }
 
@@ -45,8 +24,9 @@ declare global {
 export function isInTelebirrSuperApp(): boolean {
   if (typeof window === "undefined") return false;
   const ua = navigator.userAgent || "";
-  // The Macle container injects `my`; the UA also carries a SuperApp marker.
+  // Check for consumerapp (telebirr mini-app) or my (Ant/Macle)
   return (
+    typeof window.consumerapp?.evaluate === "function" ||
     typeof window.my?.tradePay === "function" ||
     /telebirr|superapp|miniprogram/i.test(ua)
   );
@@ -65,7 +45,7 @@ export function getTelebirrAuthCode(): Promise<string | null> {
     }
     my.getAuthCode({
       scopes: "auth_user",
-      success: (res) => resolve(res?.authCode ?? null),
+      success: (res: { authCode: string }) => resolve(res?.authCode ?? null),
       fail: () => resolve(null),
     });
   });
@@ -73,36 +53,87 @@ export function getTelebirrAuthCode(): Promise<string | null> {
 
 export type TelebirrPayResult = "success" | "cancelled" | "failed";
 
+// Store resolve function for callback
+let paymentResolve: ((result: TelebirrPayResult) => void) | null = null;
+
 /**
- * Start a telebirr payment for the given backend-issued payment URL / prepay
- * string. Inside the SuperApp this invokes the native `my.tradePay` checkout;
+ * Start a telebirr payment for the given backend-issued rawRequest string.
+ * Inside the SuperApp this invokes the native payment modal via consumerapp.evaluate;
  * in a plain browser it falls back to opening the H5 payment URL.
  */
-export function startTelebirrPay(paymentUrl: string): Promise<TelebirrPayResult> {
+export function startTelebirrPay(rawRequest: string): Promise<TelebirrPayResult> {
   return new Promise((resolve) => {
+    console.log("startTelebirrPay called");
+    console.log("rawRequest:", rawRequest?.substring(0, 100));
+    
+    // Check for consumerapp (telebirr mini-app)
+    if (typeof window !== "undefined" && window.consumerapp?.evaluate) {
+      console.log("Using consumerapp.evaluate for telebirr mini-app");
+      
+      // Store resolve function for callback
+      paymentResolve = resolve;
+      
+      // Set up callback function
+      window.handleinitDataCallback = function() {
+        console.log("handleinitDataCallback triggered - payment completed");
+        if (paymentResolve) {
+          paymentResolve("success");
+          paymentResolve = null;
+        }
+      };
+      
+      // Build the payload for consumerapp
+      const payload = JSON.stringify({
+        functionName: "js_fun_start_pay",
+        params: {
+          rawRequest: rawRequest,
+          functionCallBackName: "handleinitDataCallback",
+        },
+      });
+      
+      console.log("Invoking consumerapp.evaluate with payload:", payload);
+      
+      try {
+        window.consumerapp.evaluate(payload);
+        // Don't resolve here - wait for callback
+        return;
+      } catch (err) {
+        console.error("consumerapp.evaluate failed:", err);
+        resolve("failed");
+        return;
+      }
+    }
+    
+    // Check for my.tradePay (Ant/Macle - fallback)
     const my = typeof window !== "undefined" ? window.my : undefined;
-
     if (my?.tradePay) {
+      console.log("Using my.tradePay (Ant/Macle fallback)");
       my.tradePay({
-        paymentUrl,
-        success: (res) => {
-          // Ant tradePay resultCode: 9000 = success, 6001 = user cancelled.
+        orderStr: rawRequest,
+        success: (res: { resultCode: string }) => {
           if (res?.resultCode === "9000") resolve("success");
           else if (res?.resultCode === "6001") resolve("cancelled");
           else resolve("failed");
         },
-        fail: () => resolve("failed"),
+        fail: (err: unknown) => {
+          console.error("tradePay failed:", err);
+          resolve("failed");
+        },
       });
       return;
     }
 
-    // Plain-web fallback: navigate to the telebirr H5 payment page.
-    if (typeof window !== "undefined" && paymentUrl) {
-      window.open(paymentUrl, "_blank");
+    // Plain-web fallback: open the H5 payment page
+    if (typeof window !== "undefined" && rawRequest) {
+      console.log("Using web fallback - opening H5 payment page");
+      const h5BaseUrl = "https://developerportal.ethiotelebirr.et:38443/payment/web/paygate?";
+      const fullUrl = rawRequest.startsWith("http") ? rawRequest : h5BaseUrl + rawRequest;
+      window.open(fullUrl, "_blank");
       resolve("success");
       return;
     }
 
+    console.log("No payment method available");
     resolve("failed");
   });
 }

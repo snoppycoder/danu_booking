@@ -304,7 +304,7 @@ export const publicApi = {
 
 export const tempAPI = {
   payment: async (body: {
-    payment_method: "chapa" | "star_pay" | "telebirr";
+    payment_method: "chapa" | "star_pay" | "telebirr" | "telebirr_inapp";
     amount: number;
     email?: string;
     first_name: string;
@@ -318,7 +318,7 @@ export const tempAPI = {
     return response.data;
   },
   guestPayment: async (body: {
-    payment_method: "chapa" | "star_pay" | "telebirr";
+    payment_method: "chapa" | "star_pay" | "telebirr" | "telebirr_inapp";
     amount: number;
     email?: string;
     first_name: string;

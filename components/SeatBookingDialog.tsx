@@ -22,6 +22,7 @@ import "@/i18n";
 import { useTranslation } from "react-i18next";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/lib/authContext";
+import { isInTelebirrSuperApp } from "@/lib/telebirr/bridge";
 
 type SeatBookingDialogProps = {
   toggle: boolean;
@@ -325,7 +326,11 @@ export default function SeatBookingDialog({
                   className="flex-1"
                   disabled={selectedSeats.length != passengers.length}
                   onClick={async () => {
-                    setPaymentToggle(true);
+                    if (isInTelebirrSuperApp()) {
+                      setSelectedPayment("telebirr"); // in app option needs to be handled
+                    } else {
+                      setPaymentToggle(true);
+                    }
                   }}
                 >
                   Confirm Booking
@@ -335,73 +340,74 @@ export default function SeatBookingDialog({
           )}
         </DialogContent>
       </Dialog>
-      <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Select Payment Method</DialogTitle>
-            <DialogDescription>
-              Choose your preferred payment option to continue.
-            </DialogDescription>
-          </DialogHeader>
+      {!isInTelebirrSuperApp() && (
+        <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Select Payment Method</DialogTitle>
+              <DialogDescription>
+                Choose your preferred payment option to continue.
+              </DialogDescription>
+            </DialogHeader>
 
-          <div className="space-y-4">
-            <div className="rounded-lg border p-4 bg-muted/50 space-y-1">
-              <p className="text-sm">Total Passengers: {passengers.length}</p>
-              <p className="text-sm font-medium">
-                Total Amount: {totalFare} ETB
-              </p>
-            </div>
-
-            <div className="grid gap-3">
-              <div
-                onClick={() => setSelectedPayment("chapa")}
-                className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
-                  selectedPayment === "chapa"
-                    ? "border-primary bg-primary/5"
-                    : ""
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/logos/chapa.svg"
-                    alt="Chapa"
-                    className="h-8 w-auto object-contain"
-                  />
-
-                  <div>
-                    <p className="font-medium">Chapa</p>
-                    <p className="text-sm text-muted-foreground">
-                      Use chapa for secure transaction.
-                    </p>
-                  </div>
-                </div>
+            <div className="space-y-4">
+              <div className="rounded-lg border p-4 bg-muted/50 space-y-1">
+                <p className="text-sm">Total Passengers: {passengers.length}</p>
+                <p className="text-sm font-medium">
+                  Total Amount: {totalFare} ETB
+                </p>
               </div>
 
-              <div
-                onClick={() => setSelectedPayment("star_pay")}
-                className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
-                  selectedPayment === "star_pay"
-                    ? "border-primary bg-primary/5"
-                    : ""
-                }`}
-              >
-                <div className="flex items-center gap-3">
-                  <img
-                    src="/logos/star_pay.svg"
-                    alt="StarPay"
-                    className="h-8 w-auto object-contain"
-                  />
+              <div className="grid gap-3">
+                <div
+                  onClick={() => setSelectedPayment("chapa")}
+                  className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
+                    selectedPayment === "chapa"
+                      ? "border-primary bg-primary/5"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src="/logos/chapa.svg"
+                      alt="Chapa"
+                      className="h-8 w-auto object-contain"
+                    />
 
-                  <div>
-                    <p className="font-medium">StarPay</p>
-                    <p className="text-sm text-muted-foreground">
-                      Use StarPay for quick checkout.
-                    </p>
+                    <div>
+                      <p className="font-medium">Chapa</p>
+                      <p className="text-sm text-muted-foreground">
+                        Use chapa for secure transaction.
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              {/* <div
+                <div
+                  onClick={() => setSelectedPayment("star_pay")}
+                  className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
+                    selectedPayment === "star_pay"
+                      ? "border-primary bg-primary/5"
+                      : ""
+                  }`}
+                >
+                  <div className="flex items-center gap-3">
+                    <img
+                      src="/logos/star_pay.svg"
+                      alt="StarPay"
+                      className="h-8 w-auto object-contain"
+                    />
+
+                    <div>
+                      <p className="font-medium">StarPay</p>
+                      <p className="text-sm text-muted-foreground">
+                        Use StarPay for quick checkout.
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* <div
           onClick={() => setSelectedPayment("telebirr")}
           className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
             selectedPayment === "telebirr"
@@ -414,20 +420,21 @@ export default function SeatBookingDialog({
             Pay directly with Telebirr.
           </p>
         </div> */}
+              </div>
             </div>
-          </div>
 
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setPaymentToggle(false)}>
-              Cancel
-            </Button>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setPaymentToggle(false)}>
+                Cancel
+              </Button>
 
-            <Button disabled={!selectedPayment} onClick={handleConfirm}>
-              Continue Payment
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              <Button disabled={!selectedPayment} onClick={handleConfirm}>
+                Continue Payment
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

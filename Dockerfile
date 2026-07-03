@@ -1,58 +1,38 @@
-# ==========================================
-# Stage 1: Install dependencies
-# ==========================================
-FROM node:18-alpine AS deps
-# Check https://github.com/nodejs/docker-node/tree/b4117f9333da4138b03a546ec926ef50a31506c3#nodealpine to understand why libc6-compat might be needed.
-RUN apk add --no-cache libc6-compat
+# Stage 1: Build the application
+FROM node:20-alpine AS builder
 WORKDIR /app
 
-# Copy package managers
-COPY package.json package-lock.json* yarn.lock* pnpm-lock.yaml* ./
-# Install dependencies based on the preferred package manager
-RUN \
-  if [ -f yarn.lock ]; then yarn --frozen-lockfile; \
-  elif [ -f package-lock.json ]; then npm ci; \
-  elif [ -f pnpm-lock.yaml ]; then yarn global add pnpm && pnpm i --frozen-lockfile; \
-  else echo "Lockfile not found." && exit 1; \
-  fi
+# Build arguments – supply them with docker build --build-arg
+ARG NEXT_PUBLIC_API_URL=/api/v1
+ARG NEXT_PUBLIC_API_KEY
 
-# ==========================================
-# Stage 2: Build the application
-# ==========================================
-FROM node:18-alpine AS builder
-WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# These NEXT_PUBLIC_* variables are embedded into the client bundle
+ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL}
+ENV NEXT_PUBLIC_API_KEY=${NEXT_PUBLIC_API_KEY}
+
+# Install dependencies (layer caching)
+COPY package.json pnpm-lock.yaml* package-lock.json* ./
+# Use pnpm if you have pnpm-lock, otherwise npm ci
+RUN if [ -f pnpm-lock.yaml ]; then npm install -g pnpm && pnpm install --frozen-lockfile; \
+    elif [ -f package-lock.json ]; then npm ci; \
+    else npm install; fi
+
+# Copy all source files and build
 COPY . .
-
-# Run the build command (Make sure 'output: standalone' is still in your next.config.js!)
 RUN npm run build
 
-# ==========================================
-# Stage 3: Production Server
-# ==========================================
-FROM node:18-alpine AS runner
+# Stage 2: Production runtime
+FROM node:20-alpine AS runner
 WORKDIR /app
 
-ENV NODE_ENV production
-ENV PORT 3000
-ENV HOSTNAME "0.0.0.0"
+ENV NODE_ENV=production
 
-RUN addgroup --system --gid 1001 nodejs
-RUN adduser --system --uid 1001 nextjs
-
-# Copy static files
+# Copy only the standalone server, static files, and public assets
 COPY --from=builder /app/public ./public
-
-# Set permissions for the cache
-RUN mkdir .next
-RUN chown nextjs:nodejs .next
-
-# Copy the standalone output and static files from the builder stage
-COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
-COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
-
-USER nextjs
+COPY --from=builder /app/.next/standalone ./
+COPY --from=builder /app/.next/static ./.next/static
 
 EXPOSE 3000
 
+USER node
 CMD ["node", "server.js"]
