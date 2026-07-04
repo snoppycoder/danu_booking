@@ -339,7 +339,7 @@ export default function GuestSeatBookingDialog({
                   className="flex-1"
                   disabled={selectedSeats.length != passengers.length}
                   onClick={async () => {
-                    if (isInTelebirrSuperApp()) {
+                    if (inSuperApp) {
                       setSelectedPayment("telebirr_inapp");
                     } else {
                       setPaymentToggle(true);
@@ -353,7 +353,7 @@ export default function GuestSeatBookingDialog({
           )}
         </DialogContent>
       </Dialog>
-      {!isInTelebirrSuperApp() && (
+      {!inSuperApp && (
         <Dialog open={paymentToggle} onOpenChange={setPaymentToggle}>
           <DialogContent>
             <DialogHeader>
@@ -450,7 +450,7 @@ export default function GuestSeatBookingDialog({
                   </div>
                 </div>
 
-                {isInTelebirrSuperApp() && (
+                {inSuperApp && (
                   <div
                     onClick={() => setSelectedPayment("telebirr_inapp")}
                     className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
