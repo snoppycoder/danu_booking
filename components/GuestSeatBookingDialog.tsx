@@ -342,12 +342,13 @@ export default function GuestSeatBookingDialog({
                     if (inSuperApp) {
                       console.log("In SuperApp, getting payment method")
                       setSelectedPayment("telebirr_inapp");
+                      handleConfirm()
                     } else {
                       setPaymentToggle(true);
                     }
                   }}
                 >
-                  {inSuperApp ? "Confirm Booking (In-App)" : "Confirm Booking (web)"}
+                  Confirm Booking
                 </Button>
               </div>
             </div>
