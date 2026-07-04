@@ -347,7 +347,7 @@ export default function GuestSeatBookingDialog({
                     }
                   }}
                 >
-                  Confirm Booking
+                  {inSuperApp ? "Confirm Booking (In-App)" : "Confirm Booking (web)"}
                 </Button>
               </div>
             </div>
