@@ -24,6 +24,7 @@ declare global {
 export function isInTelebirrSuperApp(): boolean {
   if (typeof window === "undefined") return false;
   const ua = navigator.userAgent || "";
+  console.log("Navigator useragent", ua);
   // Check for consumerapp (telebirr mini-app) or my (Ant/Macle)
   return (
     typeof window.consumerapp?.evaluate === "function" ||
@@ -61,27 +62,29 @@ let paymentResolve: ((result: TelebirrPayResult) => void) | null = null;
  * Inside the SuperApp this invokes the native payment modal via consumerapp.evaluate;
  * in a plain browser it falls back to opening the H5 payment URL.
  */
-export function startTelebirrPay(rawRequest: string): Promise<TelebirrPayResult> {
+export function startTelebirrPay(
+  rawRequest: string,
+): Promise<TelebirrPayResult> {
   return new Promise((resolve) => {
     console.log("startTelebirrPay called");
     console.log("rawRequest:", rawRequest?.substring(0, 100));
-    
+
     // Check for consumerapp (telebirr mini-app)
     if (typeof window !== "undefined" && window.consumerapp?.evaluate) {
       console.log("Using consumerapp.evaluate for telebirr mini-app");
-      
+
       // Store resolve function for callback
       paymentResolve = resolve;
-      
+
       // Set up callback function
-      window.handleinitDataCallback = function() {
+      window.handleinitDataCallback = function () {
         console.log("handleinitDataCallback triggered - payment completed");
         if (paymentResolve) {
           paymentResolve("success");
           paymentResolve = null;
         }
       };
-      
+
       // Build the payload for consumerapp
       const payload = JSON.stringify({
         functionName: "js_fun_start_pay",
@@ -90,9 +93,9 @@ export function startTelebirrPay(rawRequest: string): Promise<TelebirrPayResult>
           functionCallBackName: "handleinitDataCallback",
         },
       });
-      
+
       console.log("Invoking consumerapp.evaluate with payload:", payload);
-      
+
       try {
         window.consumerapp.evaluate(payload);
         // Don't resolve here - wait for callback
@@ -103,7 +106,7 @@ export function startTelebirrPay(rawRequest: string): Promise<TelebirrPayResult>
         return;
       }
     }
-    
+
     // Check for my.tradePay (Ant/Macle - fallback)
     const my = typeof window !== "undefined" ? window.my : undefined;
     if (my?.tradePay) {
@@ -126,8 +129,11 @@ export function startTelebirrPay(rawRequest: string): Promise<TelebirrPayResult>
     // Plain-web fallback: open the H5 payment page
     if (typeof window !== "undefined" && rawRequest) {
       console.log("Using web fallback - opening H5 payment page");
-      const h5BaseUrl = "https://developerportal.ethiotelebirr.et:38443/payment/web/paygate?";
-      const fullUrl = rawRequest.startsWith("http") ? rawRequest : h5BaseUrl + rawRequest;
+      const h5BaseUrl =
+        "https://developerportal.ethiotelebirr.et:38443/payment/web/paygate?";
+      const fullUrl = rawRequest.startsWith("http")
+        ? rawRequest
+        : h5BaseUrl + rawRequest;
       window.open(fullUrl, "_blank");
       resolve("success");
       return;

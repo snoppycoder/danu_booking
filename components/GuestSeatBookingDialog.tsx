@@ -340,6 +340,7 @@ export default function GuestSeatBookingDialog({
                   disabled={selectedSeats.length != passengers.length}
                   onClick={async () => {
                     if (inSuperApp) {
+                      console.log("In SuperApp, getting payment method")
                       setSelectedPayment("telebirr_inapp");
                     } else {
                       setPaymentToggle(true);
@@ -450,7 +451,7 @@ export default function GuestSeatBookingDialog({
                   </div>
                 </div>
 
-                {inSuperApp && (
+                {/* {inSuperApp && (
                   <div
                     onClick={() => setSelectedPayment("telebirr_inapp")}
                     className={`rounded-lg border p-4 cursor-pointer transition hover:bg-muted/50 ${
@@ -473,7 +474,7 @@ export default function GuestSeatBookingDialog({
                       )}
                     </div>
                   </div>
-                )}
+                )} */}
               </div>
             </div>
 
